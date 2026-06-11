@@ -35,19 +35,19 @@ export function NavbarOption({ label, dataI18n, href, toggled = false }: NavbarO
 function HandleNavbarIconToShow(navItemLabel: string): React.JSX.Element {
     switch (navItemLabel) {
         case 'dashboard':
-            return <LayoutDashboard {...DEFAULT_ICONS_CONFIG} />;
+            return <LayoutDashboard />;
         case 'devices':
-            return <Box {...DEFAULT_ICONS_CONFIG} />;
+            return <Box />;
         case 'alerts':
-            return <Bell {...DEFAULT_ICONS_CONFIG} />;
+            return <Bell />;
         case 'profile':
-            return <UserRound {...DEFAULT_ICONS_CONFIG} />;
+            return <UserRound />;
         case 'users':
-            return <UsersRound {...DEFAULT_ICONS_CONFIG} />
+            return <UsersRound />
         case 'all-devices':
-            return <Server {...DEFAULT_ICONS_CONFIG} />
+            return <Server />
         default:
-            return <LayoutDashboard {...DEFAULT_ICONS_CONFIG} />;
+            return <LayoutDashboard />;
 
     }
 };

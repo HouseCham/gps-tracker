@@ -1,24 +1,22 @@
 ---
 import '@/styles/global.css';
-import type { Language } from '@/types';
-//-- components
-import Sidebar from "@/components/astro/ui/Sidebar.astro";
+import type { Language, User } from '@/types';
 import type { Translation } from '@/i18n';
+//-- components
+import Sidebar from '@/components/astro/ui/Sidebar.astro';
+import { Topbar } from '@/components/react/features/dashboard';
 /**
  * @interface Props
  * @property {Language} locale - The current language of the website, used for localization.
  * @property {Translation} globalI18n - The complete translation object containing all localized strings for the website, which can be passed down to child components for rendering localized content.
- * @property {Object} user - An object representing the current user, containing their name and role, which can be displayed in the sidebar for personalization and access control purposes.
+ * @property {User} user - An object representing the current user, containing their name and role, which can be displayed in the sidebar for personalization and access control purposes.
  */
 interface Props {
     locale: Language;
     translation: Translation;
-    user: {
-        name: string;
-        role: string;
-    };
+    user: User;
 }
-const { locale = 'en', translation, user  } = Astro.props;
+const { locale = 'en', translation, user } = Astro.props;
 ---
 
 <html lang={locale}>
@@ -41,9 +39,11 @@ const { locale = 'en', translation, user  } = Astro.props;
             <div class="dash-mock">
                 <!-- Sidebar -->
                 <Sidebar headerData={translation.header} user={user} />
-
                 <!-- Main -->
                 <div class="dash-main">
+                    <!-- Topbar -->
+                     <Topbar locale={locale} user={user} />
+                    <!-- Main -->
                     <slot />
                 </div>
             </div>
