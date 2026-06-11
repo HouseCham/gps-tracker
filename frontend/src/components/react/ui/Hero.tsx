@@ -1,5 +1,5 @@
-import type { JSX } from "astro/jsx-runtime";
-import type { PropsWithChildren } from "react";
+import type { JSX } from 'astro/jsx-runtime';
+import type { PropsWithChildren } from 'react';
 /**
  * @interface HeroProps
  * @property {string} title - The main title to be displayed in the hero section, representing the section or page title.
@@ -11,13 +11,18 @@ interface HeroProps extends PropsWithChildren {
     title: string;
     dataI18n: string;
     description?: string;
-};
+}
 /**
  * Hero component for displaying a section title, description, and optional action buttons or links.
  * @param {HeroProps} props - The properties for the Hero component, including:
  * @returns {JSX.Element} The rendered Hero component.
  */
-export function Hero({ title, dataI18n, description, children }: HeroProps): JSX.Element {
+export function Hero({
+    title,
+    dataI18n,
+    description,
+    children,
+}: HeroProps): JSX.Element {
     return (
         <header>
             <div className="section-header">
@@ -27,14 +32,10 @@ export function Hero({ title, dataI18n, description, children }: HeroProps): JSX
                     </h2>
                     <p className="section-subtitle">{description}</p>
                 </div>
-                {
-                    children && (
-                        <div className="flex items-center gap-8">
-                            {children}
-                        </div>
-                    )
-                }
+                {children && (
+                    <div className="flex items-center gap-8">{children}</div>
+                )}
             </div>
         </header>
-    )
-};
+    );
+}

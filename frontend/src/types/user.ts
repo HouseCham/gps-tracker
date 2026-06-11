@@ -16,4 +16,4 @@ export interface User {
     updatedAt: string;
 }
 /** Role of a {@link User}. Determines access permissions. */
-export type UserRole = "admin" | "user";
+export type UserRole = 'admin' | 'user';

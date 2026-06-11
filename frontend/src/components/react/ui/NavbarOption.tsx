@@ -1,5 +1,12 @@
-import { DEFAULT_ICONS_CONFIG } from "@/constants";
-import { Bell, Box, LayoutDashboard, Server, UserRound, UsersRound } from "lucide-react";
+import { DEFAULT_ICONS_CONFIG } from '@/constants';
+import {
+    Bell,
+    Box,
+    LayoutDashboard,
+    Server,
+    UserRound,
+    UsersRound,
+} from 'lucide-react';
 /**
  * @interface NavbarOptionProps
  * @property {string} label - The label of the navigation item, used for display and localization.
@@ -11,13 +18,18 @@ interface NavbarOptionProps {
     dataI18n: string;
     href: string;
     toggled?: boolean;
-};
+}
 /**
  * NavbarOption component. It represents a single navigation item in the sidebar, displaying an icon and a label.
  * @param {NavbarOptionProps} props - The props for the NavbarOption component, including the label, dataI18n for localization, and href for navigation.
  * @returns {JSX.Element} - A JSX element representing the navigation item in the sidebar, including the icon and label.
  */
-export function NavbarOption({ label, dataI18n, href, toggled = false }: NavbarOptionProps): React.JSX.Element {
+export function NavbarOption({
+    label,
+    dataI18n,
+    href,
+    toggled = false,
+}: NavbarOptionProps): React.JSX.Element {
     return (
         <div className={`nav-item ${toggled ? 'active' : ''}`}>
             {HandleNavbarIconToShow(dataI18n)}
@@ -25,8 +37,8 @@ export function NavbarOption({ label, dataI18n, href, toggled = false }: NavbarO
                 {label}
             </span>
         </div>
-    )
-};
+    );
+}
 /**
  * HandleNavbarIconToShow function. It takes a navigation item label as input and returns the corresponding icon component based on the label.
  * @param {string} navItemLabel - The label of the navigation item, used to determine which icon to display.
@@ -43,11 +55,10 @@ function HandleNavbarIconToShow(navItemLabel: string): React.JSX.Element {
         case 'profile':
             return <UserRound />;
         case 'users':
-            return <UsersRound />
+            return <UsersRound />;
         case 'all-devices':
-            return <Server />
+            return <Server />;
         default:
             return <LayoutDashboard />;
-
     }
-};
+}

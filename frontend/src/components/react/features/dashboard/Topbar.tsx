@@ -1,7 +1,7 @@
-import { DEFAULT_ICONS_CONFIG } from "@/constants";
-import { getFirstNameWithInitial, getUserInitials } from "@/lib";
-import type { Language, User } from "@/types";
-import { Sun, Circle, ChevronDown, Search } from "lucide-react";
+import { DEFAULT_ICONS_CONFIG } from '@/constants';
+import { getFirstNameWithInitial, getUserInitials } from '@/lib';
+import type { Language, User } from '@/types';
+import { Sun, Circle, ChevronDown, Search } from 'lucide-react';
 /**
  * @interface TopbarProps
  * @property {Language} locale - The current language of the website, used for localization in the topbar.
@@ -10,7 +10,7 @@ import { Sun, Circle, ChevronDown, Search } from "lucide-react";
 interface TopbarProps {
     locale: Language;
     user: User;
-};
+}
 /**
  * Renders the topbar component of the dashboard, which includes a search bar, theme toggle, language selector, and user information.
  * @param {TopbarProps} props - The properties for the Topbar component, including the current locale and user information.
@@ -22,7 +22,10 @@ export function Topbar({ locale, user }: TopbarProps) {
             {/* Search Bar */}
             <div className="search">
                 <Search />
-                <input type="text" placeholder="Buscar dispositivos, usuarios..." />
+                <input
+                    type="text"
+                    placeholder="Buscar dispositivos, usuarios..."
+                />
                 <span className="kbd">⌘K</span>
             </div>
             {/* Right Side: Theme Toggle, Language Selector, User Info */}
@@ -39,10 +42,12 @@ export function Topbar({ locale, user }: TopbarProps) {
                 {/* User Information */}
                 <div className="dash-topbar-user">
                     <div className="avatar">{getUserInitials(user.name)}</div>
-                    <span className="name">{getFirstNameWithInitial(user.name)}</span>
+                    <span className="name">
+                        {getFirstNameWithInitial(user.name)}
+                    </span>
                     <ChevronDown />
                 </div>
             </div>
         </div>
-    )
+    );
 }

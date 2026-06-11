@@ -22,4 +22,3 @@ export function getFirstNameWithInitial(name: string): string {
     if (!secondName) return firstName;
     return `${firstName} ${secondName.charAt(0).toUpperCase()}.`;
 }
-
