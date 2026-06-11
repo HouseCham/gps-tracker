@@ -1,0 +1,68 @@
+---
+import type { Language } from '@/types';
+import type { Translation } from '@/i18n';
+import { MapPin, Sun, Circle, User } from '@lucide/astro';
+/**
+ * @interface Props
+ * @property {Language} locale - The current language of the website, used for localization.
+ * @property {Translation['header']} seo - The header section of the translation object, containing localized strings for the header component, such as the title and navigation items.
+ */
+interface Props {
+    locale: Language;
+    seo: Translation['header'];
+}
+const { locale, seo } = Astro.props;
+---
+
+<header class="topbar">
+    <!-- Logo & Brand -->
+    <a href="#top" class="brand">
+        <span class="brand-mark">
+            <MapPin
+                width={18}
+                height={18}
+                stroke={'white'}
+                stroke-width={1.75}
+            />
+        </span>
+        <span>{seo.title}</span>
+    </a>
+    <!-- Navigation -->
+    <nav class="topbar-nav">
+        {
+            seo.navbar.map(navItem => (
+                <a href={navItem.href} data-i18n={navItem.dataI18n}>
+                    {navItem.label}
+                </a>
+            ))
+        }
+    </nav>
+    <!-- Actions -->
+    <div class="topbar-actions">
+        <!-- Theme toggle -->
+        <button class="icon-btn" id="themeBtn" aria-label="Cambiar tema">
+            <Sun />
+        </button>
+        <!-- Language selector -->
+        <button class="lang-btn" id="langBtn">
+            <Circle
+                width={14}
+                height={14}
+                stroke={'currentColor'}
+                stroke-width={1.75}
+            />
+            <span id="langLabel">
+                {locale === 'en' ? 'EN' : 'ES'}
+            </span>
+        </button>
+        <!-- User profile -->
+        <div class="avatar">
+            <User
+                width={14}
+                height={14}
+                stroke={'currentColor'}
+                stroke-width={1.75}
+            />
+        </div>
+    </div>
+</header>
