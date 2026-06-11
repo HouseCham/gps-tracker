@@ -1,0 +1,585 @@
+<div class="dash-topbar">
+    <div class="search">
+        <svg><use href="#i-search"></use></svg>
+        <input type="text" placeholder="Buscar dispositivos, usuarios..." />
+        <span class="kbd">⌘K</span>
+    </div>
+    <div class="dash-topbar-right">
+        <button class="icon-btn" onclick="toggleTheme()">
+            <svg><use href="#i-sun"></use></svg>
+        </button>
+        <button class="lang-btn" onclick="toggleLang()">
+            <svg
+                width="14"
+                height="14"
+                stroke="currentColor"
+                stroke-width="1.75"
+            >
+                <use href="#i-circle"></use>
+            </svg>
+            <span id="dashLangLabel">ES</span>
+        </button>
+        <div class="dash-topbar-user">
+            <div class="avatar">CM</div>
+            <span class="name">Carlos M.</span>
+            <svg><use href="#i-chevron-down"></use></svg>
+        </div>
+    </div>
+</div>
+
+<div class="dash-content">
+    <div class="dash-content-header">
+        <div>
+            <h1>Tablero</h1>
+            <p class="sub">Vista general de tus dispositivos</p>
+        </div>
+        <button class="btn btn-primary">
+            <svg><use href="#i-plus"></use></svg>
+            <span>Añadir dispositivo</span>
+        </button>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+        <div class="kpi">
+            <div class="kpi-icon">
+                <svg><use href="#i-monitor"></use></svg>
+            </div>
+            <div class="kpi-value">24</div>
+            <div class="kpi-label">Total dispositivos</div>
+            <span class="kpi-delta"
+                ><svg><use href="#i-trending-up"></use></svg> +2 esta semana</span
+            >
+        </div>
+        <div class="kpi">
+            <div class="kpi-icon green">
+                <svg><use href="#i-wifi"></use></svg>
+            </div>
+            <div class="kpi-value">18</div>
+            <div class="kpi-label" data-i18n="online">En línea</div>
+            <span class="kpi-delta"
+                ><svg><use href="#i-trending-up"></use></svg>
+                75%</span
+            >
+        </div>
+        <div class="kpi">
+            <div class="kpi-icon red">
+                <svg><use href="#i-wifi-off"></use></svg>
+            </div>
+            <div class="kpi-value" style="color: var(--red)">3</div>
+            <div class="kpi-label" data-i18n="offline">Sin conexión</div>
+            <span class="kpi-delta neg"
+                ><svg><use href="#i-trending-up"></use></svg> +1 hoy</span
+            >
+        </div>
+        <div class="kpi">
+            <div class="kpi-icon amber">
+                <svg><use href="#i-bell"></use></svg>
+            </div>
+            <div class="kpi-value">5</div>
+            <div class="kpi-label" data-i18n="alertsToday">Alertas hoy</div>
+            <span class="kpi-delta"
+                ><svg><use href="#i-trending-up"></use></svg> 2 críticas</span
+            >
+        </div>
+    </div>
+
+    <!-- Split: Map + List -->
+    <div class="dash-split">
+        <!-- Map -->
+        <div class="map-card">
+            <div class="map-card-head">
+                <h4>Mapa en vivo</h4>
+                <div class="actions">
+                    <button class="btn btn-ghost btn-sm">
+                        <svg><use href="#i-layers"></use></svg>
+                        Heatmap
+                    </button>
+                    <a href="#" class="text-12" style="color: var(--accent)"
+                        >Ver todo →</a
+                    >
+                </div>
+            </div>
+            <div class="map-card-body">
+                <svg
+                    class="map-svg"
+                    viewBox="0 0 800 460"
+                    preserveAspectRatio="xMidYMid slice"
+                >
+                    <defs>
+                        <pattern
+                            id="grid-dash"
+                            width="40"
+                            height="40"
+                            patternUnits="userSpaceOnUse"
+                        >
+                            <path
+                                d="M 40 0 L 0 0 0 40"
+                                fill="none"
+                                stroke="var(--border)"
+                                stroke-width="0.5"
+                                opacity="0.4"></path>
+                        </pattern>
+                        <filter id="marker-glow">
+                            <feGaussianBlur stdDeviation="2" result="b"
+                            ></feGaussianBlur>
+                            <feMerge>
+                                <feMergeNode in="b"></feMergeNode>
+                                <feMergeNode in="SourceGraphic"></feMergeNode>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    <rect width="800" height="460" fill="var(--surface-2)"
+                    ></rect>
+                    <rect width="800" height="460" fill="url(#grid-dash)"
+                    ></rect>
+                    <!-- River curve -->
+                    <path
+                        d="M 0 200 Q 200 180, 350 240 T 800 280"
+                        stroke="#BFDBFE"
+                        stroke-width="22"
+                        fill="none"
+                        opacity="0.6"></path>
+                    <path
+                        d="M 0 200 Q 200 180, 350 240 T 800 280"
+                        stroke="#93C5FD"
+                        stroke-width="2"
+                        fill="none"
+                        opacity="0.5"></path>
+                    <!-- Roads -->
+                    <path
+                        d="M 0 80 L 800 100"
+                        stroke="white"
+                        stroke-width="14"
+                        fill="none"></path>
+                    <path
+                        d="M 0 80 L 800 100"
+                        stroke="#E5E7EB"
+                        stroke-width="1"
+                        fill="none"></path>
+                    <path
+                        d="M 0 320 Q 300 340, 500 360 T 800 380"
+                        stroke="white"
+                        stroke-width="10"
+                        fill="none"></path>
+                    <path
+                        d="M 0 320 Q 300 340, 500 360 T 800 380"
+                        stroke="#E5E7EB"
+                        stroke-width="1"
+                        fill="none"></path>
+                    <path
+                        d="M 150 0 L 180 460"
+                        stroke="white"
+                        stroke-width="12"
+                        fill="none"></path>
+                    <path
+                        d="M 150 0 L 180 460"
+                        stroke="#E5E7EB"
+                        stroke-width="1"
+                        fill="none"></path>
+                    <path
+                        d="M 600 0 L 620 460"
+                        stroke="white"
+                        stroke-width="8"
+                        fill="none"></path>
+                    <path
+                        d="M 600 0 L 620 460"
+                        stroke="#E5E7EB"
+                        stroke-width="1"
+                        fill="none"></path>
+                    <!-- City blocks -->
+                    <rect
+                        x="200"
+                        y="120"
+                        width="80"
+                        height="60"
+                        fill="#E5E7EB"
+                        opacity="0.5"
+                        rx="2"></rect>
+                    <rect
+                        x="300"
+                        y="110"
+                        width="100"
+                        height="80"
+                        fill="#E5E7EB"
+                        opacity="0.5"
+                        rx="2"></rect>
+                    <rect
+                        x="640"
+                        y="120"
+                        width="120"
+                        height="70"
+                        fill="#E5E7EB"
+                        opacity="0.5"
+                        rx="2"></rect>
+                    <rect
+                        x="220"
+                        y="360"
+                        width="120"
+                        height="80"
+                        fill="#E5E7EB"
+                        opacity="0.5"
+                        rx="2"></rect>
+                    <rect
+                        x="430"
+                        y="160"
+                        width="60"
+                        height="50"
+                        fill="#E5E7EB"
+                        opacity="0.5"
+                        rx="2"></rect>
+                    <rect
+                        x="660"
+                        y="320"
+                        width="100"
+                        height="80"
+                        fill="#E5E7EB"
+                        opacity="0.5"
+                        rx="2"></rect>
+                    <rect
+                        x="50"
+                        y="350"
+                        width="80"
+                        height="60"
+                        fill="#E5E7EB"
+                        opacity="0.5"
+                        rx="2"></rect>
+                    <!-- Park -->
+                    <circle
+                        cx="500"
+                        cy="350"
+                        r="40"
+                        fill="#D1FAE5"
+                        opacity="0.6"></circle>
+                    <!-- Markers: 8 green -->
+                    <g filter="url(#marker-glow)">
+                        <circle cx="220" cy="170" r="10" fill="#10B981"
+                        ></circle>
+                        <circle cx="220" cy="170" r="3" fill="white"></circle>
+                        <circle cx="350" cy="150" r="10" fill="#10B981"
+                        ></circle>
+                        <circle cx="350" cy="150" r="3" fill="white"></circle>
+                        <circle cx="450" cy="120" r="10" fill="#10B981"
+                        ></circle>
+                        <circle cx="450" cy="120" r="3" fill="white"></circle>
+                        <circle cx="550" cy="180" r="10" fill="#10B981"
+                        ></circle>
+                        <circle cx="550" cy="180" r="3" fill="white"></circle>
+                        <circle cx="380" cy="280" r="10" fill="#10B981"
+                        ></circle>
+                        <circle cx="380" cy="280" r="3" fill="white"></circle>
+                        <circle cx="680" cy="170" r="10" fill="#10B981"
+                        ></circle>
+                        <circle cx="680" cy="170" r="3" fill="white"></circle>
+                        <circle cx="160" cy="290" r="10" fill="#10B981"
+                        ></circle>
+                        <circle cx="160" cy="290" r="3" fill="white"></circle>
+                        <circle cx="700" cy="380" r="10" fill="#10B981"
+                        ></circle>
+                        <circle cx="700" cy="380" r="3" fill="white"></circle>
+                    </g>
+                    <!-- 2 amber -->
+                    <g>
+                        <circle
+                            cx="700"
+                            cy="60"
+                            r="14"
+                            fill="none"
+                            stroke="#F59E0B"
+                            stroke-width="2"
+                            opacity="0.4"></circle>
+                        <circle cx="700" cy="60" r="10" fill="#F59E0B"></circle>
+                        <circle cx="700" cy="60" r="3" fill="white"></circle>
+                        <circle
+                            cx="80"
+                            cy="160"
+                            r="14"
+                            fill="none"
+                            stroke="#F59E0B"
+                            stroke-width="2"
+                            opacity="0.4"></circle>
+                        <circle cx="80" cy="160" r="10" fill="#F59E0B"></circle>
+                        <circle cx="80" cy="160" r="3" fill="white"></circle>
+                    </g>
+                    <!-- 2 red -->
+                    <g>
+                        <circle cx="100" cy="410" r="10" fill="#EF4444"
+                        ></circle>
+                        <circle cx="100" cy="410" r="3" fill="white"></circle>
+                        <circle cx="400" cy="240" r="10" fill="#EF4444"
+                        ></circle>
+                        <circle cx="400" cy="240" r="3" fill="white"></circle>
+                    </g>
+                    <!-- Cluster -->
+                    <g>
+                        <circle
+                            cx="500"
+                            cy="200"
+                            r="22"
+                            fill="white"
+                            opacity="0.4"></circle>
+                        <circle cx="500" cy="200" r="18" fill="#4F46E5"
+                        ></circle>
+                        <text
+                            x="500"
+                            y="205"
+                            text-anchor="middle"
+                            fill="white"
+                            font-size="12"
+                            font-weight="700"
+                            font-family="Inter"
+                        >
+                            5
+                        </text>
+                    </g>
+                </svg>
+
+                <!-- Popover -->
+                <div class="map-popover" style="top: 200px; left: 220px">
+                    <div class="popover-head">
+                        <span class="status-dot green pulse"></span>
+                        <span class="name">Camión #07</span>
+                        <button class="x">
+                            <svg><use href="#i-x"></use></svg>
+                        </button>
+                    </div>
+                    <div class="popover-time">
+                        Online — Actualizado hace 12s
+                    </div>
+                    <div class="popover-row">
+                        <span class="label">Batería</span>
+                        <span class="battery">
+                            <span class="battery-bar"
+                                ><div class="green" style="width: 78%">
+                                </div></span
+                            >
+                            <span class="battery-text">78%</span>
+                        </span>
+                    </div>
+                    <div class="popover-foot">
+                        <span class="text-12 muted">32 km/h</span>
+                        <a href="#">Ver detalles →</a>
+                    </div>
+                </div>
+
+                <div class="map-attr">© GPS-tracker</div>
+                <div class="map-count">
+                    <span class="status-dot green"></span>
+                    12 dispositivos
+                </div>
+                <div class="map-controls-br">
+                    <button class="map-control">
+                        <svg><use href="#i-zoom-in"></use></svg>
+                    </button>
+                    <button class="map-control">
+                        <svg>
+                            <use href="#i-zoom-out"></use>
+                        </svg>
+                    </button>
+                    <button class="map-control">
+                        <svg><use href="#i-layers"></use></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Device list -->
+        <div class="list-card">
+            <div class="list-card-head">
+                <h4>Dispositivos (24)</h4>
+                <button class="btn btn-ghost btn-sm">
+                    Más recientes
+                    <svg>
+                        <use href="#i-chevron-down"></use>
+                    </svg>
+                </button>
+            </div>
+            <div class="list-card-body">
+                <div class="device-row selected">
+                    <span class="status-dot green"></span>
+                    <div class="device-info">
+                        <div class="name">Camión #07</div>
+                        <div class="time">hace 12s</div>
+                        <div class="owner">Carlos M.</div>
+                    </div>
+                    <div class="battery">
+                        <span class="battery-bar"
+                            ><div class="green" style="width: 78%"></div></span
+                        >
+                        <span class="battery-text">78%</span>
+                    </div>
+                    <div class="device-speed">
+                        <svg><use href="#i-gauge"></use></svg>32 km/h
+                    </div>
+                    <div class="signal">
+                        <span class="signal-bar active"></span>
+                        <span class="signal-bar active"></span>
+                        <span class="signal-bar active"></span>
+                        <span class="signal-bar active"></span>
+                    </div>
+                </div>
+                <div class="device-row">
+                    <span class="status-dot green"></span>
+                    <div class="device-info">
+                        <div class="name">Sedán Principal</div>
+                        <div class="time">hace 2 min</div>
+                        <div class="owner">Carlos M.</div>
+                    </div>
+                    <div class="battery">
+                        <span class="battery-bar"
+                            ><div class="green" style="width: 92%"></div></span
+                        >
+                        <span class="battery-text">92%</span>
+                    </div>
+                    <div class="device-speed">
+                        <svg><use href="#i-gauge"></use></svg>45 km/h
+                    </div>
+                    <div class="signal">
+                        <span class="signal-bar active"></span>
+                        <span class="signal-bar active"></span>
+                        <span class="signal-bar active"></span>
+                        <span class="signal-bar active"></span>
+                    </div>
+                </div>
+                <div class="device-row">
+                    <span class="status-dot amber"></span>
+                    <div class="device-info">
+                        <div class="name">Moto #03</div>
+                        <div class="time">hace 5 min</div>
+                        <div class="owner">Ana R.</div>
+                    </div>
+                    <div class="battery">
+                        <span class="battery-bar"
+                            ><div class="amber" style="width: 34%"></div></span
+                        >
+                        <span class="battery-text">34%</span>
+                    </div>
+                    <div class="device-speed">
+                        <svg><use href="#i-gauge"></use></svg>0 km/h
+                    </div>
+                    <div class="signal">
+                        <span class="signal-bar active"></span>
+                        <span class="signal-bar active"></span>
+                        <span class="signal-bar amber"></span>
+                        <span class="signal-bar"></span>
+                    </div>
+                </div>
+                <div class="device-row">
+                    <span class="status-dot green"></span>
+                    <div class="device-info">
+                        <div class="name">Bicicleta eléctrica</div>
+                        <div class="time">hace 1 h</div>
+                        <div class="owner">Carlos M.</div>
+                    </div>
+                    <div class="battery">
+                        <span class="battery-bar"
+                            ><div class="green" style="width: 65%"></div></span
+                        >
+                        <span class="battery-text">65%</span>
+                    </div>
+                    <div class="device-speed">
+                        <svg><use href="#i-gauge"></use></svg>18 km/h
+                    </div>
+                    <div class="signal">
+                        <span class="signal-bar active"></span>
+                        <span class="signal-bar active"></span>
+                        <span class="signal-bar active"></span>
+                        <span class="signal-bar active"></span>
+                    </div>
+                </div>
+                <div class="device-row">
+                    <span class="status-dot red"></span>
+                    <div class="device-info">
+                        <div class="name">Furgoneta de reparto</div>
+                        <div class="time">hace 3 días</div>
+                        <div class="owner">Miguel T.</div>
+                    </div>
+                    <div class="battery">
+                        <span class="battery-bar"
+                            ><div class="red" style="width: 0%"></div></span
+                        >
+                        <span class="battery-text muted">0%</span>
+                    </div>
+                    <div class="device-speed">
+                        <svg><use href="#i-gauge"></use></svg>—
+                    </div>
+                    <div class="signal">
+                        <span class="signal-bar"></span>
+                        <span class="signal-bar"></span>
+                        <span class="signal-bar"></span>
+                        <span class="signal-bar red"></span>
+                    </div>
+                </div>
+                <div class="device-row">
+                    <span class="status-dot green"></span>
+                    <div class="device-info">
+                        <div class="name">Drone #02</div>
+                        <div class="time">hace 45s</div>
+                        <div class="owner">Laura J.</div>
+                    </div>
+                    <div class="battery">
+                        <span class="battery-bar"
+                            ><div class="green" style="width: 88%"></div></span
+                        >
+                        <span class="battery-text">88%</span>
+                    </div>
+                    <div class="device-speed">
+                        <svg><use href="#i-gauge"></use></svg>12 km/h
+                    </div>
+                    <div class="signal">
+                        <span class="signal-bar active"></span>
+                        <span class="signal-bar active"></span>
+                        <span class="signal-bar active"></span>
+                        <span class="signal-bar active"></span>
+                    </div>
+                </div>
+                <div class="device-row">
+                    <span class="status-dot red"></span>
+                    <div class="device-info">
+                        <div class="name">Tractor agrícola</div>
+                        <div class="time">hace 1 sem</div>
+                        <div class="owner">Miguel T.</div>
+                    </div>
+                    <div class="battery">
+                        <span class="battery-bar"
+                            ><div class="amber" style="width: 22%"></div></span
+                        >
+                        <span class="battery-text">22%</span>
+                    </div>
+                    <div class="device-speed">
+                        <svg><use href="#i-gauge"></use></svg>—
+                    </div>
+                    <div class="signal">
+                        <span class="signal-bar"></span>
+                        <span class="signal-bar"></span>
+                        <span class="signal-bar red"></span>
+                        <span class="signal-bar red"></span>
+                    </div>
+                </div>
+                <div class="device-row">
+                    <span class="status-dot green"></span>
+                    <div class="device-info">
+                        <div class="name">Remolque #04</div>
+                        <div class="time">hace 30s</div>
+                        <div class="owner">Carlos M.</div>
+                    </div>
+                    <div class="battery">
+                        <span class="battery-bar"
+                            ><div class="green" style="width: 55%"></div></span
+                        >
+                        <span class="battery-text">55%</span>
+                    </div>
+                    <div class="device-speed">
+                        <svg><use href="#i-gauge"></use></svg>28 km/h
+                    </div>
+                    <div class="signal">
+                        <span class="signal-bar active"></span>
+                        <span class="signal-bar active"></span>
+                        <span class="signal-bar active"></span>
+                        <span class="signal-bar active"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

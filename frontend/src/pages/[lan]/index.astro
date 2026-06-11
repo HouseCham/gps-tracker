@@ -2,7 +2,8 @@
 import type { GetStaticPaths } from "astro";
 import type { Language } from "@/types";
 import { getTranslation } from "@/i18n";
-import MainLayout from "@/components/layout/MainLayout.astro";
+import Dashboard from "@/components/astro/features/Dashboard.astro";
+import MainLayout from "@/components/astro/layout/MainLayout.astro";
 
 /**
  * This page is the main entry point for the website. It will redirect to the default language (English) if no language is specified in the URL.
@@ -14,8 +15,12 @@ export const getStaticPaths = (() => {
 
 const locale = Astro.params.lan as Language;
 const translation = getTranslation(locale);
+const user = {
+  name: "John Doe",
+  role: "Admin"
+};
 ---
 
-<MainLayout locale={locale} translation={translation}>
-
+<MainLayout locale={locale} translation={translation} user={user}>
+  <Dashboard />
 </MainLayout>

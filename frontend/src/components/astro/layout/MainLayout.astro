@@ -1,0 +1,52 @@
+---
+import '@/styles/global.css';
+import type { Language } from '@/types';
+//-- components
+import Sidebar from "@/components/astro/ui/Sidebar.astro";
+import type { Translation } from '@/i18n';
+/**
+ * @interface Props
+ * @property {Language} locale - The current language of the website, used for localization.
+ * @property {Translation} globalI18n - The complete translation object containing all localized strings for the website, which can be passed down to child components for rendering localized content.
+ * @property {Object} user - An object representing the current user, containing their name and role, which can be displayed in the sidebar for personalization and access control purposes.
+ */
+interface Props {
+    locale: Language;
+    translation: Translation;
+    user: {
+        name: string;
+        role: string;
+    };
+}
+const { locale = 'en', translation, user  } = Astro.props;
+---
+
+<html lang={locale}>
+    <head>
+        <meta charset="utf-8" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" href="/favicon.ico" />
+        <meta name="viewport" content="width=device-width" />
+        <meta name="generator" content={Astro.generator} />
+        <meta name="description" content="blablablablabla" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+        />
+    </head>
+    <body>
+        <section class="section">
+            <div class="dash-mock">
+                <!-- Sidebar -->
+                <Sidebar headerData={translation.header} user={user} />
+
+                <!-- Main -->
+                <div class="dash-main">
+                    <slot />
+                </div>
+            </div>
+        </section>
+    </body>
+</html>

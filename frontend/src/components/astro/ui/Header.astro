@@ -29,13 +29,15 @@ const { locale, seo } = Astro.props;
     </a>
     <!-- Navigation -->
     <nav class="topbar-nav">
-        {
-            seo.navbar.map(navItem => (
-                <a href={navItem.href} data-i18n={navItem.dataI18n}>
-                    {navItem.label}
-                </a>
-            ))
-        }
+        <nav class="topbar-nav">
+            {
+                seo.navbar.general.options.map(navItem => (
+                    <a href={navItem.href} data-i18n={navItem.dataI18n}>
+                        {navItem.label}
+                    </a>
+                ))
+            }
+        </nav>
     </nav>
     <!-- Actions -->
     <div class="topbar-actions">
