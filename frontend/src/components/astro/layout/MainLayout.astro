@@ -35,7 +35,7 @@ const { locale = 'en', translation, user } = Astro.props;
         />
     </head>
     <body>
-        <section class="section">
+        <div class="dash-shell">
             <div class="dash-mock">
                 <!-- Sidebar -->
                 <Sidebar headerData={translation.header} user={user} />
@@ -47,6 +47,6 @@ const { locale = 'en', translation, user } = Astro.props;
                     <slot />
                 </div>
             </div>
-        </section>
+        </div>
     </body>
 </html>
