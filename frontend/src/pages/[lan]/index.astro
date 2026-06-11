@@ -1,0 +1,21 @@
+---
+import type { GetStaticPaths } from "astro";
+import type { Language } from "@/types";
+import { getTranslation } from "@/i18n";
+import MainLayout from "@/components/layout/MainLayout.astro";
+
+/**
+ * This page is the main entry point for the website. It will redirect to the default language (English) if no language is specified in the URL.
+ * @returns {void} Redirects to the default language page.
+ */
+export const getStaticPaths = (() => {
+  return [{ params: { lan: 'en' } }, { params: { lan: 'es' } }];
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.lan as Language;
+const translation = getTranslation(locale);
+---
+
+<MainLayout locale={locale} translation={translation}>
+
+</MainLayout>
