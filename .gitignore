@@ -1,0 +1,23 @@
+# Entorno
+.env
+.env.local
+.env.*.local
+
+# Bind mounts (volumen persistente de Postgres)
+.data/
+
+# Dependencias
+node_modules/
+
+# Artefactos de build
+dist/
+build/
+.astro/
+*.local
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
