@@ -4,6 +4,7 @@ import (
 	"log/slog"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/google/uuid"
 
 	"github.com/HouseCham/gps-tracker/backend/internal/app/devices"
 	"github.com/HouseCham/gps-tracker/backend/internal/domain"
@@ -43,6 +44,34 @@ func (h *DevicesHandler) List(c fiber.Ctx) error {
 		resp = append(resp, dto.DeviceWithAccessFromDomain(&items[i]))
 	}
 	return c.JSON(resp)
+}
+
+// Get handles GET /api/devices/:id.
+// Returns 404 when the device does not exist OR the user has no access
+// (security through obscurity).
+func (h *DevicesHandler) Get(c fiber.Ctx) error {
+	user, ok := c.Locals(middleware.LocalsKeyUser).(*domain.User)
+	if !ok {
+		return c.Status(fiber.StatusUnauthorized).JSON(model.HTTPResponse[bool]{
+			StatusCode: fiber.StatusUnauthorized,
+			Message:    "unauthorized",
+		})
+	}
+
+	id, err := uuid.Parse(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(model.HTTPResponse[bool]{
+			StatusCode: fiber.StatusBadRequest,
+			Message:    "invalid device id",
+		})
+	}
+
+	device, err := h.service.GetByID(c.Context(), user.ID, id)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(dto.DeviceWithAccessFromDomain(device))
 }
 
 // Create handles POST /api/devices.

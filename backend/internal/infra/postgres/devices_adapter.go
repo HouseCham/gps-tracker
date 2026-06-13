@@ -47,6 +47,30 @@ func (a *DevicesAdapter) ListForUser(ctx context.Context, userID uuid.UUID) ([]d
 	return result, nil
 }
 
+// GetByIDForUser returns the device only if the user has access (any role).
+// Returns domain.ErrNotFound (via wrapPgError) when the device does not
+// exist OR the user has no access — both cases collapse to 404.
+func (a *DevicesAdapter) GetByIDForUser(ctx context.Context, userID, deviceID uuid.UUID) (*domain.DeviceWithAccess, error) {
+	queries := New(a.pool)
+	row, err := queries.GetDeviceByIDForUser(ctx, GetDeviceByIDForUserParams{
+		ID:     pgtypeUUID(deviceID),
+		UserID: pgtypeUUID(userID),
+	})
+	if err != nil {
+		return nil, wrapPgError(err)
+	}
+	return &domain.DeviceWithAccess{
+		Device: domain.Device{
+			ID:           uuidFromPgtype(row.ID),
+			UuidFirmware: row.UuidFirmware,
+			Name:         row.Name,
+			CreatedAt:    row.CreatedAt.Time,
+			LastSeenAt:   timestamptzToPtr(row.LastSeenAt),
+		},
+		AccessRole: domain.AccessRole(row.AccessRole),
+	}, nil
+}
+
 // Create registers a new device and grants the caller owner access atomically.
 // On unique-constraint violation against uuid_firmware, returns domain.ErrConflict.
 func (a *DevicesAdapter) Create(ctx context.Context, input devices.CreateInput) (*domain.Device, error) {

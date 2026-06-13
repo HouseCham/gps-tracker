@@ -4,6 +4,24 @@ SELECT id, uuid_firmware, name, created_at, last_seen_at, deleted_at
 FROM devices
 WHERE id = $1 AND deleted_at IS NULL;
 
+-- name: GetDeviceByIDForUser :one
+-- Returns the device only if the given user has access (any role).
+-- Returns sql.ErrNoRows when the device does not exist OR the user has no
+-- access. The handler maps both to 404 to avoid leaking which IDs exist.
+SELECT
+  d.id,
+  d.uuid_firmware,
+  d.name,
+  d.created_at,
+  d.last_seen_at,
+  uda.role AS access_role
+FROM devices d
+INNER JOIN user_device_access uda
+  ON d.id = uda.device_id AND uda.deleted_at IS NULL
+WHERE d.id = $1
+  AND uda.user_id = $2
+  AND d.deleted_at IS NULL;
+
 -- name: GetDeviceByUUIDFirmware :one
 -- Hot auth path for the IoT device authentication flow.
 -- The ESP32 sends its uuid_firmware, the backend resolves it to a device row.

@@ -28,6 +28,7 @@ func NewRouter(deps RouterDeps) *fiber.App {
 	// === Devices routes ===
 	devices := apiV1.Group("/devices", middleware.DevUser())
 	devices.Get("/", middleware.DevUser(), deps.DevicesHandler.List)
+	devices.Get("/:id", middleware.DevUser(), deps.DevicesHandler.Get)
 	devices.Post("/",
 		middleware.DevUser(),
 		middleware.ValidateRequestBody[dto.CreateDeviceRequest](),
