@@ -1,0 +1,63 @@
+services:
+  db:
+    build:
+      context: ./db
+    image: gps-tracker-db
+    container_name: gps-tracker-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gps_pass}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - ./.data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    image: migrate/migrate:v4.17.0
+    container_name: gps-tracker-migrate
+    command:
+      - sh
+      - -c
+      - |
+        migrate -path /migrations \
+          -database "postgres://$$POSTGRES_USER:$$POSTGRES_PASSWORD@db:5432/$$POSTGRES_DB?sslmode=disable" \
+          up
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gps_pass}
+      POSTGRES_DB: ${POSTGRES_DB}
+    depends_on:
+      db:
+        condition: service_healthy
+    profiles: ["migrate"]
+    volumes:
+      - ./backend/migrations:/migrations:ro
+
+  api:
+    build:
+      context: ./backend
+      target: runtime
+    image: gps-tracker-api
+    container_name: gps-tracker-api
+    restart: unless-stopped
+    ports:
+      - "${API_PORT:-8080}:8080"
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD:-gps_pass}@db:5432/${POSTGRES_DB}?sslmode=disable
+      JWT_JWKS_URL: ${JWT_JWKS_URL:-http://localhost:3000/.well-known/jwks.json}
+      JWT_ISSUER: ${JWT_ISSUER:-http://localhost:3000}
+      JWT_AUDIENCE: ${JWT_AUDIENCE:-gps-tracker-api}
+      SERVER_PORT: 8080
+    depends_on:
+      db:
+        condition: service_healthy
+    profiles: ["app"]

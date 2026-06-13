@@ -1,0 +1,57 @@
+-- name: InsertLocation :exec
+-- Idempotent insert for IoT location reports.
+-- ON CONFLICT (device_id, recorded_at) DO NOTHING handles ESP32 retries
+-- (same device + same timestamp) without raising an error or duplicating rows.
+-- This relies on the composite PK (device_id, recorded_at) from migration 000006.
+INSERT INTO locations (
+  device_id, recorded_at, latitude, longitude,
+  altitude, speed, accuracy, satellites
+) VALUES (
+  $1, $2, $3, $4,
+  $5, $6, $7, $8
+)
+ON CONFLICT (device_id, recorded_at) DO NOTHING;
+
+-- name: GetLocationsForDevice :many
+-- Returns the location history for a single device in a time range.
+-- Partition pruning: the WHERE on recorded_at lets Postgres skip partitions
+-- that fall outside the [$2, $3) range. Critical for performance as data grows.
+-- $2 is the inclusive lower bound, $3 is the exclusive upper bound.
+SELECT device_id, recorded_at, latitude, longitude,
+       altitude, speed, accuracy, satellites
+FROM locations
+WHERE device_id = $1
+  AND recorded_at >= $2
+  AND recorded_at < $3
+ORDER BY recorded_at DESC;
+
+-- name: GetLatestLocationForDevice :one
+-- Returns the most recent location for a device. Used by the live map view.
+-- Hits the most recent partition first via partition pruning.
+SELECT device_id, recorded_at, latitude, longitude,
+       altitude, speed, accuracy, satellites
+FROM locations
+WHERE device_id = $1
+ORDER BY recorded_at DESC
+LIMIT 1;
+
+-- name: GetLocationsForUser :many
+-- Returns all locations for all devices a user has access to, in a time range.
+-- Used for the multi-device dashboard view. Joins through user_device_access
+-- to filter by the user's authorized devices.
+SELECT
+  l.device_id,
+  l.recorded_at,
+  l.latitude,
+  l.longitude,
+  l.altitude,
+  l.speed,
+  l.accuracy,
+  l.satellites
+FROM locations l
+INNER JOIN user_device_access uda
+  ON l.device_id = uda.device_id AND uda.deleted_at IS NULL
+WHERE uda.user_id = $1
+  AND l.recorded_at >= $2
+  AND l.recorded_at < $3
+ORDER BY l.recorded_at DESC;
