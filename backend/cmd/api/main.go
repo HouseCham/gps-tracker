@@ -43,7 +43,7 @@ func main() {
 	defer pool.Close()
 
 	devicesRepo := postgres.NewDevicesAdapter(pool)
-	devicesService := devices.NewService(devicesRepo)
+	devicesService := devices.DevicesService(devicesRepo)
 
 	healthHandler := handlers.NewHealthHandler()
 	devicesHandler := handlers.NewDevicesHandler(devicesService, logger)

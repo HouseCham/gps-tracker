@@ -15,6 +15,7 @@ type RouterDeps struct {
 	DevicesHandler *handlers.DevicesHandler
 }
 
+// NewRouter creates a new fiber app and registers the routes and handlers.
 func NewRouter(deps RouterDeps) *fiber.App {
 	app := fiber.New(fiber.Config{
 		AppName:      "gps-tracker-api",
@@ -23,8 +24,11 @@ func NewRouter(deps RouterDeps) *fiber.App {
 
 	app.Get("/health", deps.HealthHandler.Handle)
 
-	api := app.Group("/api")
-	api.Get("/devices", middleware.DevUser(), deps.DevicesHandler.List)
+
+	apiV1 := app.Group("/api/v1")
+
+	devices := apiV1.Group("/devices", middleware.DevUser())
+	devices.Get("/", middleware.DevUser(), deps.DevicesHandler.List)
 
 	return app
 }

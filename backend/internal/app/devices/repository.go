@@ -8,7 +8,7 @@ import (
 	"github.com/HouseCham/gps-tracker/backend/internal/domain"
 )
 
-// Repository is the port that the app layer defines and infra implements.
-type Repository interface {
+// DevicesRepository is the port that the app layer defines and infra implements.
+type DevicesRepository interface {
 	ListForUser(ctx context.Context, userID uuid.UUID) ([]domain.DeviceWithAccess, error)
 }
