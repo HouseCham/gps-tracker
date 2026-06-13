@@ -101,3 +101,38 @@ func (q *Queries) GetUserByID(ctx context.Context, id pgtype.UUID) (User, error)
 	)
 	return i, err
 }
+
+const getUserList = `-- name: GetUserList :many
+SELECT id, email, role, created_at, updated_at, deleted_at
+FROM users
+WHERE deleted_at IS NULL AND id != $1
+`
+
+// Returns all active users except the given user ID.
+// Used by admin-level endpoints to list registered users.
+func (q *Queries) GetUserList(ctx context.Context, id pgtype.UUID) ([]User, error) {
+	rows, err := q.db.Query(ctx, getUserList, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Email,
+			&i.Role,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

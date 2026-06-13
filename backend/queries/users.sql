@@ -22,6 +22,13 @@ VALUES ($1, $2, $3)
 ON CONFLICT (id) DO NOTHING
 RETURNING id, email, role, created_at, updated_at, deleted_at;
 
+-- name: GetUserList :many
+-- Returns all active users except the given user ID.
+-- Used by admin-level endpoints to list registered users.
+SELECT id, email, role, created_at, updated_at, deleted_at
+FROM users
+WHERE deleted_at IS NULL AND id != $1;
+
 -- name: CountUsers :one
 -- Used by the lazy creation middleware to determine if the incoming
 -- user is the first one (becomes super_admin) or a regular one.
