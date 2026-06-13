@@ -3,7 +3,7 @@ package config
 import (
 	"fmt"
 
-	"github.com/HouseCham/gps-tracker/backend/internal/model"
+	"github.com/HouseCham/gps-tracker/backend/internal/domain"
 	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 )
@@ -19,15 +19,15 @@ func SetUpValidator() *validator.Validate {
 }
 
 // GetValidatorErrorMessage converts a validator.ValidationErrors into the
-// project's wire format ([]model.ValidatorError), with human-readable messages.
-func GetValidatorErrorMessage(err error) []model.ValidatorError {
-	var errors []model.ValidatorError
+// project's wire format ([]domain.ValidatorError), with human-readable messages.
+func GetValidatorErrorMessage(err error) []domain.ValidatorError {
+	var errors []domain.ValidatorError
 	vErrs, ok := err.(validator.ValidationErrors)
 	if !ok {
 		return errors
 	}
 	for _, vErr := range vErrs {
-		errors = append(errors, model.ValidatorError{
+		errors = append(errors, domain.ValidatorError{
 			Tag:   vErr.Tag(),
 			Field: vErr.Field(),
 			Err:   fmt.Sprintf(errorMessages[vErr.Tag()], validationFields[vErr.Field()]),

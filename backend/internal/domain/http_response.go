@@ -1,4 +1,4 @@
-package model
+package domain
 
 // HTTPResponse is a generic envelope for all HTTP responses in the API.
 // It promotes consistency across success, validation, and error responses.

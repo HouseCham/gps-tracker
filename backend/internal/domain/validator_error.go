@@ -1,4 +1,4 @@
-package model
+package domain
 
 // ValidatorError represents a single field-level validation failure.
 type ValidatorError struct {
