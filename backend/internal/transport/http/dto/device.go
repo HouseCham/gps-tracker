@@ -15,8 +15,8 @@ type DeviceResponse struct {
 }
 
 type CreateDeviceRequest struct {
-	UuidFirmware string `json:"uuid_firmware"`
-	Name         string `json:"name"`
+	UuidFirmware string `json:"uuid_firmware" validate:"required,uuid"`
+	Name         string `json:"name"          validate:"required,min=1,max=255"`
 }
 
 type DeviceWithAccessResponse struct {

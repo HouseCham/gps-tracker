@@ -9,6 +9,7 @@ import (
 	"github.com/HouseCham/gps-tracker/backend/internal/domain"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/dto"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/middleware"
+	"github.com/HouseCham/gps-tracker/backend/utils"
 )
 
 type DevicesHandler struct {
@@ -48,8 +49,8 @@ func (h *DevicesHandler) Create(c fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusUnauthorized, "unauthorized")
 	}
 
-	var req dto.CreateDeviceRequest
-	if err := c.Bind().JSON(&req); err != nil {
+	req, ok := utils.GetValidatedBody[dto.CreateDeviceRequest](c)
+	if !ok {
 		return fiber.NewError(fiber.StatusBadRequest, "invalid request body")
 	}
 

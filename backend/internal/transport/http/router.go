@@ -5,6 +5,7 @@ import (
 
 	"github.com/gofiber/fiber/v3"
 
+	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/dto"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/handlers"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/middleware"
 )
@@ -27,7 +28,11 @@ func NewRouter(deps RouterDeps) *fiber.App {
 	// === Devices routes ===
 	devices := apiV1.Group("/devices", middleware.DevUser())
 	devices.Get("/", middleware.DevUser(), deps.DevicesHandler.List)
-	devices.Post("/", middleware.DevUser(), deps.DevicesHandler.Create)
+	devices.Post("/",
+		middleware.DevUser(),
+		middleware.ValidateRequestBody[dto.CreateDeviceRequest](),
+		deps.DevicesHandler.Create,
+	)
 
 	return app
 }

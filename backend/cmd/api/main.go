@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	_ "github.com/HouseCham/gps-tracker/backend/internal/infra/config"
+	_ "github.com/HouseCham/gps-tracker/backend/internal/config"
 
 	"github.com/HouseCham/gps-tracker/backend/internal/app/devices"
 	"github.com/HouseCham/gps-tracker/backend/internal/infra/postgres"
