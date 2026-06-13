@@ -11,6 +11,7 @@ import (
 
 	_ "github.com/HouseCham/gps-tracker/backend/internal/config"
 
+	"github.com/HouseCham/gps-tracker/backend/internal/app/access"
 	"github.com/HouseCham/gps-tracker/backend/internal/app/devices"
 	"github.com/HouseCham/gps-tracker/backend/internal/infra/postgres"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http"
@@ -44,6 +45,8 @@ func main() {
 
 	devicesRepo := postgres.NewDevicesAdapter(pool)
 	devicesService := devices.DevicesService(devicesRepo)
+	accessRepo := postgres.NewAccessAdapter(pool)
+	accessService := access.AccessService(accessRepo)
 
 	healthHandler := handlers.NewHealthHandler()
 	devicesHandler := handlers.NewDevicesHandler(devicesService, logger)
@@ -52,6 +55,7 @@ func main() {
 		Logger:         logger,
 		HealthHandler:  healthHandler,
 		DevicesHandler: devicesHandler,
+		AccessService:  accessService,
 	})
 
 	server := http.NewServer(app, http.ServerConfig{

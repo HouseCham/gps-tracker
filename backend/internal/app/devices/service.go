@@ -33,3 +33,18 @@ func (s *Service) GetByID(ctx context.Context, userID, deviceID uuid.UUID) (*dom
 func (s *Service) Create(ctx context.Context, input CreateInput) (*domain.Device, error) {
 	return s.repo.Create(ctx, input)
 }
+
+// UpdateName renames a device. The caller is responsible for ensuring the
+// authenticated user has at least editor access (enforced by HTTP middleware).
+// Returns domain.ErrNotFound if the device does not exist or is soft-deleted.
+func (s *Service) UpdateName(ctx context.Context, deviceID uuid.UUID, name string) (*domain.Device, error) {
+	return s.repo.UpdateName(ctx, deviceID, name)
+}
+
+// SoftDelete marks the device as deleted by setting deleted_at = NOW().
+// The row is NOT physically removed. The caller is responsible for ensuring
+// the authenticated user has owner access (enforced by HTTP middleware).
+// Idempotent: re-deleting an already-deleted device succeeds silently.
+func (s *Service) SoftDelete(ctx context.Context, deviceID uuid.UUID) error {
+	return s.repo.SoftDelete(ctx, deviceID)
+}

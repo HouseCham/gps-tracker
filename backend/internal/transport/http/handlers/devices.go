@@ -83,6 +83,44 @@ func (h *DevicesHandler) Get(c fiber.Ctx) error {
 	})
 }
 
+// Update handles PUT /api/devices/:id.
+// Access (editor or higher) is enforced by middleware.RequireDeviceRole.
+func (h *DevicesHandler) Update(c fiber.Ctx) error {
+	if _, ok := c.Locals(middleware.LocalsKeyUser).(*domain.User); !ok {
+		return c.Status(fiber.StatusUnauthorized).JSON(domain.HTTPResponse[bool]{
+			StatusCode: fiber.StatusUnauthorized,
+			Message:    "unauthorized",
+		})
+	}
+
+	id, err := uuid.Parse(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(domain.HTTPResponse[bool]{
+			StatusCode: fiber.StatusBadRequest,
+			Message:    "invalid device id",
+		})
+	}
+
+	req, ok := utils.GetValidatedBody[dto.UpdateDeviceRequest](c)
+	if !ok {
+		return c.Status(fiber.StatusBadRequest).JSON(domain.HTTPResponse[bool]{
+			StatusCode: fiber.StatusBadRequest,
+			Message:    "invalid request body",
+		})
+	}
+
+	device, err := h.service.UpdateName(c.Context(), id, req.Name)
+	if err != nil {
+		return err
+	}
+
+	return c.Status(fiber.StatusOK).JSON(domain.HTTPResponse[dto.DeviceResponse]{
+		StatusCode: fiber.StatusOK,
+		Message:    "device updated",
+		Data:       dto.DeviceFromDomain(device),
+	})
+}
+
 // Create handles POST /api/devices.
 // The caller is implicitly granted owner access to the new device.
 func (h *DevicesHandler) Create(c fiber.Ctx) error {
@@ -116,4 +154,30 @@ func (h *DevicesHandler) Create(c fiber.Ctx) error {
 		Message:    "device created",
 		Data:       dto.DeviceFromDomain(device),
 	})
+}
+
+// Delete handles DELETE /api/devices/:id.
+// Access (owner only) is enforced by middleware.RequireDeviceRole.
+// The row is soft-deleted (deleted_at = NOW()); it is NOT physically removed.
+func (h *DevicesHandler) Delete(c fiber.Ctx) error {
+	if _, ok := c.Locals(middleware.LocalsKeyUser).(*domain.User); !ok {
+		return c.Status(fiber.StatusUnauthorized).JSON(domain.HTTPResponse[bool]{
+			StatusCode: fiber.StatusUnauthorized,
+			Message:    "unauthorized",
+		})
+	}
+
+	id, err := uuid.Parse(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(domain.HTTPResponse[bool]{
+			StatusCode: fiber.StatusBadRequest,
+			Message:    "invalid device id",
+		})
+	}
+
+	if err := h.service.SoftDelete(c.Context(), id); err != nil {
+		return err
+	}
+
+	return c.SendStatus(fiber.StatusNoContent)
 }

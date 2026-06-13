@@ -22,4 +22,6 @@ type Repository interface {
 	ListForUser(ctx context.Context, userID uuid.UUID) ([]domain.DeviceWithAccess, error)
 	GetByIDForUser(ctx context.Context, userID, deviceID uuid.UUID) (*domain.DeviceWithAccess, error)
 	Create(ctx context.Context, input CreateInput) (*domain.Device, error)
+	UpdateName(ctx context.Context, deviceID uuid.UUID, name string) (*domain.Device, error)
+	SoftDelete(ctx context.Context, deviceID uuid.UUID) error
 }

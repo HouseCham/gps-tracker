@@ -5,6 +5,8 @@ import (
 
 	"github.com/gofiber/fiber/v3"
 
+	"github.com/HouseCham/gps-tracker/backend/internal/app/access"
+	"github.com/HouseCham/gps-tracker/backend/internal/domain"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/dto"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/handlers"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/middleware"
@@ -14,6 +16,7 @@ type RouterDeps struct {
 	Logger         *slog.Logger
 	HealthHandler  *handlers.HealthHandler
 	DevicesHandler *handlers.DevicesHandler
+	AccessService  *access.Service
 }
 
 // NewRouter creates a new fiber app and registers the routes and handlers.
@@ -33,6 +36,17 @@ func NewRouter(deps RouterDeps) *fiber.App {
 		middleware.DevUser(),
 		middleware.ValidateRequestBody[dto.CreateDeviceRequest](),
 		deps.DevicesHandler.Create,
+	)
+	devices.Put("/:id",
+		middleware.DevUser(),
+		middleware.ValidateRequestBody[dto.UpdateDeviceRequest](),
+		middleware.RequireDeviceRole(domain.AccessRoleEditor, deps.AccessService),
+		deps.DevicesHandler.Update,
+	)
+	devices.Delete("/:id",
+		middleware.DevUser(),
+		middleware.RequireDeviceRole(domain.AccessRoleOwner, deps.AccessService),
+		deps.DevicesHandler.Delete,
 	)
 
 	return app

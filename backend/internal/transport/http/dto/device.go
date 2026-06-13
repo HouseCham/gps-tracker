@@ -19,6 +19,10 @@ type CreateDeviceRequest struct {
 	Name         string `json:"name"          validate:"required,min=1,max=255"`
 }
 
+type UpdateDeviceRequest struct {
+	Name string `json:"name" validate:"required,min=1,max=255"`
+}
+
 type DeviceWithAccessResponse struct {
 	DeviceResponse
 	AccessRole string `json:"access_role"`

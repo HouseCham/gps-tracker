@@ -106,6 +106,29 @@ func (a *DevicesAdapter) Create(ctx context.Context, input devices.CreateInput) 
 	return deviceFromSqlc(device), nil
 }
 
+// UpdateName renames a device. The caller is expected to have verified access
+// upstream (HTTP middleware). Returns domain.ErrNotFound if the device does
+// not exist or is soft-deleted.
+func (a *DevicesAdapter) UpdateName(ctx context.Context, deviceID uuid.UUID, name string) (*domain.Device, error) {
+	queries := New(a.pool)
+	row, err := queries.UpdateDeviceName(ctx, UpdateDeviceNameParams{
+		ID:   pgtypeUUID(deviceID),
+		Name: name,
+	})
+	if err != nil {
+		return nil, wrapPgError(err)
+	}
+	return deviceFromSqlc(row), nil
+}
+
+// SoftDelete marks the device as deleted by setting deleted_at = NOW().
+// The row is NOT physically removed from the table. Idempotent: re-deleting
+// an already-deleted device is a no-op (the WHERE clause filters it out).
+func (a *DevicesAdapter) SoftDelete(ctx context.Context, deviceID uuid.UUID) error {
+	queries := New(a.pool)
+	return queries.SoftDeleteDevice(ctx, pgtypeUUID(deviceID))
+}
+
 // wrapPgError translates pgx errors into domain errors when possible.
 func wrapPgError(err error) error {
 	if err == nil {
