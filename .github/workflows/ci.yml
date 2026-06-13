@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+env:
+  GO_VERSION: '1.26.4'
+
+jobs:
+  unit:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: backend/go.sum
+
+      - name: Install sqlc
+        run: go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+
+      - name: Generate sqlc code
+        run: sqlc generate
+
+      - name: Build
+        run: go build ./...
+
+      - name: Run tests
+        run: go test ./... -v -count=1 -race
+
+  integration:
+    if: vars.ENABLE_INTEGRATION_TESTS == 'true'
+    name: Integration tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: gps_tracker
+          POSTGRES_USER: gps_user
+          POSTGRES_PASSWORD: gps_pass
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: backend/go.sum
+
+      - name: Install sqlc
+        run: go install github.com/sqlc-dev/sqlc/cmd/sqlc@latest
+
+      - name: Generate sqlc code
+        run: sqlc generate
+
+      - name: Run migrations
+        run: |
+          PGPASSWORD=gps_pass psql -h localhost -U gps_user -d gps_tracker \
+            -f migrations/000001_extensions.up.sql
+          for f in migrations/00000*.up.sql; do
+            [ "$f" = "migrations/000001_extensions.up.sql" ] && continue
+            PGPASSWORD=gps_pass psql -h localhost -U gps_user -d gps_tracker -f "$f"
+          done
+
+      - name: Run integration tests
+        run: go test -tags=integration -v -count=1 -race ./internal/infra/postgres/...
+        env:
+          DATABASE_URL: postgres://gps_user:gps_pass@localhost:5432/gps_tracker?sslmode=disable
