@@ -5,6 +5,8 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
+
+	"github.com/HouseCham/gps-tracker/backend/internal/domain"
 )
 
 func pgtypeUUID(u uuid.UUID) pgtype.UUID {
@@ -24,4 +26,15 @@ func timestamptzToPtr(t pgtype.Timestamptz) *time.Time {
 	}
 	v := t.Time
 	return &v
+}
+
+// deviceFromSqlc converts a sqlc-generated Device into the domain.Device.
+func deviceFromSqlc(d Device) *domain.Device {
+	return &domain.Device{
+		ID:           uuidFromPgtype(d.ID),
+		UuidFirmware: d.UuidFirmware,
+		Name:         d.Name,
+		CreatedAt:    d.CreatedAt.Time,
+		LastSeenAt:   timestamptzToPtr(d.LastSeenAt),
+	}
 }

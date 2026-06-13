@@ -2,10 +2,15 @@ package postgres
 
 import (
 	"context"
+	"errors"
+	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/HouseCham/gps-tracker/backend/internal/app/devices"
 	"github.com/HouseCham/gps-tracker/backend/internal/domain"
 )
 
@@ -40,4 +45,61 @@ func (a *DevicesAdapter) ListForUser(ctx context.Context, userID uuid.UUID) ([]d
 		})
 	}
 	return result, nil
+}
+
+// Create registers a new device and grants the caller owner access atomically.
+// On unique-constraint violation against uuid_firmware, returns domain.ErrConflict.
+func (a *DevicesAdapter) Create(ctx context.Context, input devices.CreateInput) (*domain.Device, error) {
+	tx, err := a.pool.Begin(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("begin tx: %w", err)
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	queries := New(tx)
+
+	device, err := queries.CreateDevice(ctx, CreateDeviceParams{
+		UuidFirmware: input.UuidFirmware,
+		Name:         input.Name,
+	})
+	if err != nil {
+		return nil, wrapPgError(err)
+	}
+
+	_, err = queries.GrantDeviceAccess(ctx, GrantDeviceAccessParams{
+		UserID:   pgtypeUUID(input.OwnerID),
+		DeviceID: device.ID,
+		Role:     string(domain.AccessRoleOwner),
+	})
+	if err != nil {
+		return nil, fmt.Errorf("grant owner access: %w", err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, fmt.Errorf("commit tx: %w", err)
+	}
+
+	return deviceFromSqlc(device), nil
+}
+
+// wrapPgError translates pgx errors into domain errors when possible.
+func wrapPgError(err error) error {
+	if err == nil {
+		return nil
+	}
+	if errors.Is(err, pgx.ErrNoRows) {
+		return domain.ErrNotFound
+	}
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		switch pgErr.Code {
+		case "23505": // unique_violation
+			return fmt.Errorf("%w: %s", domain.ErrConflict, pgErr.Detail)
+		case "23503": // foreign_key_violation
+			return fmt.Errorf("%w: %s", domain.ErrValidation, pgErr.Detail)
+		case "23502": // not_null_violation
+			return fmt.Errorf("%w: %s", domain.ErrValidation, pgErr.Detail)
+		}
+	}
+	return err
 }

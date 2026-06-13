@@ -9,15 +9,20 @@ import (
 )
 
 type Service struct {
-	repo DevicesRepository
+	repo Repository
 }
 
-func DevicesService(repo DevicesRepository) *Service {
+func DevicesService(repo Repository) *Service {
 	return &Service{repo: repo}
 }
 
 // ListMine returns the devices the given user has access to.
-// The repository hides the underlying SQL and pgx details.
 func (s *Service) ListMine(ctx context.Context, userID uuid.UUID) ([]domain.DeviceWithAccess, error) {
 	return s.repo.ListForUser(ctx, userID)
+}
+
+// Create registers a new device and grants the caller owner access to it,
+// atomically. The repository implementation owns the transaction.
+func (s *Service) Create(ctx context.Context, input CreateInput) (*domain.Device, error) {
+	return s.repo.Create(ctx, input)
 }

@@ -14,6 +14,11 @@ type DeviceResponse struct {
 	LastSeenAt   *time.Time `json:"last_seen_at,omitempty"`
 }
 
+type CreateDeviceRequest struct {
+	UuidFirmware string `json:"uuid_firmware"`
+	Name         string `json:"name"`
+}
+
 type DeviceWithAccessResponse struct {
 	DeviceResponse
 	AccessRole string `json:"access_role"`

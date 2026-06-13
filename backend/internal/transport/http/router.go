@@ -21,14 +21,13 @@ func NewRouter(deps RouterDeps) *fiber.App {
 		AppName:      "gps-tracker-api",
 		ErrorHandler: httpErrorHandler,
 	})
-
 	app.Get("/health", deps.HealthHandler.Handle)
 
-
 	apiV1 := app.Group("/api/v1")
-
+	// === Devices routes ===
 	devices := apiV1.Group("/devices", middleware.DevUser())
 	devices.Get("/", middleware.DevUser(), deps.DevicesHandler.List)
+	devices.Post("/", middleware.DevUser(), deps.DevicesHandler.Create)
 
 	return app
 }

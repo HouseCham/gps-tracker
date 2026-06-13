@@ -8,7 +8,17 @@ import (
 	"github.com/HouseCham/gps-tracker/backend/internal/domain"
 )
 
-// DevicesRepository is the port that the app layer defines and infra implements.
-type DevicesRepository interface {
+// CreateInput carries the data needed to create a device.
+// The caller (typically the service) is responsible for business rules;
+// the repository handles persistence and the implicit owner access grant.
+type CreateInput struct {
+	UuidFirmware string
+	Name         string
+	OwnerID      uuid.UUID
+}
+
+// Repository is the port that the app layer defines and infra implements.
+type Repository interface {
 	ListForUser(ctx context.Context, userID uuid.UUID) ([]domain.DeviceWithAccess, error)
+	Create(ctx context.Context, input CreateInput) (*domain.Device, error)
 }

@@ -39,3 +39,31 @@ func (h *DevicesHandler) List(c fiber.Ctx) error {
 	}
 	return c.JSON(resp)
 }
+
+// Create handles POST /api/devices.
+// The caller is implicitly granted owner access to the new device.
+func (h *DevicesHandler) Create(c fiber.Ctx) error {
+	user, ok := c.Locals(middleware.LocalsKeyUser).(*domain.User)
+	if !ok {
+		return fiber.NewError(fiber.StatusUnauthorized, "unauthorized")
+	}
+
+	var req dto.CreateDeviceRequest
+	if err := c.Bind().JSON(&req); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "invalid request body")
+	}
+
+	device, err := h.service.Create(c.Context(), devices.CreateInput{
+		UuidFirmware: req.UuidFirmware,
+		Name:         req.Name,
+		OwnerID:      user.ID,
+	})
+	if err != nil {
+		return err
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(dto.DeviceWithAccessResponse{
+		DeviceResponse: dto.DeviceFromDomain(device),
+		AccessRole:     string(domain.AccessRoleOwner),
+	})
+}
