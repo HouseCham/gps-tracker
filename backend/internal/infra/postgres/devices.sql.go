@@ -58,6 +58,53 @@ func (q *Queries) GetDeviceByID(ctx context.Context, id pgtype.UUID) (Device, er
 	return i, err
 }
 
+const getDeviceByIDForUser = `-- name: GetDeviceByIDForUser :one
+SELECT
+  d.id,
+  d.uuid_firmware,
+  d.name,
+  d.created_at,
+  d.last_seen_at,
+  uda.role AS access_role
+FROM devices d
+INNER JOIN user_device_access uda
+  ON d.id = uda.device_id AND uda.deleted_at IS NULL
+WHERE d.id = $1
+  AND uda.user_id = $2
+  AND d.deleted_at IS NULL
+`
+
+type GetDeviceByIDForUserParams struct {
+	ID     pgtype.UUID
+	UserID pgtype.UUID
+}
+
+type GetDeviceByIDForUserRow struct {
+	ID           pgtype.UUID
+	UuidFirmware string
+	Name         string
+	CreatedAt    pgtype.Timestamptz
+	LastSeenAt   pgtype.Timestamptz
+	AccessRole   string
+}
+
+// Returns the device only if the given user has access (any role).
+// Returns sql.ErrNoRows when the device does not exist OR the user has no
+// access. The handler maps both to 404 to avoid leaking which IDs exist.
+func (q *Queries) GetDeviceByIDForUser(ctx context.Context, arg GetDeviceByIDForUserParams) (GetDeviceByIDForUserRow, error) {
+	row := q.db.QueryRow(ctx, getDeviceByIDForUser, arg.ID, arg.UserID)
+	var i GetDeviceByIDForUserRow
+	err := row.Scan(
+		&i.ID,
+		&i.UuidFirmware,
+		&i.Name,
+		&i.CreatedAt,
+		&i.LastSeenAt,
+		&i.AccessRole,
+	)
+	return i, err
+}
+
 const getDeviceByUUIDFirmware = `-- name: GetDeviceByUUIDFirmware :one
 SELECT id, uuid_firmware, name, created_at, last_seen_at, deleted_at
 FROM devices

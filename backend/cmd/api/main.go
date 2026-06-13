@@ -9,8 +9,11 @@ import (
 	"syscall"
 	"time"
 
-	_ "github.com/HouseCham/gps-tracker/backend/internal/infra/config"
+	_ "github.com/HouseCham/gps-tracker/backend/internal/config"
 
+	"github.com/HouseCham/gps-tracker/backend/internal/app/access"
+	"github.com/HouseCham/gps-tracker/backend/internal/app/devices"
+	"github.com/HouseCham/gps-tracker/backend/internal/infra/postgres"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/handlers"
 )
@@ -25,10 +28,34 @@ func main() {
 		}
 	}
 
+	dsn := os.Getenv("DATABASE_URL")
+	if dsn == "" {
+		logger.Error("DATABASE_URL is required")
+		os.Exit(1)
+	}
+
+	startCtx, startCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	pool, err := postgres.NewPool(startCtx, dsn)
+	startCancel()
+	if err != nil {
+		logger.Error("create db pool", "err", err)
+		os.Exit(1)
+	}
+	defer pool.Close()
+
+	devicesRepo := postgres.NewDevicesAdapter(pool)
+	devicesService := devices.DevicesService(devicesRepo)
+	accessRepo := postgres.NewAccessAdapter(pool)
+	accessService := access.AccessService(accessRepo)
+
 	healthHandler := handlers.NewHealthHandler()
+	devicesHandler := handlers.NewDevicesHandler(devicesService, logger)
+
 	app := http.NewRouter(http.RouterDeps{
-		Logger:        logger,
-		HealthHandler: healthHandler,
+		Logger:         logger,
+		HealthHandler:  healthHandler,
+		DevicesHandler: devicesHandler,
+		AccessService:  accessService,
 	})
 
 	server := http.NewServer(app, http.ServerConfig{
