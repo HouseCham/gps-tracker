@@ -7,6 +7,7 @@ import (
 
 	"github.com/HouseCham/gps-tracker/backend/internal/app/devices"
 	"github.com/HouseCham/gps-tracker/backend/internal/domain"
+	"github.com/HouseCham/gps-tracker/backend/internal/model"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/dto"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/middleware"
 	"github.com/HouseCham/gps-tracker/backend/utils"
@@ -26,7 +27,10 @@ func NewDevicesHandler(svc *devices.Service, logger *slog.Logger) *DevicesHandle
 func (h *DevicesHandler) List(c fiber.Ctx) error {
 	user, ok := c.Locals(middleware.LocalsKeyUser).(*domain.User)
 	if !ok {
-		return fiber.NewError(fiber.StatusUnauthorized, "unauthorized")
+		return c.Status(fiber.StatusUnauthorized).JSON(model.HTTPResponse[bool]{
+			StatusCode: fiber.StatusUnauthorized,
+			Message:    "unauthorized",
+		})
 	}
 
 	items, err := h.service.ListMine(c.Context(), user.ID)
@@ -46,12 +50,18 @@ func (h *DevicesHandler) List(c fiber.Ctx) error {
 func (h *DevicesHandler) Create(c fiber.Ctx) error {
 	user, ok := c.Locals(middleware.LocalsKeyUser).(*domain.User)
 	if !ok {
-		return fiber.NewError(fiber.StatusUnauthorized, "unauthorized")
+		return c.Status(fiber.StatusUnauthorized).JSON(model.HTTPResponse[bool]{
+			StatusCode: fiber.StatusUnauthorized,
+			Message:    "unauthorized",
+		})
 	}
 
 	req, ok := utils.GetValidatedBody[dto.CreateDeviceRequest](c)
 	if !ok {
-		return fiber.NewError(fiber.StatusBadRequest, "invalid request body")
+		return c.Status(fiber.StatusBadRequest).JSON(model.HTTPResponse[bool]{
+			StatusCode: fiber.StatusBadRequest,
+			Message:    "invalid request body",
+		})
 	}
 
 	device, err := h.service.Create(c.Context(), devices.CreateInput{

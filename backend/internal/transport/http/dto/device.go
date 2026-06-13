@@ -24,6 +24,7 @@ type DeviceWithAccessResponse struct {
 	AccessRole string `json:"access_role"`
 }
 
+// DeviceFromDomain converts a *domain.Device to a DeviceResponse
 func DeviceFromDomain(d *domain.Device) DeviceResponse {
 	return DeviceResponse{
 		ID:           d.ID.String(),
@@ -33,7 +34,7 @@ func DeviceFromDomain(d *domain.Device) DeviceResponse {
 		LastSeenAt:   d.LastSeenAt,
 	}
 }
-
+// DeviceWithAccessFromDomain converts a *domain.DeviceWithAccess to a DeviceWithAccessResponse
 func DeviceWithAccessFromDomain(d *domain.DeviceWithAccess) DeviceWithAccessResponse {
 	return DeviceWithAccessResponse{
 		DeviceResponse: DeviceFromDomain(&d.Device),
