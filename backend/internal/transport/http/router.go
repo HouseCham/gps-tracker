@@ -2,25 +2,29 @@ package http
 
 import (
 	"log/slog"
-	"os"
 
 	"github.com/gofiber/fiber/v3"
+
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/handlers"
+	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/middleware"
 )
 
 type RouterDeps struct {
-	Logger        *slog.Logger
-	HealthHandler *handlers.HealthHandler
+	Logger         *slog.Logger
+	HealthHandler  *handlers.HealthHandler
+	DevicesHandler *handlers.DevicesHandler
 }
 
-// NewRouter creates a new Fiber app with the defined routes and handlers.
 func NewRouter(deps RouterDeps) *fiber.App {
 	app := fiber.New(fiber.Config{
-		AppName:      os.Getenv("APP_NAME"),
+		AppName:      "gps-tracker-api",
 		ErrorHandler: httpErrorHandler,
 	})
 
 	app.Get("/health", deps.HealthHandler.Handle)
+
+	api := app.Group("/api")
+	api.Get("/devices", middleware.DevUser(), deps.DevicesHandler.List)
 
 	return app
 }
