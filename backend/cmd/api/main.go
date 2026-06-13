@@ -1,40 +1,47 @@
 package main
 
 import (
-	"fmt"
+	"context"
+	"log/slog"
 	"os"
+	"os/signal"
 	"strconv"
+	"syscall"
+	"time"
 
 	_ "github.com/HouseCham/gps-tracker/backend/internal/infra/config"
 
-	"github.com/gofiber/fiber/v3"
-	"github.com/gofiber/fiber/v3/log"
-	"github.com/gofiber/fiber/v3/middleware/cors"
+	"github.com/HouseCham/gps-tracker/backend/internal/transport/http"
+	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/handlers"
 )
 
 func main() {
-	// Get app port from environment variables
-	apiPort, err := strconv.ParseUint(os.Getenv("APP_PORT"), 10, 64)
-	if err != nil {
-		log.Fatalf("Failed to parse APP_PORT: %v", err)
+	logger := slog.Default()
+
+	addr := ":8080"
+	if v := os.Getenv("APP_PORT"); v != "" {
+		if port, err := strconv.ParseUint(v, 10, 64); err == nil {
+			addr = ":" + strconv.FormatUint(port, 10)
+		}
 	}
 
-	// Set up the Fiber app
-	app := fiber.New()
+	healthHandler := handlers.NewHealthHandler()
+	app := http.NewRouter(http.RouterDeps{
+		Logger:        logger,
+		HealthHandler: healthHandler,
+	})
 
-	// Setting up CORS middleware
-	app.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{os.Getenv("CLIENT_ORIGIN")},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "PATCH"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "Cookie"},
-		AllowCredentials: true,
-	}))
-	
-	// Set up the routes and handlers for the app
-	// routes.SetupRoutes(app)
-	log.Info("Routes are set up")
-	
-	log.Info("Fiber app is set up")
-	log.Infof("Server is running on port %d", apiPort)
-	app.Listen(fmt.Sprintf(":%d", apiPort))
+	server := http.NewServer(app, http.ServerConfig{
+		Addr:            addr,
+		ShutdownTimeout: 30 * time.Second,
+		Logger:          logger,
+	})
+
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
+	if err := server.Run(ctx); err != nil {
+		logger.Error("server error", "err", err)
+		os.Exit(1)
+	}
 }
