@@ -24,13 +24,13 @@ services:
   migrate:
     image: migrate/migrate:v4.17.0
     container_name: gps-tracker-migrate
+    restart: "no"
     command:
-      - sh
-      - -c
-      - |
-        migrate -path /migrations \
-          -database "postgres://$$POSTGRES_USER:$$POSTGRES_PASSWORD@db:5432/$$POSTGRES_DB?sslmode=disable" \
-          up
+      - "-path"
+      - /migrations
+      - "-database"
+      - "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD:-gps_pass}@db:5432/${POSTGRES_DB}?sslmode=disable"
+      - up
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gps_pass}
@@ -38,7 +38,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    profiles: ["migrate"]
     volumes:
       - ./backend/migrations:/migrations:ro
 
@@ -58,6 +57,5 @@ services:
       JWT_AUDIENCE: ${JWT_AUDIENCE:-gps-tracker-api}
       SERVER_PORT: 8080
     depends_on:
-      db:
-        condition: service_healthy
-    profiles: ["app"]
+      migrate:
+        condition: service_completed_successfully
