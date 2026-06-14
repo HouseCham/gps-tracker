@@ -31,7 +31,7 @@ func TestListUsers(t *testing.T) {
 	}
 
 	t.Run("returns all users except excluded ID", func(t *testing.T) {
-		svc := NewService(&mockRepo{
+		svc := UsersService(&mockRepo{
 			listFn: func(_ context.Context, exclude uuid.UUID) ([]domain.User, error) {
 				if exclude != ownerID {
 					t.Errorf("expected exclude %v, got %v", ownerID, exclude)
@@ -52,7 +52,7 @@ func TestListUsers(t *testing.T) {
 	})
 
 	t.Run("returns empty list when only owner exists", func(t *testing.T) {
-		svc := NewService(&mockRepo{
+		svc := UsersService(&mockRepo{
 			listFn: func(_ context.Context, _ uuid.UUID) ([]domain.User, error) {
 				return []domain.User{}, nil
 			},
@@ -68,7 +68,7 @@ func TestListUsers(t *testing.T) {
 
 	t.Run("propagates repository error", func(t *testing.T) {
 		expectedErr := errors.New("db closed")
-		svc := NewService(&mockRepo{
+		svc := UsersService(&mockRepo{
 			listFn: func(_ context.Context, _ uuid.UUID) ([]domain.User, error) {
 				return nil, expectedErr
 			},

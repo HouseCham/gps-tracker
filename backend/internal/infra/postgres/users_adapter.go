@@ -4,29 +4,33 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-
-	"github.com/HouseCham/gps-tracker/backend/internal/app/users"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/HouseCham/gps-tracker/backend/internal/domain"
 )
 
-type UsersRepository struct {
-	q *Queries
+type UsersAdapter struct {
+	pool *pgxpool.Pool
 }
 
-func NewUsersRepository(q *Queries) *UsersRepository {
-	return &UsersRepository{q: q}
+func NewUsersAdapter(pool *pgxpool.Pool) *UsersAdapter {
+	return &UsersAdapter{pool: pool}
 }
 
-func (r *UsersRepository) ListUsers(ctx context.Context, excludeUserID uuid.UUID) ([]domain.User, error) {
-	pgUsers, err := r.q.GetUserList(ctx, pgtypeUUID(excludeUserID))
+func (a *UsersAdapter) ListUsers(ctx context.Context, excludeUserID uuid.UUID) ([]domain.User, error) {
+	queries := New(a.pool)
+	rows, err := queries.GetUserList(ctx, pgtypeUUID(excludeUserID))
 	if err != nil {
 		return nil, err
 	}
-	res := make([]domain.User, len(pgUsers))
-	for i, u := range pgUsers {
-		res[i] = userFromSqlc(u)
+	result := make([]domain.User, 0, len(rows))
+	for _, r := range rows {
+		result = append(result, domain.User{
+			ID:        uuidFromPgtype(r.ID),
+			Email:     r.Email,
+			Role:      domain.UserRole(r.Role),
+			CreatedAt: r.CreatedAt.Time,
+			UpdatedAt: r.UpdatedAt.Time,
+		})
 	}
-	return res, nil
+	return result, nil
 }
-
-var _ users.Repository = (*UsersRepository)(nil)

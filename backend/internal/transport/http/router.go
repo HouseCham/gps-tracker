@@ -16,6 +16,7 @@ type RouterDeps struct {
 	Logger         *slog.Logger
 	HealthHandler  *handlers.HealthHandler
 	DevicesHandler *handlers.DevicesHandler
+	UsersHandler   *handlers.UsersHandler
 	AccessService  *access.Service
 }
 
@@ -47,6 +48,14 @@ func NewRouter(deps RouterDeps) *fiber.App {
 		middleware.DevUser(),
 		middleware.RequireDeviceRole(domain.AccessRoleOwner, deps.AccessService),
 		deps.DevicesHandler.Delete,
+	)
+
+	// === Users routes ===
+	users := apiV1.Group("/users", middleware.DevUser())
+	users.Get("/", 
+		middleware.DevUser(),
+		middleware.RequireDeviceRole(domain.AccessRoleOwner, deps.AccessService),
+		deps.UsersHandler.List,
 	)
 
 	return app
