@@ -41,3 +41,16 @@ func (s *Service) GetByID(ctx context.Context, requestingUserID, targetUserID uu
 
 	return nil, domain.ErrForbidden
 }
+
+func (s *Service) CreateUser(ctx context.Context, email, name, lastname string, role domain.UserRole) (*domain.User, error) {
+	count, err := s.repo.CountUsers(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	if count == 0 {
+		role = domain.UserRoleSuperAdmin
+	}
+
+	return s.repo.CreateUser(ctx, email, name, lastname, role)
+}

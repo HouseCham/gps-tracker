@@ -11,4 +11,6 @@ import (
 type Repository interface {
 	ListUsers(ctx context.Context, excludeUserID uuid.UUID) ([]domain.User, error)
 	GetByID(ctx context.Context, userID uuid.UUID) (*domain.User, error)
+	CreateUser(ctx context.Context, email, name, lastname string, role domain.UserRole) (*domain.User, error)
+	CountUsers(ctx context.Context) (int, error)
 }

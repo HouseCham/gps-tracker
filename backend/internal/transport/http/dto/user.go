@@ -9,6 +9,8 @@ import (
 type UserResponse struct {
 	ID        string    `json:"id"`
 	Email     string    `json:"email"`
+	Name      string    `json:"name"`
+	Lastname  string    `json:"lastname"`
 	Role      string    `json:"role"`
 	CreatedAt time.Time `json:"created_at"`
 }
@@ -17,9 +19,18 @@ func UserFromDomain(u *domain.User) UserResponse {
 	return UserResponse{
 		ID:        u.ID.String(),
 		Email:     u.Email,
+		Name:      u.Name,
+		Lastname:  u.Lastname,
 		Role:      string(u.Role),
 		CreatedAt: u.CreatedAt,
 	}
+}
+
+type CreateUserRequest struct {
+	Email    string `json:"email" validate:"required,email"`
+	Name     string `json:"name" validate:"omitempty,min=0,max=100"`
+	Lastname string `json:"lastname" validate:"omitempty,min=0,max=100"`
+	Role     string `json:"role" validate:"required,user_role"`
 }
 
 type DeviceBasicResponse struct {

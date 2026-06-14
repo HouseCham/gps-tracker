@@ -58,6 +58,12 @@ func NewRouter(deps RouterDeps) *fiber.App {
 		deps.UsersHandler.List,
 	)
 	users.Get("/:id", middleware.DevUser(), deps.UsersHandler.GetByID)
+	users.Post("/",
+		middleware.DevUser(),
+		middleware.RequireUserRole(domain.UserRoleSuperAdmin),
+		middleware.ValidateRequestBody[dto.CreateUserRequest](),
+		deps.UsersHandler.Create,
+	)
 
 	return app
 }

@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/log"
 	"github.com/google/uuid"
 
 	"github.com/HouseCham/gps-tracker/backend/internal/app/devices"
@@ -24,7 +25,6 @@ func NewUsersHandler(usersSvc *users.Service, devicesSvc *devices.Service, logge
 	return &UsersHandler{usersService: usersSvc, devicesService: devicesSvc, logger: logger}
 }
 
-// Retrieves a list of all the users in the system. This endpoint is protected and requires authentication and "owner" role.
 func (h *UsersHandler) List(c fiber.Ctx) error {
 	user, ok := c.Locals(middleware.LocalsKeyUser).(*domain.User)
 	if !ok {
@@ -128,5 +128,45 @@ func (h *UsersHandler) GetByID(c fiber.Ctx) error {
 				TotalPages: totalPages,
 			},
 		},
+	})
+}
+
+func (h *UsersHandler) Create(c fiber.Ctx) error {
+	log.Info("Create User handler called")
+	_, ok := c.Locals(middleware.LocalsKeyUser).(*domain.User)
+	if !ok {
+		log.Warn("User is not authenticated - UsersCreate handler")
+		return c.Status(fiber.StatusUnauthorized).JSON(domain.HTTPResponse[bool]{
+			StatusCode: fiber.StatusUnauthorized,
+			Message:    "unauthorized",
+		})
+	}
+
+	var req dto.CreateUserRequest
+	if err := c.Bind().JSON(&req); err != nil {
+		log.Warn("Invalid request body - UsersCreate handler")
+		return c.Status(fiber.StatusBadRequest).JSON(domain.HTTPResponse[bool]{
+			StatusCode: fiber.StatusBadRequest,
+			Message:    "invalid request body",
+		})
+	}
+
+	user, err := h.usersService.CreateUser(
+		c.Context(),
+		req.Email,
+		req.Name,
+		req.Lastname,
+		domain.UserRole(req.Role),
+	)
+	if err != nil {
+		log.Error("Error creating user - UsersCreate handler", "- error:", err)
+		return err
+	}
+
+	log.Info("User created successfully - UsersCreate handler")
+	return c.Status(fiber.StatusCreated).JSON(domain.HTTPResponse[dto.UserResponse]{
+		StatusCode: fiber.StatusCreated,
+		Message:    "user created",
+		Data:       dto.UserFromDomain(user),
 	})
 }
