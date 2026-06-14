@@ -21,6 +21,11 @@ func (s *Service) ListMine(ctx context.Context, userID uuid.UUID) ([]domain.Devi
 	return s.repo.ListForUser(ctx, userID)
 }
 
+func (s *Service) ListForUserPaginated(ctx context.Context, userID uuid.UUID, page, pageSize int) ([]domain.Device, int, error) {
+	offset := (page - 1) * pageSize
+	return s.repo.ListForUserPaginated(ctx, userID, pageSize, offset)
+}
+
 // GetByID returns a single device if the given user has access to it.
 // Returns domain.ErrNotFound if the device does not exist OR the user has
 // no access (the repository collapses both into "no rows").

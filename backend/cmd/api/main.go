@@ -57,7 +57,7 @@ func main() {
 	//-- handlers
 	healthHandler := handlers.NewHealthHandler()
 	devicesHandler := handlers.NewDevicesHandler(devicesService, logger)
-	usersHandler := handlers.NewUsersHandler(usersService, logger)
+	usersHandler := handlers.NewUsersHandler(usersService, devicesService, logger)
 
 	app := http.NewRouter(http.RouterDeps{
 		Logger:         logger,

@@ -19,3 +19,25 @@ func UsersService(repo Repository) *Service {
 func (s *Service) ListUsers(ctx context.Context, excludeUserID uuid.UUID) ([]domain.User, error) {
 	return s.repo.ListUsers(ctx, excludeUserID)
 }
+
+func (s *Service) GetByID(ctx context.Context, requestingUserID, targetUserID uuid.UUID) (*domain.User, error) {
+	targetUser, err := s.repo.GetByID(ctx, targetUserID)
+	if err != nil {
+		return nil, err
+	}
+
+	requestingUser, err := s.repo.GetByID(ctx, requestingUserID)
+	if err != nil {
+		return nil, err
+	}
+
+	if requestingUser.Role == domain.UserRoleSuperAdmin {
+		return targetUser, nil
+	}
+
+	if requestingUserID == targetUserID {
+		return targetUser, nil
+	}
+
+	return nil, domain.ErrForbidden
+}

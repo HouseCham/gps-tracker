@@ -52,11 +52,12 @@ func NewRouter(deps RouterDeps) *fiber.App {
 
 	// === Users routes ===
 	users := apiV1.Group("/users", middleware.DevUser())
-	users.Get("/", 
+	users.Get("/",
 		middleware.DevUser(),
 		middleware.RequireDeviceRole(domain.AccessRoleOwner, deps.AccessService),
 		deps.UsersHandler.List,
 	)
+	users.Get("/:id", middleware.DevUser(), deps.UsersHandler.GetByID)
 
 	return app
 }

@@ -11,11 +11,16 @@ import (
 )
 
 type mockRepo struct {
-	listFn func(ctx context.Context, excludeUserID uuid.UUID) ([]domain.User, error)
+	listFn  func(ctx context.Context, excludeUserID uuid.UUID) ([]domain.User, error)
+	getByIDFn func(ctx context.Context, userID uuid.UUID) (*domain.User, error)
 }
 
 func (m *mockRepo) ListUsers(ctx context.Context, excludeUserID uuid.UUID) ([]domain.User, error) {
 	return m.listFn(ctx, excludeUserID)
+}
+
+func (m *mockRepo) GetByID(ctx context.Context, userID uuid.UUID) (*domain.User, error) {
+	return m.getByIDFn(ctx, userID)
 }
 
 func TestListUsers(t *testing.T) {

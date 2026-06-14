@@ -47,6 +47,37 @@ func (a *DevicesAdapter) ListForUser(ctx context.Context, userID uuid.UUID) ([]d
 	return result, nil
 }
 
+func (a *DevicesAdapter) ListForUserPaginated(ctx context.Context, userID uuid.UUID, limit, offset int) ([]domain.Device, int, error) {
+	queries := New(a.pool)
+
+	count, err := queries.CountDevicesForUser(ctx, pgtypeUUID(userID))
+	if err != nil {
+		return nil, 0, wrapPgError(err)
+	}
+
+	rows, err := queries.ListDevicesForUserPaginated(ctx, ListDevicesForUserPaginatedParams{
+		UserID: pgtypeUUID(userID),
+		Limit:  int32(limit),
+		Offset: int32(offset),
+	})
+	if err != nil {
+		return nil, 0, wrapPgError(err)
+	}
+
+	result := make([]domain.Device, 0, len(rows))
+	for _, r := range rows {
+		result = append(result, domain.Device{
+			ID:           uuidFromPgtype(r.ID),
+			UuidFirmware: r.UuidFirmware,
+			Name:         r.Name,
+			CreatedAt:    r.CreatedAt.Time,
+			LastSeenAt:   timestamptzToPtr(r.LastSeenAt),
+		})
+	}
+
+	return result, int(count), nil
+}
+
 // GetByIDForUser returns the device only if the user has access (any role).
 // Returns domain.ErrNotFound (via wrapPgError) when the device does not
 // exist OR the user has no access — both cases collapse to 404.
