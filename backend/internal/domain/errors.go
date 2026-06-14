@@ -9,4 +9,5 @@ var (
 	ErrConflict           = errors.New("conflict")
 	ErrValidation         = errors.New("validation error")
 	ErrInvalidCredentials = errors.New("invalid credentials")
+	ErrCannotRevokeSelf   = errors.New("cannot revoke your own device access")
 )

@@ -52,18 +52,20 @@ func main() {
 	usersService := users.UsersService(usersRepo)
 	//-- access
 	accessRepo := postgres.NewAccessAdapter(pool)
-	accessService := access.AccessService(accessRepo)
+	accessService := access.AccessService(accessRepo, usersRepo)
 
 	//-- handlers
 	healthHandler := handlers.NewHealthHandler()
 	devicesHandler := handlers.NewDevicesHandler(devicesService, logger)
 	usersHandler := handlers.NewUsersHandler(usersService, devicesService, logger)
+	accessHandler := handlers.NewAccessHandler(accessService, logger)
 
 	app := http.NewRouter(http.RouterDeps{
 		Logger:         logger,
 		HealthHandler:  healthHandler,
 		DevicesHandler: devicesHandler,
 		UsersHandler:   usersHandler,
+		AccessHandler:  accessHandler,
 		AccessService:  accessService,
 	})
 

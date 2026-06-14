@@ -17,6 +17,7 @@ type RouterDeps struct {
 	HealthHandler  *handlers.HealthHandler
 	DevicesHandler *handlers.DevicesHandler
 	UsersHandler   *handlers.UsersHandler
+	AccessHandler  *handlers.AccessHandler
 	AccessService  *access.Service
 }
 
@@ -48,6 +49,22 @@ func NewRouter(deps RouterDeps) *fiber.App {
 		middleware.DevUser(),
 		middleware.RequireDeviceRole(domain.AccessRoleOwner, deps.AccessService),
 		deps.DevicesHandler.Delete,
+	)
+	devices.Post("/:id/access",
+		middleware.DevUser(),
+		middleware.ValidateRequestBody[dto.GrantAccessRequest](),
+		middleware.RequireDeviceRole(domain.AccessRoleOwner, deps.AccessService),
+		deps.AccessHandler.Grant,
+	)
+	devices.Get("/:id/access",
+		middleware.DevUser(),
+		middleware.RequireDeviceRole(domain.AccessRoleOwner, deps.AccessService),
+		deps.AccessHandler.List,
+	)
+	devices.Delete("/:id/access/:userId",
+		middleware.DevUser(),
+		middleware.RequireDeviceRole(domain.AccessRoleOwner, deps.AccessService),
+		deps.AccessHandler.Revoke,
 	)
 
 	// === Users routes ===

@@ -2,22 +2,20 @@ package http
 
 import (
 	"errors"
-
 	"github.com/gofiber/fiber/v3"
-
 	"github.com/HouseCham/gps-tracker/backend/internal/domain"
 )
 
+// httpErrorHandler maps domain errors to HTTP status codes
 func httpErrorHandler(c fiber.Ctx, err error) error {
-	status, code, message := mapDomainError(err)
-	return c.Status(status).JSON(fiber.Map{
-		"error": fiber.Map{
-			"code":    code,
-			"message": message,
-		},
+	status, _, message := mapDomainError(err)
+	return c.Status(status).JSON(domain.HTTPResponse[struct{}]{
+		StatusCode: status,
+		Message:    message,
 	})
 }
 
+// mapDomainError maps domain errors to HTTP status codes
 func mapDomainError(err error) (status int, code string, message string) {
 	if err == nil {
 		return fiber.StatusOK, "", ""
@@ -35,6 +33,8 @@ func mapDomainError(err error) (status int, code string, message string) {
 		return fiber.StatusUnauthorized, "unauthorized", "unauthorized"
 	case errors.Is(err, domain.ErrForbidden):
 		return fiber.StatusForbidden, "forbidden", "forbidden"
+	case errors.Is(err, domain.ErrCannotRevokeSelf):
+		return fiber.StatusBadRequest, "cannot_revoke_self", "cannot revoke your own device access"
 	case errors.Is(err, domain.ErrConflict):
 		return fiber.StatusConflict, "conflict", "conflict"
 	case errors.Is(err, domain.ErrValidation):

@@ -251,4 +251,117 @@ Role hierarchy: `viewer (1) < editor (2) < owner (3)`
 
 ## Device Access Management
 
-Device access is managed through the `user_device_access` table. Managing access grants (adding/removing users, changing roles) is handled via dedicated access endpoints (not covered in this document).
+The original creator of a device is the only `owner` for the device's lifetime. Owners can grant `viewer` access to additional users, list who has access, and revoke access. Grants always assign the `viewer` role; ownership transfer is not supported.
+
+All access-management endpoints are gated by `owner` access on the device and are exposed as a sub-resource of `/devices/:id`.
+
+### POST /api/v1/devices/:id/access
+
+Grants a user `viewer` access to the device. The granted role is always `viewer` — the request body does not include a role.
+
+**Authorization:** Requires `owner` access role on the device.
+
+**Request**
+```
+POST /api/v1/devices/550e8400-e29b-41d4-a716-446655440000/access
+X-User-Id: <owner-uuid>
+Content-Type: application/json
+
+{
+  "user_id": "660e8400-e29b-41d4-a716-446655440001"
+}
+```
+
+**Fields (request body):**
+| Field | Type | Required | Validation |
+|-------|------|----------|-------------|
+| `user_id` | string (UUID) | Yes | Must reference an existing, non-deleted user |
+
+**Response `201 Created`**
+```json
+{
+  "status_code": 201,
+  "message": "access granted",
+  "data": {
+    "user_id": "660e8400-e29b-41d4-a716-446655440001",
+    "device_id": "550e8400-e29b-41d4-a716-446655440000",
+    "role": "viewer",
+    "created_at": "2026-06-14T12:00:00Z"
+  }
+}
+```
+
+**Error Responses**
+- `400` — Invalid device id, invalid user id in body, or invalid request body
+- `401` — Unauthorized
+- `403` — Caller is not the device owner
+- `404` — Target `user_id` does not exist or has been deleted
+- `409` — Caller attempted to grant access to themselves (would overwrite their `owner` role)
+
+The grant is idempotent: re-granting the same `user_id` returns the existing (re-activated) grant rather than creating a duplicate.
+
+---
+
+### GET /api/v1/devices/:id/access
+
+Lists every user that currently has access to the device, with their role and when the grant was created. The list includes the owner.
+
+**Authorization:** Requires `owner` access role on the device.
+
+**Request**
+```
+GET /api/v1/devices/550e8400-e29b-41d4-a716-446655440000/access
+X-User-Id: <owner-uuid>
+```
+
+**Response `200 OK`**
+```json
+{
+  "status_code": 200,
+  "message": "device access list retrieved",
+  "data": [
+    {
+      "user_id": "550e8400-e29b-41d4-a716-446655440000",
+      "email": "owner@example.com",
+      "role": "owner",
+      "access_granted_at": "2026-06-10T08:00:00Z"
+    },
+    {
+      "user_id": "660e8400-e29b-41d4-a716-446655440001",
+      "email": "viewer@example.com",
+      "role": "viewer",
+      "access_granted_at": "2026-06-14T12:00:00Z"
+    }
+  ]
+}
+```
+
+**Error Responses**
+- `400` — Invalid device id
+- `401` — Unauthorized
+- `403` — Caller is not the device owner
+- `404` — Device does not exist or caller has no access
+
+---
+
+### DELETE /api/v1/devices/:id/access/:userId
+
+Revokes a user's access to the device by soft-deleting the row in `user_device_access` (the row stays in the table for audit, but is filtered out of all queries).
+
+**Authorization:** Requires `owner` access role on the device.
+
+**Request**
+```
+DELETE /api/v1/devices/550e8400-e29b-41d4-a716-446655440000/access/660e8400-e29b-41d4-a716-446655440001
+X-User-Id: <owner-uuid>
+```
+
+**Response `204 No Content`**
+
+No response body is returned.
+
+**Error Responses**
+- `400` — Invalid device id, invalid `userId`, or caller tried to revoke themselves (`cannot_revoke_self`)
+- `401` — Unauthorized
+- `403` — Caller is not the device owner, or target is another owner
+- `404` — Target `userId` has no active access grant to the device
