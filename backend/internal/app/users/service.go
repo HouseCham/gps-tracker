@@ -58,3 +58,16 @@ func (s *Service) CreateUser(ctx context.Context, email, name, lastname string, 
 func (s *Service) UpdateUser(ctx context.Context, userID uuid.UUID, name, lastname string) (*domain.User, error) {
 	return s.repo.UpdateUser(ctx, userID, name, lastname)
 }
+
+func (s *Service) SoftDeleteUser(ctx context.Context, requestingUserID, targetUserID uuid.UUID) error {
+	requestingUser, err := s.repo.GetByID(ctx, requestingUserID)
+	if err != nil {
+		return err
+	}
+
+	if requestingUser.Role != domain.UserRoleSuperAdmin && requestingUserID != targetUserID {
+		return domain.ErrForbidden
+	}
+
+	return s.repo.SoftDeleteUser(ctx, targetUserID)
+}

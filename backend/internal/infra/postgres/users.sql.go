@@ -192,6 +192,20 @@ func (q *Queries) GetUserList(ctx context.Context, id pgtype.UUID) ([]GetUserLis
 	return items, nil
 }
 
+const softDeleteUser = `-- name: SoftDeleteUser :exec
+UPDATE users
+SET deleted_at = NOW()
+WHERE id = $1 AND deleted_at IS NULL
+`
+
+// Marks a user as deleted by setting deleted_at = NOW().
+// The row is NOT physically removed. Idempotent: re-deleting
+// an already-deleted user is a no-op.
+func (q *Queries) SoftDeleteUser(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, softDeleteUser, id)
+	return err
+}
+
 const updateUser = `-- name: UpdateUser :one
 UPDATE users
 SET name = $2, lastname = $3, updated_at = NOW()

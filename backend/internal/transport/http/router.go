@@ -69,6 +69,7 @@ func NewRouter(deps RouterDeps) *fiber.App {
 		middleware.ValidateRequestBody[dto.UpdateUserRequest](),
 		deps.UsersHandler.Update,
 	)
+	users.Delete("/:id", middleware.DevUser(), deps.UsersHandler.Delete)
 
 	return app
 }

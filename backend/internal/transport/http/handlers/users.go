@@ -208,3 +208,30 @@ func (h *UsersHandler) Update(c fiber.Ctx) error {
 		Data:       dto.UserFromDomain(user),
 	})
 }
+
+func (h *UsersHandler) Delete(c fiber.Ctx) error {
+	requestingUser, ok := c.Locals(middleware.LocalsKeyUser).(*domain.User)
+	if !ok {
+		return c.Status(fiber.StatusUnauthorized).JSON(domain.HTTPResponse[bool]{
+			StatusCode: fiber.StatusUnauthorized,
+			Message:    "unauthorized",
+		})
+	}
+
+	targetUserID, err := uuid.Parse(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(domain.HTTPResponse[bool]{
+			StatusCode: fiber.StatusBadRequest,
+			Message:    "invalid user id",
+		})
+	}
+
+	if err := h.usersService.SoftDeleteUser(c.Context(), requestingUser.ID, targetUserID); err != nil {
+		return err
+	}
+
+	return c.Status(fiber.StatusOK).JSON(domain.HTTPResponse[bool]{
+		StatusCode: fiber.StatusOK,
+		Message:    "user deleted",
+	})
+}

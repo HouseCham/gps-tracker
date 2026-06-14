@@ -41,3 +41,11 @@ UPDATE users
 SET name = $2, lastname = $3, updated_at = NOW()
 WHERE id = $1 AND deleted_at IS NULL
 RETURNING id, email, name, lastname, role, created_at, updated_at, deleted_at;
+
+-- name: SoftDeleteUser :exec
+-- Marks a user as deleted by setting deleted_at = NOW().
+-- The row is NOT physically removed. Idempotent: re-deleting
+-- an already-deleted user is a no-op.
+UPDATE users
+SET deleted_at = NOW()
+WHERE id = $1 AND deleted_at IS NULL;

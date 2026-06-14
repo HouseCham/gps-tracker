@@ -11,11 +11,12 @@ import (
 )
 
 type mockRepo struct {
-	listFn       func(ctx context.Context, excludeUserID uuid.UUID) ([]domain.User, error)
-	getByIDFn     func(ctx context.Context, userID uuid.UUID) (*domain.User, error)
-	createUserFn  func(ctx context.Context, email, name, lastname string, role domain.UserRole) (*domain.User, error)
-	updateUserFn  func(ctx context.Context, userID uuid.UUID, name, lastname string) (*domain.User, error)
-	countUsersFn  func(ctx context.Context) (int, error)
+	listFn          func(ctx context.Context, excludeUserID uuid.UUID) ([]domain.User, error)
+	getByIDFn       func(ctx context.Context, userID uuid.UUID) (*domain.User, error)
+	createUserFn    func(ctx context.Context, email, name, lastname string, role domain.UserRole) (*domain.User, error)
+	updateUserFn    func(ctx context.Context, userID uuid.UUID, name, lastname string) (*domain.User, error)
+	softDeleteUserFn func(ctx context.Context, userID uuid.UUID) error
+	countUsersFn    func(ctx context.Context) (int, error)
 }
 
 func (m *mockRepo) ListUsers(ctx context.Context, excludeUserID uuid.UUID) ([]domain.User, error) {
@@ -32,6 +33,10 @@ func (m *mockRepo) CreateUser(ctx context.Context, email, name, lastname string,
 
 func (m *mockRepo) UpdateUser(ctx context.Context, userID uuid.UUID, name, lastname string) (*domain.User, error) {
 	return m.updateUserFn(ctx, userID, name, lastname)
+}
+
+func (m *mockRepo) SoftDeleteUser(ctx context.Context, userID uuid.UUID) error {
+	return m.softDeleteUserFn(ctx, userID)
 }
 
 func (m *mockRepo) CountUsers(ctx context.Context) (int, error) {

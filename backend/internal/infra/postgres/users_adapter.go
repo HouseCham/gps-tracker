@@ -105,3 +105,8 @@ func (a *UsersAdapter) UpdateUser(ctx context.Context, userID uuid.UUID, name, l
 		UpdatedAt: row.UpdatedAt.Time,
 	}, nil
 }
+
+func (a *UsersAdapter) SoftDeleteUser(ctx context.Context, userID uuid.UUID) error {
+	queries := New(a.pool)
+	return queries.SoftDeleteUser(ctx, pgtypeUUID(userID))
+}
