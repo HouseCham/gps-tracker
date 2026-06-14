@@ -54,7 +54,7 @@ func NewRouter(deps RouterDeps) *fiber.App {
 	users := apiV1.Group("/users", middleware.DevUser())
 	users.Get("/",
 		middleware.DevUser(),
-		middleware.RequireDeviceRole(domain.AccessRoleOwner, deps.AccessService),
+		middleware.RequireUserRole(domain.UserRoleSuperAdmin),
 		deps.UsersHandler.List,
 	)
 	users.Get("/:id", middleware.DevUser(), deps.UsersHandler.GetByID)
