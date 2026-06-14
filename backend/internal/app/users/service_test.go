@@ -14,6 +14,7 @@ type mockRepo struct {
 	listFn       func(ctx context.Context, excludeUserID uuid.UUID) ([]domain.User, error)
 	getByIDFn     func(ctx context.Context, userID uuid.UUID) (*domain.User, error)
 	createUserFn  func(ctx context.Context, email, name, lastname string, role domain.UserRole) (*domain.User, error)
+	updateUserFn  func(ctx context.Context, userID uuid.UUID, name, lastname string) (*domain.User, error)
 	countUsersFn  func(ctx context.Context) (int, error)
 }
 
@@ -27,6 +28,10 @@ func (m *mockRepo) GetByID(ctx context.Context, userID uuid.UUID) (*domain.User,
 
 func (m *mockRepo) CreateUser(ctx context.Context, email, name, lastname string, role domain.UserRole) (*domain.User, error) {
 	return m.createUserFn(ctx, email, name, lastname, role)
+}
+
+func (m *mockRepo) UpdateUser(ctx context.Context, userID uuid.UUID, name, lastname string) (*domain.User, error) {
+	return m.updateUserFn(ctx, userID, name, lastname)
 }
 
 func (m *mockRepo) CountUsers(ctx context.Context) (int, error) {

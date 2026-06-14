@@ -33,3 +33,11 @@ WHERE deleted_at IS NULL AND id != $1;
 SELECT COUNT(*)::bigint AS count
 FROM users
 WHERE deleted_at IS NULL;
+
+-- name: UpdateUser :one
+-- Updates a user's name and lastname. Only the user themselves can update
+-- their own profile. Returns the updated user.
+UPDATE users
+SET name = $2, lastname = $3, updated_at = NOW()
+WHERE id = $1 AND deleted_at IS NULL
+RETURNING id, email, name, lastname, role, created_at, updated_at, deleted_at;

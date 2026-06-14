@@ -5,7 +5,6 @@ import (
 	"strconv"
 
 	"github.com/gofiber/fiber/v3"
-	"github.com/gofiber/fiber/v3/log"
 	"github.com/google/uuid"
 
 	"github.com/HouseCham/gps-tracker/backend/internal/app/devices"
@@ -132,10 +131,8 @@ func (h *UsersHandler) GetByID(c fiber.Ctx) error {
 }
 
 func (h *UsersHandler) Create(c fiber.Ctx) error {
-	log.Info("Create User handler called")
 	_, ok := c.Locals(middleware.LocalsKeyUser).(*domain.User)
 	if !ok {
-		log.Warn("User is not authenticated - UsersCreate handler")
 		return c.Status(fiber.StatusUnauthorized).JSON(domain.HTTPResponse[bool]{
 			StatusCode: fiber.StatusUnauthorized,
 			Message:    "unauthorized",
@@ -144,7 +141,6 @@ func (h *UsersHandler) Create(c fiber.Ctx) error {
 
 	var req dto.CreateUserRequest
 	if err := c.Bind().JSON(&req); err != nil {
-		log.Warn("Invalid request body - UsersCreate handler")
 		return c.Status(fiber.StatusBadRequest).JSON(domain.HTTPResponse[bool]{
 			StatusCode: fiber.StatusBadRequest,
 			Message:    "invalid request body",
@@ -159,14 +155,56 @@ func (h *UsersHandler) Create(c fiber.Ctx) error {
 		domain.UserRole(req.Role),
 	)
 	if err != nil {
-		log.Error("Error creating user - UsersCreate handler", "- error:", err)
 		return err
 	}
 
-	log.Info("User created successfully - UsersCreate handler")
 	return c.Status(fiber.StatusCreated).JSON(domain.HTTPResponse[dto.UserResponse]{
 		StatusCode: fiber.StatusCreated,
 		Message:    "user created",
+		Data:       dto.UserFromDomain(user),
+	})
+}
+
+func (h *UsersHandler) Update(c fiber.Ctx) error {
+	requestingUser, ok := c.Locals(middleware.LocalsKeyUser).(*domain.User)
+	if !ok {
+		return c.Status(fiber.StatusUnauthorized).JSON(domain.HTTPResponse[bool]{
+			StatusCode: fiber.StatusUnauthorized,
+			Message:    "unauthorized",
+		})
+	}
+
+	targetUserID, err := uuid.Parse(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(domain.HTTPResponse[bool]{
+			StatusCode: fiber.StatusBadRequest,
+			Message:    "invalid user id",
+		})
+	}
+
+	if requestingUser.ID != targetUserID {
+		return c.Status(fiber.StatusForbidden).JSON(domain.HTTPResponse[bool]{
+			StatusCode: fiber.StatusForbidden,
+			Message:    "forbidden",
+		})
+	}
+
+	var req dto.UpdateUserRequest
+	if err := c.Bind().JSON(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(domain.HTTPResponse[bool]{
+			StatusCode: fiber.StatusBadRequest,
+			Message:    "invalid request body",
+		})
+	}
+
+	user, err := h.usersService.UpdateUser(c.Context(), targetUserID, req.Name, req.Lastname)
+	if err != nil {
+		return err
+	}
+
+	return c.Status(fiber.StatusOK).JSON(domain.HTTPResponse[dto.UserResponse]{
+		StatusCode: fiber.StatusOK,
+		Message:    "user updated",
 		Data:       dto.UserFromDomain(user),
 	})
 }

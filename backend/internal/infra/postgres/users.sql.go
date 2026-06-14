@@ -191,3 +191,45 @@ func (q *Queries) GetUserList(ctx context.Context, id pgtype.UUID) ([]GetUserLis
 	}
 	return items, nil
 }
+
+const updateUser = `-- name: UpdateUser :one
+UPDATE users
+SET name = $2, lastname = $3, updated_at = NOW()
+WHERE id = $1 AND deleted_at IS NULL
+RETURNING id, email, name, lastname, role, created_at, updated_at, deleted_at
+`
+
+type UpdateUserParams struct {
+	ID       pgtype.UUID
+	Name     string
+	Lastname string
+}
+
+type UpdateUserRow struct {
+	ID        pgtype.UUID
+	Email     string
+	Name      string
+	Lastname  string
+	Role      UserRole
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
+	DeletedAt pgtype.Timestamptz
+}
+
+// Updates a user's name and lastname. Only the user themselves can update
+// their own profile. Returns the updated user.
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateUserRow, error) {
+	row := q.db.QueryRow(ctx, updateUser, arg.ID, arg.Name, arg.Lastname)
+	var i UpdateUserRow
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Name,
+		&i.Lastname,
+		&i.Role,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}

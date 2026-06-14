@@ -54,3 +54,7 @@ func (s *Service) CreateUser(ctx context.Context, email, name, lastname string, 
 
 	return s.repo.CreateUser(ctx, email, name, lastname, role)
 }
+
+func (s *Service) UpdateUser(ctx context.Context, userID uuid.UUID, name, lastname string) (*domain.User, error) {
+	return s.repo.UpdateUser(ctx, userID, name, lastname)
+}

@@ -33,6 +33,11 @@ type CreateUserRequest struct {
 	Role     string `json:"role" validate:"required,user_role"`
 }
 
+type UpdateUserRequest struct {
+	Name     string `json:"name" validate:"omitempty,min=0,max=100"`
+	Lastname string `json:"lastname" validate:"omitempty,min=0,max=100"`
+}
+
 type DeviceBasicResponse struct {
 	ID           string `json:"id"`
 	UuidFirmware string `json:"uuid_firmware"`

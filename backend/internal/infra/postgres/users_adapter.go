@@ -84,3 +84,24 @@ func (a *UsersAdapter) CountUsers(ctx context.Context) (int, error) {
 	}
 	return int(row), nil
 }
+
+func (a *UsersAdapter) UpdateUser(ctx context.Context, userID uuid.UUID, name, lastname string) (*domain.User, error) {
+	queries := New(a.pool)
+	row, err := queries.UpdateUser(ctx, UpdateUserParams{
+		ID:       pgtypeUUID(userID),
+		Name:     name,
+		Lastname: lastname,
+	})
+	if err != nil {
+		return nil, wrapPgError(err)
+	}
+	return &domain.User{
+		ID:        uuidFromPgtype(row.ID),
+		Email:     row.Email,
+		Name:      row.Name,
+		Lastname:  row.Lastname,
+		Role:      domain.UserRole(row.Role),
+		CreatedAt: row.CreatedAt.Time,
+		UpdatedAt: row.UpdatedAt.Time,
+	}, nil
+}
