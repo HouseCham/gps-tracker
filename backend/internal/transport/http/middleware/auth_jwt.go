@@ -7,7 +7,7 @@ import (
 	"github.com/gofiber/fiber/v3"
 
 	"github.com/HouseCham/gps-tracker/backend/internal/auth"
-	"github.com/HouseCham/gps-tracker/backend/internal/domain"
+	"github.com/HouseCham/gps-tracker/backend/internal/transport/response"
 )
 
 // bearerPrefix is the expected prefix on the Authorization header
@@ -62,7 +62,7 @@ func ClaimsFromCtx(c fiber.Ctx) *models.Actor {
 // unauthorizedResponse returns a JSON response with a 401 status code
 // and the supplied message.
 func unauthorizedResponse(c fiber.Ctx, message string) error {
-	return c.Status(fiber.StatusUnauthorized).JSON(domain.HTTPResponse[bool]{
+	return c.Status(fiber.StatusUnauthorized).JSON(response.HTTPResponse[bool]{
 		StatusCode: fiber.StatusUnauthorized,
 		Message:    message,
 	})
