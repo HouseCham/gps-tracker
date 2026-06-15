@@ -14,7 +14,13 @@ type Service struct {
 	repo Repository
 }
 
-func AccessService(repo Repository) *Service {
+var roleOrder = map[domain.AccessRole]int{
+	domain.AccessRoleViewer: 1,
+	domain.AccessRoleEditor: 2,
+	domain.AccessRoleOwner:  3,
+}
+
+func New(repo Repository) *Service {
 	return &Service{repo: repo}
 }
 
@@ -41,10 +47,5 @@ func (s *Service) RequireRole(ctx context.Context, userID, deviceID uuid.UUID, m
 // RoleSatisfies reports whether `actual` is at least as privileged as `min`.
 // Hierarchy: viewer (1) < editor (2) < owner (3).
 func RoleSatisfies(actual, min domain.AccessRole) bool {
-	order := map[domain.AccessRole]int{
-		domain.AccessRoleViewer: 1,
-		domain.AccessRoleEditor: 2,
-		domain.AccessRoleOwner:  3,
-	}
-	return order[actual] >= order[min]
+	return roleOrder[actual] >= roleOrder[min]
 }

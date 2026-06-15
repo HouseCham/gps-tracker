@@ -19,10 +19,6 @@ func httpErrorHandler(c fiber.Ctx, err error) error {
 }
 
 func mapDomainError(err error) (status int, code string, message string) {
-	if err == nil {
-		return fiber.StatusOK, "", ""
-	}
-
 	var fe *fiber.Error
 	if errors.As(err, &fe) {
 		return fe.Code, "fiber_error", fe.Message

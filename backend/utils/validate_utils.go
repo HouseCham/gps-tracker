@@ -14,15 +14,6 @@ func GetValidatedBody[T any](c fiber.Ctx) (T, bool) {
 	return v, ok
 }
 
-// ReturnBadRequestResponse builds a uniform validation error response.
-func ReturnBadRequestResponse(errors *[]domain.ValidatorError) domain.HTTPResponse[[]domain.ValidatorError] {
-	return domain.HTTPResponse[[]domain.ValidatorError]{
-		StatusCode: fiber.StatusBadRequest,
-		Message:    "Invalid request body",
-		Data:       *errors,
-	}
-}
-
 // ValidateStruct runs the validator on the given value. On failure, returns
 // a populated HTTPResponse with the list of field errors and the original
 // validator error. On success, returns an empty response and nil.

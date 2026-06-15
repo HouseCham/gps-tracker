@@ -31,21 +31,18 @@ func NewRouter(deps RouterDeps) *fiber.App {
 	apiV1 := app.Group("/api/v1")
 	// === Devices routes ===
 	devices := apiV1.Group("/devices", middleware.DevUser())
-	devices.Get("/", middleware.DevUser(), deps.DevicesHandler.List)
-	devices.Get("/:id", middleware.DevUser(), deps.DevicesHandler.Get)
+	devices.Get("/", deps.DevicesHandler.List)
+	devices.Get("/:id", deps.DevicesHandler.Get)
 	devices.Post("/",
-		middleware.DevUser(),
 		middleware.ValidateRequestBody[dto.CreateDeviceRequest](),
 		deps.DevicesHandler.Create,
 	)
 	devices.Put("/:id",
-		middleware.DevUser(),
 		middleware.ValidateRequestBody[dto.UpdateDeviceRequest](),
 		middleware.RequireDeviceRole(domain.AccessRoleEditor, deps.AccessService),
 		deps.DevicesHandler.Update,
 	)
 	devices.Delete("/:id",
-		middleware.DevUser(),
 		middleware.RequireDeviceRole(domain.AccessRoleOwner, deps.AccessService),
 		deps.DevicesHandler.Delete,
 	)
@@ -53,23 +50,20 @@ func NewRouter(deps RouterDeps) *fiber.App {
 	// === Users routes ===
 	users := apiV1.Group("/users", middleware.DevUser())
 	users.Get("/",
-		middleware.DevUser(),
 		middleware.RequireUserRole(domain.UserRoleSuperAdmin),
 		deps.UsersHandler.List,
 	)
-	users.Get("/:id", middleware.DevUser(), deps.UsersHandler.GetByID)
+	users.Get("/:id", deps.UsersHandler.GetByID)
 	users.Post("/",
-		middleware.DevUser(),
 		middleware.RequireUserRole(domain.UserRoleSuperAdmin),
 		middleware.ValidateRequestBody[dto.CreateUserRequest](),
 		deps.UsersHandler.Create,
 	)
 	users.Put("/:id",
-		middleware.DevUser(),
 		middleware.ValidateRequestBody[dto.UpdateUserRequest](),
 		deps.UsersHandler.Update,
 	)
-	users.Delete("/:id", middleware.DevUser(), deps.UsersHandler.Delete)
+	users.Delete("/:id", deps.UsersHandler.Delete)
 
 	return app
 }

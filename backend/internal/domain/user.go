@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// User represents a registered user in the system.
 type User struct {
 	ID        uuid.UUID
 	Email     string
@@ -16,9 +17,12 @@ type User struct {
 	UpdatedAt time.Time
 }
 
+// UserRole defines the role a user can have.
 type UserRole string
 
 const (
-	UserRoleUser       UserRole = "user"
+	// UserRoleUser is a standard user with no elevated privileges.
+	UserRoleUser UserRole = "user"
+	// UserRoleSuperAdmin is a super administrator with full access.
 	UserRoleSuperAdmin UserRole = "super_admin"
 )

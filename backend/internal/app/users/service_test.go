@@ -56,7 +56,7 @@ func TestListUsers(t *testing.T) {
 	}
 
 	t.Run("returns all users except excluded ID", func(t *testing.T) {
-		svc := UsersService(&mockRepo{
+		svc := New(&mockRepo{
 			listFn: func(_ context.Context, exclude uuid.UUID) ([]domain.User, error) {
 				if exclude != ownerID {
 					t.Errorf("expected exclude %v, got %v", ownerID, exclude)
@@ -77,7 +77,7 @@ func TestListUsers(t *testing.T) {
 	})
 
 	t.Run("returns empty list when only owner exists", func(t *testing.T) {
-		svc := UsersService(&mockRepo{
+		svc := New(&mockRepo{
 			listFn: func(_ context.Context, _ uuid.UUID) ([]domain.User, error) {
 				return []domain.User{}, nil
 			},
@@ -93,7 +93,7 @@ func TestListUsers(t *testing.T) {
 
 	t.Run("propagates repository error", func(t *testing.T) {
 		expectedErr := errors.New("db closed")
-		svc := UsersService(&mockRepo{
+		svc := New(&mockRepo{
 			listFn: func(_ context.Context, _ uuid.UUID) ([]domain.User, error) {
 				return nil, expectedErr
 			},
@@ -116,7 +116,7 @@ func TestGetByID(t *testing.T) {
 	target := &domain.User{ID: targetID, Role: domain.UserRoleUser}
 
 	t.Run("super admin can fetch any user", func(t *testing.T) {
-		svc := UsersService(&mockRepo{
+		svc := New(&mockRepo{
 			getByIDFn: func(_ context.Context, id uuid.UUID) (*domain.User, error) {
 				switch id {
 				case superAdminID:
@@ -137,7 +137,7 @@ func TestGetByID(t *testing.T) {
 	})
 
 	t.Run("user can fetch themselves", func(t *testing.T) {
-		svc := UsersService(&mockRepo{
+		svc := New(&mockRepo{
 			getByIDFn: func(_ context.Context, _ uuid.UUID) (*domain.User, error) {
 				return owner, nil
 			},
@@ -152,7 +152,7 @@ func TestGetByID(t *testing.T) {
 	})
 
 	t.Run("non-admin fetching another user is forbidden", func(t *testing.T) {
-		svc := UsersService(&mockRepo{
+		svc := New(&mockRepo{
 			getByIDFn: func(_ context.Context, id uuid.UUID) (*domain.User, error) {
 				switch id {
 				case ownerID:
@@ -170,7 +170,7 @@ func TestGetByID(t *testing.T) {
 	})
 
 	t.Run("propagates target lookup error", func(t *testing.T) {
-		svc := UsersService(&mockRepo{
+		svc := New(&mockRepo{
 			getByIDFn: func(_ context.Context, id uuid.UUID) (*domain.User, error) {
 				if id == targetID {
 					return nil, domain.ErrNotFound
@@ -185,7 +185,7 @@ func TestGetByID(t *testing.T) {
 	})
 
 	t.Run("propagates requesting user lookup error", func(t *testing.T) {
-		svc := UsersService(&mockRepo{
+		svc := New(&mockRepo{
 			getByIDFn: func(_ context.Context, id uuid.UUID) (*domain.User, error) {
 				if id == ownerID {
 					return nil, domain.ErrNotFound
@@ -204,7 +204,7 @@ func TestCreateUser(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("preserves role when users already exist", func(t *testing.T) {
-		svc := UsersService(&mockRepo{
+		svc := New(&mockRepo{
 			countUsersFn: func(_ context.Context) (int, error) { return 3, nil },
 			createUserFn: func(_ context.Context, _, _, _ string, role domain.UserRole) (*domain.User, error) {
 				if role != domain.UserRoleUser {
@@ -223,7 +223,7 @@ func TestCreateUser(t *testing.T) {
 	})
 
 	t.Run("first registered user is promoted to super admin", func(t *testing.T) {
-		svc := UsersService(&mockRepo{
+		svc := New(&mockRepo{
 			countUsersFn: func(_ context.Context) (int, error) { return 0, nil },
 			createUserFn: func(_ context.Context, _, _, _ string, role domain.UserRole) (*domain.User, error) {
 				if role != domain.UserRoleSuperAdmin {
@@ -243,7 +243,7 @@ func TestCreateUser(t *testing.T) {
 
 	t.Run("propagates count error", func(t *testing.T) {
 		expected := errors.New("db closed")
-		svc := UsersService(&mockRepo{
+		svc := New(&mockRepo{
 			countUsersFn: func(_ context.Context) (int, error) { return 0, expected },
 		})
 		_, err := svc.CreateUser(ctx, "a@b.com", "A", "B", domain.UserRoleUser)
@@ -253,7 +253,7 @@ func TestCreateUser(t *testing.T) {
 	})
 
 	t.Run("propagates create error", func(t *testing.T) {
-		svc := UsersService(&mockRepo{
+		svc := New(&mockRepo{
 			countUsersFn: func(_ context.Context) (int, error) { return 1, nil },
 			createUserFn: func(_ context.Context, _, _, _ string, _ domain.UserRole) (*domain.User, error) {
 				return nil, domain.ErrConflict
@@ -271,7 +271,7 @@ func TestUpdateUser(t *testing.T) {
 	userID := uuid.New()
 
 	t.Run("updates and returns user", func(t *testing.T) {
-		svc := UsersService(&mockRepo{
+		svc := New(&mockRepo{
 			updateUserFn: func(_ context.Context, id uuid.UUID, name, lastname string) (*domain.User, error) {
 				if id != userID || name != "New" || lastname != "Name" {
 					t.Errorf("repo received %v %q %q, want %v New Name", id, name, lastname, userID)
@@ -289,7 +289,7 @@ func TestUpdateUser(t *testing.T) {
 	})
 
 	t.Run("propagates repository error", func(t *testing.T) {
-		svc := UsersService(&mockRepo{
+		svc := New(&mockRepo{
 			updateUserFn: func(_ context.Context, _ uuid.UUID, _, _ string) (*domain.User, error) {
 				return nil, domain.ErrNotFound
 			},
@@ -313,7 +313,7 @@ func TestSoftDeleteUser(t *testing.T) {
 
 	t.Run("super admin can delete any user", func(t *testing.T) {
 		var deleted bool
-		svc := UsersService(&mockRepo{
+		svc := New(&mockRepo{
 			getByIDFn: func(_ context.Context, id uuid.UUID) (*domain.User, error) {
 				if id == superAdminID {
 					return superAdmin, nil
@@ -338,7 +338,7 @@ func TestSoftDeleteUser(t *testing.T) {
 
 	t.Run("user can delete themselves", func(t *testing.T) {
 		var deleted bool
-		svc := UsersService(&mockRepo{
+		svc := New(&mockRepo{
 			getByIDFn: func(_ context.Context, _ uuid.UUID) (*domain.User, error) {
 				return owner, nil
 			},
@@ -359,7 +359,7 @@ func TestSoftDeleteUser(t *testing.T) {
 	})
 
 	t.Run("non-admin deleting another user is forbidden", func(t *testing.T) {
-		svc := UsersService(&mockRepo{
+		svc := New(&mockRepo{
 			getByIDFn: func(_ context.Context, id uuid.UUID) (*domain.User, error) {
 				if id == ownerID {
 					return owner, nil
@@ -379,7 +379,7 @@ func TestSoftDeleteUser(t *testing.T) {
 
 	t.Run("propagates requesting user lookup error", func(t *testing.T) {
 		expected := errors.New("db closed")
-		svc := UsersService(&mockRepo{
+		svc := New(&mockRepo{
 			getByIDFn: func(_ context.Context, _ uuid.UUID) (*domain.User, error) {
 				return nil, expected
 			},
