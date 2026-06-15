@@ -64,6 +64,9 @@ func (m *mockUsersRepo) GetByID(ctx context.Context, userID uuid.UUID) (*domain.
 func (m *mockUsersRepo) ListUsers(_ context.Context, _ uuid.UUID) ([]domain.User, error) {
 	return nil, errors.New("mockUsersRepo.ListUsers: not configured")
 }
+func (m *mockUsersRepo) GetByEmail(_ context.Context, _ string) (*domain.User, error) {
+	return nil, errors.New("mockUsersRepo.GetByEmail: not configured")
+}
 func (m *mockUsersRepo) CreateUser(_ context.Context, _, _, _ string, _ domain.UserRole) (*domain.User, error) {
 	return nil, errors.New("mockUsersRepo.CreateUser: not configured")
 }
