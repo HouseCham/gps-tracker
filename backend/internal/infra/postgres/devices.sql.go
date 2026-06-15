@@ -253,6 +253,67 @@ func (q *Queries) ListDevicesForUserPaginated(ctx context.Context, arg ListDevic
 	return items, nil
 }
 
+const listDevicesForUserWithAccessPaginated = `-- name: ListDevicesForUserWithAccessPaginated :many
+SELECT
+  d.id,
+  d.uuid_firmware,
+  d.name,
+  d.created_at,
+  d.last_seen_at,
+  uda.role AS access_role
+FROM devices d
+INNER JOIN user_device_access uda
+  ON d.id = uda.device_id AND uda.deleted_at IS NULL
+WHERE uda.user_id = $1
+  AND d.deleted_at IS NULL
+ORDER BY d.created_at DESC
+LIMIT $2 OFFSET $3
+`
+
+type ListDevicesForUserWithAccessPaginatedParams struct {
+	UserID pgtype.UUID
+	Limit  int32
+	Offset int32
+}
+
+type ListDevicesForUserWithAccessPaginatedRow struct {
+	ID           pgtype.UUID
+	UuidFirmware string
+	Name         string
+	CreatedAt    pgtype.Timestamptz
+	LastSeenAt   pgtype.Timestamptz
+	AccessRole   string
+}
+
+// Returns paginated devices the given user has access to, with the access role.
+// Used by the device list endpoint with pagination.
+func (q *Queries) ListDevicesForUserWithAccessPaginated(ctx context.Context, arg ListDevicesForUserWithAccessPaginatedParams) ([]ListDevicesForUserWithAccessPaginatedRow, error) {
+	rows, err := q.db.Query(ctx, listDevicesForUserWithAccessPaginated, arg.UserID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListDevicesForUserWithAccessPaginatedRow
+	for rows.Next() {
+		var i ListDevicesForUserWithAccessPaginatedRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.UuidFirmware,
+			&i.Name,
+			&i.CreatedAt,
+			&i.LastSeenAt,
+			&i.AccessRole,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const softDeleteDevice = `-- name: SoftDeleteDevice :exec
 UPDATE devices
 SET deleted_at = NOW()

@@ -28,6 +28,11 @@ type DeviceWithAccessResponse struct {
 	AccessRole string `json:"access_role"`
 }
 
+type DeviceListResponse struct {
+	Items      []DeviceWithAccessResponse `json:"items"`
+	Pagination PaginationMeta             `json:"pagination"`
+}
+
 // DeviceFromDomain converts a *domain.Device to a DeviceResponse
 func DeviceFromDomain(d *domain.Device) DeviceResponse {
 	return DeviceResponse{
@@ -38,6 +43,7 @@ func DeviceFromDomain(d *domain.Device) DeviceResponse {
 		LastSeenAt:   d.LastSeenAt,
 	}
 }
+
 // DeviceWithAccessFromDomain converts a *domain.DeviceWithAccess to a DeviceWithAccessResponse
 func DeviceWithAccessFromDomain(d *domain.DeviceWithAccess) DeviceWithAccessResponse {
 	return DeviceWithAccessResponse{

@@ -20,6 +20,7 @@ type CreateInput struct {
 // Repository is the port that the app layer defines and infra implements.
 type Repository interface {
 	ListForUser(ctx context.Context, userID uuid.UUID) ([]domain.DeviceWithAccess, error)
+	ListForUserWithAccessPaginated(ctx context.Context, userID uuid.UUID, limit, offset int) ([]domain.DeviceWithAccess, int, error)
 	ListForUserPaginated(ctx context.Context, userID uuid.UUID, limit, offset int) ([]domain.Device, int, error)
 	GetByIDForUser(ctx context.Context, userID, deviceID uuid.UUID) (*domain.DeviceWithAccess, error)
 	Create(ctx context.Context, input CreateInput) (*domain.Device, error)
