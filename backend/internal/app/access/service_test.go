@@ -76,6 +76,9 @@ func (m *mockUsersRepo) UpdateUser(_ context.Context, _ uuid.UUID, _, _ string) 
 func (m *mockUsersRepo) SoftDeleteUser(_ context.Context, _ uuid.UUID) error {
 	return errors.New("mockUsersRepo.SoftDeleteUser: not configured")
 }
+func (m *mockUsersRepo) SetMustChangePassword(_ context.Context, _ uuid.UUID, _ bool) error {
+	return errors.New("mockUsersRepo.SetMustChangePassword: not configured")
+}
 func (m *mockUsersRepo) CountUsers(_ context.Context) (int, error) {
 	return 0, errors.New("mockUsersRepo.CountUsers: not configured")
 }

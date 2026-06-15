@@ -2,20 +2,31 @@ package users
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
 
+	"github.com/HouseCham/gps-tracker/backend/internal/auth"
 	"github.com/HouseCham/gps-tracker/backend/internal/domain"
 )
 
-type Service struct {
-	repo Repository
+// CreateUserResult wraps the created user and the temporary password
+// assigned during admin creation.
+type CreateUserResult struct {
+	User              *domain.User
+	TemporaryPassword string
 }
 
-func UsersService(repo Repository) *Service {
-	return &Service{repo: repo}
+type Service struct {
+	repo        Repository
+	authCreator auth.UserCreator
+}
+
+func UsersService(repo Repository, authCreator auth.UserCreator) *Service {
+	return &Service{repo: repo, authCreator: authCreator}
 }
 
 func (s *Service) ListUsers(ctx context.Context, excludeUserID uuid.UUID) ([]domain.User, error) {
@@ -44,7 +55,7 @@ func (s *Service) GetByID(ctx context.Context, requestingUserID, targetUserID uu
 	return nil, domain.ErrForbidden
 }
 
-func (s *Service) CreateUser(ctx context.Context, email, name, lastname string, role domain.UserRole) (*domain.User, error) {
+func (s *Service) CreateUser(ctx context.Context, email, name, lastname string, role domain.UserRole) (*CreateUserResult, error) {
 	count, err := s.repo.CountUsers(ctx)
 	if err != nil {
 		return nil, err
@@ -54,7 +65,21 @@ func (s *Service) CreateUser(ctx context.Context, email, name, lastname string, 
 		role = domain.UserRoleSuperAdmin
 	}
 
-	return s.repo.CreateUser(ctx, email, name, lastname, role)
+	password, err := generateRandomPassword()
+	if err != nil {
+		return nil, fmt.Errorf("generate password: %w", err)
+	}
+
+	if err := s.authCreator.CreateUserWithPassword(ctx, name, email, password); err != nil {
+		return nil, fmt.Errorf("create authula user: %w", err)
+	}
+
+	user, err := s.repo.CreateUser(ctx, email, name, lastname, role)
+	if err != nil {
+		return nil, err
+	}
+
+	return &CreateUserResult{User: user, TemporaryPassword: password}, nil
 }
 
 // GetOrCreate returns the local user record associated with the given
@@ -116,6 +141,10 @@ func (s *Service) UpdateUser(ctx context.Context, userID uuid.UUID, name, lastna
 	return s.repo.UpdateUser(ctx, userID, name, lastname)
 }
 
+func (s *Service) SetMustChangePassword(ctx context.Context, userID uuid.UUID, mustChange bool) error {
+	return s.repo.SetMustChangePassword(ctx, userID, mustChange)
+}
+
 func (s *Service) SoftDeleteUser(ctx context.Context, requestingUserID, targetUserID uuid.UUID) error {
 	requestingUser, err := s.repo.GetByID(ctx, requestingUserID)
 	if err != nil {
@@ -127,4 +156,14 @@ func (s *Service) SoftDeleteUser(ctx context.Context, requestingUserID, targetUs
 	}
 
 	return s.repo.SoftDeleteUser(ctx, targetUserID)
+}
+
+// generateRandomPassword generates a cryptographically random
+// 32-character hex string (128 bits of entropy).
+func generateRandomPassword() (string, error) {
+	b := make([]byte, 16)
+	if _, err := rand.Read(b); err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(b), nil
 }

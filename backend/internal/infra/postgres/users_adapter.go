@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
+
 	"github.com/HouseCham/gps-tracker/backend/internal/domain"
 )
 
@@ -25,13 +26,14 @@ func (a *UsersAdapter) ListUsers(ctx context.Context, excludeUserID uuid.UUID) (
 	result := make([]domain.User, 0, len(rows))
 	for _, r := range rows {
 		result = append(result, domain.User{
-			ID:        uuidFromPgtype(r.ID),
-			Email:     r.Email,
-			Name:      r.Name,
-			Lastname:  r.Lastname,
-			Role:      domain.UserRole(r.Role),
-			CreatedAt: r.CreatedAt.Time,
-			UpdatedAt: r.UpdatedAt.Time,
+			ID:                 uuidFromPgtype(r.ID),
+			Email:              r.Email,
+			Name:               r.Name,
+			Lastname:           r.Lastname,
+			Role:               domain.UserRole(r.Role),
+			MustChangePassword: r.MustChangePassword,
+			CreatedAt:          r.CreatedAt.Time,
+			UpdatedAt:          r.UpdatedAt.Time,
 		})
 	}
 	return result, nil
@@ -44,13 +46,14 @@ func (a *UsersAdapter) GetByID(ctx context.Context, userID uuid.UUID) (*domain.U
 		return nil, wrapPgError(err)
 	}
 	return &domain.User{
-		ID:        uuidFromPgtype(row.ID),
-		Email:     row.Email,
-		Name:      row.Name,
-		Lastname:  row.Lastname,
-		Role:      domain.UserRole(row.Role),
-		CreatedAt: row.CreatedAt.Time,
-		UpdatedAt: row.UpdatedAt.Time,
+		ID:                 uuidFromPgtype(row.ID),
+		Email:              row.Email,
+		Name:               row.Name,
+		Lastname:           row.Lastname,
+		Role:               domain.UserRole(row.Role),
+		MustChangePassword: row.MustChangePassword,
+		CreatedAt:          row.CreatedAt.Time,
+		UpdatedAt:          row.UpdatedAt.Time,
 	}, nil
 }
 
@@ -61,13 +64,14 @@ func (a *UsersAdapter) GetByEmail(ctx context.Context, email string) (*domain.Us
 		return nil, wrapPgError(err)
 	}
 	return &domain.User{
-		ID:        uuidFromPgtype(row.ID),
-		Email:     row.Email,
-		Name:      row.Name,
-		Lastname:  row.Lastname,
-		Role:      domain.UserRole(row.Role),
-		CreatedAt: row.CreatedAt.Time,
-		UpdatedAt: row.UpdatedAt.Time,
+		ID:                 uuidFromPgtype(row.ID),
+		Email:              row.Email,
+		Name:               row.Name,
+		Lastname:           row.Lastname,
+		Role:               domain.UserRole(row.Role),
+		MustChangePassword: row.MustChangePassword,
+		CreatedAt:          row.CreatedAt.Time,
+		UpdatedAt:          row.UpdatedAt.Time,
 	}, nil
 }
 
@@ -83,13 +87,14 @@ func (a *UsersAdapter) CreateUser(ctx context.Context, email, name, lastname str
 		return nil, wrapPgError(err)
 	}
 	return &domain.User{
-		ID:        uuidFromPgtype(row.ID),
-		Email:     row.Email,
-		Name:      row.Name,
-		Lastname:  row.Lastname,
-		Role:      domain.UserRole(row.Role),
-		CreatedAt: row.CreatedAt.Time,
-		UpdatedAt: row.UpdatedAt.Time,
+		ID:                 uuidFromPgtype(row.ID),
+		Email:              row.Email,
+		Name:               row.Name,
+		Lastname:           row.Lastname,
+		Role:               domain.UserRole(row.Role),
+		MustChangePassword: row.MustChangePassword,
+		CreatedAt:          row.CreatedAt.Time,
+		UpdatedAt:          row.UpdatedAt.Time,
 	}, nil
 }
 
@@ -113,14 +118,23 @@ func (a *UsersAdapter) UpdateUser(ctx context.Context, userID uuid.UUID, name, l
 		return nil, wrapPgError(err)
 	}
 	return &domain.User{
-		ID:        uuidFromPgtype(row.ID),
-		Email:     row.Email,
-		Name:      row.Name,
-		Lastname:  row.Lastname,
-		Role:      domain.UserRole(row.Role),
-		CreatedAt: row.CreatedAt.Time,
-		UpdatedAt: row.UpdatedAt.Time,
+		ID:                 uuidFromPgtype(row.ID),
+		Email:              row.Email,
+		Name:               row.Name,
+		Lastname:           row.Lastname,
+		Role:               domain.UserRole(row.Role),
+		MustChangePassword: row.MustChangePassword,
+		CreatedAt:          row.CreatedAt.Time,
+		UpdatedAt:          row.UpdatedAt.Time,
 	}, nil
+}
+
+func (a *UsersAdapter) SetMustChangePassword(ctx context.Context, userID uuid.UUID, mustChange bool) error {
+	queries := New(a.pool)
+	return queries.SetUserMustChangePassword(ctx, SetUserMustChangePasswordParams{
+		ID:                 pgtypeUUID(userID),
+		MustChangePassword: mustChange,
+	})
 }
 
 func (a *UsersAdapter) SoftDeleteUser(ctx context.Context, userID uuid.UUID) error {
