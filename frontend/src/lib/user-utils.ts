@@ -3,7 +3,7 @@
  * @param {string} name - The full name of the user.
  * @returns {string} The initials of the user's name in uppercase.
  */
-export function getUserInitials(name: string) {
+export function getUserInitials(name: string): string {
     const nameParts = name.split(' ');
     const initials = nameParts.map(part => part.charAt(0)).join('');
     return initials.toUpperCase();
