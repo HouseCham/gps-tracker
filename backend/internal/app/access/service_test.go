@@ -115,7 +115,7 @@ func TestRequireRole(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("allows when role satisfies minimum", func(t *testing.T) {
-		svc := New(&mockRepo{
+		svc := NewAccessService(&mockRepo{
 			getRoleFn: func(_ context.Context, _, _ uuid.UUID) (domain.AccessRole, error) {
 				return domain.AccessRoleOwner, nil
 			},
@@ -127,7 +127,7 @@ func TestRequireRole(t *testing.T) {
 	})
 
 	t.Run("forbids when role below minimum", func(t *testing.T) {
-		svc := New(&mockRepo{
+		svc := NewAccessService(&mockRepo{
 			getRoleFn: func(_ context.Context, _, _ uuid.UUID) (domain.AccessRole, error) {
 				return domain.AccessRoleViewer, nil
 			},
@@ -139,7 +139,7 @@ func TestRequireRole(t *testing.T) {
 	})
 
 	t.Run("propagates not found from repo", func(t *testing.T) {
-		svc := New(&mockRepo{
+		svc := NewAccessService(&mockRepo{
 			getRoleFn: func(_ context.Context, _, _ uuid.UUID) (domain.AccessRole, error) {
 				return "", domain.ErrNotFound
 			},
@@ -152,7 +152,7 @@ func TestRequireRole(t *testing.T) {
 
 	t.Run("propagates unexpected error from repo", func(t *testing.T) {
 		unexpected := errors.New("connection refused")
-		svc := New(&mockRepo{
+		svc := NewAccessService(&mockRepo{
 			getRoleFn: func(_ context.Context, _, _ uuid.UUID) (domain.AccessRole, error) {
 				return "", unexpected
 			},
@@ -172,7 +172,7 @@ func TestGrantAccess(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("grants viewer access and propagates the result", func(t *testing.T) {
-		svc := AccessService(
+		svc := NewAccessService(
 			&mockRepo{
 				grantFn: func(_ context.Context, gotUserID, gotDeviceID uuid.UUID, gotRole domain.AccessRole) (domain.Grant, error) {
 					if gotUserID != targetID {
@@ -216,7 +216,7 @@ func TestGrantAccess(t *testing.T) {
 
 	t.Run("rejects self-grant with conflict", func(t *testing.T) {
 		repoCalled := false
-		svc := AccessService(
+		svc := NewAccessService(
 			&mockRepo{
 				grantFn: func(_ context.Context, _, _ uuid.UUID, _ domain.AccessRole) (domain.Grant, error) {
 					repoCalled = true
@@ -242,7 +242,7 @@ func TestGrantAccess(t *testing.T) {
 
 	t.Run("rejects when target user does not exist", func(t *testing.T) {
 		repoCalled := false
-		svc := AccessService(
+		svc := NewAccessService(
 			&mockRepo{
 				grantFn: func(_ context.Context, _, _ uuid.UUID, _ domain.AccessRole) (domain.Grant, error) {
 					repoCalled = true
@@ -267,7 +267,7 @@ func TestGrantAccess(t *testing.T) {
 
 	t.Run("propagates unexpected error from users repo", func(t *testing.T) {
 		unexpected := errors.New("db down")
-		svc := AccessService(
+		svc := NewAccessService(
 			&mockRepo{},
 			&mockUsersRepo{
 				getByIDFn: func(_ context.Context, _ uuid.UUID) (*domain.User, error) {
@@ -293,7 +293,7 @@ func TestRevokeAccess(t *testing.T) {
 
 	t.Run("revokes when target is viewer", func(t *testing.T) {
 		revokeCalled := false
-		svc := AccessService(
+		svc := NewAccessService(
 			&mockRepo{
 				getRoleFn: func(_ context.Context, gotUserID, _ uuid.UUID) (domain.AccessRole, error) {
 					if gotUserID != targetID {
@@ -324,7 +324,7 @@ func TestRevokeAccess(t *testing.T) {
 	})
 
 	t.Run("rejects self-revoke", func(t *testing.T) {
-		svc := AccessService(
+		svc := NewAccessService(
 			&mockRepo{
 				getRoleFn: func(_ context.Context, _ uuid.UUID, _ uuid.UUID) (domain.AccessRole, error) {
 					t.Errorf("getRoleFn should not be called for self-revoke")
@@ -342,7 +342,7 @@ func TestRevokeAccess(t *testing.T) {
 
 	t.Run("rejects revoking another owner", func(t *testing.T) {
 		revokeCalled := false
-		svc := AccessService(
+		svc := NewAccessService(
 			&mockRepo{
 				getRoleFn: func(_ context.Context, _, _ uuid.UUID) (domain.AccessRole, error) {
 					return domain.AccessRoleOwner, nil
@@ -365,7 +365,7 @@ func TestRevokeAccess(t *testing.T) {
 	})
 
 	t.Run("propagates not found from get role", func(t *testing.T) {
-		svc := AccessService(
+		svc := NewAccessService(
 			&mockRepo{
 				getRoleFn: func(_ context.Context, _, _ uuid.UUID) (domain.AccessRole, error) {
 					return "", domain.ErrNotFound
@@ -382,7 +382,7 @@ func TestRevokeAccess(t *testing.T) {
 
 	t.Run("propagates unexpected error from repo", func(t *testing.T) {
 		unexpected := errors.New("connection refused")
-		svc := AccessService(
+		svc := NewAccessService(
 			&mockRepo{
 				getRoleFn: func(_ context.Context, _, _ uuid.UUID) (domain.AccessRole, error) {
 					return "", unexpected
@@ -412,7 +412,7 @@ func TestListUsersForDevice(t *testing.T) {
 	}
 
 	t.Run("passes through to the repo", func(t *testing.T) {
-		svc := AccessService(
+		svc := NewAccessService(
 			&mockRepo{
 				listUsersForDeviceFn: func(_ context.Context, gotDeviceID uuid.UUID) ([]domain.UserWithAccessOnDevice, error) {
 					if gotDeviceID != deviceID {
@@ -440,7 +440,7 @@ func TestListUsersForDevice(t *testing.T) {
 
 	t.Run("propagates unexpected error from repo", func(t *testing.T) {
 		unexpected := errors.New("db down")
-		svc := AccessService(
+		svc := NewAccessService(
 			&mockRepo{
 				listUsersForDeviceFn: func(_ context.Context, _ uuid.UUID) ([]domain.UserWithAccessOnDevice, error) {
 					return nil, unexpected

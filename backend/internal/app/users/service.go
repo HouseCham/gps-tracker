@@ -25,8 +25,8 @@ type UserService struct {
 	authCreator auth.UserCreator
 }
 
-func New(repo Repository) *UserService {
-	return &UserService{repo: repo}
+func NewUserService(repo Repository, authCreator auth.UserCreator) *UserService {
+	return &UserService{repo: repo, authCreator: authCreator}
 }
 
 func (s *UserService) ListUsers(ctx context.Context, excludeUserID uuid.UUID) ([]domain.User, error) {

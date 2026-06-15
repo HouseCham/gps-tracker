@@ -23,7 +23,7 @@ import (
 // The local users service is responsible for the soft-deleted
 // "resurrection" guard; this middleware merely translates its
 // domain.ErrUnauthorized into a 401.
-func LazyUser(svc *users.Service, lookup auth.UserLookup) fiber.Handler {
+func LazyUser(svc *users.UserService, lookup auth.UserLookup) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		actor, ok := c.Locals(LocalsKeyClaims).(*models.Actor)
 		if !ok || actor == nil {

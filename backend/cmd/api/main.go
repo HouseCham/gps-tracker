@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log/slog"
 	"os"
 	"os/signal"
 	"strconv"
@@ -10,6 +9,7 @@ import (
 	"time"
 
 	_ "github.com/HouseCham/gps-tracker/backend/internal/config"
+	"github.com/gofiber/fiber/v3/log"
 
 	"github.com/HouseCham/gps-tracker/backend/internal/app/access"
 	"github.com/HouseCham/gps-tracker/backend/internal/app/devices"
@@ -22,8 +22,6 @@ import (
 )
 
 func main() {
-	logger := slog.Default()
-
 	addr := ":8080"
 	if v := os.Getenv("APP_PORT"); v != "" {
 		if port, err := strconv.ParseUint(v, 10, 64); err == nil {
@@ -33,7 +31,7 @@ func main() {
 
 	dsn := os.Getenv("DATABASE_URL")
 	if dsn == "" {
-		logger.Error("DATABASE_URL is required")
+		log.Error("DATABASE_URL is required")
 		os.Exit(1)
 	}
 
@@ -41,7 +39,7 @@ func main() {
 	pool, err := postgres.NewPool(startCtx, dsn)
 	startCancel()
 	if err != nil {
-		logger.Error("create db pool", "err", err)
+		log.Error("create db pool", "err", err)
 		os.Exit(1)
 	}
 	defer pool.Close()
@@ -56,7 +54,7 @@ func main() {
 	// from the env. Migrations run on first init.
 	authCfg, err := config.LoadAuthConfig()
 	if err != nil {
-		logger.Error("load auth config", "err", err)
+		log.Error("load auth config", "err", err)
 		os.Exit(1)
 	}
 	authInstance, err := auth.Bootstrap(context.Background(), auth.Config{
@@ -66,27 +64,26 @@ func main() {
 		DatabaseURL: authCfg.DatabaseURL,
 	})
 	if err != nil {
-		logger.Error("bootstrap auth", "err", err)
+		log.Error("bootstrap auth", "err", err)
 		os.Exit(1)
 	}
 
 	userCreator := authInstance.NewUserCreator()
-	usersService := users.UsersService(usersRepo, userCreator)
+	usersService := users.NewUserService(usersRepo, userCreator)
 
 	//-- access
 	accessRepo := postgres.NewAccessAdapter(pool)
-	accessService := access.AccessService(accessRepo, usersRepo)
+	accessService := access.NewAccessService(accessRepo, usersRepo)
 
 	//-- handlers
 	healthHandler := handlers.NewHealthHandler()
-	devicesHandler := handlers.NewDevicesHandler(devicesService, logger)
+	devicesHandler := handlers.NewDevicesHandler(devicesService)
 	passwordUpdater := authInstance.NewPasswordUpdater()
-	usersHandler := handlers.NewUsersHandler(usersService, devicesService, passwordUpdater, logger)
-	accessHandler := handlers.NewAccessHandler(accessService, logger)
+	usersHandler := handlers.NewUsersHandler(usersService, devicesService, passwordUpdater)
+	accessHandler := handlers.NewAccessHandler(accessService)
 
 
 	app := http.NewRouter(http.RouterDeps{
-		Logger:           logger,
 		HealthHandler:    healthHandler,
 		DevicesHandler:   devicesHandler,
 		UsersHandler:     usersHandler,
@@ -101,14 +98,13 @@ func main() {
 	server := http.NewServer(app, http.ServerConfig{
 		Addr:            addr,
 		ShutdownTimeout: 30 * time.Second,
-		Logger:          logger,
 	})
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
 	if err := server.Run(ctx); err != nil {
-		logger.Error("server error", "err", err)
+		log.Error("server error", "err", err)
 		os.Exit(1)
 	}
 }

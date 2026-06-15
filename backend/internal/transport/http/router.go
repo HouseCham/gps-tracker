@@ -22,7 +22,7 @@ type RouterDeps struct {
 	DevicesHandler *handlers.DevicesHandler
 	UsersHandler   *handlers.UsersHandler
 	AccessHandler  *handlers.AccessHandler
-	AccessService  *access.Service
+	AccessService  *access.AccessService
 	UsersService   *users.UserService
 	// AuthHandler is the net/http handler exposed by Authula. Mounted
 	// under /api/auth/* to serve sign-in, sign-up, JWKS, token

@@ -18,7 +18,7 @@ import (
 //
 // The middleware fails fast: it does not store the resolved role in
 // c.Locals. The handler downstream can re-query if it needs to.
-func RequireDeviceRole(minRole domain.AccessRole, svc *access.Service) fiber.Handler {
+func RequireDeviceRole(minRole domain.AccessRole, svc *access.AccessService) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		user, ok := c.Locals(LocalsKeyUser).(*domain.User)
 		if !ok {
