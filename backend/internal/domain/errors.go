@@ -15,4 +15,5 @@ var (
 	ErrValidation = errors.New("validation error")
 	// ErrInvalidCredentials is returned when authentication credentials are invalid.
 	ErrInvalidCredentials = errors.New("invalid credentials")
+	ErrCannotRevokeSelf   = errors.New("cannot revoke your own device access")
 )

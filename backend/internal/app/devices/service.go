@@ -21,6 +21,13 @@ func (s *Service) ListMine(ctx context.Context, userID uuid.UUID) ([]domain.Devi
 	return s.repo.ListForUser(ctx, userID)
 }
 
+// ListMinePaginated returns a paginated list of devices the user has access to,
+// with their access role.
+func (s *Service) ListMinePaginated(ctx context.Context, userID uuid.UUID, page, pageSize int) ([]domain.DeviceWithAccess, int, error) {
+	offset := (page - 1) * pageSize
+	return s.repo.ListForUserWithAccessPaginated(ctx, userID, pageSize, offset)
+}
+
 func (s *Service) ListForUserPaginated(ctx context.Context, userID uuid.UUID, page, pageSize int) ([]domain.Device, int, error) {
 	offset := (page - 1) * pageSize
 	return s.repo.ListForUserPaginated(ctx, userID, pageSize, offset)

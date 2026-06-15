@@ -1,8 +1,6 @@
 package http
 
 import (
-	"log/slog"
-
 	"github.com/gofiber/fiber/v3"
 
 	"github.com/HouseCham/gps-tracker/backend/internal/app/access"
@@ -13,10 +11,10 @@ import (
 )
 
 type RouterDeps struct {
-	Logger         *slog.Logger
 	HealthHandler  *handlers.HealthHandler
 	DevicesHandler *handlers.DevicesHandler
 	UsersHandler   *handlers.UsersHandler
+	AccessHandler  *handlers.AccessHandler
 	AccessService  *access.Service
 }
 
@@ -45,6 +43,22 @@ func NewRouter(deps RouterDeps) *fiber.App {
 	devices.Delete("/:id",
 		middleware.RequireDeviceRole(domain.AccessRoleOwner, deps.AccessService),
 		deps.DevicesHandler.Delete,
+	)
+	devices.Post("/:id/access",
+		middleware.DevUser(),
+		middleware.ValidateRequestBody[dto.GrantAccessRequest](),
+		middleware.RequireDeviceRole(domain.AccessRoleOwner, deps.AccessService),
+		deps.AccessHandler.Grant,
+	)
+	devices.Get("/:id/access",
+		middleware.DevUser(),
+		middleware.RequireDeviceRole(domain.AccessRoleOwner, deps.AccessService),
+		deps.AccessHandler.List,
+	)
+	devices.Delete("/:id/access/:userId",
+		middleware.DevUser(),
+		middleware.RequireDeviceRole(domain.AccessRoleOwner, deps.AccessService),
+		deps.AccessHandler.Revoke,
 	)
 
 	// === Users routes ===
