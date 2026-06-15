@@ -28,28 +28,44 @@ func (q *Queries) CountUsers(ctx context.Context) (int64, error) {
 }
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (id, email, role)
-VALUES ($1, $2, $3)
-ON CONFLICT (id) DO NOTHING
-RETURNING id, email, role, created_at, updated_at, deleted_at
+INSERT INTO users (email, name, lastname, role)
+VALUES ($1, $2, $3, $4)
+RETURNING id, email, name, lastname, role, created_at, updated_at, deleted_at
 `
 
 type CreateUserParams struct {
-	ID    pgtype.UUID
-	Email string
-	Role  UserRole
+	Email    string
+	Name     string
+	Lastname string
+	Role     UserRole
 }
 
-// Idempotent user creation. Called by the lazy creation middleware.
-// If the user already exists (race condition between two simultaneous
-// requests with the same JWT), the insert is a no-op and the function
-// returns sql.ErrNoRows. The middleware then falls back to GetUserByID.
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRow(ctx, createUser, arg.ID, arg.Email, arg.Role)
-	var i User
+type CreateUserRow struct {
+	ID        pgtype.UUID
+	Email     string
+	Name      string
+	Lastname  string
+	Role      UserRole
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
+	DeletedAt pgtype.Timestamptz
+}
+
+// Creates a new user with name, lastname, and role.
+// Returns the created user.
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
+	row := q.db.QueryRow(ctx, createUser,
+		arg.Email,
+		arg.Name,
+		arg.Lastname,
+		arg.Role,
+	)
+	var i CreateUserRow
 	err := row.Scan(
 		&i.ID,
 		&i.Email,
+		&i.Name,
+		&i.Lastname,
 		&i.Role,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -59,19 +75,32 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, email, role, created_at, updated_at, deleted_at
+SELECT id, email, name, lastname, role, created_at, updated_at, deleted_at
 FROM users
 WHERE email = $1 AND deleted_at IS NULL
 `
 
+type GetUserByEmailRow struct {
+	ID        pgtype.UUID
+	Email     string
+	Name      string
+	Lastname  string
+	Role      UserRole
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
+	DeletedAt pgtype.Timestamptz
+}
+
 // Lookup by email. Used by the lazy user creation flow as a fallback
 // when the JWT id is not available.
-func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEmailRow, error) {
 	row := q.db.QueryRow(ctx, getUserByEmail, email)
-	var i User
+	var i GetUserByEmailRow
 	err := row.Scan(
 		&i.ID,
 		&i.Email,
+		&i.Name,
+		&i.Lastname,
 		&i.Role,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -81,19 +110,136 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, email, role, created_at, updated_at, deleted_at
+SELECT id, email, name, lastname, role, created_at, updated_at, deleted_at
 FROM users
 WHERE id = $1 AND deleted_at IS NULL
 `
 
+type GetUserByIDRow struct {
+	ID        pgtype.UUID
+	Email     string
+	Name      string
+	Lastname  string
+	Role      UserRole
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
+	DeletedAt pgtype.Timestamptz
+}
+
 // Used by the Authula middleware to load the current user from the DB
 // after JWT validation. Filters out soft-deleted users.
-func (q *Queries) GetUserByID(ctx context.Context, id pgtype.UUID) (User, error) {
+func (q *Queries) GetUserByID(ctx context.Context, id pgtype.UUID) (GetUserByIDRow, error) {
 	row := q.db.QueryRow(ctx, getUserByID, id)
-	var i User
+	var i GetUserByIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.Email,
+		&i.Name,
+		&i.Lastname,
+		&i.Role,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const getUserList = `-- name: GetUserList :many
+SELECT id, email, name, lastname, role, created_at, updated_at, deleted_at
+FROM users
+WHERE deleted_at IS NULL AND id != $1
+`
+
+type GetUserListRow struct {
+	ID        pgtype.UUID
+	Email     string
+	Name      string
+	Lastname  string
+	Role      UserRole
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
+	DeletedAt pgtype.Timestamptz
+}
+
+// Returns all active users except the given user ID.
+// Used by admin-level endpoints to list registered users.
+func (q *Queries) GetUserList(ctx context.Context, id pgtype.UUID) ([]GetUserListRow, error) {
+	rows, err := q.db.Query(ctx, getUserList, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetUserListRow
+	for rows.Next() {
+		var i GetUserListRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Email,
+			&i.Name,
+			&i.Lastname,
+			&i.Role,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const softDeleteUser = `-- name: SoftDeleteUser :exec
+UPDATE users
+SET deleted_at = NOW()
+WHERE id = $1 AND deleted_at IS NULL
+`
+
+// Marks a user as deleted by setting deleted_at = NOW().
+// The row is NOT physically removed. Idempotent: re-deleting
+// an already-deleted user is a no-op.
+func (q *Queries) SoftDeleteUser(ctx context.Context, id pgtype.UUID) error {
+	_, err := q.db.Exec(ctx, softDeleteUser, id)
+	return err
+}
+
+const updateUser = `-- name: UpdateUser :one
+UPDATE users
+SET name = $2, lastname = $3, updated_at = NOW()
+WHERE id = $1 AND deleted_at IS NULL
+RETURNING id, email, name, lastname, role, created_at, updated_at, deleted_at
+`
+
+type UpdateUserParams struct {
+	ID       pgtype.UUID
+	Name     string
+	Lastname string
+}
+
+type UpdateUserRow struct {
+	ID        pgtype.UUID
+	Email     string
+	Name      string
+	Lastname  string
+	Role      UserRole
+	CreatedAt pgtype.Timestamptz
+	UpdatedAt pgtype.Timestamptz
+	DeletedAt pgtype.Timestamptz
+}
+
+// Updates a user's name and lastname. Only the user themselves can update
+// their own profile. Returns the updated user.
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateUserRow, error) {
+	row := q.db.QueryRow(ctx, updateUser, arg.ID, arg.Name, arg.Lastname)
+	var i UpdateUserRow
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Name,
+		&i.Lastname,
 		&i.Role,
 		&i.CreatedAt,
 		&i.UpdatedAt,

@@ -12,13 +12,18 @@ type Service struct {
 	repo Repository
 }
 
-func DevicesService(repo Repository) *Service {
+func New(repo Repository) *Service {
 	return &Service{repo: repo}
 }
 
 // ListMine returns the devices the given user has access to.
 func (s *Service) ListMine(ctx context.Context, userID uuid.UUID) ([]domain.DeviceWithAccess, error) {
 	return s.repo.ListForUser(ctx, userID)
+}
+
+func (s *Service) ListForUserPaginated(ctx context.Context, userID uuid.UUID, page, pageSize int) ([]domain.Device, int, error) {
+	offset := (page - 1) * pageSize
+	return s.repo.ListForUserPaginated(ctx, userID, pageSize, offset)
 }
 
 // GetByID returns a single device if the given user has access to it.

@@ -90,6 +90,8 @@ type User struct {
 	CreatedAt pgtype.Timestamptz
 	UpdatedAt pgtype.Timestamptz
 	DeletedAt pgtype.Timestamptz
+	Name      string
+	Lastname  string
 }
 
 type UserDeviceAccess struct {

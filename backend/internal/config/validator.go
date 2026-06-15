@@ -15,6 +15,7 @@ func SetUpValidator() *validator.Validate {
 	v := validator.New()
 	v.RegisterValidation("uuid", validateUUID)
 	v.RegisterValidation("access_role", validateAccessRole)
+	v.RegisterValidation("user_role", validateUserRole)
 	return v
 }
 
@@ -42,6 +43,7 @@ var errorMessages = map[string]string{
 	"required":    "The field %s is required.",
 	"uuid":        "The field %s must be a valid UUID.",
 	"access_role": "The field %s must be one of: owner, editor, viewer.",
+	"user_role":   "The field %s must be one of: user, super_admin.",
 	"email":       "The field %s must be a valid email address.",
 	"max":         "The field %s exceeds the maximum length of characters allowed.",
 	"min":         "The field %s is below the minimum length of characters allowed.",
@@ -100,6 +102,20 @@ func validateAccessRole(fl validator.FieldLevel) bool {
 	}
 	switch s {
 	case "owner", "editor", "viewer":
+		return true
+	}
+	return false
+}
+
+// validateUserRole checks that the field is one of the allowed user roles:
+// user, super_admin.
+func validateUserRole(fl validator.FieldLevel) bool {
+	s := fl.Field().String()
+	if s == "" {
+		return true
+	}
+	switch s {
+	case "user", "super_admin":
 		return true
 	}
 	return false

@@ -9,10 +9,10 @@ import (
 	"github.com/gofiber/fiber/v3/log"
 )
 
-var validador *validator.Validate
+var validator_ *validator.Validate
 
 func init() {
-	validador = config.SetUpValidator()
+	validator_ = config.SetUpValidator()
 	log.Info("Validator is set up")
 }
 
@@ -32,7 +32,7 @@ func ValidateRequestBody[T any]() fiber.Handler {
 			})
 		}
 
-		response, err := utils.ValidateStruct(request, validador)
+		response, err := utils.ValidateStruct(request, validator_)
 		if err != nil {
 			log.Warnf("Invalid request body: %v", response.Data)
 			return c.Status(response.StatusCode).JSON(response)

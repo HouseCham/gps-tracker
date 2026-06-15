@@ -11,6 +11,24 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+const countDevicesForUser = `-- name: CountDevicesForUser :one
+SELECT COUNT(*)::bigint AS count
+FROM devices d
+INNER JOIN user_device_access uda
+  ON d.id = uda.device_id AND uda.deleted_at IS NULL
+WHERE uda.user_id = $1
+  AND d.deleted_at IS NULL
+`
+
+// Returns the total count of devices a user has access to.
+// Used for pagination metadata.
+func (q *Queries) CountDevicesForUser(ctx context.Context, userID pgtype.UUID) (int64, error) {
+	row := q.db.QueryRow(ctx, countDevicesForUser, userID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const createDevice = `-- name: CreateDevice :one
 INSERT INTO devices (uuid_firmware, name)
 VALUES ($1, $2)
@@ -171,6 +189,59 @@ func (q *Queries) ListDevicesForUser(ctx context.Context, userID pgtype.UUID) ([
 			&i.CreatedAt,
 			&i.LastSeenAt,
 			&i.AccessRole,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listDevicesForUserPaginated = `-- name: ListDevicesForUserPaginated :many
+SELECT d.id, d.uuid_firmware, d.name, d.created_at, d.last_seen_at
+FROM devices d
+INNER JOIN user_device_access uda
+  ON d.id = uda.device_id AND uda.deleted_at IS NULL
+WHERE uda.user_id = $1
+  AND d.deleted_at IS NULL
+ORDER BY d.created_at DESC
+LIMIT $2 OFFSET $3
+`
+
+type ListDevicesForUserPaginatedParams struct {
+	UserID pgtype.UUID
+	Limit  int32
+	Offset int32
+}
+
+type ListDevicesForUserPaginatedRow struct {
+	ID           pgtype.UUID
+	UuidFirmware string
+	Name         string
+	CreatedAt    pgtype.Timestamptz
+	LastSeenAt   pgtype.Timestamptz
+}
+
+// Returns paginated devices for a user with access.
+// Used by the user profile endpoint to list user's devices.
+func (q *Queries) ListDevicesForUserPaginated(ctx context.Context, arg ListDevicesForUserPaginatedParams) ([]ListDevicesForUserPaginatedRow, error) {
+	rows, err := q.db.Query(ctx, listDevicesForUserPaginated, arg.UserID, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListDevicesForUserPaginatedRow
+	for rows.Next() {
+		var i ListDevicesForUserPaginatedRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.UuidFirmware,
+			&i.Name,
+			&i.CreatedAt,
+			&i.LastSeenAt,
 		); err != nil {
 			return nil, err
 		}

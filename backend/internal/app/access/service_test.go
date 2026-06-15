@@ -50,7 +50,7 @@ func TestRequireRole(t *testing.T) {
 	ctx := context.Background()
 
 	t.Run("allows when role satisfies minimum", func(t *testing.T) {
-		svc := AccessService(&mockRepo{
+		svc := New(&mockRepo{
 			getRoleFn: func(_ context.Context, _, _ uuid.UUID) (domain.AccessRole, error) {
 				return domain.AccessRoleOwner, nil
 			},
@@ -62,7 +62,7 @@ func TestRequireRole(t *testing.T) {
 	})
 
 	t.Run("forbids when role below minimum", func(t *testing.T) {
-		svc := AccessService(&mockRepo{
+		svc := New(&mockRepo{
 			getRoleFn: func(_ context.Context, _, _ uuid.UUID) (domain.AccessRole, error) {
 				return domain.AccessRoleViewer, nil
 			},
@@ -74,7 +74,7 @@ func TestRequireRole(t *testing.T) {
 	})
 
 	t.Run("propagates not found from repo", func(t *testing.T) {
-		svc := AccessService(&mockRepo{
+		svc := New(&mockRepo{
 			getRoleFn: func(_ context.Context, _, _ uuid.UUID) (domain.AccessRole, error) {
 				return "", domain.ErrNotFound
 			},
@@ -87,7 +87,7 @@ func TestRequireRole(t *testing.T) {
 
 	t.Run("propagates unexpected error from repo", func(t *testing.T) {
 		unexpected := errors.New("connection refused")
-		svc := AccessService(&mockRepo{
+		svc := New(&mockRepo{
 			getRoleFn: func(_ context.Context, _, _ uuid.UUID) (domain.AccessRole, error) {
 				return "", unexpected
 			},

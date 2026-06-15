@@ -74,3 +74,25 @@ WHERE id = $1 AND deleted_at IS NULL;
 UPDATE devices
 SET deleted_at = NOW()
 WHERE id = $1 AND deleted_at IS NULL;
+
+-- name: ListDevicesForUserPaginated :many
+-- Returns paginated devices for a user with access.
+-- Used by the user profile endpoint to list user's devices.
+SELECT d.id, d.uuid_firmware, d.name, d.created_at, d.last_seen_at
+FROM devices d
+INNER JOIN user_device_access uda
+  ON d.id = uda.device_id AND uda.deleted_at IS NULL
+WHERE uda.user_id = $1
+  AND d.deleted_at IS NULL
+ORDER BY d.created_at DESC
+LIMIT $2 OFFSET $3;
+
+-- name: CountDevicesForUser :one
+-- Returns the total count of devices a user has access to.
+-- Used for pagination metadata.
+SELECT COUNT(*)::bigint AS count
+FROM devices d
+INNER JOIN user_device_access uda
+  ON d.id = uda.device_id AND uda.deleted_at IS NULL
+WHERE uda.user_id = $1
+  AND d.deleted_at IS NULL;

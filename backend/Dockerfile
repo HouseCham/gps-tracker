@@ -1,23 +1,28 @@
-FROM golang:1.22-alpine AS builder
+# syntax=docker/dockerfile:1
+FROM golang:1.26-alpine AS builder
+ARG TARGETOS=linux
+ARG TARGETARCH=amd64
+WORKDIR /src
+ENV GOTOOLCHAIN=local \
+    CGO_ENABLED=0 \
+    GOOS=$TARGETOS \
+    GOARCH=$TARGETARCH
 
-WORKDIR /app
-
-COPY go.mod go.sum* ./
-RUN go mod download
+COPY go.mod go.sum ./
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    go mod download
 
 COPY . .
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    go build -trimpath -buildvcs=false \
+        -ldflags="-s -w" \
+        -tags timetzdata \
+        -o /out/api ./cmd/api
 
-RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" -o /out/api ./cmd/api
-
-FROM alpine:3.19 AS runtime
-
-RUN apk add --no-cache ca-certificates tzdata \
-    && addgroup -S app && adduser -S app -G app
-
+FROM gcr.io/distroless/static-debian13:nonroot AS runtime
 COPY --from=builder /out/api /usr/local/bin/api
-
-USER app
-
 EXPOSE 8080
-
+USER nonroot:nonroot
 ENTRYPOINT ["/usr/local/bin/api"]

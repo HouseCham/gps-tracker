@@ -1,0 +1,14 @@
+.git
+.github
+.gitignore
+
+.env
+.env.*
+!.env.example
+
+*.md
+docs/
+queries/
+sqlc.yaml
+
+migrations/

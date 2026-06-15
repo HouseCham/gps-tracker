@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"log/slog"
-
 	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 
@@ -15,11 +13,10 @@ import (
 
 type DevicesHandler struct {
 	service *devices.Service
-	logger  *slog.Logger
 }
 
-func NewDevicesHandler(svc *devices.Service, logger *slog.Logger) *DevicesHandler {
-	return &DevicesHandler{service: svc, logger: logger}
+func NewDevicesHandler(svc *devices.Service) *DevicesHandler {
+	return &DevicesHandler{service: svc}
 }
 
 // List handles GET /api/devices.

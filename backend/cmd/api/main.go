@@ -13,6 +13,7 @@ import (
 
 	"github.com/HouseCham/gps-tracker/backend/internal/app/access"
 	"github.com/HouseCham/gps-tracker/backend/internal/app/devices"
+	"github.com/HouseCham/gps-tracker/backend/internal/app/users"
 	"github.com/HouseCham/gps-tracker/backend/internal/infra/postgres"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/handlers"
@@ -43,18 +44,26 @@ func main() {
 	}
 	defer pool.Close()
 
+	//-- devices
 	devicesRepo := postgres.NewDevicesAdapter(pool)
-	devicesService := devices.DevicesService(devicesRepo)
+	devicesService := devices.New(devicesRepo)
+	//-- users
+	usersRepo := postgres.NewUsersAdapter(pool)
+	usersService := users.New(usersRepo)
+	//-- access
 	accessRepo := postgres.NewAccessAdapter(pool)
-	accessService := access.AccessService(accessRepo)
+	accessService := access.New(accessRepo)
 
+	//-- handlers
 	healthHandler := handlers.NewHealthHandler()
-	devicesHandler := handlers.NewDevicesHandler(devicesService, logger)
+	devicesHandler := handlers.NewDevicesHandler(devicesService)
+	usersHandler := handlers.NewUsersHandler(usersService, devicesService)
 
 	app := http.NewRouter(http.RouterDeps{
 		Logger:         logger,
 		HealthHandler:  healthHandler,
 		DevicesHandler: devicesHandler,
+		UsersHandler:   usersHandler,
 		AccessService:  accessService,
 	})
 

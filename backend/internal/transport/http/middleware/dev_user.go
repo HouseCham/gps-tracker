@@ -22,10 +22,11 @@ func DevUser() fiber.Handler {
 		if err != nil {
 			return fiber.NewError(fiber.StatusBadRequest, "invalid X-User-Id header")
 		}
+		// TODO: hardcoding superadmin role for now, but we could allow passing role via header too if needed.
 		user := &domain.User{
 			ID:    id,
 			Email: "dev@example.com",
-			Role:  domain.UserRoleUser,
+			Role:  domain.UserRoleSuperAdmin,
 		}
 		c.Locals(LocalsKeyUser, user)
 		return c.Next()
