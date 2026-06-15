@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"log/slog"
-
 	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 
@@ -15,11 +13,10 @@ import (
 
 type AccessHandler struct {
 	service *access.Service
-	logger  *slog.Logger
 }
 
-func NewAccessHandler(svc *access.Service, logger *slog.Logger) *AccessHandler {
-	return &AccessHandler{service: svc, logger: logger}
+func NewAccessHandler(svc *access.Service) *AccessHandler {
+	return &AccessHandler{service: svc}
 }
 
 // Grant handles POST /api/v1/devices/:id/access.

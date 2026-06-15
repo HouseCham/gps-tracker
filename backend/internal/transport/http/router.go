@@ -1,8 +1,6 @@
 package http
 
 import (
-	"log/slog"
-
 	"github.com/gofiber/fiber/v3"
 
 	"github.com/HouseCham/gps-tracker/backend/internal/app/access"
@@ -13,7 +11,6 @@ import (
 )
 
 type RouterDeps struct {
-	Logger         *slog.Logger
 	HealthHandler  *handlers.HealthHandler
 	DevicesHandler *handlers.DevicesHandler
 	UsersHandler   *handlers.UsersHandler
