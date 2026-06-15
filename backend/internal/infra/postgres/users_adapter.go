@@ -54,6 +54,23 @@ func (a *UsersAdapter) GetByID(ctx context.Context, userID uuid.UUID) (*domain.U
 	}, nil
 }
 
+func (a *UsersAdapter) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
+	queries := New(a.pool)
+	row, err := queries.GetUserByEmail(ctx, email)
+	if err != nil {
+		return nil, wrapPgError(err)
+	}
+	return &domain.User{
+		ID:        uuidFromPgtype(row.ID),
+		Email:     row.Email,
+		Name:      row.Name,
+		Lastname:  row.Lastname,
+		Role:      domain.UserRole(row.Role),
+		CreatedAt: row.CreatedAt.Time,
+		UpdatedAt: row.UpdatedAt.Time,
+	}, nil
+}
+
 func (a *UsersAdapter) CreateUser(ctx context.Context, email, name, lastname string, role domain.UserRole) (*domain.User, error) {
 	queries := New(a.pool)
 	row, err := queries.CreateUser(ctx, CreateUserParams{
