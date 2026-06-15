@@ -1,10 +1,7 @@
 ---
-import '@/styles/global.css';
-import type { Language, User } from '@/types';
 import type { Translation } from '@/i18n';
-//-- components
-import Sidebar from '@/components/astro/ui/Sidebar.astro';
-import { Topbar } from '@/components/react/features/dashboard';
+import '@/styles/global.css';
+import type { Language } from '@/types';
 /**
  * @interface Props
  * @property {Language} locale - The current language of the website, used for localization.
@@ -14,9 +11,8 @@ import { Topbar } from '@/components/react/features/dashboard';
 interface Props {
     locale: Language;
     translation: Translation;
-    user: User;
 }
-const { locale = 'en', translation, user } = Astro.props;
+const { locale = 'en', translation } = Astro.props;
 ---
 
 <html lang={locale}>
@@ -26,7 +22,8 @@ const { locale = 'en', translation, user } = Astro.props;
         <link rel="icon" href="/favicon.ico" />
         <meta name="viewport" content="width=device-width" />
         <meta name="generator" content={Astro.generator} />
-        <meta name="description" content="blablablablabla" />
+        <title>GPS Tracker</title>
+        <meta name="description" content="GPS Tracker App" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
@@ -35,18 +32,6 @@ const { locale = 'en', translation, user } = Astro.props;
         />
     </head>
     <body>
-        <div class="dash-shell">
-            <div class="dash-mock">
-                <!-- Sidebar -->
-                <Sidebar headerData={translation.header} user={user} />
-                <!-- Main -->
-                <div class="dash-main">
-                    <!-- Topbar -->
-                     <Topbar locale={locale} user={user} />
-                    <!-- Main -->
-                    <slot />
-                </div>
-            </div>
-        </div>
+        <slot />
     </body>
 </html>
