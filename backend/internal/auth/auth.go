@@ -97,6 +97,7 @@ func Bootstrap(ctx context.Context, cfg Config) (*Auth, error) {
 		authulaconfig.WithSecret(cfg.Secret),
 		authulaconfig.WithDatabase(models.DatabaseConfig{
 			Provider: "postgres",
+			URL:      cfg.DatabaseURL,
 		}),
 		// Auto sign-in is intentionally false; sign-in is a
 		// deliberate step that returns the JWT pair.

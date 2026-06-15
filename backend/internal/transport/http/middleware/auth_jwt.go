@@ -59,6 +59,8 @@ func ClaimsFromCtx(c fiber.Ctx) *models.Actor {
 	return actor
 }
 
+// unauthorizedResponse returns a JSON response with a 401 status code
+// and the supplied message.
 func unauthorizedResponse(c fiber.Ctx, message string) error {
 	return c.Status(fiber.StatusUnauthorized).JSON(domain.HTTPResponse[bool]{
 		StatusCode: fiber.StatusUnauthorized,

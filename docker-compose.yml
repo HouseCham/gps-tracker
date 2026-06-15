@@ -52,9 +52,8 @@ services:
       - "${API_PORT:-8080}:8080"
     environment:
       DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD:-gps_pass}@db:5432/${POSTGRES_DB}?sslmode=disable
-      JWT_JWKS_URL: ${JWT_JWKS_URL:-http://localhost:3000/.well-known/jwks.json}
-      JWT_ISSUER: ${JWT_ISSUER:-http://localhost:3000}
-      JWT_AUDIENCE: ${JWT_AUDIENCE:-gps-tracker-api}
+      AUTHULA_SECRET: ${AUTHULA_SECRET}
+      AUTHULA_BASE_URL: ${AUTHULA_BASE_URL:-http://localhost:8080}
       SERVER_PORT: 8080
     depends_on:
       migrate:
