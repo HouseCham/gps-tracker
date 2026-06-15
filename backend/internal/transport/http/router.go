@@ -2,10 +2,14 @@ package http
 
 import (
 	"log/slog"
+	"net/http"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/adaptor"
 
+	"github.com/HouseCham/gps-tracker/backend/internal/auth"
 	"github.com/HouseCham/gps-tracker/backend/internal/app/access"
+	"github.com/HouseCham/gps-tracker/backend/internal/app/users"
 	"github.com/HouseCham/gps-tracker/backend/internal/domain"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/dto"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/handlers"
@@ -19,6 +23,17 @@ type RouterDeps struct {
 	UsersHandler   *handlers.UsersHandler
 	AccessHandler  *handlers.AccessHandler
 	AccessService  *access.Service
+	UsersService   *users.Service
+	// AuthHandler is the net/http handler exposed by Authula. Mounted
+	// under /api/auth/* to serve sign-in, sign-up, JWKS, token
+	// refresh, etc.
+	AuthHandler http.Handler
+	// AuthJWTValidator validates raw JWT access tokens. Consumed
+	// by the AuthJWT middleware.
+	AuthJWTValidator auth.JWTValidator
+	// AuthUserLookup fetches Authula's user record by id, used by
+	// the LazyUser middleware to resolve the email.
+	AuthUserLookup auth.UserLookup
 }
 
 // NewRouter creates a new fiber app and registers the routes and handlers.
@@ -29,64 +44,88 @@ func NewRouter(deps RouterDeps) *fiber.App {
 	})
 	app.Get("/health", deps.HealthHandler.Handle)
 
+	// --- Authula: sign-in, sign-up, JWKS, token refresh, etc. ---
+	// Mounted as a catch-all under the Authula base path. Authula
+	// returns a net/http.Handler; we adapt it to a Fiber handler
+	// via fasthttp's adaptor.
+	if deps.AuthHandler != nil {
+		authH := adaptor.HTTPHandler(deps.AuthHandler)
+		app.All(auth.BasePath+"/*", authH)
+		app.All(auth.BasePath, authH)
+	}
+
+	// Reusable auth middlewares. The pair (AuthJWT -> LazyUser) is
+	// applied to every protected route below.
+	authJWT := middleware.AuthJWT(deps.AuthJWTValidator)
+	lazyUser := middleware.LazyUser(deps.UsersService, deps.AuthUserLookup)
+
 	apiV1 := app.Group("/api/v1")
 	// === Devices routes ===
-	devices := apiV1.Group("/devices", middleware.DevUser())
-	devices.Get("/", middleware.DevUser(), deps.DevicesHandler.List)
-	devices.Get("/:id", middleware.DevUser(), deps.DevicesHandler.Get)
+	devices := apiV1.Group("/devices")
+	devices.Get("/", authJWT, lazyUser, deps.DevicesHandler.List)
+	devices.Get("/:id", authJWT, lazyUser, deps.DevicesHandler.Get)
 	devices.Post("/",
-		middleware.DevUser(),
+		authJWT,
+		lazyUser,
 		middleware.ValidateRequestBody[dto.CreateDeviceRequest](),
 		deps.DevicesHandler.Create,
 	)
 	devices.Put("/:id",
-		middleware.DevUser(),
+		authJWT,
+		lazyUser,
 		middleware.ValidateRequestBody[dto.UpdateDeviceRequest](),
 		middleware.RequireDeviceRole(domain.AccessRoleEditor, deps.AccessService),
 		deps.DevicesHandler.Update,
 	)
 	devices.Delete("/:id",
-		middleware.DevUser(),
+		authJWT,
+		lazyUser,
 		middleware.RequireDeviceRole(domain.AccessRoleOwner, deps.AccessService),
 		deps.DevicesHandler.Delete,
 	)
 	devices.Post("/:id/access",
-		middleware.DevUser(),
+		authJWT,
+		lazyUser,
 		middleware.ValidateRequestBody[dto.GrantAccessRequest](),
 		middleware.RequireDeviceRole(domain.AccessRoleOwner, deps.AccessService),
 		deps.AccessHandler.Grant,
 	)
 	devices.Get("/:id/access",
-		middleware.DevUser(),
+		authJWT,
+		lazyUser,
 		middleware.RequireDeviceRole(domain.AccessRoleOwner, deps.AccessService),
 		deps.AccessHandler.List,
 	)
 	devices.Delete("/:id/access/:userId",
-		middleware.DevUser(),
+		authJWT,
+		lazyUser,
 		middleware.RequireDeviceRole(domain.AccessRoleOwner, deps.AccessService),
 		deps.AccessHandler.Revoke,
 	)
 
 	// === Users routes ===
-	users := apiV1.Group("/users", middleware.DevUser())
+	users := apiV1.Group("/users")
 	users.Get("/",
-		middleware.DevUser(),
+		authJWT,
+		lazyUser,
 		middleware.RequireUserRole(domain.UserRoleSuperAdmin),
 		deps.UsersHandler.List,
 	)
-	users.Get("/:id", middleware.DevUser(), deps.UsersHandler.GetByID)
+	users.Get("/:id", authJWT, lazyUser, deps.UsersHandler.GetByID)
 	users.Post("/",
-		middleware.DevUser(),
+		authJWT,
+		lazyUser,
 		middleware.RequireUserRole(domain.UserRoleSuperAdmin),
 		middleware.ValidateRequestBody[dto.CreateUserRequest](),
 		deps.UsersHandler.Create,
 	)
 	users.Put("/:id",
-		middleware.DevUser(),
+		authJWT,
+		lazyUser,
 		middleware.ValidateRequestBody[dto.UpdateUserRequest](),
 		deps.UsersHandler.Update,
 	)
-	users.Delete("/:id", middleware.DevUser(), deps.UsersHandler.Delete)
+	users.Delete("/:id", authJWT, lazyUser, deps.UsersHandler.Delete)
 
 	return app
 }

@@ -11,7 +11,7 @@ import (
 // RequireDeviceRole returns a middleware that allows the request through only
 // if the authenticated user has at least `minRole` on the device whose ID
 // is in the :id path param. Behavior:
-//   - 401 if no user is in context (DevUser must run first)
+//   - 401 if no user is in context (LazyUser must run first)
 //   - 400 if :id is not a valid UUID
 //   - 404 if the user has no access (security through obscurity)
 //   - 403 if the user has access but the role is below the minimum
