@@ -46,7 +46,7 @@ func TestListMine(t *testing.T) {
 		expected := []domain.DeviceWithAccess{
 			{Device: domain.Device{Name: "tracker-1"}, AccessRole: domain.AccessRoleOwner},
 		}
-		svc := DevicesService(&mockRepo{
+		svc := New(&mockRepo{
 			listForUserFn: func(_ context.Context, uid uuid.UUID) ([]domain.DeviceWithAccess, error) {
 				if uid != userID {
 					t.Errorf("expected userID %v, got %v", userID, uid)
@@ -64,7 +64,7 @@ func TestListMine(t *testing.T) {
 	})
 
 	t.Run("propagates error", func(t *testing.T) {
-		svc := DevicesService(&mockRepo{
+		svc := New(&mockRepo{
 			listForUserFn: func(_ context.Context, _ uuid.UUID) ([]domain.DeviceWithAccess, error) {
 				return nil, domain.ErrNotFound
 			},
@@ -86,7 +86,7 @@ func TestGetByID(t *testing.T) {
 			Device:     domain.Device{ID: deviceID, Name: "gps-1"},
 			AccessRole: domain.AccessRoleEditor,
 		}
-		svc := DevicesService(&mockRepo{
+		svc := New(&mockRepo{
 			getByIDForUserFn: func(_ context.Context, uid, did uuid.UUID) (*domain.DeviceWithAccess, error) {
 				if uid != userID || did != deviceID {
 					t.Error("wrong arguments passed to repo")
@@ -104,7 +104,7 @@ func TestGetByID(t *testing.T) {
 	})
 
 	t.Run("returns nil when no access", func(t *testing.T) {
-		svc := DevicesService(&mockRepo{
+		svc := New(&mockRepo{
 			getByIDForUserFn: func(_ context.Context, _, _ uuid.UUID) (*domain.DeviceWithAccess, error) {
 				return nil, domain.ErrNotFound
 			},
@@ -126,7 +126,7 @@ func TestCreate(t *testing.T) {
 
 	t.Run("creates and returns device", func(t *testing.T) {
 		expected := &domain.Device{Name: "new-device"}
-		svc := DevicesService(&mockRepo{
+		svc := New(&mockRepo{
 			createFn: func(_ context.Context, in CreateInput) (*domain.Device, error) {
 				if in != input {
 					t.Error("input not forwarded")
@@ -144,7 +144,7 @@ func TestCreate(t *testing.T) {
 	})
 
 	t.Run("propagates repository error", func(t *testing.T) {
-		svc := DevicesService(&mockRepo{
+		svc := New(&mockRepo{
 			createFn: func(_ context.Context, _ CreateInput) (*domain.Device, error) {
 				return nil, domain.ErrConflict
 			},
@@ -161,7 +161,7 @@ func TestUpdateName(t *testing.T) {
 	deviceID := uuid.New()
 
 	t.Run("updates and returns device", func(t *testing.T) {
-		svc := DevicesService(&mockRepo{
+		svc := New(&mockRepo{
 			updateNameFn: func(_ context.Context, did uuid.UUID, name string) (*domain.Device, error) {
 				if did != deviceID || name != "new-name" {
 					t.Error("wrong arguments")
@@ -179,7 +179,7 @@ func TestUpdateName(t *testing.T) {
 	})
 
 	t.Run("not found on soft-deleted device", func(t *testing.T) {
-		svc := DevicesService(&mockRepo{
+		svc := New(&mockRepo{
 			updateNameFn: func(_ context.Context, _ uuid.UUID, _ string) (*domain.Device, error) {
 				return nil, domain.ErrNotFound
 			},
@@ -196,7 +196,7 @@ func TestSoftDelete(t *testing.T) {
 	deviceID := uuid.New()
 
 	t.Run("deletes successfully", func(t *testing.T) {
-		svc := DevicesService(&mockRepo{
+		svc := New(&mockRepo{
 			softDeleteFn: func(_ context.Context, did uuid.UUID) error {
 				if did != deviceID {
 					t.Error("wrong device id")
@@ -210,7 +210,7 @@ func TestSoftDelete(t *testing.T) {
 	})
 
 	t.Run("idempotent delete succeeds", func(t *testing.T) {
-		svc := DevicesService(&mockRepo{
+		svc := New(&mockRepo{
 			softDeleteFn: func(_ context.Context, _ uuid.UUID) error {
 				return nil
 			},
@@ -221,7 +221,7 @@ func TestSoftDelete(t *testing.T) {
 	})
 
 	t.Run("propagates repository error", func(t *testing.T) {
-		svc := DevicesService(&mockRepo{
+		svc := New(&mockRepo{
 			softDeleteFn: func(_ context.Context, _ uuid.UUID) error {
 				return domain.ErrNotFound
 			},

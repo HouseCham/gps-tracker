@@ -17,13 +17,19 @@ type Service struct {
 	users users.Repository
 }
 
+var roleOrder = map[domain.AccessRole]int{
+	domain.AccessRoleViewer: 1,
+	domain.AccessRoleEditor: 2,
+	domain.AccessRoleOwner:  3,
+}
+
 // AccessService constructs the access service.
 //
 // The users repository is needed so the service can validate that a target
 // user exists and is not soft-deleted before creating a grant for them.
 // Without this, an invalid user_id would surface as a 23503 foreign-key
 // violation (422 validation error) instead of the expected 404.
-func AccessService(repo Repository, usersRepo users.Repository) *Service {
+func NewAccessService(repo Repository, usersRepo users.Repository) *Service {
 	return &Service{repo: repo, users: usersRepo}
 }
 
@@ -50,12 +56,7 @@ func (s *Service) RequireRole(ctx context.Context, userID, deviceID uuid.UUID, m
 // RoleSatisfies reports whether `actual` is at least as privileged as `min`.
 // Hierarchy: viewer (1) < editor (2) < owner (3).
 func RoleSatisfies(actual, min domain.AccessRole) bool {
-	order := map[domain.AccessRole]int{
-		domain.AccessRoleViewer: 1,
-		domain.AccessRoleEditor: 2,
-		domain.AccessRoleOwner:  3,
-	}
-	return order[actual] >= order[min]
+	return roleOrder[actual] >= roleOrder[min]
 }
 
 // GrantAccess grants the target user `viewer` access to the device. The

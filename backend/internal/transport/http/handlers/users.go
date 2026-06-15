@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log/slog"
 	"strconv"
 
 	"github.com/gofiber/fiber/v3"
@@ -17,11 +16,10 @@ import (
 type UsersHandler struct {
 	usersService   *users.Service
 	devicesService *devices.Service
-	logger         *slog.Logger
 }
 
-func NewUsersHandler(usersSvc *users.Service, devicesSvc *devices.Service, logger *slog.Logger) *UsersHandler {
-	return &UsersHandler{usersService: usersSvc, devicesService: devicesSvc, logger: logger}
+func NewUsersHandler(usersSvc *users.Service, devicesSvc *devices.Service) *UsersHandler {
+	return &UsersHandler{usersService: usersSvc, devicesService: devicesSvc}
 }
 
 func (h *UsersHandler) List(c fiber.Ctx) error {
@@ -82,13 +80,6 @@ func (h *UsersHandler) GetByID(c fiber.Ctx) error {
 		if parsed, err := strconv.Atoi(ps); err == nil {
 			pageSize = parsed
 		}
-	}
-	if pageSize < 1 || pageSize > 100 {
-		pageSize = 10
-	}
-
-	if page < 1 {
-		page = 1
 	}
 	if pageSize < 1 || pageSize > 100 {
 		pageSize = 10

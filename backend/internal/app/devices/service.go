@@ -12,7 +12,7 @@ type Service struct {
 	repo Repository
 }
 
-func DevicesService(repo Repository) *Service {
+func New(repo Repository) *Service {
 	return &Service{repo: repo}
 }
 

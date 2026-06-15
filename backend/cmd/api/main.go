@@ -46,18 +46,18 @@ func main() {
 
 	//-- devices
 	devicesRepo := postgres.NewDevicesAdapter(pool)
-	devicesService := devices.DevicesService(devicesRepo)
+	devicesService := devices.New(devicesRepo)
 	//-- users
 	usersRepo := postgres.NewUsersAdapter(pool)
-	usersService := users.UsersService(usersRepo)
+	usersService := users.New(usersRepo)
 	//-- access
 	accessRepo := postgres.NewAccessAdapter(pool)
-	accessService := access.AccessService(accessRepo, usersRepo)
+	accessService := access.NewAccessService(accessRepo, usersRepo)
 
 	//-- handlers
 	healthHandler := handlers.NewHealthHandler()
-	devicesHandler := handlers.NewDevicesHandler(devicesService, logger)
-	usersHandler := handlers.NewUsersHandler(usersService, devicesService, logger)
+	devicesHandler := handlers.NewDevicesHandler(devicesService)
+	usersHandler := handlers.NewUsersHandler(usersService, devicesService)
 	accessHandler := handlers.NewAccessHandler(accessService, logger)
 
 	app := http.NewRouter(http.RouterDeps{

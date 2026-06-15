@@ -39,13 +39,3 @@ func deviceFromSqlc(d Device) *domain.Device {
 	}
 }
 
-// userFromSqlc converts a sqlc-generated User into the domain.User.
-func userFromSqlc(u User) domain.User {
-	return domain.User{
-		ID:        uuidFromPgtype(u.ID),
-		Email:     u.Email,
-		Role:      domain.UserRole(u.Role),
-		CreatedAt: u.CreatedAt.Time,
-		UpdatedAt: u.UpdatedAt.Time,
-	}
-}
