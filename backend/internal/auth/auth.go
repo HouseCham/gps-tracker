@@ -31,6 +31,8 @@ import (
 	jwtplugin "github.com/Authula/authula/plugins/jwt"
 	jwtplugintypes "github.com/Authula/authula/plugins/jwt/types"
 	authulaservices "github.com/Authula/authula/services"
+
+	"github.com/HouseCham/gps-tracker/backend/internal/domain"
 )
 
 // BasePath is the URL prefix where Authula's own routes (sign-in,
@@ -60,9 +62,11 @@ type Config struct {
 // Auth is the composition root for Authula. It exposes the bits of
 // the Authula surface that the rest of the application needs.
 type Auth struct {
-	instance    *authula.Auth
-	jwtService  authulaservices.JWTService
-	userService authulaservices.UserService
+	instance        *authula.Auth
+	jwtService      authulaservices.JWTService
+	userService     authulaservices.UserService
+	accountService  authulaservices.AccountService
+	passwordService authulaservices.PasswordService
 }
 
 // Bootstrap initializes Authula: it runs core + plugin migrations
@@ -161,10 +165,22 @@ func Bootstrap(ctx context.Context, cfg Config) (*Auth, error) {
 		return nil, fmt.Errorf("auth: user service not registered by core services")
 	}
 
+	accountSvc, ok := instance.ServiceRegistry.Get(models.ServiceAccount.String()).(authulaservices.AccountService)
+	if !ok {
+		return nil, fmt.Errorf("auth: account service not registered by core services")
+	}
+
+	passwordSvc, ok := instance.ServiceRegistry.Get(models.ServicePassword.String()).(authulaservices.PasswordService)
+	if !ok {
+		return nil, fmt.Errorf("auth: password service not registered by core services")
+	}
+
 	return &Auth{
-		instance:    instance,
-		jwtService:  jwtSvc,
-		userService: userSvc,
+		instance:        instance,
+		jwtService:      jwtSvc,
+		userService:     userSvc,
+		accountService:  accountSvc,
+		passwordService: passwordSvc,
 	}, nil
 }
 
@@ -200,4 +216,79 @@ func (a *Auth) NewJWTValidator() JWTValidator {
 // user service.
 func (a *Auth) NewUserLookup() UserLookup {
 	return a.userService
+}
+
+// UserCreator creates a user account with a password in Authula.
+type UserCreator interface {
+	CreateUserWithPassword(ctx context.Context, name, email, password string) error
+}
+
+// NewUserCreator returns a UserCreator backed by the live Authula services.
+func (a *Auth) NewUserCreator() UserCreator {
+	return authulaUserCreator{
+		userService:    a.userService,
+		accountService: a.accountService,
+		passwordService: a.passwordService,
+	}
+}
+
+type authulaUserCreator struct {
+	userService    authulaservices.UserService
+	accountService authulaservices.AccountService
+	passwordService authulaservices.PasswordService
+}
+
+func (c authulaUserCreator) CreateUserWithPassword(ctx context.Context, name, email, password string) error {
+	hash, err := c.passwordService.Hash(password)
+	if err != nil {
+		return fmt.Errorf("auth: hash password: %w", err)
+	}
+	user, err := c.userService.Create(ctx, name, email, true, nil, nil)
+	if err != nil {
+		return fmt.Errorf("auth: create user: %w", err)
+	}
+	_, err = c.accountService.Create(ctx, user.ID, email, models.AuthProviderEmail.String(), &hash)
+	if err != nil {
+		return fmt.Errorf("auth: create account: %w", err)
+	}
+	return nil
+}
+
+// PasswordUpdater updates a user's password in Authula, verifying the old
+// password first.
+type PasswordUpdater interface {
+	UpdatePassword(ctx context.Context, authulaUserID, oldPassword, newPassword string) error
+}
+
+// NewPasswordUpdater returns a PasswordUpdater backed by the live Authula
+// services.
+func (a *Auth) NewPasswordUpdater() PasswordUpdater {
+	return authulaPasswordUpdater{
+		accountService:  a.accountService,
+		passwordService: a.passwordService,
+	}
+}
+
+type authulaPasswordUpdater struct {
+	accountService  authulaservices.AccountService
+	passwordService authulaservices.PasswordService
+}
+
+func (u authulaPasswordUpdater) UpdatePassword(ctx context.Context, authulaUserID, oldPassword, newPassword string) error {
+	account, err := u.accountService.GetByUserID(ctx, authulaUserID)
+	if err != nil {
+		return fmt.Errorf("auth: get account: %w", err)
+	}
+	if account.Password == nil || !u.passwordService.Verify(oldPassword, *account.Password) {
+		return fmt.Errorf("%w: current password is incorrect", domain.ErrInvalidCredentials)
+	}
+	hash, err := u.passwordService.Hash(newPassword)
+	if err != nil {
+		return fmt.Errorf("auth: hash password: %w", err)
+	}
+	err = u.accountService.UpdateFields(ctx, authulaUserID, map[string]any{"password": hash})
+	if err != nil {
+		return fmt.Errorf("auth: update account password: %w", err)
+	}
+	return nil
 }

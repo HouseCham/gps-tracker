@@ -51,16 +51,6 @@ func main() {
 	devicesService := devices.DevicesService(devicesRepo)
 	//-- users
 	usersRepo := postgres.NewUsersAdapter(pool)
-	usersService := users.UsersService(usersRepo)
-	//-- access
-	accessRepo := postgres.NewAccessAdapter(pool)
-	accessService := access.AccessService(accessRepo, usersRepo)
-
-	//-- handlers
-	healthHandler := handlers.NewHealthHandler()
-	devicesHandler := handlers.NewDevicesHandler(devicesService, logger)
-	usersHandler := handlers.NewUsersHandler(usersService, devicesService, logger)
-	accessHandler := handlers.NewAccessHandler(accessService, logger)
 
 	//-- auth (Authula). Reads AUTHULA_SECRET and AUTHULA_BASE_URL
 	// from the env. Migrations run on first init.
@@ -79,6 +69,20 @@ func main() {
 		logger.Error("bootstrap auth", "err", err)
 		os.Exit(1)
 	}
+
+	userCreator := authInstance.NewUserCreator()
+	usersService := users.UsersService(usersRepo, userCreator)
+
+	//-- access
+	accessRepo := postgres.NewAccessAdapter(pool)
+	accessService := access.AccessService(accessRepo, usersRepo)
+
+	//-- handlers
+	healthHandler := handlers.NewHealthHandler()
+	devicesHandler := handlers.NewDevicesHandler(devicesService, logger)
+	passwordUpdater := authInstance.NewPasswordUpdater()
+	usersHandler := handlers.NewUsersHandler(usersService, devicesService, passwordUpdater, logger)
+	accessHandler := handlers.NewAccessHandler(accessService, logger)
 
 	app := http.NewRouter(http.RouterDeps{
 		Logger:           logger,

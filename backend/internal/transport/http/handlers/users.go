@@ -4,24 +4,28 @@ import (
 	"log/slog"
 	"strconv"
 
+	"github.com/Authula/authula/models"
+
 	"github.com/gofiber/fiber/v3"
 	"github.com/google/uuid"
 
 	"github.com/HouseCham/gps-tracker/backend/internal/app/devices"
 	"github.com/HouseCham/gps-tracker/backend/internal/app/users"
+	"github.com/HouseCham/gps-tracker/backend/internal/auth"
 	"github.com/HouseCham/gps-tracker/backend/internal/domain"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/dto"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/middleware"
 )
 
 type UsersHandler struct {
-	usersService   *users.Service
-	devicesService *devices.Service
-	logger         *slog.Logger
+	usersService     *users.Service
+	devicesService   *devices.Service
+	passwordUpdater  auth.PasswordUpdater
+	logger           *slog.Logger
 }
 
-func NewUsersHandler(usersSvc *users.Service, devicesSvc *devices.Service, logger *slog.Logger) *UsersHandler {
-	return &UsersHandler{usersService: usersSvc, devicesService: devicesSvc, logger: logger}
+func NewUsersHandler(usersSvc *users.Service, devicesSvc *devices.Service, passwordUpdater auth.PasswordUpdater, logger *slog.Logger) *UsersHandler {
+	return &UsersHandler{usersService: usersSvc, devicesService: devicesSvc, passwordUpdater: passwordUpdater, logger: logger}
 }
 
 func (h *UsersHandler) List(c fiber.Ctx) error {
@@ -147,7 +151,7 @@ func (h *UsersHandler) Create(c fiber.Ctx) error {
 		})
 	}
 
-	user, err := h.usersService.CreateUser(
+	result, err := h.usersService.CreateUser(
 		c.Context(),
 		req.Email,
 		req.Name,
@@ -158,10 +162,10 @@ func (h *UsersHandler) Create(c fiber.Ctx) error {
 		return err
 	}
 
-	return c.Status(fiber.StatusCreated).JSON(domain.HTTPResponse[dto.UserResponse]{
+	return c.Status(fiber.StatusCreated).JSON(domain.HTTPResponse[dto.CreateUserResponse]{
 		StatusCode: fiber.StatusCreated,
 		Message:    "user created",
-		Data:       dto.UserFromDomain(user),
+		Data:       dto.CreateUserResponseFromDomain(result.User, result.TemporaryPassword),
 	})
 }
 
@@ -206,6 +210,45 @@ func (h *UsersHandler) Update(c fiber.Ctx) error {
 		StatusCode: fiber.StatusOK,
 		Message:    "user updated",
 		Data:       dto.UserFromDomain(user),
+	})
+}
+
+func (h *UsersHandler) ChangePassword(c fiber.Ctx) error {
+	actor, ok := c.Locals(middleware.LocalsKeyClaims).(*models.Actor)
+	if !ok || actor == nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(domain.HTTPResponse[bool]{
+			StatusCode: fiber.StatusUnauthorized,
+			Message:    "unauthorized",
+		})
+	}
+
+	user, ok := c.Locals(middleware.LocalsKeyUser).(*domain.User)
+	if !ok {
+		return c.Status(fiber.StatusUnauthorized).JSON(domain.HTTPResponse[bool]{
+			StatusCode: fiber.StatusUnauthorized,
+			Message:    "unauthorized",
+		})
+	}
+
+	var req dto.ChangePasswordRequest
+	if err := c.Bind().JSON(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(domain.HTTPResponse[bool]{
+			StatusCode: fiber.StatusBadRequest,
+			Message:    "invalid request body",
+		})
+	}
+
+	if err := h.passwordUpdater.UpdatePassword(c.Context(), actor.ID, req.OldPassword, req.NewPassword); err != nil {
+		return err
+	}
+
+	if err := h.usersService.SetMustChangePassword(c.Context(), user.ID, false); err != nil {
+		return err
+	}
+
+	return c.Status(fiber.StatusOK).JSON(domain.HTTPResponse[bool]{
+		StatusCode: fiber.StatusOK,
+		Message:    "password changed",
 	})
 }
 
