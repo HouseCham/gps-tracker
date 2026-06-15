@@ -27,3 +27,13 @@ const (
 	// UserRoleSuperAdmin is a super administrator with full access.
 	UserRoleSuperAdmin UserRole = "super_admin"
 )
+
+var userRoleRank = map[UserRole]int{
+	UserRoleUser:       1,
+	UserRoleSuperAdmin: 2,
+}
+
+// Satisfies reports whether the user role is at least as privileged as min.
+func (r UserRole) Satisfies(min UserRole) bool {
+	return userRoleRank[r] >= userRoleRank[min]
+}

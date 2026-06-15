@@ -6,6 +6,7 @@ import (
 
 	"github.com/HouseCham/gps-tracker/backend/internal/app/access"
 	"github.com/HouseCham/gps-tracker/backend/internal/domain"
+	"github.com/HouseCham/gps-tracker/backend/internal/transport/response"
 )
 
 // RequireDeviceRole returns a middleware that allows the request through only
@@ -22,7 +23,7 @@ func RequireDeviceRole(minRole domain.AccessRole, svc *access.AccessService) fib
 	return func(c fiber.Ctx) error {
 		user, ok := c.Locals(LocalsKeyUser).(*domain.User)
 		if !ok {
-			return c.Status(fiber.StatusUnauthorized).JSON(domain.HTTPResponse[bool]{
+			return c.Status(fiber.StatusUnauthorized).JSON(response.HTTPResponse[bool]{
 				StatusCode: fiber.StatusUnauthorized,
 				Message:    "unauthorized",
 			})
@@ -30,7 +31,7 @@ func RequireDeviceRole(minRole domain.AccessRole, svc *access.AccessService) fib
 
 		deviceID, err := uuid.Parse(c.Params("id"))
 		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(domain.HTTPResponse[bool]{
+			return c.Status(fiber.StatusBadRequest).JSON(response.HTTPResponse[bool]{
 				StatusCode: fiber.StatusBadRequest,
 				Message:    "invalid device id",
 			})

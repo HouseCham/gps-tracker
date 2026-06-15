@@ -11,16 +11,20 @@ import (
 )
 
 type mockRepo struct {
-	listForUserFn            func(ctx context.Context, userID uuid.UUID) ([]domain.DeviceWithAccess, error)
-	listForUserPaginatedFn   func(ctx context.Context, userID uuid.UUID, limit, offset int) ([]domain.Device, int, error)
-	getByIDForUserFn         func(ctx context.Context, userID, deviceID uuid.UUID) (*domain.DeviceWithAccess, error)
-	createFn                 func(ctx context.Context, input CreateInput) (*domain.Device, error)
-	updateNameFn             func(ctx context.Context, deviceID uuid.UUID, name string) (*domain.Device, error)
-	softDeleteFn             func(ctx context.Context, deviceID uuid.UUID) error
+	listForUserFn                     func(ctx context.Context, userID uuid.UUID) ([]domain.DeviceWithAccess, error)
+	listForUserWithAccessPaginatedFn  func(ctx context.Context, userID uuid.UUID, limit, offset int) ([]domain.DeviceWithAccess, int, error)
+	listForUserPaginatedFn            func(ctx context.Context, userID uuid.UUID, limit, offset int) ([]domain.Device, int, error)
+	getByIDForUserFn                  func(ctx context.Context, userID, deviceID uuid.UUID) (*domain.DeviceWithAccess, error)
+	createFn                          func(ctx context.Context, input CreateInput) (*domain.Device, error)
+	updateNameFn                      func(ctx context.Context, deviceID uuid.UUID, name string) (*domain.Device, error)
+	softDeleteFn                      func(ctx context.Context, deviceID uuid.UUID) error
 }
 
 func (m *mockRepo) ListForUser(ctx context.Context, userID uuid.UUID) ([]domain.DeviceWithAccess, error) {
 	return m.listForUserFn(ctx, userID)
+}
+func (m *mockRepo) ListForUserWithAccessPaginated(ctx context.Context, userID uuid.UUID, limit, offset int) ([]domain.DeviceWithAccess, int, error) {
+	return m.listForUserWithAccessPaginatedFn(ctx, userID, limit, offset)
 }
 func (m *mockRepo) ListForUserPaginated(ctx context.Context, userID uuid.UUID, limit, offset int) ([]domain.Device, int, error) {
 	return m.listForUserPaginatedFn(ctx, userID, limit, offset)

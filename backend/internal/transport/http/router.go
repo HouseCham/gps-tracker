@@ -1,7 +1,6 @@
 package http
 
 import (
-	"log/slog"
 	"net/http"
 
 	"github.com/gofiber/fiber/v3"
@@ -17,7 +16,6 @@ import (
 )
 
 type RouterDeps struct {
-	Logger         *slog.Logger
 	HealthHandler  *handlers.HealthHandler
 	DevicesHandler *handlers.DevicesHandler
 	UsersHandler   *handlers.UsersHandler

@@ -83,24 +83,7 @@ func (s *UserService) CreateUser(ctx context.Context, email, name, lastname stri
 }
 
 // GetOrCreate returns the local user record associated with the given
-// email, creating one on the fly if no active record exists. It is
-// the entry point used by the HTTP auth middleware to materialise a
-// domain.User from a verified Authula JWT.
-//
-// Policy:
-//   - If an active (non-soft-deleted) user with this email exists,
-//     it is returned as-is.
-//   - Otherwise a new user is created. If the system has no other
-//     users, the new user is granted super_admin (preserves the
-//     bootstrap invariant); otherwise user.
-//   - If creation fails because a soft-deleted user with the same
-//     email is still present in the table (the email column is
-//     UNIQUE regardless of deleted_at), domain.ErrUnauthorized is
-//     returned. This is the "do not resurrect" guard.
-//
-// The "first user becomes super_admin" rule is intentionally coupled
-// to user count rather than to a hard-coded flag: it stays correct
-// even if the table is later seeded out-of-band.
+// email, creating one on the fly if no active record exists.
 func (s *UserService) GetOrCreate(ctx context.Context, email, name string) (*domain.User, error) {
 	if email == "" {
 		return nil, fmt.Errorf("%w: email is required", domain.ErrUnauthorized)
