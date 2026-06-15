@@ -20,20 +20,20 @@ type CreateUserResult struct {
 	TemporaryPassword string
 }
 
-type Service struct {
+type UserService struct {
 	repo        Repository
 	authCreator auth.UserCreator
 }
 
-func UsersService(repo Repository, authCreator auth.UserCreator) *Service {
-	return &Service{repo: repo, authCreator: authCreator}
+func New(repo Repository) *UserService {
+	return &UserService{repo: repo}
 }
 
-func (s *Service) ListUsers(ctx context.Context, excludeUserID uuid.UUID) ([]domain.User, error) {
+func (s *UserService) ListUsers(ctx context.Context, excludeUserID uuid.UUID) ([]domain.User, error) {
 	return s.repo.ListUsers(ctx, excludeUserID)
 }
 
-func (s *Service) GetByID(ctx context.Context, requestingUserID, targetUserID uuid.UUID) (*domain.User, error) {
+func (s *UserService) GetByID(ctx context.Context, requestingUserID, targetUserID uuid.UUID) (*domain.User, error) {
 	targetUser, err := s.repo.GetByID(ctx, targetUserID)
 	if err != nil {
 		return nil, err
@@ -55,7 +55,7 @@ func (s *Service) GetByID(ctx context.Context, requestingUserID, targetUserID uu
 	return nil, domain.ErrForbidden
 }
 
-func (s *Service) CreateUser(ctx context.Context, email, name, lastname string, role domain.UserRole) (*CreateUserResult, error) {
+func (s *UserService) CreateUser(ctx context.Context, email, name, lastname string, role domain.UserRole) (*CreateUserResult, error) {
 	count, err := s.repo.CountUsers(ctx)
 	if err != nil {
 		return nil, err
@@ -101,7 +101,7 @@ func (s *Service) CreateUser(ctx context.Context, email, name, lastname string, 
 // The "first user becomes super_admin" rule is intentionally coupled
 // to user count rather than to a hard-coded flag: it stays correct
 // even if the table is later seeded out-of-band.
-func (s *Service) GetOrCreate(ctx context.Context, email, name string) (*domain.User, error) {
+func (s *UserService) GetOrCreate(ctx context.Context, email, name string) (*domain.User, error) {
 	if email == "" {
 		return nil, fmt.Errorf("%w: email is required", domain.ErrUnauthorized)
 	}
@@ -137,15 +137,15 @@ func (s *Service) GetOrCreate(ctx context.Context, email, name string) (*domain.
 	return nil, err
 }
 
-func (s *Service) UpdateUser(ctx context.Context, userID uuid.UUID, name, lastname string) (*domain.User, error) {
+func (s *UserService) UpdateUser(ctx context.Context, userID uuid.UUID, name, lastname string) (*domain.User, error) {
 	return s.repo.UpdateUser(ctx, userID, name, lastname)
 }
 
-func (s *Service) SetMustChangePassword(ctx context.Context, userID uuid.UUID, mustChange bool) error {
+func (s *UserService) SetMustChangePassword(ctx context.Context, userID uuid.UUID, mustChange bool) error {
 	return s.repo.SetMustChangePassword(ctx, userID, mustChange)
 }
 
-func (s *Service) SoftDeleteUser(ctx context.Context, requestingUserID, targetUserID uuid.UUID) error {
+func (s *UserService) SoftDeleteUser(ctx context.Context, requestingUserID, targetUserID uuid.UUID) error {
 	requestingUser, err := s.repo.GetByID(ctx, requestingUserID)
 	if err != nil {
 		return err

@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"log/slog"
 	"strconv"
 
 	"github.com/Authula/authula/models"
@@ -18,14 +17,13 @@ import (
 )
 
 type UsersHandler struct {
-	usersService     *users.Service
+	usersService     *users.UserService
 	devicesService   *devices.Service
 	passwordUpdater  auth.PasswordUpdater
-	logger           *slog.Logger
 }
 
-func NewUsersHandler(usersSvc *users.Service, devicesSvc *devices.Service, passwordUpdater auth.PasswordUpdater, logger *slog.Logger) *UsersHandler {
-	return &UsersHandler{usersService: usersSvc, devicesService: devicesSvc, passwordUpdater: passwordUpdater, logger: logger}
+func NewUsersHandler(usersSvc *users.UserService, devicesSvc *devices.Service, passwordUpdater auth.PasswordUpdater) *UsersHandler {
+	return &UsersHandler{usersService: usersSvc, devicesService: devicesSvc, passwordUpdater: passwordUpdater}
 }
 
 func (h *UsersHandler) List(c fiber.Ctx) error {
@@ -86,13 +84,6 @@ func (h *UsersHandler) GetByID(c fiber.Ctx) error {
 		if parsed, err := strconv.Atoi(ps); err == nil {
 			pageSize = parsed
 		}
-	}
-	if pageSize < 1 || pageSize > 100 {
-		pageSize = 10
-	}
-
-	if page < 1 {
-		page = 1
 	}
 	if pageSize < 1 || pageSize > 100 {
 		pageSize = 10

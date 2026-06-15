@@ -41,3 +41,5 @@ internal/infrastructure/database/*.sql.go
 
 # custom commands
 Makefile
+.gga
+REVIEWER.md

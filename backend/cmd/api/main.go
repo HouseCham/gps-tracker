@@ -48,7 +48,7 @@ func main() {
 
 	//-- devices
 	devicesRepo := postgres.NewDevicesAdapter(pool)
-	devicesService := devices.DevicesService(devicesRepo)
+	devicesService := devices.New(devicesRepo)
 	//-- users
 	usersRepo := postgres.NewUsersAdapter(pool)
 
@@ -83,6 +83,7 @@ func main() {
 	passwordUpdater := authInstance.NewPasswordUpdater()
 	usersHandler := handlers.NewUsersHandler(usersService, devicesService, passwordUpdater, logger)
 	accessHandler := handlers.NewAccessHandler(accessService, logger)
+
 
 	app := http.NewRouter(http.RouterDeps{
 		Logger:           logger,
