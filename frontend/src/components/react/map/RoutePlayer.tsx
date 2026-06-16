@@ -5,14 +5,25 @@ import { useCallback } from 'react';
 import { Pause, Play, Rewind, FastForward } from 'lucide-react';
 //-- Types
 import type { RouteSpeed } from '@/types/components';
-
-export interface RoutePlayerProps {
+import { MAP_SPEED_OPTIONS } from '@/constants/components';
+/**
+ * @interface RoutePlayerProps
+ * @param {boolean} playing - Whether the route is currently playing.
+ * @param {number} progress - The current progress of the route.
+ * @param {string} [currentLabel] - The label of the current location.
+ * @param {string} [endLabel] - The label of the end location.
+ * @param {RouteSpeed} speed - The speed of the route.
+ * @param {function} [onTogglePlay] - The function to call when the play button is clicked.
+ * @param {function} [onSeek] - The function to call when the scrubber is moved.
+ * @param {function} [onSpeedChange] - The function to call when the speed is changed.
+ * @param {function} [onStepBack] - The function to call when the step back button is clicked.
+ * @param {function} [onStepForward] - The function to call when the step forward button is clicked.
+ * @param {boolean} [disabled] - Whether the player is disabled.
+ */
+interface RoutePlayerProps {
     playing: boolean;
-    /** 0–1 progress through the route. */
     progress: number;
-    /** Display label for the current playhead time, e.g. "Jan 12, 14:32:05". */
     currentLabel?: string;
-    /** Display label for the end of the route. */
     endLabel?: string;
     speed: RouteSpeed;
     onTogglePlay?: () => void;
@@ -22,9 +33,6 @@ export interface RoutePlayerProps {
     onStepForward?: () => void;
     disabled?: boolean;
 }
-
-const SPEED_OPTIONS: RouteSpeed[] = [1, 2, 4];
-
 /**
  * RoutePlayer — control bar for scrubbing through a device's location history.
  *
@@ -124,7 +132,7 @@ export default function RoutePlayer({
             </div>
 
             <div className="route-player__speed" role="group" aria-label="Playback speed">
-                {SPEED_OPTIONS.map((option) => (
+                {MAP_SPEED_OPTIONS.map((option) => (
                     <button
                         key={option}
                         type="button"

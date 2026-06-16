@@ -1,31 +1,36 @@
 import '@/styles/map/device-map.css'
 //-- React
-import type { ReactNode } from 'react';
+import type { JSX, ReactNode } from 'react';
 import { useCallback, useMemo, useState } from 'react';
+//-- Types
+import type { DeviceMapPin, DeviceMapRoutePoint, MapPopoverDevice } from '@/types/components';
 //-- Icons
 import { MapPin, Plus, Minus, Locate } from 'lucide-react';
 //-- Components
 import MapMarker from './MapMarker';
-import MapPopover, { type MapPopoverDevice } from './MapPopover';
-import type { DeviceMapRoutePoint } from '@/types/components';
-
+import MapPopover from './MapPopover';
+import { formatCoords, getPathFromRoute, projectCoordinate } from '@/lib/map-utils';
+/**
+ * @interface DeviceMapProps
+ * @param {DeviceMapPin[]} pins - The pins to render on the map.
+ * @param {DeviceMapRoutePoint[]} [route] - The route to render on the map.
+ * @param {string | null} [selectedId] - The ID of the selected pin.
+ * @param {function} [onSelect] - The function to call when a pin is selected.
+ * @param {{ lat: number; lng: number; label?: string }} [center] - The center of the map.
+ * @param {'default' | 'satellite'} [variant] - The variant of the map.
+ * @param {boolean} [showLabels] - Whether to show labels on the map.
+ * @param {boolean} [showRoute] - Whether to show the route on the map.
+ * @param {function} [onZoomIn] - The function to call when the zoom in button is clicked.
+ * @param {function} [onZoomOut] - The function to call when the zoom out button is clicked.
+ * @param {function} [onLocate] - The function to call when the locate button is clicked.
+ * @param {ReactNode} [bottomRightSlot] - The slot to render at the bottom right of the map.
+ */
 interface DeviceMapProps {
     pins: DeviceMapPin[];
-    /**
-     * Optional route polyline as normalized [0..1] coordinates. Rendered
-     * as an SVG path inside the map overlay.
-     */
     route?: DeviceMapRoutePoint[];
     selectedId?: string | null;
     onSelect?: (id: string) => void;
-    /**
-     * Optional center for the coord display. If omitted, the first pin's
-     * coordinates are used.
-     */
     center?: { lat: number; lng: number; label?: string };
-    /**
-     * Map variant: 'default' (grid + radial) or 'satellite' (no grid, darker).
-     */
     variant?: 'default' | 'satellite';
     showLabels?: boolean;
     showRoute?: boolean;
@@ -34,43 +39,11 @@ interface DeviceMapProps {
     onLocate?: () => void;
     bottomRightSlot?: ReactNode;
 }
-
 /**
- * Project lat/lng to 0..1 percent coordinates inside the map placeholder.
- * Uses a simple equirectangular projection; the visible viewport is set
- * to lat ∈ [-60, 75] and the full lng range.
- */
-function project(lat: number, lng: number): { x: number; y: number } {
-    const LAT_MIN = -60;
-    const LAT_MAX = 75;
-    const x = ((lng + 180) / 360) * 100;
-    const y = ((LAT_MAX - lat) / (LAT_MAX - LAT_MIN)) * 100;
-    return {
-        x: Math.max(0, Math.min(100, x)),
-        y: Math.max(0, Math.min(100, y)),
-    };
-}
-
-function formatCoords(lat: number, lng: number): string {
-    return `${Math.abs(lat).toFixed(4)}° ${lat >= 0 ? 'N' : 'S'}, ${Math.abs(lng).toFixed(4)}° ${lng >= 0 ? 'E' : 'W'}`;
-}
-
-function getPathFromRoute(route: DeviceMapRoutePoint[]): string {
-    if (route.length === 0) return '';
-    return route
-        .map((p, i) => {
-            const { x, y } = project(p.lat, p.lng);
-            return `${i === 0 ? 'M' : 'L'}${x.toFixed(2)},${y.toFixed(2)}`;
-        })
-        .join(' ');
-}
-
-/**
- * DeviceMap — placeholder map surface (no real Leaflet integration).
- * Renders a grid + radial gradient surface, optional route polyline,
- * device pins, controls (zoom, locate), and a coords badge.
- *
- * Selecting a pin shows a MapPopover anchored to its lat/lng.
+ * @function DeviceMap
+ * @description A component for rendering a map with pins and routes.
+ * @param {DeviceMapProps} props - The props for the DeviceMap component.
+ * @returns {JSX.Element} The rendered DeviceMap component.
  */
 export default function DeviceMap({
     pins,
@@ -85,11 +58,14 @@ export default function DeviceMap({
     onZoomOut,
     onLocate,
     bottomRightSlot,
-}: DeviceMapProps): React.JSX.Element {
+}: DeviceMapProps): JSX.Element {
     const [internalSelectedId, setInternalSelectedId] = useState<string | null>(null);
     const isControlled = controlledSelectedId !== undefined;
     const selectedId = isControlled ? controlledSelectedId : internalSelectedId;
-
+    /**
+     * Handles the selection of a pin.
+     * @param {string} id - The ID of the pin to select.
+     */
     const handleSelect = useCallback(
         (id: string): void => {
             if (!isControlled) setInternalSelectedId(id);
@@ -97,21 +73,33 @@ export default function DeviceMap({
         },
         [isControlled, onSelect],
     );
-
+    /**
+     * Handles the closing of the popover.
+     * @returns {void}
+     */
     const handleClose = useCallback((): void => {
         if (!isControlled) setInternalSelectedId(null);
     }, [isControlled]);
-
+    /**
+     * Current pin selected.
+     * @returns {DeviceMapPin | null} The selected pin.
+     */
     const selectedPin = useMemo(
         () => pins.find((p) => p.id === selectedId) ?? null,
         [pins, selectedId],
     );
-
-    const projected = useMemo(
-        () => pins.map((pin) => ({ pin, ...project(pin.lat, pin.lng) })),
+    /**
+     * Array of projected coordinates.
+     * @returns {Array} An array of coordinates pins.
+     */
+    const pinsProjected = useMemo(
+        () => pins.map((pin) => ({ pin, ...projectCoordinate(pin.lat, pin.lng) })),
         [pins],
     );
-
+    /**
+     * Center of the map.
+     * @returns {{ lat: number; lng: number; text: string }} The center of the map.
+     */
     const coords = useMemo(() => {
         const c = center ?? (selectedPin
             ? { lat: selectedPin.lat, lng: selectedPin.lng }
@@ -124,12 +112,18 @@ export default function DeviceMap({
             text: formatCoords(c.lat, c.lng),
         };
     }, [center, selectedPin, pins]);
-
+    /**
+     * Route path of the map.
+     * @returns {string} The route path.
+     */
     const routePath = useMemo(
         () => (showRoute && route && route.length > 1 ? getPathFromRoute(route) : ''),
         [route, showRoute],
     );
-
+    /**
+     * Popover device information.
+     * @returns {MapPopoverDevice | null} The popover device.
+     */
     const popoverDevice: MapPopoverDevice | null = selectedPin
         ? {
             id: selectedPin.id,
@@ -140,8 +134,11 @@ export default function DeviceMap({
             lastSeen: selectedPin.lastSeen,
         }
         : null;
-
-    const popoverProjection = selectedPin ? project(selectedPin.lat, selectedPin.lng) : null;
+    /**
+     * Coordinates of the selected pin.
+     * @returns {MapPopoverProjection | null} The popover projection.
+     */
+    const popoverProjection = selectedPin ? projectCoordinate(selectedPin.lat, selectedPin.lng) : null;
 
     return (
         <div
@@ -171,7 +168,7 @@ export default function DeviceMap({
                         </svg>
                     )}
 
-                    {projected.map(({ pin, x, y }) => (
+                    {pinsProjected.map(({ pin, x, y }) => (
                         <div
                             key={pin.id}
                             className="device-map__pin-pos"

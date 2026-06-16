@@ -1,38 +1,28 @@
 import '@/styles/map/map-popover.css';
-//-- React
-import type { ReactNode } from 'react';
 //-- Constants
 import { MAP_STATUS_CLASS, MAP_STATUS_LABEL } from '@/constants/components/map';
 //-- Components
-import type { MarkerStatus } from '@/types/components';
+import type { MapPopoverDevice } from '@/types/components';
 import { ArrowRight, X } from 'lucide-react';
-
-export interface MapPopoverDevice {
-    id: string;
-    name: string;
-    status: MarkerStatus;
-    lat: number;
-    lng: number;
-    lastSeen: string | null;
-    speed?: number | string;
-    battery?: number;
-    heading?: string;
-    extra?: { label: string; value: ReactNode; tone?: 'default' | 'warning' | 'danger' }[];
-}
-
-export interface MapPopoverProps {
+/**
+ * @interface MapPopoverProps
+ * @param {MapPopoverDevice} device - The device to display info for.
+ * @param {string} [href] - Optional link to open in a new tab.
+ * @param {function} [onClose] - Optional function to call when the popover is closed.
+ * @param {function} [onView] - Optional function to call when the view button is clicked.
+ * @param {string} [lastSeenLabel] - Optional label to use for the last seen time.
+ */
+interface MapPopoverProps {
     device: MapPopoverDevice;
     href?: string;
     onClose?: () => void;
     onView?: (id: string) => void;
-    /**
-     * Optional relative timestamp string. If omitted, falls back to lastSeen.
-     */
     lastSeenLabel?: string;
 }
 /**
- * MapPopover — info card anchored above an active MapMarker.
- * Renders inside the map overlay (sibling to MapMarker), positioned by parent.
+ * Render a popover for a device on the map.
+ * @param {MapPopoverProps} props - The props for the component.
+ * @returns {JSX.Element} The rendered component.
  */
 export default function MapPopover({
     device,
