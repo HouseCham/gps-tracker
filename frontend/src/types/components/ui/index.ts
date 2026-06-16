@@ -4,3 +4,6 @@ export * from './dataTable.types';
 export * from './input.types';
 export * from './kpi.types';
 export * from './status.types';
+export * from './dropdown.types';
+export * from './modal.types';
+export * from './toast.types';
