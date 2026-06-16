@@ -53,14 +53,15 @@ const classes = ['device-card', className].filter(Boolean).join(' ');
 <style>
     .device-card {
         background: var(--surface);
-        border: 1px solid var(--border);
+        border: none;
         border-radius: var(--radius);
+        box-shadow: var(--shadow-md);
         transition:
-            border-color var(--transition),
+            box-shadow var(--transition),
             background var(--transition);
     }
     .device-card:hover {
-        border-color: var(--accent);
+        box-shadow: var(--shadow-lg);
         background: var(--surface-2);
     }
 
@@ -80,10 +81,12 @@ const classes = ['device-card', className].filter(Boolean).join(' ');
 
     .device-card__name {
         margin: 0;
-        font-size: 15px;
+        font-family: var(--font-display);
+        font-size: 16px;
         font-weight: 600;
         color: var(--text);
-        line-height: 1.2;
+        line-height: 1.1;
+        letter-spacing: 0;
     }
 
     .device-card__meta {
