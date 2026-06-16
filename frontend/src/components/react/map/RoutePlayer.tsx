@@ -57,14 +57,14 @@ export default function RoutePlayer({
         (e: React.ChangeEvent<HTMLInputElement>): void => {
             onSeek?.(Number(e.target.value) / 1000);
         },
-        [onSeek],
+        [onSeek]
     );
 
     const handleSpeed = useCallback(
         (next: RouteSpeed): void => {
             onSpeedChange?.(next);
         },
-        [onSpeedChange],
+        [onSpeedChange]
     );
 
     return (
@@ -131,8 +131,12 @@ export default function RoutePlayer({
                 </div>
             </div>
 
-            <div className="route-player__speed" role="group" aria-label="Playback speed">
-                {MAP_SPEED_OPTIONS.map((option) => (
+            <div
+                className="route-player__speed"
+                role="group"
+                aria-label="Playback speed"
+            >
+                {MAP_SPEED_OPTIONS.map(option => (
                     <button
                         key={option}
                         type="button"

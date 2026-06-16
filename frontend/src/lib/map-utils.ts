@@ -1,4 +1,4 @@
-import type { Coordinate, DeviceMapRoutePoint } from "@/types/components";
+import type { Coordinate, DeviceMapRoutePoint } from '@/types/components';
 /**
  * Project a latitude and longitude onto a 100x100 grid
  * @param {number} lat - The latitude to project.

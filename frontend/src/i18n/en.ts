@@ -133,7 +133,8 @@ export const en = {
             save: 'Save',
             saving: 'Saving...',
             cancel: 'Cancel',
-            deleteConfirm: 'Are you sure you want to delete this device? This action cannot be undone.',
+            deleteConfirm:
+                'Are you sure you want to delete this device? This action cannot be undone.',
         },
         table: {
             name: 'Name',

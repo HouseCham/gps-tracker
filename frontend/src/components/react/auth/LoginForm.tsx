@@ -37,7 +37,9 @@ export default function LoginForm({
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+    const [errors, setErrors] = useState<{ email?: string; password?: string }>(
+        {}
+    );
 
     const s = {
         email: 'Email address',
@@ -55,7 +57,7 @@ export default function LoginForm({
         loginSubtitle: 'Sign in to your GPS Tracker account',
         ...strings,
     };
-    
+
     /**
      * Validates the form data.
      * @returns {boolean} Whether the form is valid.
@@ -86,40 +88,78 @@ export default function LoginForm({
                 <p className="login-form__subtitle">{s.loginSubtitle}</p>
             </div>
 
-            {error && <p className="login-form__banner" role="alert">{error}</p>}
+            {error && (
+                <p className="login-form__banner" role="alert">
+                    {error}
+                </p>
+            )}
 
-            <div className={`login-form__field ${errors.email ? 'login-form__field--error' : ''}`}>
-                <label className="login-form__label" htmlFor={emailId}>{s.email}</label>
+            <div
+                className={`login-form__field ${errors.email ? 'login-form__field--error' : ''}`}
+            >
+                <label className="login-form__label" htmlFor={emailId}>
+                    {s.email}
+                </label>
                 <input
                     id={emailId}
                     className="login-form__input"
                     type="email"
                     value={email}
-                    onChange={(e) => { setEmail(e.target.value); setErrors((p) => ({ ...p, email: undefined })); }}
+                    onChange={e => {
+                        setEmail(e.target.value);
+                        setErrors(p => ({ ...p, email: undefined }));
+                    }}
                     placeholder={s.emailPlaceholder}
                     disabled={loading}
                     autoComplete="email"
                     aria-invalid={!!errors.email}
-                    aria-describedby={errors.email ? `${emailId}-err` : undefined}
+                    aria-describedby={
+                        errors.email ? `${emailId}-err` : undefined
+                    }
                 />
-                {errors.email && <p id={`${emailId}-err`} className="login-form__error" role="alert">{errors.email}</p>}
+                {errors.email && (
+                    <p
+                        id={`${emailId}-err`}
+                        className="login-form__error"
+                        role="alert"
+                    >
+                        {errors.email}
+                    </p>
+                )}
             </div>
 
-            <div className={`login-form__field ${errors.password ? 'login-form__field--error' : ''}`}>
-                <label className="login-form__label" htmlFor={passId}>{s.password}</label>
+            <div
+                className={`login-form__field ${errors.password ? 'login-form__field--error' : ''}`}
+            >
+                <label className="login-form__label" htmlFor={passId}>
+                    {s.password}
+                </label>
                 <input
                     id={passId}
                     className="login-form__input"
                     type="password"
                     value={password}
-                    onChange={(e) => { setPassword(e.target.value); setErrors((p) => ({ ...p, password: undefined })); }}
+                    onChange={e => {
+                        setPassword(e.target.value);
+                        setErrors(p => ({ ...p, password: undefined }));
+                    }}
                     placeholder={s.passwordPlaceholder}
                     disabled={loading}
                     autoComplete="current-password"
                     aria-invalid={!!errors.password}
-                    aria-describedby={errors.password ? `${passId}-err` : undefined}
+                    aria-describedby={
+                        errors.password ? `${passId}-err` : undefined
+                    }
                 />
-                {errors.password && <p id={`${passId}-err`} className="login-form__error" role="alert">{errors.password}</p>}
+                {errors.password && (
+                    <p
+                        id={`${passId}-err`}
+                        className="login-form__error"
+                        role="alert"
+                    >
+                        {errors.password}
+                    </p>
+                )}
             </div>
 
             <button
@@ -132,7 +172,12 @@ export default function LoginForm({
 
             <p className="login-form__switch">
                 {s.noAccount}{' '}
-                <button type="button" className="login-form__link" onClick={onSwitchToSignup} disabled={loading}>
+                <button
+                    type="button"
+                    className="login-form__link"
+                    onClick={onSwitchToSignup}
+                    disabled={loading}
+                >
                     {s.signupLink}
                 </button>
             </p>

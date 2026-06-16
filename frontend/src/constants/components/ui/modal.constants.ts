@@ -1,10 +1,5 @@
 import type { ToastVariant } from '@/types/components/ui';
-import {
-    CheckCircle2,
-    CircleX,
-    Info,
-    TriangleAlert,
-} from 'lucide-react';
+import { CheckCircle2, CircleX, Info, TriangleAlert } from 'lucide-react';
 /**
  * @constant
  * @description Icon for each toast variant

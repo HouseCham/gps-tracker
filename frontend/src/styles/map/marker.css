@@ -38,7 +38,9 @@
     box-shadow:
         0 0 0 2px var(--bg),
         0 0 0 3px var(--border);
-    transition: transform var(--transition), box-shadow var(--transition);
+    transition:
+        transform var(--transition),
+        box-shadow var(--transition);
 }
 
 .map-marker:hover .map-marker__dot {
@@ -64,7 +66,8 @@
     color: var(--green);
 }
 .map-marker--online .map-marker__pulse {
-    animation: marker-pulse 2.4s var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1)) infinite;
+    animation: marker-pulse 2.4s var(--ease-out, cubic-bezier(0.16, 1, 0.3, 1))
+        infinite;
 }
 .map-marker--online .map-marker__dot {
     box-shadow:

@@ -1,4 +1,4 @@
-import type { GetStaticPaths } from "astro";
+import type { GetStaticPaths } from 'astro';
 /**
  * Get static paths for all supported locales
  * @returns {GetStaticPaths}

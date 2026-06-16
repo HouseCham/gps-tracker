@@ -21,7 +21,9 @@
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
-    transition: background var(--transition), border-color var(--transition);
+    transition:
+        background var(--transition),
+        border-color var(--transition);
     font-family: inherit;
 }
 
@@ -120,7 +122,9 @@
     cursor: pointer;
     width: 100%;
     font-family: inherit;
-    transition: background var(--transition), color var(--transition);
+    transition:
+        background var(--transition),
+        color var(--transition);
 }
 
 .dropdown-item:hover:not(.is-disabled) {

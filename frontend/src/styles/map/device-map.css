@@ -20,15 +20,8 @@
     min-height: 360px;
     background-color: #0d1015;
     background-image:
-        linear-gradient(
-            rgba(255, 255, 255, 0.04) 1px,
-            transparent 1px
-        ),
-        linear-gradient(
-            90deg,
-            rgba(255, 255, 255, 0.04) 1px,
-            transparent 1px
-        ),
+        linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
         radial-gradient(
             circle at 30% 40%,
             rgba(59, 130, 246, 0.08),
@@ -63,7 +56,9 @@
             rgba(34, 197, 94, 0.04),
             transparent 60%
         );
-    background-size: 8px 8px, 100% 100%;
+    background-size:
+        8px 8px,
+        100% 100%;
     background-color: #060709;
 }
 
@@ -130,7 +125,9 @@
     border: 0;
     color: var(--text);
     cursor: pointer;
-    transition: background var(--transition), color var(--transition);
+    transition:
+        background var(--transition),
+        color var(--transition);
     font-family: inherit;
 }
 

@@ -1,5 +1,5 @@
-import type { DeviceData } from "@/types/components";
-import type { DataTableColumn } from "@/types/components/ui";
+import type { DeviceData } from '@/types/components';
+import type { DataTableColumn } from '@/types/components/ui';
 /**
  * @constant DEVICE_TABLE_COLUMNS
  * @description Columns for the device table

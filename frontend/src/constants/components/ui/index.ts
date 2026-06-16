@@ -1,1 +1,1 @@
-export * from "./modal.constants"
+export * from './modal.constants';

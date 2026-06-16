@@ -70,7 +70,8 @@ export default function DeviceFormGallery(): JSX.Element {
 
             {submitted && (
                 <div className="dfg__result">
-                    <strong>Submitted:</strong> {submitted.name} — {submitted.uuid_firmware}
+                    <strong>Submitted:</strong> {submitted.name} —{' '}
+                    {submitted.uuid_firmware}
                 </div>
             )}
         </div>

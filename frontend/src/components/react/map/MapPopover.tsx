@@ -38,8 +38,11 @@ export default function MapPopover({
 
     const formattedCoords = `${device.lat.toFixed(4)}° ${device.lat >= 0 ? 'N' : 'S'}, ${device.lng.toFixed(4)}° ${device.lng >= 0 ? 'E' : 'W'}`;
 
-    const lastSeen = lastSeenLabel ??
-        (device.lastSeen ? new Date(device.lastSeen).toLocaleString() : 'Never');
+    const lastSeen =
+        lastSeenLabel ??
+        (device.lastSeen
+            ? new Date(device.lastSeen).toLocaleString()
+            : 'Never');
 
     return (
         <div
@@ -92,12 +95,14 @@ export default function MapPopover({
                         </span>
                     </div>
                 )}
-                {device.extra?.map((row) => (
+                {device.extra?.map(row => (
                     <div className="map-popover__field" key={row.label}>
                         <span className="map-popover__label">{row.label}</span>
                         <span
                             className={`map-popover__value map-popover__value--mono ${
-                                row.tone === 'warning' ? 'map-popover__value--warn' : ''
+                                row.tone === 'warning'
+                                    ? 'map-popover__value--warn'
+                                    : ''
                             }${row.tone === 'danger' ? ' map-popover__value--danger' : ''}`}
                         >
                             {row.value}

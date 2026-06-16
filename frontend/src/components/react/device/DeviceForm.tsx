@@ -46,7 +46,7 @@ export default function DeviceForm({
     const [deleteConfirm, setDeleteConfirm] = useState(false);
 
     const s = {
-        ...{
+        ...({
             title: 'Create Device',
             nameLabel: 'Name',
             namePlaceholder: 'Delivery Van #3',
@@ -60,7 +60,7 @@ export default function DeviceForm({
             cancel: 'Cancel',
             deleteConfirm: 'Are you sure you want to delete this device?',
             deleteDevice: 'Delete Device',
-        } as DeviceFormStrings,
+        } as DeviceFormStrings),
         ...strings,
     };
 
@@ -97,7 +97,9 @@ export default function DeviceForm({
         <form className="device-form" onSubmit={handleSubmit} noValidate>
             <h2 className="device-form__title">{s.title}</h2>
 
-            <div className={`device-form__field ${errors.name ? 'device-form__field--error' : ''}`}>
+            <div
+                className={`device-form__field ${errors.name ? 'device-form__field--error' : ''}`}
+            >
                 <label className="device-form__label" htmlFor={nameId}>
                     {s.nameLabel}
                 </label>
@@ -106,18 +108,29 @@ export default function DeviceForm({
                     className="device-form__input"
                     type="text"
                     value={name}
-                    onChange={(e) => { setName(e.target.value); setErrors((p) => ({ ...p, name: undefined })); }}
+                    onChange={e => {
+                        setName(e.target.value);
+                        setErrors(p => ({ ...p, name: undefined }));
+                    }}
                     placeholder={s.namePlaceholder}
                     disabled={saving}
                     aria-invalid={!!errors.name}
                     aria-describedby={errors.name ? `${nameId}-err` : undefined}
                 />
                 {errors.name && (
-                    <p id={`${nameId}-err`} className="device-form__error" role="alert">{errors.name}</p>
+                    <p
+                        id={`${nameId}-err`}
+                        className="device-form__error"
+                        role="alert"
+                    >
+                        {errors.name}
+                    </p>
                 )}
             </div>
 
-            <div className={`device-form__field ${errors.uuid ? 'device-form__field--error' : ''}`}>
+            <div
+                className={`device-form__field ${errors.uuid ? 'device-form__field--error' : ''}`}
+            >
                 <label className="device-form__label" htmlFor={uuidId}>
                     {s.uuidLabel}
                 </label>
@@ -126,14 +139,23 @@ export default function DeviceForm({
                     className="device-form__input device-form__input--mono"
                     type="text"
                     value={uuid}
-                    onChange={(e) => { setUuid(e.target.value); setErrors((p) => ({ ...p, uuid: undefined })); }}
+                    onChange={e => {
+                        setUuid(e.target.value);
+                        setErrors(p => ({ ...p, uuid: undefined }));
+                    }}
                     placeholder={s.uuidPlaceholder}
                     disabled={saving}
                     aria-invalid={!!errors.uuid}
                     aria-describedby={errors.uuid ? `${uuidId}-err` : undefined}
                 />
                 {errors.uuid && (
-                    <p id={`${uuidId}-err`} className="device-form__error" role="alert">{errors.uuid}</p>
+                    <p
+                        id={`${uuidId}-err`}
+                        className="device-form__error"
+                        role="alert"
+                    >
+                        {errors.uuid}
+                    </p>
                 )}
             </div>
 

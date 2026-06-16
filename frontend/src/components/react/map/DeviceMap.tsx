@@ -1,15 +1,23 @@
-import '@/styles/map/device-map.css'
+import '@/styles/map/device-map.css';
 //-- React
 import type { JSX, ReactNode } from 'react';
 import { useCallback, useMemo, useState } from 'react';
 //-- Types
-import type { DeviceMapPin, DeviceMapRoutePoint, MapPopoverDevice } from '@/types/components';
+import type {
+    DeviceMapPin,
+    DeviceMapRoutePoint,
+    MapPopoverDevice,
+} from '@/types/components';
 //-- Icons
 import { MapPin, Plus, Minus, Locate } from 'lucide-react';
 //-- Components
 import MapMarker from './MapMarker';
 import MapPopover from './MapPopover';
-import { formatCoords, getPathFromRoute, projectCoordinate } from '@/lib/map-utils';
+import {
+    formatCoords,
+    getPathFromRoute,
+    projectCoordinate,
+} from '@/lib/map-utils';
 /**
  * @interface DeviceMapProps
  * @param {DeviceMapPin[]} pins - The pins to render on the map.
@@ -59,7 +67,9 @@ export default function DeviceMap({
     onLocate,
     bottomRightSlot,
 }: DeviceMapProps): JSX.Element {
-    const [internalSelectedId, setInternalSelectedId] = useState<string | null>(null);
+    const [internalSelectedId, setInternalSelectedId] = useState<string | null>(
+        null
+    );
     const isControlled = controlledSelectedId !== undefined;
     const selectedId = isControlled ? controlledSelectedId : internalSelectedId;
     /**
@@ -71,7 +81,7 @@ export default function DeviceMap({
             if (!isControlled) setInternalSelectedId(id);
             onSelect?.(id);
         },
-        [isControlled, onSelect],
+        [isControlled, onSelect]
     );
     /**
      * Handles the closing of the popover.
@@ -85,27 +95,30 @@ export default function DeviceMap({
      * @returns {DeviceMapPin | null} The selected pin.
      */
     const selectedPin = useMemo(
-        () => pins.find((p) => p.id === selectedId) ?? null,
-        [pins, selectedId],
+        () => pins.find(p => p.id === selectedId) ?? null,
+        [pins, selectedId]
     );
     /**
      * Array of projected coordinates.
      * @returns {Array} An array of coordinates pins.
      */
     const pinsProjected = useMemo(
-        () => pins.map((pin) => ({ pin, ...projectCoordinate(pin.lat, pin.lng) })),
-        [pins],
+        () =>
+            pins.map(pin => ({ pin, ...projectCoordinate(pin.lat, pin.lng) })),
+        [pins]
     );
     /**
      * Center of the map.
      * @returns {{ lat: number; lng: number; text: string }} The center of the map.
      */
     const coords = useMemo(() => {
-        const c = center ?? (selectedPin
-            ? { lat: selectedPin.lat, lng: selectedPin.lng }
-            : pins[0]
-                ? { lat: pins[0].lat, lng: pins[0].lng }
-                : null);
+        const c =
+            center ??
+            (selectedPin
+                ? { lat: selectedPin.lat, lng: selectedPin.lng }
+                : pins[0]
+                  ? { lat: pins[0].lat, lng: pins[0].lng }
+                  : null);
         if (!c) return null;
         return {
             ...c,
@@ -117,8 +130,11 @@ export default function DeviceMap({
      * @returns {string} The route path.
      */
     const routePath = useMemo(
-        () => (showRoute && route && route.length > 1 ? getPathFromRoute(route) : ''),
-        [route, showRoute],
+        () =>
+            showRoute && route && route.length > 1
+                ? getPathFromRoute(route)
+                : '',
+        [route, showRoute]
     );
     /**
      * Popover device information.
@@ -126,19 +142,21 @@ export default function DeviceMap({
      */
     const popoverDevice: MapPopoverDevice | null = selectedPin
         ? {
-            id: selectedPin.id,
-            name: selectedPin.name,
-            status: selectedPin.status,
-            lat: selectedPin.lat,
-            lng: selectedPin.lng,
-            lastSeen: selectedPin.lastSeen,
-        }
+              id: selectedPin.id,
+              name: selectedPin.name,
+              status: selectedPin.status,
+              lat: selectedPin.lat,
+              lng: selectedPin.lng,
+              lastSeen: selectedPin.lastSeen,
+          }
         : null;
     /**
      * Coordinates of the selected pin.
      * @returns {MapPopoverProjection | null} The popover projection.
      */
-    const popoverProjection = selectedPin ? projectCoordinate(selectedPin.lat, selectedPin.lng) : null;
+    const popoverProjection = selectedPin
+        ? projectCoordinate(selectedPin.lat, selectedPin.lng)
+        : null;
 
     return (
         <div
@@ -204,7 +222,11 @@ export default function DeviceMap({
                     )}
                 </div>
 
-                <div className="device-map__controls" role="toolbar" aria-label="Map controls">
+                <div
+                    className="device-map__controls"
+                    role="toolbar"
+                    aria-label="Map controls"
+                >
                     <button
                         type="button"
                         className="device-map__control"
@@ -234,15 +256,21 @@ export default function DeviceMap({
                 {coords && (
                     <div className="device-map__coords" aria-live="polite">
                         <MapPin size={12} strokeWidth={2} aria-hidden="true" />
-                        <span className="device-map__coords-text">{coords.text}</span>
+                        <span className="device-map__coords-text">
+                            {coords.text}
+                        </span>
                         {coords.label && (
-                            <span className="device-map__coords-label">· {coords.label}</span>
+                            <span className="device-map__coords-label">
+                                · {coords.label}
+                            </span>
                         )}
                     </div>
                 )}
 
                 {bottomRightSlot && (
-                    <div className="device-map__bottom-right">{bottomRightSlot}</div>
+                    <div className="device-map__bottom-right">
+                        {bottomRightSlot}
+                    </div>
                 )}
 
                 <div className="device-map__attribution" aria-hidden="true">

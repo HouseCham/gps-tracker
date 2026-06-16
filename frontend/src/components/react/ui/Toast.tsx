@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState, type ReactElement } from 'react';
+import {
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
+    type ReactElement,
+} from 'react';
 import { createPortal } from 'react-dom';
 import { CheckCircle2, CircleX, Info, TriangleAlert, X } from 'lucide-react';
 import './toast.css';
@@ -47,7 +53,9 @@ export default function Toast({
     useEffect(() => {
         if (duration <= 0) return;
         timerRef.current = setTimeout((): void => setHiding(true), duration);
-        return (): void => { if (timerRef.current) clearTimeout(timerRef.current); };
+        return (): void => {
+            if (timerRef.current) clearTimeout(timerRef.current);
+        };
     }, [duration]);
 
     useEffect(() => {
@@ -56,12 +64,19 @@ export default function Toast({
         return (): void => clearTimeout(t);
     }, [hiding, onClose]);
 
-    const handleAction = (): void => { action?.onClick(); setHiding(true); };
+    const handleAction = (): void => {
+        action?.onClick();
+        setHiding(true);
+    };
 
     return (
         <div
             className={`toast ${VARIANT_CLASS[variant]} ${hiding ? 'is-hiding' : ''}`}
-            role={variant === 'error' || variant === 'warning' ? 'alert' : 'status'}
+            role={
+                variant === 'error' || variant === 'warning'
+                    ? 'alert'
+                    : 'status'
+            }
             aria-live={variant === 'error' ? 'assertive' : 'polite'}
         >
             <span className="toast-icon" aria-hidden="true">
@@ -79,7 +94,11 @@ export default function Toast({
                 )}
             </div>
             {action && (
-                <button type="button" className="toast-action" onClick={handleAction}>
+                <button
+                    type="button"
+                    className="toast-action"
+                    onClick={handleAction}
+                >
                     {action.label}
                 </button>
             )}
@@ -98,7 +117,13 @@ export default function Toast({
 export interface ToastContainerProps {
     toasts: ToastItem[];
     onClose: (id: string) => void;
-    position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
+    position?:
+        | 'top-right'
+        | 'top-left'
+        | 'bottom-right'
+        | 'bottom-left'
+        | 'top-center'
+        | 'bottom-center';
 }
 
 export function ToastContainer({
@@ -108,8 +133,11 @@ export function ToastContainer({
 }: ToastContainerProps): React.JSX.Element | null {
     if (typeof document === 'undefined') return null;
     return createPortal(
-        <div className={`toast-stack toast-stack--${position}`} aria-label="Notifications">
-            {toasts.map((t) => (
+        <div
+            className={`toast-stack toast-stack--${position}`}
+            aria-label="Notifications"
+        >
+            {toasts.map(t => (
                 <Toast
                     key={t.id}
                     id={t.id}
@@ -122,7 +150,7 @@ export function ToastContainer({
                 />
             ))}
         </div>,
-        document.body,
+        document.body
     );
 }
 
@@ -150,16 +178,20 @@ export function useToast(options: UseToastOptions = {}): ToastHandle {
     }, []);
 
     const dismiss = useCallback((id: string): void => {
-        setToasts((prev): ToastItem[] => prev.filter((t) => t.id !== id));
+        setToasts((prev): ToastItem[] => prev.filter(t => t.id !== id));
     }, []);
 
     const clear = useCallback((): void => setToasts([]), []);
 
     const Container = useCallback(
         (): ReactElement => (
-            <ToastContainer toasts={toasts} onClose={dismiss} position={options.position} />
+            <ToastContainer
+                toasts={toasts}
+                onClose={dismiss}
+                position={options.position}
+            />
         ),
-        [toasts, dismiss, options.position],
+        [toasts, dismiss, options.position]
     );
 
     return { toasts, push, dismiss, clear, Container };

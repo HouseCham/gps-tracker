@@ -135,7 +135,8 @@ export const es: Translation = {
             save: 'Guardar',
             saving: 'Guardando...',
             cancel: 'Cancelar',
-            deleteConfirm: '¿Estás seguro de eliminar este dispositivo? Esta acción no se puede deshacer.',
+            deleteConfirm:
+                '¿Estás seguro de eliminar este dispositivo? Esta acción no se puede deshacer.',
         },
         table: {
             name: 'Nombre',

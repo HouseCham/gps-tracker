@@ -86,4 +86,4 @@ export interface DeviceFormStrings {
     cancel?: string;
     deleteConfirm?: string;
     deleteDevice?: string;
-};
+}

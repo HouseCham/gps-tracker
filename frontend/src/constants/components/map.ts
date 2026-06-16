@@ -1,4 +1,9 @@
-import type { DeviceMapPin, DeviceMapRoutePoint, MarkerStatus, RouteSpeed } from "@/types/components";
+import type {
+    DeviceMapPin,
+    DeviceMapRoutePoint,
+    MarkerStatus,
+    RouteSpeed,
+} from '@/types/components';
 /**
  * @constant MAP_STATUS_LABEL
  * @description Label for each marker status
@@ -27,11 +32,46 @@ export const MAP_STATUS_CLASS: Record<MarkerStatus, string> = {
  * @type {DeviceMapPin[]}
  */
 export const MAP_DEMO_PINS: DeviceMapPin[] = [
-    { id: 'D-001', name: 'Delivery Van #3',   status: 'online',     lat:  19.4326, lng: -99.1332, lastSeen: new Date(Date.now() - 2 * 60000).toISOString() },
-    { id: 'D-002', name: 'Fleet Unit #7',     status: 'online',     lat:  29.6200, lng: -99.1500, lastSeen: new Date(Date.now() - 8 * 60000).toISOString() },
-    { id: 'D-003', name: 'Cargo Truck #12',   status: 'online',     lat:  39.4450, lng: -99.1150, lastSeen: new Date(Date.now() - 1 * 60000).toISOString() },
-    { id: 'D-004', name: 'Service Van #2',    status: 'offline',    lat:  49.4050, lng: -99.1600, lastSeen: new Date(Date.now() - 4 * 3600000).toISOString() },
-    { id: 'D-005', name: 'ESP32-A4:CF:12',    status: 'never-seen', lat:  59.4380, lng: -99.1000, lastSeen: null },
+    {
+        id: 'D-001',
+        name: 'Delivery Van #3',
+        status: 'online',
+        lat: 19.4326,
+        lng: -99.1332,
+        lastSeen: new Date(Date.now() - 2 * 60000).toISOString(),
+    },
+    {
+        id: 'D-002',
+        name: 'Fleet Unit #7',
+        status: 'online',
+        lat: 29.62,
+        lng: -99.15,
+        lastSeen: new Date(Date.now() - 8 * 60000).toISOString(),
+    },
+    {
+        id: 'D-003',
+        name: 'Cargo Truck #12',
+        status: 'online',
+        lat: 39.445,
+        lng: -99.115,
+        lastSeen: new Date(Date.now() - 1 * 60000).toISOString(),
+    },
+    {
+        id: 'D-004',
+        name: 'Service Van #2',
+        status: 'offline',
+        lat: 49.405,
+        lng: -99.16,
+        lastSeen: new Date(Date.now() - 4 * 3600000).toISOString(),
+    },
+    {
+        id: 'D-005',
+        name: 'ESP32-A4:CF:12',
+        status: 'never-seen',
+        lat: 59.438,
+        lng: -99.1,
+        lastSeen: null,
+    },
 ];
 /**
  * @constant MAP_DEMO_ROUTE
@@ -39,10 +79,10 @@ export const MAP_DEMO_PINS: DeviceMapPin[] = [
  * @type {DeviceMapRoutePoint[]}
  */
 export const MAP_DEMO_ROUTE: DeviceMapRoutePoint[] = [
-    { lat: 19.4050, lng: -99.1600 },
-    { lat: 19.4100, lng: -99.1500 },
-    { lat: 19.4200, lng: -99.1450 },
-    { lat: 19.4250, lng: -99.1380 },
+    { lat: 19.405, lng: -99.16 },
+    { lat: 19.41, lng: -99.15 },
+    { lat: 19.42, lng: -99.145 },
+    { lat: 19.425, lng: -99.138 },
     { lat: 19.4326, lng: -99.1332 },
 ];
 /**

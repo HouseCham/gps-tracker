@@ -64,7 +64,7 @@ export default function Modal({
 
     const onSentinelFocus = (dir: 'start' | 'end'): void => {
         const all = panelRef.current?.querySelectorAll<HTMLElement>(
-            'a[href],button:not([disabled]),textarea,input,select,[tabindex]:not([tabindex="-1"])',
+            'a[href],button:not([disabled]),textarea,input,select,[tabindex]:not([tabindex="-1"])'
         );
         if (!all || all.length === 0) return;
         (dir === 'start' ? all[all.length - 1] : all[0])?.focus();
@@ -89,7 +89,9 @@ export default function Modal({
                 tabIndex={-1}
             >
                 <header className="modal-head">
-                    <h2 id={titleId} className="modal-title">{title}</h2>
+                    <h2 id={titleId} className="modal-title">
+                        {title}
+                    </h2>
                     <button
                         type="button"
                         className="modal-close"

@@ -113,9 +113,10 @@ export default function GalleryIslands(): JSX.Element {
                     }
                 >
                     <p>
-                        Are you sure you want to delete <strong>Delivery Van #3</strong>?
-                        This action cannot be undone. All location history will be
-                        permanently removed.
+                        Are you sure you want to delete{' '}
+                        <strong>Delivery Van #3</strong>? This action cannot be
+                        undone. All location history will be permanently
+                        removed.
                     </p>
                 </Modal>
 
@@ -127,8 +128,8 @@ export default function GalleryIslands(): JSX.Element {
                 >
                     <p>
                         Search for a user and assign them a role on this device.
-                        Owners can manage access; editors can update; viewers are
-                        read-only.
+                        Owners can manage access; editors can update; viewers
+                        are read-only.
                     </p>
                 </Modal>
             </section>

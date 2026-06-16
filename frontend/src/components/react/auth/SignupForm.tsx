@@ -1,4 +1,3 @@
-
 import '@/styles/components/signup-form.css';
 //-- React
 import { useId, useState } from 'react';
@@ -89,14 +88,23 @@ export default function SignupForm({
     function handleSubmit(e: SyntheticEvent<HTMLFormElement>): void {
         e.preventDefault();
         if (!validate()) return;
-        onSubmit({ email: email.trim(), name: name.trim(), lastname: lastname.trim(), password });
+        onSubmit({
+            email: email.trim(),
+            name: name.trim(),
+            lastname: lastname.trim(),
+            password,
+        });
     }
     /**
      * Clears the error for a specific field.
      * @param {string} field - The field to clear the error for.
      */
     function clearError(field: string): void {
-        setErrors((p) => { const n = { ...p }; delete n[field]; return n; });
+        setErrors(p => {
+            const n = { ...p };
+            delete n[field];
+            return n;
+        });
     }
 
     return (
@@ -106,68 +114,112 @@ export default function SignupForm({
                 <p className="signup-form__subtitle">{s.signupSubtitle}</p>
             </div>
 
-            {error && <p className="signup-form__banner" role="alert">{error}</p>}
+            {error && (
+                <p className="signup-form__banner" role="alert">
+                    {error}
+                </p>
+            )}
 
             <div className={`signup-form__row`}>
-                <div className={`signup-form__field ${errors.name ? 'signup-form__field--error' : ''}`}>
-                    <label className="signup-form__label" htmlFor={nameId}>{s.name}</label>
+                <div
+                    className={`signup-form__field ${errors.name ? 'signup-form__field--error' : ''}`}
+                >
+                    <label className="signup-form__label" htmlFor={nameId}>
+                        {s.name}
+                    </label>
                     <input
                         id={nameId}
                         className="signup-form__input"
                         type="text"
                         value={name}
-                        onChange={(e) => { setName(e.target.value); clearError('name'); }}
+                        onChange={e => {
+                            setName(e.target.value);
+                            clearError('name');
+                        }}
                         placeholder={s.namePlaceholder}
                         disabled={loading}
                         aria-invalid={!!errors.name}
                     />
-                    {errors.name && <p className="signup-form__error" role="alert">{errors.name}</p>}
+                    {errors.name && (
+                        <p className="signup-form__error" role="alert">
+                            {errors.name}
+                        </p>
+                    )}
                 </div>
 
-                <div className={`signup-form__field ${errors.lastname ? 'signup-form__field--error' : ''}`}>
-                    <label className="signup-form__label" htmlFor={lastnameId}>{s.lastname}</label>
+                <div
+                    className={`signup-form__field ${errors.lastname ? 'signup-form__field--error' : ''}`}
+                >
+                    <label className="signup-form__label" htmlFor={lastnameId}>
+                        {s.lastname}
+                    </label>
                     <input
                         id={lastnameId}
                         className="signup-form__input"
                         type="text"
                         value={lastname}
-                        onChange={(e) => { setLastname(e.target.value); clearError('lastname'); }}
+                        onChange={e => {
+                            setLastname(e.target.value);
+                            clearError('lastname');
+                        }}
                         placeholder={s.lastnamePlaceholder}
                         disabled={loading}
                     />
                 </div>
             </div>
 
-            <div className={`signup-form__field ${errors.email ? 'signup-form__field--error' : ''}`}>
-                <label className="signup-form__label" htmlFor={emailId}>{s.email}</label>
+            <div
+                className={`signup-form__field ${errors.email ? 'signup-form__field--error' : ''}`}
+            >
+                <label className="signup-form__label" htmlFor={emailId}>
+                    {s.email}
+                </label>
                 <input
                     id={emailId}
                     className="signup-form__input"
                     type="email"
                     value={email}
-                    onChange={(e) => { setEmail(e.target.value); clearError('email'); }}
+                    onChange={e => {
+                        setEmail(e.target.value);
+                        clearError('email');
+                    }}
                     placeholder={s.emailPlaceholder}
                     disabled={loading}
                     autoComplete="email"
                     aria-invalid={!!errors.email}
                 />
-                {errors.email && <p className="signup-form__error" role="alert">{errors.email}</p>}
+                {errors.email && (
+                    <p className="signup-form__error" role="alert">
+                        {errors.email}
+                    </p>
+                )}
             </div>
 
-            <div className={`signup-form__field ${errors.password ? 'signup-form__field--error' : ''}`}>
-                <label className="signup-form__label" htmlFor={passId}>{s.password}</label>
+            <div
+                className={`signup-form__field ${errors.password ? 'signup-form__field--error' : ''}`}
+            >
+                <label className="signup-form__label" htmlFor={passId}>
+                    {s.password}
+                </label>
                 <input
                     id={passId}
                     className="signup-form__input"
                     type="password"
                     value={password}
-                    onChange={(e) => { setPassword(e.target.value); clearError('password'); }}
+                    onChange={e => {
+                        setPassword(e.target.value);
+                        clearError('password');
+                    }}
                     placeholder={s.passwordPlaceholder}
                     disabled={loading}
                     autoComplete="new-password"
                     aria-invalid={!!errors.password}
                 />
-                {errors.password && <p className="signup-form__error" role="alert">{errors.password}</p>}
+                {errors.password && (
+                    <p className="signup-form__error" role="alert">
+                        {errors.password}
+                    </p>
+                )}
             </div>
 
             <button
@@ -180,7 +232,12 @@ export default function SignupForm({
 
             <p className="signup-form__switch">
                 {s.haveAccount}{' '}
-                <button type="button" className="signup-form__link" onClick={onSwitchToLogin} disabled={loading}>
+                <button
+                    type="button"
+                    className="signup-form__link"
+                    onClick={onSwitchToLogin}
+                    disabled={loading}
+                >
                     {s.loginLink}
                 </button>
             </p>

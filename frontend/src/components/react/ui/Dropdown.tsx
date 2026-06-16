@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import {
+    useCallback,
+    useEffect,
+    useId,
+    useRef,
+    useState,
+    type ReactNode,
+} from 'react';
 import { ChevronDown } from 'lucide-react';
 import './dropdown.css';
 
@@ -42,7 +49,8 @@ export default function Dropdown({
     ariaLabel,
 }: DropdownProps): React.JSX.Element {
     const isControlled = controlledOpen !== undefined;
-    const [uncontrolledOpen, setUncontrolledOpen] = useState<boolean>(defaultOpen);
+    const [uncontrolledOpen, setUncontrolledOpen] =
+        useState<boolean>(defaultOpen);
     const open = isControlled ? controlledOpen : uncontrolledOpen;
 
     const menuId = useId();
@@ -54,13 +62,16 @@ export default function Dropdown({
             if (!isControlled) setUncontrolledOpen(next);
             onOpenChange?.(next);
         },
-        [isControlled, onOpenChange],
+        [isControlled, onOpenChange]
     );
 
     useEffect(() => {
         if (!open) return;
         const onPointer = (e: MouseEvent): void => {
-            if (rootRef.current && !rootRef.current.contains(e.target as Node)) {
+            if (
+                rootRef.current &&
+                !rootRef.current.contains(e.target as Node)
+            ) {
                 setOpen(false);
             }
         };
@@ -115,7 +126,11 @@ export default function Dropdown({
     };
 
     return (
-        <div ref={rootRef} className={`dropdown ${open ? 'is-open' : ''}`} data-side={resolvedSide}>
+        <div
+            ref={rootRef}
+            className={`dropdown ${open ? 'is-open' : ''}`}
+            data-side={resolvedSide}
+        >
             <button
                 ref={triggerRef}
                 type="button"
@@ -126,7 +141,11 @@ export default function Dropdown({
                 onClick={handleTrigger}
             >
                 {trigger}
-                <ChevronDown size={14} strokeWidth={2} className="dropdown-trigger__caret" />
+                <ChevronDown
+                    size={14}
+                    strokeWidth={2}
+                    className="dropdown-trigger__caret"
+                />
             </button>
             {open && (
                 <div
@@ -141,8 +160,17 @@ export default function Dropdown({
                         </div>
                     )}
                     {(sections ?? []).map((section, idx) => (
-                        <div key={section.key} className="dropdown-section" role="none">
-                            {idx > 0 && <div className="dropdown-divider" role="separator" />}
+                        <div
+                            key={section.key}
+                            className="dropdown-section"
+                            role="none"
+                        >
+                            {idx > 0 && (
+                                <div
+                                    className="dropdown-divider"
+                                    role="separator"
+                                />
+                            )}
                             {section.items.map(renderItem)}
                         </div>
                     ))}
@@ -152,7 +180,10 @@ export default function Dropdown({
     );
 }
 
-function useResolvedSide(side: 'bottom' | 'top' | 'auto', open: boolean): 'bottom' | 'top' {
+function useResolvedSide(
+    side: 'bottom' | 'top' | 'auto',
+    open: boolean
+): 'bottom' | 'top' {
     const [resolved, setResolved] = useState<'bottom' | 'top'>('bottom');
     useEffect((): void => {
         if (!open || side !== 'auto') {
@@ -160,8 +191,15 @@ function useResolvedSide(side: 'bottom' | 'top' | 'auto', open: boolean): 'botto
             return;
         }
         const el = document.activeElement as HTMLElement | null;
-        if (!el) { setResolved('bottom'); return; }
-        setResolved(window.innerHeight - el.getBoundingClientRect().bottom < 220 ? 'top' : 'bottom');
+        if (!el) {
+            setResolved('bottom');
+            return;
+        }
+        setResolved(
+            window.innerHeight - el.getBoundingClientRect().bottom < 220
+                ? 'top'
+                : 'bottom'
+        );
     }, [open, side]);
     return resolved;
 }

@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
 /**
  * @interface DeviceMapPin
@@ -45,8 +45,8 @@ export type RouteSpeed = 1 | 2 | 4;
  */
 export interface Coordinate {
     x: number;
-    y: number
-};
+    y: number;
+}
 /**
  * @interface MapPopoverDevice
  * @param {string} id - The ID of the device.
@@ -70,5 +70,9 @@ export interface MapPopoverDevice {
     speed?: number | string;
     battery?: number;
     heading?: string;
-    extra?: { label: string; value: ReactNode; tone?: 'default' | 'warning' | 'danger' }[];
+    extra?: {
+        label: string;
+        value: ReactNode;
+        tone?: 'default' | 'warning' | 'danger';
+    }[];
 }

@@ -41,11 +41,7 @@ export default function MapMarker({
     const handleClick = (): void => onClick?.(id);
 
     const statusClass = `map-marker--${status}`;
-    const classes = [
-        'map-marker',
-        statusClass,
-        selected && 'is-selected',
-    ]
+    const classes = ['map-marker', statusClass, selected && 'is-selected']
         .filter(Boolean)
         .join(' ');
 
@@ -54,13 +50,17 @@ export default function MapMarker({
             type="button"
             className={classes}
             onClick={handleClick}
-            aria-label={name ? `${name} — ${status}` : `Device ${id} — ${status}`}
+            aria-label={
+                name ? `${name} — ${status}` : `Device ${id} — ${status}`
+            }
             aria-pressed={selected}
             data-marker-id={id}
         >
             <span className="map-marker__pulse" aria-hidden="true" />
             <span className="map-marker__dot" aria-hidden="true" />
-            {showLabel && name && <span className="map-marker__label">{name}</span>}
+            {showLabel && name && (
+                <span className="map-marker__label">{name}</span>
+            )}
         </button>
     );
 }
