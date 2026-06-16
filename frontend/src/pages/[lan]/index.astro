@@ -13,6 +13,13 @@ import {
 //-- Components
 import MainLayout from '@/components/astro/layout/MainLayout.astro';
 import Dashboard from '@/components/sections/Dashboard.astro';
+import type { GetStaticPaths } from 'astro';
+/**
+ * @type {GetStaticPaths}
+ */
+export const getStaticPaths = (() => {
+    return [{ params: { lan: 'en' } }, { params: { lan: 'es' } }];
+}) satisfies GetStaticPaths;
 
 const locale = Astro.params.lan as Language;
 const translation = getTranslation(locale);
