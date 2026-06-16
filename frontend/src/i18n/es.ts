@@ -14,6 +14,31 @@ export const es: Translation = {
         primaryNav: 'Principal',
         primaryNavMobile: 'Principal móvil',
     },
+    admin: {
+        title: 'Administración',
+        stats: 'Estadísticas',
+        users: 'Usuarios',
+        totalUsers: 'Usuarios totales',
+        totalDevices: 'Dispositivos totales',
+        activeToday: 'Activos hoy',
+        alerts: 'Alertas',
+        userTable: {
+            name: 'Nombre',
+            email: 'Correo',
+            role: 'Rol',
+            status: 'Estado',
+            created: 'Creado',
+            actions: 'Acciones',
+        },
+        roles: {
+            user: 'Usuario',
+            superAdmin: 'Super Admin',
+        },
+        status: {
+            active: 'Activo',
+            inactive: 'Inactivo',
+        },
+    },
     device: {
         title: 'Dispositivos',
         addDevice: 'Añadir dispositivo',

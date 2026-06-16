@@ -12,6 +12,31 @@ export const en = {
         primaryNav: 'Primary',
         primaryNavMobile: 'Primary mobile',
     },
+    admin: {
+        title: 'Admin',
+        stats: 'Statistics',
+        users: 'Users',
+        totalUsers: 'Total Users',
+        totalDevices: 'Total Devices',
+        activeToday: 'Active Today',
+        alerts: 'Alerts',
+        userTable: {
+            name: 'Name',
+            email: 'Email',
+            role: 'Role',
+            status: 'Status',
+            created: 'Created',
+            actions: 'Actions',
+        },
+        roles: {
+            user: 'User',
+            superAdmin: 'Super Admin',
+        },
+        status: {
+            active: 'Active',
+            inactive: 'Inactive',
+        },
+    },
     device: {
         title: 'Devices',
         addDevice: 'Add Device',
