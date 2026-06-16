@@ -1,0 +1,78 @@
+---
+import { en } from '@/i18n';
+//-- Constants
+import { 
+    SECTION_GALLERY_DEMO_ACTIVITIES,
+    SECTION_GALLERY_DEMO_DEVICE,
+    SECTION_GALLERY_DEMO_DEVICES,
+    SECTION_GALLERY_DEMO_KPI_ITEMS
+} from '@/constants/components';
+//-- Components
+import MainLayout from '@/components/astro/layout/MainLayout.astro';
+import KpiBar from '@/components/sections/KpiBar.astro';
+import ActivityFeed from '@/components/sections/ActivityFeed.astro';
+import Dashboard from '@/components/sections/Dashboard.astro';
+import DeviceDetail from '@/components/sections/DeviceDetail.astro';
+---
+
+<MainLayout
+    locale="en"
+    translation={en}
+    user={{ name: 'Gallery', role: 'Dev' }}
+    active="dashboard"
+    title="Sections & Shells · Gallery"
+>
+    <h1>Section Components & Feature Shells</h1>
+    <p class="hint">KpiBar, ActivityFeed, Dashboard, DeviceDetail.</p>
+
+    <section>
+        <h2>KpiBar</h2>
+        <KpiBar items={SECTION_GALLERY_DEMO_KPI_ITEMS} title="Overview" />
+    </section>
+
+    <section>
+        <h2>ActivityFeed — populated</h2>
+        <div class="feed-wrapper">
+            <ActivityFeed activities={SECTION_GALLERY_DEMO_ACTIVITIES} title="Recent Activity" viewAllHref="#" />
+        </div>
+    </section>
+
+    <section>
+        <h2>ActivityFeed — empty</h2>
+        <div class="feed-wrapper">
+            <ActivityFeed activities={[]} title="Recent Activity" />
+        </div>
+    </section>
+
+    <section>
+        <h2>Dashboard shell</h2>
+        <Dashboard
+            kpiItems={SECTION_GALLERY_DEMO_KPI_ITEMS}
+            activities={SECTION_GALLERY_DEMO_ACTIVITIES.slice(0, 4)}
+            devices={SECTION_GALLERY_DEMO_DEVICES}
+            activityTitle="Latest Activity"
+        />
+    </section>
+
+    <section>
+        <h2>DeviceDetail shell</h2>
+        <DeviceDetail
+            device={SECTION_GALLERY_DEMO_DEVICE}
+            activities={SECTION_GALLERY_DEMO_ACTIVITIES}
+            activityTitle="Device Activity"
+        />
+    </section>
+</MainLayout>
+
+<style>
+    h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+    .hint { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+    section { margin-bottom: 40px; }
+    section h2 {
+        font-size: 14px; font-weight: 600; text-transform: uppercase;
+        letter-spacing: 0.06em; color: var(--muted); margin-bottom: 12px;
+    }
+    .feed-wrapper {
+        max-width: 400px;
+    }
+</style>

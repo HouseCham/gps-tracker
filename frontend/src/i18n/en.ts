@@ -37,6 +37,25 @@ export const en = {
             inactive: 'Inactive',
         },
     },
+    section: {
+        kpiBar: {
+            title: 'Overview',
+        },
+        activityFeed: {
+            title: 'Activity',
+            viewAll: 'View all',
+            noActivities: 'No recent activity.',
+            ago: 'ago',
+        },
+        deviceDetail: {
+            overview: 'Overview',
+            map: 'Map',
+            activity: 'Activity',
+            noData: 'No data available.',
+            createdAt: 'Created',
+            uuid: 'Firmware UUID',
+        },
+    },
     device: {
         title: 'Devices',
         addDevice: 'Add Device',

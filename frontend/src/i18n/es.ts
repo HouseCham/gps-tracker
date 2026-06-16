@@ -39,6 +39,25 @@ export const es: Translation = {
             inactive: 'Inactivo',
         },
     },
+    section: {
+        kpiBar: {
+            title: 'Resumen',
+        },
+        activityFeed: {
+            title: 'Actividad',
+            viewAll: 'Ver todo',
+            noActivities: 'Sin actividad reciente.',
+            ago: 'atrás',
+        },
+        deviceDetail: {
+            overview: 'Resumen',
+            map: 'Mapa',
+            activity: 'Actividad',
+            noData: 'Sin datos disponibles.',
+            createdAt: 'Creado',
+            uuid: 'UUID del firmware',
+        },
+    },
     device: {
         title: 'Dispositivos',
         addDevice: 'Añadir dispositivo',

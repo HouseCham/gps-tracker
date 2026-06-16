@@ -1,0 +1,96 @@
+---
+//-- Types
+import type { KpiBarItem, ActivityItem, DeviceTableItem } from '@/types/components';
+//-- Components
+import KpiBar from '@/components/sections/KpiBar.astro';
+import ActivityFeed from '@/components/sections/ActivityFeed.astro';
+import DeviceTable from '@/components/device/DeviceTable.astro';
+/**
+ * @interface Props
+ * @property {KpiBarItem[]} kpiItems - KPI bar items.
+ * @property {ActivityItem[]} activities - Activity feed items.
+ * @property {DeviceTableItem[]} devices - Device table items.
+ * @property {boolean} [devicesLoading=false] - Show loading indicator.
+ * @property {boolean} [devicesEmpty=false] - Show empty state.
+ * @property {string} [activityTitle='Activity'] - Activity feed title.
+ * @property {string | undefined} [viewAllHref] - View all link.
+ * @property {string | undefined} [class] - Extra classes.
+ */
+interface Props {
+    kpiItems: KpiBarItem[];
+    activities: ActivityItem[];
+    devices: DeviceTableItem[];
+    devicesLoading?: boolean;
+    devicesEmpty?: boolean;
+    activityTitle?: string;
+    viewAllHref?: string;
+    class?: string;
+}
+
+const {
+    kpiItems,
+    activities,
+    devices,
+    devicesLoading = false,
+    devicesEmpty = false,
+    activityTitle,
+    viewAllHref,
+    class: className,
+} = Astro.props;
+
+const classes = ['dashboard', className].filter(Boolean).join(' ');
+---
+
+<div class={classes}>
+    <KpiBar items={kpiItems} title="Overview" />
+
+    <div class="dashboard__main">
+        <div class="dashboard__feed">
+            <ActivityFeed
+                activities={activities}
+                title={activityTitle}
+                viewAllHref={viewAllHref}
+            />
+        </div>
+        <div class="dashboard__table">
+            <DeviceTable
+                devices={devices}
+                loading={devicesLoading}
+                empty={devicesEmpty}
+            />
+        </div>
+    </div>
+</div>
+
+<style>
+    .dashboard {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .dashboard__main {
+        display: grid;
+        grid-template-columns: 320px 1fr;
+        gap: 20px;
+        align-items: start;
+    }
+
+    .dashboard__feed {
+        position: sticky;
+        top: 20px;
+    }
+
+    @media (max-width: 1023.98px) {
+        .dashboard__main {
+            grid-template-columns: 1fr;
+        }
+        .dashboard__feed {
+            position: static;
+            order: 1;
+        }
+        .dashboard__table {
+            order: 0;
+        }
+    }
+</style>
