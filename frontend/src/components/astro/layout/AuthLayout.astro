@@ -1,0 +1,97 @@
+---
+/**
+ * @interface Props
+ * @property {string | undefined} [title] - Page title.
+ * @property {string | undefined} [class] - Extra classes.
+ */
+interface Props {
+    title?: string;
+    class?: string;
+}
+
+const { title = 'GPS Tracker', class: className } = Astro.props;
+const classes = ['auth-layout', className].filter(Boolean).join(' ');
+---
+
+<html lang="en" data-theme="dark">
+    <head>
+        <meta charset="utf-8" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" href="/favicon.ico" />
+        <meta name="viewport" content="width=device-width" />
+        <meta name="generator" content={Astro.generator} />
+        <title>{title}</title>
+        <meta name="description" content="GPS Tracker App" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+        />
+    </head>
+    <body>
+        <div class={classes}>
+            <div class="auth-layout__card">
+                <slot />
+            </div>
+        </div>
+    </body>
+</html>
+
+<style is:global>
+    *,
+    *::before,
+    *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: 'Inter', system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+    :root {
+        color-scheme: dark;
+        --bg: #0b0d11;
+        --surface: #13161b;
+        --surface-2: #1a1e26;
+        --surface-3: #222834;
+        --border: #262d3a;
+        --text: #e8edf5;
+        --muted: #7b8499;
+        --accent: #3b82f6;
+        --accent-soft: rgba(59, 130, 246, 0.12);
+        --accent-hover: #2563eb;
+        --green: #22c55e;
+        --green-soft: rgba(34, 197, 94, 0.12);
+        --red: #ef4444;
+        --red-soft: rgba(239, 68, 68, 0.12);
+        --amber: #f59e0b;
+        --amber-soft: rgba(245, 158, 11, 0.12);
+        --radius: 10px;
+        --radius-sm: 6px;
+        --transition: 180ms ease;
+        --mono: 'SF Mono', 'Fira Code', 'Cascadia Code', monospace;
+        --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+    }
+</style>
+
+<style>
+    .auth-layout {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100dvh;
+        padding: 24px;
+        background: var(--bg);
+    }
+
+    .auth-layout__card {
+        width: 100%;
+        max-width: 400px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 32px;
+        box-shadow: var(--shadow-lg);
+    }
+</style>

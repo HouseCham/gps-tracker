@@ -1,6 +1,7 @@
 ---
 //-- Types
 import type { KpiBarItem, ActivityItem, DeviceTableItem } from '@/types/components';
+import type { Language } from '@/types';
 //-- Components
 import KpiBar from '@/components/sections/KpiBar.astro';
 import ActivityFeed from '@/components/sections/ActivityFeed.astro';
@@ -17,6 +18,7 @@ import DeviceTable from '@/components/device/DeviceTable.astro';
  * @property {string | undefined} [class] - Extra classes.
  */
 interface Props {
+    locale: Language;
     kpiItems: KpiBarItem[];
     activities: ActivityItem[];
     devices: DeviceTableItem[];
@@ -28,6 +30,7 @@ interface Props {
 }
 
 const {
+    locale,
     kpiItems,
     activities,
     devices,
@@ -54,6 +57,7 @@ const classes = ['dashboard', className].filter(Boolean).join(' ');
         </div>
         <div class="dashboard__table">
             <DeviceTable
+                locale={locale}
                 devices={devices}
                 loading={devicesLoading}
                 empty={devicesEmpty}

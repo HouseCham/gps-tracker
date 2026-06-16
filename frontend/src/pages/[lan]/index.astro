@@ -1,24 +1,39 @@
 ---
-import type { GetStaticPaths } from "astro";
-import type { Language } from "@/types";
-import { getTranslation } from "@/i18n";
-import MainLayout from "@/components/astro/layout/MainLayout.astro";
 
-/**
- * This page is the main entry point for the website. It will redirect to the default language (English) if no language is specified in the URL.
- * @returns {void} Redirects to the default language page.
- */
-export const getStaticPaths = (() => {
-    return [{ params: { lan: 'en' } }, { params: { lan: 'es' } }];
-}) satisfies GetStaticPaths;
+import type { Language } from '@/types';
+import { getTranslation } from '@/i18n';
+import MainLayout from '@/components/astro/layout/MainLayout.astro';
+import Dashboard from '@/components/sections/Dashboard.astro';
 
 const locale = Astro.params.lan as Language;
 const translation = getTranslation(locale);
+
 const user = {
-    name: "John Doe",
-    role: "Admin",
-    email: "john.doe@example.com",
+    name: 'John Doe',
+    role: 'Admin',
+    email: 'john.doe@example.com',
 };
+
+const kpiItems = [
+    { label: 'Total Devices', value: 24, icon: 'cpu' as const, trend: 'up' as const, trendValue: '+3 today', variant: 'neutral' as const },
+    { label: 'Online Now',     value: 18, icon: 'wifi' as const, trend: 'up' as const, trendValue: '+2',      variant: 'success' as const },
+    { label: 'Offline',        value: 5,  icon: 'wifi-off' as const, trend: 'down' as const, trendValue: '-1', variant: 'warning' as const },
+    { label: 'Alerts',         value: 1,  icon: 'alert' as const, trend: 'flat' as const, trendValue: '0',    variant: 'danger' as const },
+];
+
+const activities = [
+    { id: 'A-001', type: 'device-online' as const,  message: 'Delivery Van #3 came online',          timestamp: '2 min ago' },
+    { id: 'A-002', type: 'location-update' as const, message: 'Cargo Truck #12: new position recorded', timestamp: '8 min ago' },
+    { id: 'A-003', type: 'device-offline' as const,  message: 'Service Van #2 went offline',          timestamp: '12 min ago' },
+    { id: 'A-004', type: 'alert' as const,          message: 'ESP32-A4:CF:12 battery critical (3%)', timestamp: '18 min ago' },
+];
+
+const devices = [
+    { id: 'D-001', name: 'Delivery Van #3',   status: 'online' as const,  lastSeen: '2 min ago', battery: 78, signal: 5 },
+    { id: 'D-002', name: 'Cargo Truck #12',   status: 'online' as const,  lastSeen: '8 min ago', battery: 45, signal: 3 },
+    { id: 'D-003', name: 'Fleet Unit #7',     status: 'online' as const,  lastSeen: '1 min ago', battery: 92, signal: 4 },
+    { id: 'D-004', name: 'Service Van #2',    status: 'offline' as const, lastSeen: '4 hrs ago', battery: 15, signal: 0 },
+];
 ---
 
 <MainLayout
@@ -31,40 +46,26 @@ const user = {
 >
     <header class="page-header">
         <div>
-            <p class="page-header__eyebrow">Overview</p>
-            <h1 class="page-header__title">Dashboard</h1>
+            <p class="page-header__eyebrow">{translation.section.kpiBar.title}</p>
+            <h1 class="page-header__title">{translation.nav.dashboard}</h1>
         </div>
     </header>
 
-    <p class="page-header__hint">
-        App shell ready. Page content goes here.
-    </p>
-
-    <style>
-        .page-header {
-            margin-bottom: 24px;
-        }
-        .page-header__eyebrow {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            margin-bottom: 4px;
-        }
-        .page-header__title {
-            font-size: 24px;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            color: var(--text);
-        }
-        .page-header__hint {
-            color: var(--muted);
-            font-size: 14px;
-            padding: 16px;
-            background: var(--surface);
-            border: 1px dashed var(--border);
-            border-radius: var(--radius);
-        }
-    </style>
+    <Dashboard
+        kpiItems={kpiItems}
+        activities={activities}
+        devices={devices}
+        activityTitle={translation.section.activityFeed.title}
+    />
 </MainLayout>
+
+<style>
+    .page-header { margin-bottom: 24px; }
+    .page-header__eyebrow {
+        font-size: 12px; font-weight: 600; color: var(--muted);
+        text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px;
+    }
+    .page-header__title {
+        font-size: 24px; font-weight: 700; letter-spacing: -0.02em; color: var(--text);
+    }
+</style>

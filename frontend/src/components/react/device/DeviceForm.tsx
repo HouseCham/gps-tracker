@@ -5,7 +5,7 @@ import type { ReactElement, SyntheticEvent } from 'react';
 //-- Types
 import type { DeviceFormStrings, DeviceFormValues } from '@/types/components';
 //-- Constants
-import { UUID_REGEX } from '@/constants/components';
+import { UUID_REGEX } from '@/constants';
 /**
  * @interface DeviceFormProps
  * @param {DeviceFormValues} device - The device to edit.

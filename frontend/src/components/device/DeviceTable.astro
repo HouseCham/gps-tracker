@@ -8,9 +8,11 @@ import BatteryIndicator from '@/components/ui/BatteryIndicator.astro';
 import SignalIndicator from '@/components/ui/SignalIndicator.astro';
 import Button from '@/components/ui/Button.astro';
 import { DEVICE_TABLE_COLUMNS } from '@/constants/components/deviceTable';
+import type { Language } from '@/types';
 /**
  * @interface Props
  * @property {DeviceTableItem[]} devices - Device table items.
+ * @property {Language} locale - Current locale.
  * @property {boolean} [loading=false] - Show loading indicator.
  * @property {boolean} [empty=false] - Show empty state.
  * @property {string} [emptyTitle='No devices yet'] - Empty state title.
@@ -19,6 +21,7 @@ import { DEVICE_TABLE_COLUMNS } from '@/constants/components/deviceTable';
  */
 interface Props {
     devices: DeviceTableItem[];
+    locale: Language;
     loading?: boolean;
     empty?: boolean;
     emptyTitle?: string;
@@ -28,6 +31,7 @@ interface Props {
 
 const {
     devices,
+    locale,
     loading = false,
     empty = false,
     emptyTitle = 'No devices yet',
@@ -48,7 +52,7 @@ const {
         devices.map((device) => (
             <tr class="data-table__row device-table__row">
                 <td class="data-table__cell">
-                    <a href={`/devices/${device.id}`} class="device-table__name">
+                    <a href={`/${locale}/devices/${device.id}`} class="device-table__name">
                         {device.name}
                     </a>
                 </td>

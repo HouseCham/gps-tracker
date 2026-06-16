@@ -14,12 +14,6 @@ export const DEVICE_TABLE_COLUMNS: DataTableColumn[] = [
     { key: 'actions', label: 'Actions', align: 'right' },
 ];
 /**
- * @constant UUID_REGEX
- * @description Regular expression for validating UUIDv4
- * @type {RegExp}
- */
-export const UUID_REGEX: RegExp = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-/**
  * @constant DEMO_DEVICE
  * @description Demo device for the device table
  * @type {DeviceData}
