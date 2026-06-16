@@ -8,16 +8,16 @@ The frontend communicates with a Go + Fiber backend and PostgreSQL database to p
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Framework | [Astro 6](https://astro.build) (Islands Architecture) + [React 19](https://react.dev) |
-| Language | [TypeScript 5.9](https://www.typescriptlang.org) (strict mode) |
-| Styling | Pure CSS — custom properties, dark/light themes, BEM methodology |
-| Icons | [Lucide](https://lucide.dev) (`@lucide/astro` + `lucide-react`) |
-| HTTP | [`@better-fetch/fetch`](https://github.com/better-fetch/fetch) |
-| Auth | [`better-auth`](https://www.better-auth.com) |
-| Package manager | [pnpm](https://pnpm.io) |
-| Engine | Node >= 22.12.0 |
+| Layer           | Technology                                                                            |
+| --------------- | ------------------------------------------------------------------------------------- |
+| Framework       | [Astro 6](https://astro.build) (Islands Architecture) + [React 19](https://react.dev) |
+| Language        | [TypeScript 5.9](https://www.typescriptlang.org) (strict mode)                        |
+| Styling         | Pure CSS — custom properties, dark/light themes, BEM methodology                      |
+| Icons           | [Lucide](https://lucide.dev) (`@lucide/astro` + `lucide-react`)                       |
+| HTTP            | [`@better-fetch/fetch`](https://github.com/better-fetch/fetch)                        |
+| Auth            | [`better-auth`](https://www.better-auth.com)                                          |
+| Package manager | [pnpm](https://pnpm.io)                                                               |
+| Engine          | Node >= 22.12.0                                                                       |
 
 ---
 
@@ -148,8 +148,8 @@ pnpm format     # Prettier — formats all files
 
 ## Environment Variables
 
-| Variable | Default | Description |
-|---|---|---|
+| Variable         | Default                        | Description          |
+| ---------------- | ------------------------------ | -------------------- |
 | `PUBLIC_API_URL` | `http://localhost:8080/api/v1` | Backend API base URL |
 
 ---
@@ -197,14 +197,14 @@ All API calls return responses wrapped in a generic `Envelope<T>` type with stat
 
 The project includes dev-only gallery pages for component verification during development:
 
-| Route | Content |
-|---|---|
-| `/dev-gallery` | UI primitives showcase |
-| `/admin-gallery` | Admin components |
-| `/device-gallery` | Device components + form |
-| `/map-gallery` | Map + route player |
-| `/section-gallery` | Sections and dashboard shell |
-| `/react-islands-gallery` | Modal, Toast, Dropdown |
+| Route                    | Content                      |
+| ------------------------ | ---------------------------- |
+| `/dev-gallery`           | UI primitives showcase       |
+| `/admin-gallery`         | Admin components             |
+| `/device-gallery`        | Device components + form     |
+| `/map-gallery`           | Map + route player           |
+| `/section-gallery`       | Sections and dashboard shell |
+| `/react-islands-gallery` | Modal, Toast, Dropdown       |
 
 These pages use hardcoded demo data and are not intended for production.
 

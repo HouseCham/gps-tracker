@@ -1,15 +1,14 @@
 import '@/styles/ui//toast.css';
 //-- React
-import {
-    useEffect,
-    useRef,
-    useState,
-} from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 //-- Types
 import type { ToastItem } from '@/types/components';
 //-- Constants
-import { MODAL_VARIANT_CLASS, MODAL_VARIANT_ICON } from '@/constants/components/ui';
+import {
+    MODAL_VARIANT_CLASS,
+    MODAL_VARIANT_ICON,
+} from '@/constants/components/ui';
 //-- Icons
 import { X } from 'lucide-react';
 /**

@@ -7,7 +7,9 @@ interface ThemeToggleProps {
     class?: string;
 }
 
-export default function ThemeToggle({ class: className }: ThemeToggleProps): React.JSX.Element {
+export default function ThemeToggle({
+    class: className,
+}: ThemeToggleProps): React.JSX.Element {
     const [theme, setTheme] = useState<Theme>(() => {
         if (typeof document === 'undefined') return 'dark';
         return (document.documentElement.dataset.theme as Theme) ?? 'dark';
@@ -25,8 +27,16 @@ export default function ThemeToggle({ class: className }: ThemeToggleProps): Rea
             type="button"
             className={`icon-btn ${className ?? ''}`}
             onClick={toggleTheme}
-            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            aria-label={
+                theme === 'dark'
+                    ? 'Switch to light mode'
+                    : 'Switch to dark mode'
+            }
+            title={
+                theme === 'dark'
+                    ? 'Switch to light mode'
+                    : 'Switch to dark mode'
+            }
         >
             {theme === 'dark' ? (
                 <Sun size={18} strokeWidth={1.75} />

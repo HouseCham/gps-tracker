@@ -1,6 +1,9 @@
-import { ToastContainer, type ToastContainerProps } from "@/components/react/ui";
-import type { ToastHandle, ToastItem } from "@/types/components";
-import { useState, useRef, useCallback, type ReactElement } from "react";
+import {
+    ToastContainer,
+    type ToastContainerProps,
+} from '@/components/react/ui';
+import type { ToastHandle, ToastItem } from '@/types/components';
+import { useState, useRef, useCallback, type ReactElement } from 'react';
 /**
  * @interface UseToastOptions
  * @param {string} [position='bottom-right'] - The position of the toasts.
