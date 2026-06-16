@@ -1,45 +1,27 @@
 ---
-
-import type { Language } from '@/types';
+//-- Translations
 import { getTranslation } from '@/i18n';
+//-- Types
+import type { Language } from '@/types';
+//-- Constants
+import { 
+    DEMO_USER,
+    SECTION_GALLERY_DEMO_ACTIVITIES,
+    SECTION_GALLERY_DEMO_DEVICES,
+    SECTION_GALLERY_DEMO_KPI_ITEMS
+} from '@/constants/components';
+//-- Components
 import MainLayout from '@/components/astro/layout/MainLayout.astro';
 import Dashboard from '@/components/sections/Dashboard.astro';
 
 const locale = Astro.params.lan as Language;
 const translation = getTranslation(locale);
-
-const user = {
-    name: 'John Doe',
-    role: 'Admin',
-    email: 'john.doe@example.com',
-};
-
-const kpiItems = [
-    { label: 'Total Devices', value: 24, icon: 'cpu' as const, trend: 'up' as const, trendValue: '+3 today', variant: 'neutral' as const },
-    { label: 'Online Now',     value: 18, icon: 'wifi' as const, trend: 'up' as const, trendValue: '+2',      variant: 'success' as const },
-    { label: 'Offline',        value: 5,  icon: 'wifi-off' as const, trend: 'down' as const, trendValue: '-1', variant: 'warning' as const },
-    { label: 'Alerts',         value: 1,  icon: 'alert' as const, trend: 'flat' as const, trendValue: '0',    variant: 'danger' as const },
-];
-
-const activities = [
-    { id: 'A-001', type: 'device-online' as const,  message: 'Delivery Van #3 came online',          timestamp: '2 min ago' },
-    { id: 'A-002', type: 'location-update' as const, message: 'Cargo Truck #12: new position recorded', timestamp: '8 min ago' },
-    { id: 'A-003', type: 'device-offline' as const,  message: 'Service Van #2 went offline',          timestamp: '12 min ago' },
-    { id: 'A-004', type: 'alert' as const,          message: 'ESP32-A4:CF:12 battery critical (3%)', timestamp: '18 min ago' },
-];
-
-const devices = [
-    { id: 'D-001', name: 'Delivery Van #3',   status: 'online' as const,  lastSeen: '2 min ago', battery: 78, signal: 5 },
-    { id: 'D-002', name: 'Cargo Truck #12',   status: 'online' as const,  lastSeen: '8 min ago', battery: 45, signal: 3 },
-    { id: 'D-003', name: 'Fleet Unit #7',     status: 'online' as const,  lastSeen: '1 min ago', battery: 92, signal: 4 },
-    { id: 'D-004', name: 'Service Van #2',    status: 'offline' as const, lastSeen: '4 hrs ago', battery: 15, signal: 0 },
-];
 ---
 
 <MainLayout
     locale={locale}
     translation={translation}
-    user={user}
+    user={DEMO_USER}
     active="dashboard"
     showAdmin={true}
     title="Dashboard · GPS Tracker"
@@ -52,9 +34,10 @@ const devices = [
     </header>
 
     <Dashboard
-        kpiItems={kpiItems}
-        activities={activities}
-        devices={devices}
+        locale={locale}
+        kpiItems={SECTION_GALLERY_DEMO_KPI_ITEMS}
+        activities={SECTION_GALLERY_DEMO_ACTIVITIES}
+        devices={SECTION_GALLERY_DEMO_DEVICES}
         activityTitle={translation.section.activityFeed.title}
     />
 </MainLayout>

@@ -1,7 +1,10 @@
 ---
 import type { GetStaticPaths } from 'astro';
-import type { Language } from '@/types';
+//-- Translations
 import { getTranslation } from '@/i18n';
+//-- Types
+import type { Language } from '@/types';
+//-- Components
 import MainLayout from '@/components/astro/layout/MainLayout.astro';
 import DeviceDetail from '@/components/sections/DeviceDetail.astro';
 import { DEMO_USER } from '@/constants/components';

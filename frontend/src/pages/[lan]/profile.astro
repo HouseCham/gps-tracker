@@ -1,10 +1,14 @@
 ---
 import type { GetStaticPaths } from 'astro';
-import type { Language } from '@/types';
+//-- Translations
 import { getTranslation } from '@/i18n';
+//-- Types
+import type { Language } from '@/types';
+//-- Constants
+import { DEMO_USER } from '@/constants/components';
+//-- Components
 import MainLayout from '@/components/astro/layout/MainLayout.astro';
 import StatusIndicator from '@/components/ui/StatusIndicator.astro';
-import { DEMO_USER } from '@/constants/components';
 /**
  * @type {GetStaticPaths}
  */

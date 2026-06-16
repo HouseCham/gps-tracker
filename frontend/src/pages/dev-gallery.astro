@@ -1,9 +1,7 @@
 ---
-/**
- * /_gallery — internal component gallery for visual verification.
- * Renders every UI primitive in default + key state variants.
- * Underscore prefix keeps it out of i18n language routes.
- */
+//-- Translations
+import { en } from '@/i18n';
+//-- Components
 import MainLayout from '@/components/astro/layout/MainLayout.astro';
 import Button from '@/components/ui/Button.astro';
 import Input from '@/components/ui/Input.astro';
@@ -14,7 +12,6 @@ import BatteryIndicator from '@/components/ui/BatteryIndicator.astro';
 import SignalIndicator from '@/components/ui/SignalIndicator.astro';
 import DataTable from '@/components/ui/DataTable.astro';
 import EmptyState from '@/components/ui/EmptyState.astro';
-import { en } from '@/i18n';
 
 const columns = [
     { key: 'name', label: 'Name', sortable: true },
