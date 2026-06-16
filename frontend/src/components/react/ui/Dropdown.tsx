@@ -1,32 +1,22 @@
-import '@/styles/ui/dropdown.css';
-//-- React
-import {
-    useCallback,
-    useEffect,
-    useId,
-    useRef,
-    useState,
-    type ReactNode,
-} from 'react';
-//-- Icons
+import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { ChevronDown } from 'lucide-react';
-import type { DropdownItem, DropdownSection } from '@/types/components/ui';
+import './dropdown.css';
 
-/**
- * @interface DropdownProps
- * @description Interface for DropdownProps representing the props for the Dropdown component.
- * @property {ReactNode} trigger - The trigger button for the dropdown.
- * @property {DropdownItem[] | undefined} items - The items in the dropdown menu.
- * @property {DropdownSection[] | undefined} sections - The sections in the dropdown menu.
- * @property {'start' | 'end'} align - The alignment of the dropdown menu.
- * @property {'bottom' | 'top' | 'auto'} side - The side of the dropdown menu.
- * @property {boolean | undefined} open - Whether the dropdown menu is open.
- * @property {boolean | undefined} defaultOpen - Whether the dropdown menu is initially open.
- * @property {(open: boolean) => void | undefined} onOpenChange - The function to call when the dropdown menu is opened or closed.
- * @property {boolean | undefined} closeOnSelect - Whether to close the dropdown menu when an item is selected.
- * @property {string | undefined} ariaLabel - The aria-label for the dropdown menu.
- */
-interface DropdownProps {
+export interface DropdownItem {
+    key: string;
+    label: string;
+    icon?: ReactNode;
+    onSelect?: () => void;
+    destructive?: boolean;
+    disabled?: boolean;
+}
+
+export interface DropdownSection {
+    key: string;
+    items: DropdownItem[];
+}
+
+export interface DropdownProps {
     trigger: ReactNode;
     items?: DropdownItem[];
     sections?: DropdownSection[];
@@ -38,11 +28,7 @@ interface DropdownProps {
     closeOnSelect?: boolean;
     ariaLabel?: string;
 }
-/**
- * Dropdown — dropdown menu component.
- * @props {DropdownProps} props - The props for the Dropdown component.
- * @returns {React.JSX.Element} The rendered Dropdown component.
- */
+
 export default function Dropdown({
     trigger,
     items,
@@ -93,8 +79,8 @@ export default function Dropdown({
     }, [open, setOpen]);
 
     const resolvedSide = useResolvedSide(side, open);
-
     const handleTrigger = (): void => setOpen(!open);
+
     const handleItem = (item: DropdownItem): void => {
         if (item.disabled) return;
         item.onSelect?.();
@@ -102,7 +88,7 @@ export default function Dropdown({
     };
 
     const renderItem = (item: DropdownItem): React.JSX.Element => {
-        const classes = [
+        const cls = [
             'dropdown-item',
             item.destructive && 'dropdown-item--destructive',
             item.disabled && 'is-disabled',
@@ -114,9 +100,9 @@ export default function Dropdown({
                 key={item.key}
                 type="button"
                 role="menuitem"
-                className={classes}
+                className={cls}
                 disabled={item.disabled}
-                onClick={() => handleItem(item)}
+                onClick={(): void => handleItem(item)}
             >
                 {item.icon && (
                     <span className="dropdown-item__icon" aria-hidden="true">
@@ -128,15 +114,8 @@ export default function Dropdown({
         );
     };
 
-    const flatItems = items ?? [];
-    const groupedSections = sections ?? [];
-
     return (
-        <div
-            ref={rootRef}
-            className={`dropdown ${open ? 'is-open' : ''}`}
-            data-side={resolvedSide}
-        >
+        <div ref={rootRef} className={`dropdown ${open ? 'is-open' : ''}`} data-side={resolvedSide}>
             <button
                 ref={triggerRef}
                 type="button"
@@ -147,11 +126,7 @@ export default function Dropdown({
                 onClick={handleTrigger}
             >
                 {trigger}
-                <ChevronDown
-                    size={14}
-                    strokeWidth={2}
-                    className="dropdown-trigger__caret"
-                />
+                <ChevronDown size={14} strokeWidth={2} className="dropdown-trigger__caret" />
             </button>
             {open && (
                 <div
@@ -160,14 +135,14 @@ export default function Dropdown({
                     aria-label={ariaLabel}
                     className={`dropdown-menu dropdown-menu--align-${align}`}
                 >
-                    {flatItems.length > 0 && (
+                    {(items ?? []).length > 0 && (
                         <div className="dropdown-section" role="none">
-                            {flatItems.map(renderItem)}
+                            {(items ?? []).map(renderItem)}
                         </div>
                     )}
-                    {groupedSections.map((section, sIdx) => (
+                    {(sections ?? []).map((section, idx) => (
                         <div key={section.key} className="dropdown-section" role="none">
-                            {sIdx > 0 && <div className="dropdown-divider" role="separator" />}
+                            {idx > 0 && <div className="dropdown-divider" role="separator" />}
                             {section.items.map(renderItem)}
                         </div>
                     ))}
@@ -177,24 +152,16 @@ export default function Dropdown({
     );
 }
 
-function useResolvedSide(
-    side: 'bottom' | 'top' | 'auto',
-    open: boolean,
-): 'bottom' | 'top' {
+function useResolvedSide(side: 'bottom' | 'top' | 'auto', open: boolean): 'bottom' | 'top' {
     const [resolved, setResolved] = useState<'bottom' | 'top'>('bottom');
     useEffect((): void => {
         if (!open || side !== 'auto') {
             setResolved(side === 'top' ? 'top' : 'bottom');
             return;
         }
-        const trigger = document.activeElement as HTMLElement | null;
-        if (!trigger) {
-            setResolved('bottom');
-            return;
-        }
-        const rect = trigger.getBoundingClientRect();
-        const spaceBelow = window.innerHeight - rect.bottom;
-        setResolved(spaceBelow < 220 ? 'top' : 'bottom');
+        const el = document.activeElement as HTMLElement | null;
+        if (!el) { setResolved('bottom'); return; }
+        setResolved(window.innerHeight - el.getBoundingClientRect().bottom < 220 ? 'top' : 'bottom');
     }, [open, side]);
     return resolved;
 }

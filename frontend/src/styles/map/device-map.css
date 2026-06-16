@@ -1,0 +1,221 @@
+/* ============================================
+   DEVICE MAP (React island)
+   Co-located with DeviceMap.tsx.
+   Consumes tokens from global.css.
+   ============================================ */
+
+.device-map {
+    position: relative;
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--surface);
+}
+
+.device-map__placeholder {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    min-height: 360px;
+    background-color: #0d1015;
+    background-image:
+        linear-gradient(
+            rgba(255, 255, 255, 0.04) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.04) 1px,
+            transparent 1px
+        ),
+        radial-gradient(
+            circle at 30% 40%,
+            rgba(59, 130, 246, 0.08),
+            transparent 60%
+        ),
+        radial-gradient(
+            circle at 75% 65%,
+            rgba(34, 197, 94, 0.05),
+            transparent 55%
+        );
+    background-size:
+        40px 40px,
+        40px 40px,
+        100% 100%,
+        100% 100%;
+}
+
+.device-map--satellite .device-map__placeholder {
+    background-image:
+        linear-gradient(
+            135deg,
+            rgba(255, 255, 255, 0.02) 25%,
+            transparent 25%,
+            transparent 50%,
+            rgba(255, 255, 255, 0.02) 50%,
+            rgba(255, 255, 255, 0.02) 75%,
+            transparent 75%,
+            transparent
+        ),
+        radial-gradient(
+            circle at 50% 50%,
+            rgba(34, 197, 94, 0.04),
+            transparent 60%
+        );
+    background-size: 8px 8px, 100% 100%;
+    background-color: #060709;
+}
+
+.device-map__overlay {
+    position: absolute;
+    inset: 0;
+}
+
+.device-map__route {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.device-map__route-path {
+    filter: drop-shadow(0 0 4px rgba(59, 130, 246, 0.45));
+    stroke-dasharray: 1.6 0.6;
+    stroke-dashoffset: 0;
+    animation: device-map-route-flow 30s linear infinite;
+}
+
+@keyframes device-map-route-flow {
+    to {
+        stroke-dashoffset: -100;
+    }
+}
+
+.device-map__pin-pos {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+}
+
+.device-map__popover-pos {
+    position: absolute;
+    width: 0;
+    height: 0;
+    z-index: 10;
+}
+
+.device-map__controls {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--shadow-md);
+    z-index: 5;
+}
+
+.device-map__control {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 0;
+    color: var(--text);
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition);
+    font-family: inherit;
+}
+
+.device-map__control:hover {
+    background: var(--surface-2);
+    color: var(--accent);
+}
+
+.device-map__control:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+}
+
+.device-map__control + .device-map__control {
+    border-top: 1px solid var(--border);
+}
+
+.device-map__coords {
+    position: absolute;
+    left: 12px;
+    bottom: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    background: rgba(13, 16, 21, 0.85);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-2);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.02em;
+    z-index: 5;
+    box-shadow: var(--shadow-sm);
+}
+
+.device-map__coords svg {
+    color: var(--accent);
+}
+
+.device-map__coords-label {
+    color: var(--muted);
+    text-transform: uppercase;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+}
+
+.device-map__bottom-right {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    z-index: 5;
+}
+
+.device-map__attribution {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    pointer-events: none;
+    color: var(--text-3);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 500;
+    display: none;
+}
+
+/* Map marker overlay positioning: shift marker style to overlay */
+.device-map .map-marker {
+    /* MapMarker handles its own transform; nothing to override here. */
+}
+
+@media (max-width: 640px) {
+    .device-map__placeholder {
+        min-height: 280px;
+    }
+    .device-map__controls {
+        top: 8px;
+        right: 8px;
+    }
+    .device-map__coords {
+        left: 8px;
+        bottom: 8px;
+        font-size: 10px;
+    }
+}

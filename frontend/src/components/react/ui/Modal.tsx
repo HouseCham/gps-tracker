@@ -1,25 +1,12 @@
-import '@/styles/ui/modal.css';
-//-- React
-import type { ReactNode } from 'react';
 import { useEffect, useId, useRef } from 'react';
-//-- Types
-import type { ModalSize, ModalVariant } from '@/types/components/ui';
-//-- Icons
 import { X } from 'lucide-react';
-/**
- * @interface ModalProps
- * @property {boolean} open - Whether the modal is open.
- * @property {() => void} onClose - The function to call when the modal is closed.
- * @property {string} title - The title of the modal.
- * @property {ReactNode} children - The children of the modal.
- * @property {ReactNode | undefined} footer - The footer of the modal.
- * @property {ModalVariant} variant - The variant of the modal.
- * @property {ModalSize} size - The size of the modal.
- * @property {boolean} closeOnBackdrop - Whether to close the modal when the backdrop is clicked.
- * @property {boolean} closeOnEscape - Whether to close the modal when the escape key is pressed.
- * @property {React.RefObject<HTMLElement> | undefined} initialFocusRef - The ref to focus when the modal is opened.
- */
-interface ModalProps {
+import type { ReactNode } from 'react';
+import './modal.css';
+
+export type ModalVariant = 'default' | 'danger';
+export type ModalSize = 'sm' | 'md' | 'lg';
+
+export interface ModalProps {
     open: boolean;
     onClose: () => void;
     title: string;
@@ -32,12 +19,6 @@ interface ModalProps {
     initialFocusRef?: React.RefObject<HTMLElement>;
 }
 
-/**
- * @component Modal
- * @description Modal component for displaying content in a modal window.
- * @props {ModalProps} props - The props for the Modal component.
- * @returns {React.JSX.Element | null} The rendered Modal component.
- */
 export default function Modal({
     open,
     onClose,
@@ -57,7 +38,6 @@ export default function Modal({
 
     useEffect(() => {
         if (!open) return;
-
         const previousOverflow = document.body.style.overflow;
         document.body.style.overflow = 'hidden';
 
@@ -68,9 +48,7 @@ export default function Modal({
             }
         };
         document.addEventListener('keydown', onKey);
-
-        const focusTarget = initialFocusRef?.current ?? panelRef.current;
-        focusTarget?.focus();
+        (initialFocusRef?.current ?? panelRef.current)?.focus();
 
         return (): void => {
             document.removeEventListener('keydown', onKey);
@@ -80,39 +58,27 @@ export default function Modal({
 
     if (!open) return null;
 
-    const onBackdropClick = (e: React.MouseEvent): void => {
-        if (!closeOnBackdrop) return;
-        if (e.target === e.currentTarget) onClose();
+    const onBackdropPointer = (e: React.MouseEvent): void => {
+        if (closeOnBackdrop && e.target === e.currentTarget) onClose();
     };
 
-    const onSentinelFocus = (direction: 'start' | 'end'): void => {
-        const focusables = panelRef.current?.querySelectorAll<HTMLElement>(
-            'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])',
+    const onSentinelFocus = (dir: 'start' | 'end'): void => {
+        const all = panelRef.current?.querySelectorAll<HTMLElement>(
+            'a[href],button:not([disabled]),textarea,input,select,[tabindex]:not([tabindex="-1"])',
         );
-        if (!focusables || focusables.length === 0) return;
-        const first = focusables[0];
-        const last = focusables[focusables.length - 1];
-        if (first === undefined || last === undefined) return;
-        if (direction === 'start') {
-            last.focus();
-        } else {
-            first.focus();
-        }
+        if (!all || all.length === 0) return;
+        (dir === 'start' ? all[all.length - 1] : all[0])?.focus();
     };
 
     return (
-        <div
-            className="modal-backdrop is-open"
-            onMouseDown={onBackdropClick}
-            aria-hidden={false}
-        >
+        <div className="modal-backdrop is-open" onMouseDown={onBackdropPointer}>
             <button
                 ref={startSentinelRef}
                 type="button"
                 tabIndex={0}
                 className="modal-sentinel"
                 aria-hidden="true"
-                onFocus={() => onSentinelFocus('start')}
+                onFocus={(): void => onSentinelFocus('start')}
             />
             <div
                 ref={panelRef}
@@ -123,9 +89,7 @@ export default function Modal({
                 tabIndex={-1}
             >
                 <header className="modal-head">
-                    <h2 id={titleId} className="modal-title">
-                        {title}
-                    </h2>
+                    <h2 id={titleId} className="modal-title">{title}</h2>
                     <button
                         type="button"
                         className="modal-close"
@@ -144,7 +108,7 @@ export default function Modal({
                 tabIndex={0}
                 className="modal-sentinel"
                 aria-hidden="true"
-                onFocus={() => onSentinelFocus('end')}
+                onFocus={(): void => onSentinelFocus('end')}
             />
         </div>
     );
