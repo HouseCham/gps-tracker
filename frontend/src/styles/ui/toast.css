@@ -165,7 +165,7 @@
 .toast-action {
     background: none;
     border: 0;
-    color: var(--accent);
+    color: var(--text);
     font-size: 12px;
     font-weight: 600;
     padding: 4px 6px;
@@ -176,7 +176,7 @@
 }
 
 .toast-action:hover {
-    background: var(--accent-soft);
+    background: var(--surface-2);
 }
 
 .toast-x {
