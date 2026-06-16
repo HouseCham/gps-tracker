@@ -1,28 +1,50 @@
 ---
-import type { Translation } from '@/i18n';
 import '@/styles/global.css';
+import '@/styles/layout/main-layout.css';
+//-- Types
+import type { Translation } from '@/i18n';
 import type { Language } from '@/types';
+//-- Components
+import Sidebar from './Sidebar.astro';
+import TabBar from './TabBar.astro';
+import type { SidebarNavItem, SidebarUser } from '@/types/layout';
+
 /**
  * @interface Props
- * @property {Language} locale - The current language of the website, used for localization.
- * @property {Translation} globalI18n - The complete translation object containing all localized strings for the website, which can be passed down to child components for rendering localized content.
- * @property {User} user - An object representing the current user, containing their name and role, which can be displayed in the sidebar for personalization and access control purposes.
+ * @property {Language} locale - Current locale code ('en' | 'es').
+ * @property {Translation} translation - Translation bundle (en/es) used for nav labels.
+ * @property {SidebarUser} [user] - Current user for the sidebar footer card.
+ * @property {SidebarNavItem} [active] - Active nav item, drives the .active highlight and aria-current.
+ * @property {boolean} [showAdmin] - Whether to surface the Admin nav item (super_admin only).
+ * @property {string} [title] - Document title override; falls back to "GPS Tracker".
  */
 interface Props {
     locale: Language;
     translation: Translation;
+    user?: SidebarUser;
+    active?: SidebarNavItem;
+    showAdmin?: boolean;
+    title?: string;
 }
-const { locale = 'en', translation } = Astro.props;
+
+const {
+    locale = 'en',
+    translation,
+    user,
+    active = 'dashboard',
+    showAdmin = false,
+    title = 'GPS Tracker',
+} = Astro.props;
 ---
 
-<html lang={locale}>
+<html lang={locale} data-theme="dark">
     <head>
         <meta charset="utf-8" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" href="/favicon.ico" />
         <meta name="viewport" content="width=device-width" />
         <meta name="generator" content={Astro.generator} />
-        <title>GPS Tracker</title>
+        <title>{title}</title>
         <meta name="description" content="GPS Tracker App" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -32,6 +54,23 @@ const { locale = 'en', translation } = Astro.props;
         />
     </head>
     <body>
-        <slot />
+        <div class="app-shell">
+            <Sidebar
+                locale={locale}
+                translation={translation}
+                active={active}
+                user={user}
+                showAdmin={showAdmin}
+            />
+            <main class="app-shell__main">
+                <slot />
+            </main>
+            <TabBar
+                locale={locale}
+                translation={translation}
+                active={active}
+                showAdmin={showAdmin}
+            />
+        </div>
     </body>
 </html>
