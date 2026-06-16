@@ -1,0 +1,135 @@
+---
+import type { InputType } from '@/types/components/ui';
+import { Eye, Search } from '@lucide/astro';
+/**
+ * @interface Props
+ * @property {InputType} [type='text'] - Input type.
+ * @property {string} [label] - Input label.
+ * @property {string} [name] - Input name.
+ * @property {string} [id] - Input id.
+ * @property {string} [value] - Input value.
+ * @property {string} [placeholder] - Input placeholder.
+ * @property {string} [hint] - Input hint.
+ * @property {string} [error] - Input error.
+ * @property {boolean} [disabled=false] - Disable input.
+ * @property {boolean} [required=false] - Make input required.
+ * @property {string} [autocomplete] - Input autocomplete.
+ * @property {string | undefined} [class] - Extra classes.
+ */
+interface Props {
+    type?: InputType;
+    label?: string;
+    name?: string;
+    id?: string;
+    value?: string;
+    placeholder?: string;
+    hint?: string;
+    error?: string;
+    disabled?: boolean;
+    required?: boolean;
+    autocomplete?: string;
+    class?: string;
+}
+
+const {
+    type = 'text',
+    label,
+    name,
+    id,
+    value,
+    placeholder,
+    hint,
+    error,
+    disabled = false,
+    required = false,
+    autocomplete,
+    class: className,
+} = Astro.props;
+
+const inputId = id ?? (name ? `input-${name}` : undefined);
+const describedBy = [hint && 'hint', error && 'error'].filter(Boolean).join(' ') || undefined;
+const inputClasses = [
+    'input',
+    type === 'search' && 'with-icon',
+    error && 'input-error-state',
+    className,
+]
+    .filter(Boolean)
+    .join(' ');
+
+const isPassword = type === 'password';
+const isSearch = type === 'search';
+---
+
+<div class="input-group">
+    {
+        label && (
+            <label class="input-label" for={inputId}>
+                {label}
+                {required && <span class="input-required" aria-hidden="true">*</span>}
+            </label>
+        )
+    }
+
+    <div class="input-wrap">
+        {
+            isSearch && (
+                <span class="input-icon" aria-hidden="true">
+                    <Search size={16} stroke-width={1.75} />
+                </span>
+            )
+        }
+
+        <input
+            id={inputId}
+            name={name}
+            type={isPassword ? 'password' : type}
+            value={value}
+            placeholder={placeholder}
+            disabled={disabled || undefined}
+            required={required || undefined}
+            autocomplete={autocomplete}
+            aria-invalid={error ? 'true' : undefined}
+            aria-describedby={describedBy}
+            class={inputClasses}
+            data-password={isPassword || undefined}
+        />
+
+        {
+            isPassword && (
+                <span class="input-suffix">
+                    <button
+                        type="button"
+                        class="input-eye"
+                        aria-label="Toggle password visibility"
+                        data-password-toggle
+                    >
+                        <Eye size={16} stroke-width={1.75} />
+                    </button>
+                </span>
+            )
+        }
+    </div>
+
+    {
+        hint && !error && (
+            <p id="hint" class="input-hint">
+                {hint}
+            </p>
+        )
+    }
+    {
+        error && (
+            <p id="error" class="input-error" role="alert">
+                {error}
+            </p>
+        )
+    }
+</div>
+
+<style>
+    .input-required {
+        color: var(--danger);
+        margin-left: 2px;
+    }
+</style>

@@ -72,13 +72,13 @@ const posts: CollectionEntry<'blog'>[] = await getCollection('blog');
 import { defineConfig, fontProviders } from 'astro/config';
 
 export default defineConfig({
-  fonts: [
-    {
-      name: 'Inter',
-      cssVariable: '--font-inter',
-      provider: fontProviders.fontsource(),
-    },
-  ],
+    fonts: [
+        {
+            name: 'Inter',
+            cssVariable: '--font-inter',
+            provider: fontProviders.fontsource(),
+        },
+    ],
 });
 ```
 
@@ -98,13 +98,13 @@ The `tsconfig.json` must extend `astro/tsconfigs/strict`. Never relax strictness
 
 ```json
 {
-  "extends": "astro/tsconfigs/strict",
-  "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist"],
-  "compilerOptions": {
-    "jsx": "react-jsx",
-    "jsxImportSource": "react"
-  }
+    "extends": "astro/tsconfigs/strict",
+    "include": [".astro/types.d.ts", "**/*"],
+    "exclude": ["dist"],
+    "compilerOptions": {
+        "jsx": "react-jsx",
+        "jsxImportSource": "react"
+    }
 }
 ```
 
@@ -126,14 +126,14 @@ import type { ReactNode } from 'react';
 
 ### Naming
 
-| Construct | Convention |
-|---|---|
-| Files (components) | `PascalCase.astro`, `PascalCase.tsx` |
-| Files (utils, hooks) | `camelCase.ts` |
-| Interfaces / Types | `PascalCase` |
-| Variables & functions | `camelCase` |
-| Constants (module-level) | `UPPER_SNAKE_CASE` |
-| CSS custom properties | `--kebab-case` |
+| Construct                | Convention                           |
+| ------------------------ | ------------------------------------ |
+| Files (components)       | `PascalCase.astro`, `PascalCase.tsx` |
+| Files (utils, hooks)     | `camelCase.ts`                       |
+| Interfaces / Types       | `PascalCase`                         |
+| Variables & functions    | `camelCase`                          |
+| Constants (module-level) | `UPPER_SNAKE_CASE`                   |
+| CSS custom properties    | `--kebab-case`                       |
 
 ---
 
@@ -163,11 +163,11 @@ import type { ReactNode } from 'react';
 ```css
 /* src/styles/global.css */
 :root {
-  --color-brand: oklch(0.55 0.2 250);
-  --color-surface: oklch(0.98 0 0);
-  --space-4: 1rem;
-  --radius-md: 0.5rem;
-  --font-sans: var(--font-inter);
+    --color-brand: oklch(0.55 0.2 250);
+    --color-surface: oklch(0.98 0 0);
+    --space-4: 1rem;
+    --radius-md: 0.5rem;
+    --font-sans: var(--font-inter);
 }
 ```
 
@@ -198,22 +198,27 @@ When writing global utility classes or layout primitives, follow BEM naming:
 
 ```tsx
 interface ButtonProps {
-  label: string;
-  variant?: 'primary' | 'secondary' | 'ghost';
-  onClick?: () => void;
-  disabled?: boolean;
+    label: string;
+    variant?: 'primary' | 'secondary' | 'ghost';
+    onClick?: () => void;
+    disabled?: boolean;
 }
 
-export default function Button({ label, variant = 'primary', onClick, disabled = false }: ButtonProps) {
-  return (
-    <button
-      className={`btn btn--${variant}`}
-      onClick={onClick}
-      disabled={disabled}
-    >
-      {label}
-    </button>
-  );
+export default function Button({
+    label,
+    variant = 'primary',
+    onClick,
+    disabled = false,
+}: ButtonProps) {
+    return (
+        <button
+            className={`btn btn--${variant}`}
+            onClick={onClick}
+            disabled={disabled}
+        >
+            {label}
+        </button>
+    );
 }
 ```
 
@@ -289,19 +294,19 @@ The project uses **ESLint** and **Prettier**. All code must pass both before bei
 
 ## What NOT to Do
 
-| Anti-pattern | Preferred alternative |
-|---|---|
-| `<img src="…">` | `<Image src={…} alt="…" />` from `astro:assets` |
-| `Astro.glob('./posts/*.md')` | `getCollection('posts')` from `astro:content` |
-| `@astrojs/tailwind` (Tailwind v4) | `@tailwindcss/vite` Vite plugin |
-| Hardcoded color/spacing values in CSS | CSS custom property tokens from `global.css` |
-| `client:load` on every React component | Use the most deferred directive appropriate |
-| `any` TypeScript type | `unknown` + narrowing, or a proper interface |
-| Class components in React | Functional components + hooks |
-| `Astro.glob()` | `getCollection()` |
-| `<style is:global>` for component styles | Scoped `<style>` inside `.astro` files |
-| Prop drilling 3+ levels | Nano Stores or React Context |
+| Anti-pattern                             | Preferred alternative                           |
+| ---------------------------------------- | ----------------------------------------------- |
+| `<img src="…">`                          | `<Image src={…} alt="…" />` from `astro:assets` |
+| `Astro.glob('./posts/*.md')`             | `getCollection('posts')` from `astro:content`   |
+| `@astrojs/tailwind` (Tailwind v4)        | `@tailwindcss/vite` Vite plugin                 |
+| Hardcoded color/spacing values in CSS    | CSS custom property tokens from `global.css`    |
+| `client:load` on every React component   | Use the most deferred directive appropriate     |
+| `any` TypeScript type                    | `unknown` + narrowing, or a proper interface    |
+| Class components in React                | Functional components + hooks                   |
+| `Astro.glob()`                           | `getCollection()`                               |
+| `<style is:global>` for component styles | Scoped `<style>` inside `.astro` files          |
+| Prop drilling 3+ levels                  | Nano Stores or React Context                    |
 
 ---
 
-*This file is the source of truth for code conventions in this repository. When in doubt, the most readable, type-safe, and performance-conscious solution wins.*
+_This file is the source of truth for code conventions in this repository. When in doubt, the most readable, type-safe, and performance-conscious solution wins._
