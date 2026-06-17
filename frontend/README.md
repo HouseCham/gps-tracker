@@ -50,25 +50,31 @@ This project follows the **Astro Islands Architecture**:
 
 ```
 src/
-├── assets/                    # Static assets (images, fonts)
 ├── components/
-│   ├── astro/                 # Server-rendered components
-│   │   ├── admin/             # Admin stats, user table
-│   │   ├── device/            # Device card, device table
-│   │   ├── layout/            # MainLayout, Sidebar, TabBar
+│   ├── astro/                 # Server-rendered .astro components
+│   │   ├── admin/             # AdminStats, UserTable
+│   │   ├── device/            # DeviceCard, DeviceTable
+│   │   ├── layout/            # MainLayout, Sidebar, TabBar, Toolbar, AuthLayout
 │   │   ├── sections/          # Dashboard, KpiBar, ActivityFeed, DeviceDetail
-│   │   └── ui/                # Badge, Button, Input, DataTable, KpiCard, etc.
+│   │   └── ui/                # Badge, Button, Input, KpiCard, StatusIndicator,
+│   │                          # SignalIndicator, BatteryIndicator, EmptyState, DataTable
 │   └── react/                 # Interactive React islands
 │       ├── auth/              # LoginForm, SignupForm
 │       ├── device/            # DeviceForm
 │       ├── map/               # DeviceMap, MapMarker, MapPopover, RoutePlayer
-│       └── ui/                # Modal, Toast, Dropdown
-├── constants/                 # Regex patterns, demo data, UI constants
-├── i18n/                      # English and Spanish translation bundles
-├── layouts/                   # Base layout wrappers
+│       └── ui/                # Modal, Toast, Dropdown, ThemeToggle, GalleryIslands
+├── constants/
+│   ├── components/            # Demo/gallery data per component (admin, device, map, etc.)
+│   │   └── ui/                # UI component constants (modal defaults)
+│   └── regex.ts               # Validation regex patterns
+├── hooks/                     # Custom hooks (useToast)
+├── i18n/                      # English (en.ts) and Spanish (es.ts) translation bundles
 ├── lib/                       # Utilities, API services, auth client
 │   ├── api/                   # HTTP client, device/user services
-│   └── auth/                  # better-auth client instance
+│   │   └── helpers/           # handleApiError utility
+│   ├── auth/                  # better-auth client instance
+│   ├── map-utils.ts           # Map calculation utilities
+│   └── user-utils.ts          # User helper utilities
 ├── pages/                     # File-based routing
 │   ├── [lan]/                 # Locale-driven routes (en/es)
 │   │   ├── devices/           # Device list + detail pages
@@ -80,11 +86,17 @@ src/
 │   └── *-gallery.astro        # Component galleries (dev verification)
 ├── styles/
 │   ├── global.css             # Design system: tokens, reset, typography, all component styles
-│   ├── components/            # Co-located CSS for React forms
-│   ├── layout/                # Shell, sidebar, tabbar CSS
-│   ├── map/                   # Map, marker, popover, route player CSS
+│   ├── components/            # Co-located CSS for React forms (login, signup, device)
+│   ├── layout/                # MainLayout, Sidebar, TabBar CSS
+│   ├── map/                   # DeviceMap, marker, popover, route-player CSS
 │   └── ui/                    # Modal, toast, dropdown CSS
-└── types/                     # TypeScript interfaces (API, components, layout)
+└── types/
+    ├── api/                   # API request/response types (devices, users)
+    ├── components/             # Component prop types, organized by domain
+    │   └── ui/                # UI component prop types (button, input, modal, etc.)
+    ├── layout/                # Layout prop types (sidebar, etc.)
+    ├── i18n.ts                 # i18n type definitions
+    └── index.ts               # Type exports
 ```
 
 ### Routing
