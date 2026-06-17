@@ -1,11 +1,24 @@
+import '@/styles/ui/modal.css';
+//-- React
 import { useEffect, useId, useRef } from 'react';
-import { X } from 'lucide-react';
+//-- Types
 import type { ReactNode } from 'react';
-import './modal.css';
-
-export type ModalVariant = 'default' | 'danger';
-export type ModalSize = 'sm' | 'md' | 'lg';
-
+import type { ModalSize, ModalVariant } from '@/types/components';
+//-- Icons
+import { X } from 'lucide-react';
+/**
+ * @interface ModalProps
+ * @param {boolean} open - Whether the modal is open.
+ * @param {function} onClose - The function to call when the modal is closed.
+ * @param {string} title - The title of the modal.
+ * @param {ReactNode} children - The children of the modal.
+ * @param {ReactNode} footer - The footer of the modal.
+ * @param {ModalVariant} [variant='default'] - The variant of the modal.
+ * @param {ModalSize} [size='md'] - The size of the modal.
+ * @param {boolean} [closeOnBackdrop=true] - Whether to close the modal when the backdrop is clicked.
+ * @param {boolean} [closeOnEscape=true] - Whether to close the modal when the escape key is pressed.
+ * @param {React.RefObject<HTMLElement>} [initialFocusRef] - The ref of the element to focus when the modal is opened.
+ */
 export interface ModalProps {
     open: boolean;
     onClose: () => void;
@@ -18,7 +31,11 @@ export interface ModalProps {
     closeOnEscape?: boolean;
     initialFocusRef?: React.RefObject<HTMLElement>;
 }
-
+/**
+ * Renders a modal component.
+ * @param {ModalProps} props - The props for the component.
+ * @returns {React.JSX.Element | null} The rendered component.
+ */
 export default function Modal({
     open,
     onClose,

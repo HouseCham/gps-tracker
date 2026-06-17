@@ -1,3 +1,5 @@
+import '@/styles/ui/dropdown.css';
+//-- React
 import {
     useCallback,
     useEffect,
@@ -6,23 +8,23 @@ import {
     useState,
     type ReactNode,
 } from 'react';
+//-- Types
+import type { DropdownItem, DropdownSection } from '@/types/components';
+//-- Icons
 import { ChevronDown } from 'lucide-react';
-import './dropdown.css';
-
-export interface DropdownItem {
-    key: string;
-    label: string;
-    icon?: ReactNode;
-    onSelect?: () => void;
-    destructive?: boolean;
-    disabled?: boolean;
-}
-
-export interface DropdownSection {
-    key: string;
-    items: DropdownItem[];
-}
-
+/**
+ * @interface DropdownProps
+ * @param {ReactNode} trigger - The trigger element for the dropdown.
+ * @param {DropdownItem[]} items - The items to display in the dropdown.
+ * @param {DropdownSection[]} sections - The sections to display in the dropdown.
+ * @param {string} [align='start'] - The alignment of the dropdown.
+ * @param {string} [side='auto'] - The side of the dropdown.
+ * @param {boolean} [open] - Whether the dropdown is open.
+ * @param {boolean} [defaultOpen=false] - Whether the dropdown should be open by default.
+ * @param {function} [onOpenChange] - The function to call when the dropdown is opened or closed.
+ * @param {boolean} [closeOnSelect=true] - Whether to close the dropdown when an item is selected.
+ * @param {string} [ariaLabel] - The aria-label for the dropdown.
+ */
 export interface DropdownProps {
     trigger: ReactNode;
     items?: DropdownItem[];
@@ -35,7 +37,11 @@ export interface DropdownProps {
     closeOnSelect?: boolean;
     ariaLabel?: string;
 }
-
+/**
+ * Dropdown component.
+ * @param {DropdownProps} props
+ * @returns {JSX.Element}
+ */
 export default function Dropdown({
     trigger,
     items,
@@ -179,7 +185,12 @@ export default function Dropdown({
         </div>
     );
 }
-
+/**
+ * Hook to resolve the side of the dropdown.
+ * @param {string} side - The side of the dropdown.
+ * @param {boolean} open - Whether the dropdown is open.
+ * @returns {string} The resolved side of the dropdown.
+ */
 function useResolvedSide(
     side: 'bottom' | 'top' | 'auto',
     open: boolean

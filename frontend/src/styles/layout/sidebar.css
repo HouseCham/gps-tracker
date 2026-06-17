@@ -39,7 +39,7 @@
     width: 28px;
     height: 28px;
     border-radius: var(--radius-sm);
-    background: var(--accent);
+    background: var(--text);
     color: white;
     display: inline-flex;
     align-items: center;
@@ -129,8 +129,8 @@
 }
 
 .sidebar__logout:hover {
-    color: var(--red);
-    background: var(--red-soft);
+    color: var(--text);
+    background: var(--surface-2);
 }
 
 /* Hidden on mobile — TabBar takes over */

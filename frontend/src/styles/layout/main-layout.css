@@ -4,6 +4,12 @@
    Consumes tokens from global.css.
    ============================================ */
 
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
 .app-shell {
     display: grid;
     grid-template-columns: 240px 1fr;
@@ -11,7 +17,8 @@
         'sidebar main'
         'sidebar tabbar';
     grid-template-rows: 1fr auto;
-    min-height: 100vh;
+    flex: 1;
+    min-height: 0;
     background: var(--bg);
 }
 

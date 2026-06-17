@@ -1,3 +1,5 @@
+import type { ReactElement } from 'react';
+
 export type ToastVariant = 'success' | 'error' | 'warning' | 'info';
 /**
  * @interface ToastItem
@@ -15,4 +17,19 @@ export interface ToastItem {
     message?: string;
     duration?: number;
     action?: { label: string; onClick: () => void };
+}
+/**
+ * @interface ToastHandle
+ * @property {ToastItem[]} toasts - The toasts.
+ * @property {function} push - The function to push a toast.
+ * @property {function} dismiss - The function to dismiss a toast.
+ * @property {function} clear - The function to clear all toasts.
+ * @property {function} Container - The function to render the toast container.
+ */
+export interface ToastHandle {
+    toasts: ToastItem[];
+    push: (item: Omit<ToastItem, 'id'>) => string;
+    dismiss: (id: string) => void;
+    clear: () => void;
+    Container: () => ReactElement;
 }

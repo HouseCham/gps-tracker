@@ -138,10 +138,12 @@ const classes = ['device-detail', className].filter(Boolean).join(' ');
 
     .device-detail__name {
         margin: 0;
-        font-size: 22px;
-        font-weight: 700;
+        font-family: var(--font-display);
+        font-size: 24px;
+        font-weight: 600;
         color: var(--text);
-        letter-spacing: -0.02em;
+        letter-spacing: 0;
+        line-height: 1.2;
     }
 
     .device-detail__body {
@@ -159,8 +161,9 @@ const classes = ['device-detail', className].filter(Boolean).join(' ');
 
     .device-detail__card {
         background: var(--surface);
-        border: 1px solid var(--border);
+        border: none;
         border-radius: var(--radius);
+        box-shadow: var(--shadow-md);
         padding: 20px;
     }
 

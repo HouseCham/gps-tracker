@@ -114,8 +114,9 @@ const rootClasses = [
 <style>
     .data-table__scroll {
         background: var(--surface);
-        border: 1px solid var(--border);
+        border: none;
         border-radius: var(--radius);
+        box-shadow: var(--shadow-md);
         overflow: auto;
         max-height: 100%;
     }
@@ -187,14 +188,14 @@ const rootClasses = [
     }
 
     .data-table__head.is-sorted-asc {
-        color: var(--accent);
+        color: var(--text);
     }
     .data-table__head.is-sorted-asc .data-table__sort-icon {
         opacity: 1;
         transform: rotate(0deg);
     }
     .data-table__head.is-sorted-desc {
-        color: var(--accent);
+        color: var(--text);
     }
     .data-table__head.is-sorted-desc .data-table__sort-icon {
         opacity: 1;
@@ -230,7 +231,7 @@ const rootClasses = [
         background: linear-gradient(
             90deg,
             var(--surface-2) 0%,
-            var(--surface-3) 50%,
+            var(--border) 50%,
             var(--surface-2) 100%
         );
         background-size: 200% 100%;

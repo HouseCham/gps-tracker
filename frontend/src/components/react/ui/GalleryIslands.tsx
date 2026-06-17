@@ -1,9 +1,12 @@
 //-- React
 import { useState, type JSX } from 'react';
+//-- Hooks
+import { useToast } from '@/hooks';
 //-- Icons
 import { Pencil, Trash2, Copy, MoreVertical, CheckCircle2 } from 'lucide-react';
 //-- Components
-import { Modal, useToast, Dropdown } from './index';
+import Modal from './Modal';
+import Dropdown from './Dropdown';
 /**
  * ReactIslandsGallery — React islands gallery component.
  * @description Only used for demo purposes.

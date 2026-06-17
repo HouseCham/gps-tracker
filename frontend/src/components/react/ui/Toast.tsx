@@ -1,43 +1,33 @@
-import {
-    useCallback,
-    useEffect,
-    useRef,
-    useState,
-    type ReactElement,
-} from 'react';
+import '@/styles/ui//toast.css';
+//-- React
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { CheckCircle2, CircleX, Info, TriangleAlert, X } from 'lucide-react';
-import './toast.css';
-
-export type ToastVariant = 'success' | 'error' | 'warning' | 'info';
-
-export interface ToastItem {
-    id: string;
-    variant: ToastVariant;
-    title: string;
-    message?: string;
-    duration?: number;
-    action?: { label: string; onClick: () => void };
-}
-
+//-- Types
+import type { ToastItem } from '@/types/components';
+//-- Constants
+import {
+    MODAL_VARIANT_CLASS,
+    MODAL_VARIANT_ICON,
+} from '@/constants/components/ui';
+//-- Icons
+import { X } from 'lucide-react';
+/**
+ * @interface ToastProps
+ * @param {string} variant - The variant of the toast.
+ * @param {string} title - The title of the toast.
+ * @param {string} message - The message of the toast.
+ * @param {number} [duration=3000] - The duration of the toast.
+ * @param {ToastAction} [action] - The action of the toast.
+ * @param {function} onClose - The function to call when the toast is closed.
+ */
 export interface ToastProps extends ToastItem {
     onClose: () => void;
 }
-
-const VARIANT_ICON: Record<ToastVariant, typeof CheckCircle2> = {
-    success: CheckCircle2,
-    error: CircleX,
-    warning: TriangleAlert,
-    info: Info,
-};
-
-const VARIANT_CLASS: Record<ToastVariant, string> = {
-    success: 'toast--success',
-    error: 'toast--error',
-    warning: 'toast--warning',
-    info: 'toast--info',
-};
-
+/**
+ * Render a toast.
+ * @param {ToastProps} props - The props of the toast.
+ * @returns {React.JSX.Element} The toast.
+ */
 export default function Toast({
     variant,
     title,
@@ -46,7 +36,7 @@ export default function Toast({
     action,
     onClose,
 }: ToastProps): React.JSX.Element {
-    const Icon = VARIANT_ICON[variant];
+    const Icon = MODAL_VARIANT_ICON[variant];
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const [hiding, setHiding] = useState<boolean>(false);
 
@@ -71,7 +61,7 @@ export default function Toast({
 
     return (
         <div
-            className={`toast ${VARIANT_CLASS[variant]} ${hiding ? 'is-hiding' : ''}`}
+            className={`toast ${MODAL_VARIANT_CLASS[variant]} ${hiding ? 'is-hiding' : ''}`}
             role={
                 variant === 'error' || variant === 'warning'
                     ? 'alert'
@@ -113,7 +103,12 @@ export default function Toast({
         </div>
     );
 }
-
+/**
+ * @interface ToastContainerProps
+ * @param {ToastItem[]} toasts - The toasts to render.
+ * @param {function} onClose - The function to call when a toast is closed.
+ * @param {string} [position='bottom-right'] - The position of the toasts.
+ */
 export interface ToastContainerProps {
     toasts: ToastItem[];
     onClose: (id: string) => void;
@@ -125,7 +120,11 @@ export interface ToastContainerProps {
         | 'top-center'
         | 'bottom-center';
 }
-
+/**
+ * Render a toast container.
+ * @param {ToastContainerProps} props - The props of the toast container.
+ * @returns {React.JSX.Element | null} The toast container.
+ */
 export function ToastContainer({
     toasts,
     onClose,
@@ -152,47 +151,4 @@ export function ToastContainer({
         </div>,
         document.body
     );
-}
-
-interface UseToastOptions {
-    position?: ToastContainerProps['position'];
-}
-
-export interface ToastHandle {
-    toasts: ToastItem[];
-    push: (item: Omit<ToastItem, 'id'>) => string;
-    dismiss: (id: string) => void;
-    clear: () => void;
-    Container: () => ReactElement;
-}
-
-export function useToast(options: UseToastOptions = {}): ToastHandle {
-    const [toasts, setToasts] = useState<ToastItem[]>([]);
-    const counter = useRef(0);
-
-    const push = useCallback((item: Omit<ToastItem, 'id'>): string => {
-        counter.current += 1;
-        const id = `t-${Date.now()}-${counter.current}`;
-        setToasts((prev): ToastItem[] => [...prev, { ...item, id }].slice(-5));
-        return id;
-    }, []);
-
-    const dismiss = useCallback((id: string): void => {
-        setToasts((prev): ToastItem[] => prev.filter(t => t.id !== id));
-    }, []);
-
-    const clear = useCallback((): void => setToasts([]), []);
-
-    const Container = useCallback(
-        (): ReactElement => (
-            <ToastContainer
-                toasts={toasts}
-                onClose={dismiss}
-                position={options.position}
-            />
-        ),
-        [toasts, dismiss, options.position]
-    );
-
-    return { toasts, push, dismiss, clear, Container };
 }

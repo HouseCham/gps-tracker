@@ -4,10 +4,11 @@ import '@/styles/layout/main-layout.css';
 //-- Types
 import type { Translation } from '@/i18n';
 import type { Language } from '@/types';
+import type { SidebarNavItem, SidebarUser } from '@/types/layout';
 //-- Components
 import Sidebar from './Sidebar.astro';
 import TabBar from './TabBar.astro';
-import type { SidebarNavItem, SidebarUser } from '@/types/layout';
+import Toolbar from './Toolbar.astro';
 
 /**
  * @interface Props
@@ -37,7 +38,7 @@ const {
 } = Astro.props;
 ---
 
-<html lang={locale} data-theme="dark">
+<html lang={locale}>
     <head>
         <meta charset="utf-8" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -50,7 +51,7 @@ const {
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
             rel="stylesheet"
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cal+Sans:wght@600&display=swap"
         />
     </head>
     <body>
@@ -63,8 +64,12 @@ const {
                 showAdmin={showAdmin}
             />
             <main class="app-shell__main">
+                <!-- Toolbar -->
+                <Toolbar />
+                <!-- Content -->
                 <slot />
             </main>
+            <!-- Tab Bar (for mobile) -->
             <TabBar
                 locale={locale}
                 translation={translation}
@@ -72,5 +77,16 @@ const {
                 showAdmin={showAdmin}
             />
         </div>
+        <script is:inline>
+            (function () {
+                var stored = localStorage.getItem('theme');
+                var preferred = stored
+                    ? stored
+                    : window.matchMedia('(prefers-color-scheme: dark)').matches
+                      ? 'dark'
+                      : 'light';
+                document.documentElement.dataset.theme = preferred;
+            })();
+        </script>
     </body>
 </html>
