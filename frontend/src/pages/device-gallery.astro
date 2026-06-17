@@ -1,0 +1,84 @@
+---
+//-- Translations
+import { en } from '@/i18n';
+//-- Types
+import { DEVICE_GALLERY_DEMO_DEVICES, DEVICE_GALLERY_DEMO_CARD_DEVICES } from '@/constants/components';
+//-- Components
+import MainLayout from '@/components/astro/layout/MainLayout.astro';
+import DeviceTable from '@/components/device/DeviceTable.astro';
+import DeviceCard from '@/components/device/DeviceCard.astro';
+import DeviceFormDemo from '@/components/react/device/DeviceFormGallery';
+---
+
+<MainLayout
+    locale="en"
+    translation={en}
+    user={{ name: 'Gallery', role: 'Dev' }}
+    active="devices"
+    title="Device Components · Gallery"
+>
+    <h1>Device Components</h1>
+    <p class="hint">DeviceTable, DeviceCard, DeviceForm — Astro + React islands.</p>
+
+    <section>
+        <h2>DeviceTable — populated</h2>
+        <DeviceTable 
+            locale="en" 
+            devices={DEVICE_GALLERY_DEMO_DEVICES} 
+        />
+    </section>
+
+    <section>
+        <h2>DeviceTable — empty</h2>
+        <DeviceTable 
+            locale="en" 
+            devices={[]} 
+            empty 
+        />
+    </section>
+
+    <section>
+        <h2>DeviceTable — loading</h2>
+        <DeviceTable 
+            locale="en" 
+            devices={[]} 
+            loading
+        />
+    </section>
+
+    <section>
+        <h2>DeviceCard</h2>
+        <div class="card-grid">
+            {DEVICE_GALLERY_DEMO_CARD_DEVICES.map((d) => <DeviceCard device={d} />)}
+        </div>
+    </section>
+
+    <section>
+        <h2>DeviceForm (React island)</h2>
+        <div class="form-surface">
+            <DeviceFormDemo client:load />
+        </div>
+    </section>
+</MainLayout>
+
+<style>
+    h1 { font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+    .hint { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+    section { margin-bottom: 32px; }
+    section h2 {
+        font-size: 14px; font-weight: 600; text-transform: uppercase;
+        letter-spacing: 0.06em; color: var(--muted); margin-bottom: 12px;
+    }
+    .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 12px;
+    }
+    .form-surface {
+        max-width: 420px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 24px;
+    }
+</style>

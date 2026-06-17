@@ -1,0 +1,115 @@
+---
+//-- Types
+import type { DeviceTableItem } from '@/types/components/device.types';
+//-- Components
+import DataTable from '@/components/ui/DataTable.astro';
+import StatusIndicator from '@/components/ui/StatusIndicator.astro';
+import BatteryIndicator from '@/components/ui/BatteryIndicator.astro';
+import SignalIndicator from '@/components/ui/SignalIndicator.astro';
+import Button from '@/components/ui/Button.astro';
+import { DEVICE_TABLE_COLUMNS } from '@/constants/components/deviceTable';
+import type { Language } from '@/types';
+/**
+ * @interface Props
+ * @property {DeviceTableItem[]} devices - Device table items.
+ * @property {Language} locale - Current locale.
+ * @property {boolean} [loading=false] - Show loading indicator.
+ * @property {boolean} [empty=false] - Show empty state.
+ * @property {string} [emptyTitle='No devices yet'] - Empty state title.
+ * @property {string} [emptyMessage='Add your first GPS device to get started.'] - Empty state message.
+ * @property {string | undefined} [class] - Extra classes.
+ */
+interface Props {
+    devices: DeviceTableItem[];
+    locale: Language;
+    loading?: boolean;
+    empty?: boolean;
+    emptyTitle?: string;
+    emptyMessage?: string;
+    class?: string;
+}
+
+const {
+    devices,
+    locale,
+    loading = false,
+    empty = false,
+    emptyTitle = 'No devices yet',
+    emptyMessage = 'Add your first GPS device to get started.',
+    class: className,
+} = Astro.props;
+---
+
+<DataTable
+    columns={DEVICE_TABLE_COLUMNS}
+    loading={loading}
+    empty={empty}
+    emptyTitle={emptyTitle}
+    emptyMessage={emptyMessage}
+    class={className}
+>
+    {
+        devices.map((device) => (
+            <tr class="data-table__row device-table__row">
+                <td class="data-table__cell">
+                    <a href={`/${locale}/devices/${device.id}`} class="device-table__name">
+                        {device.name}
+                    </a>
+                </td>
+                <td class="data-table__cell">
+                    <StatusIndicator status={device.status} />
+                </td>
+                <td class="data-table__cell device-table__time">
+                    {device.lastSeen ?? '—'}
+                </td>
+                <td class="data-table__cell" data-align="center">
+                    <BatteryIndicator level={device.battery} />
+                </td>
+                <td class="data-table__cell" data-align="center">
+                    <SignalIndicator strength={device.signal} />
+                </td>
+                <td class="data-table__cell" data-align="right">
+                    <div class="device-table__actions">
+                        <Button variant="ghost" size="sm">Edit</Button>
+                        <Button variant="danger" size="sm">Delete</Button>
+                    </div>
+                </td>
+            </tr>
+        ))
+    }
+</DataTable>
+
+<style>
+    .device-table__row td {
+        vertical-align: middle;
+    }
+
+    .device-table__name {
+        color: var(--text);
+        font-weight: 500;
+        text-decoration: none;
+        transition: color var(--transition);
+    }
+    .device-table__name:hover {
+        color: var(--accent);
+    }
+
+    .device-table__time {
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--muted);
+        white-space: nowrap;
+    }
+
+    .device-table__actions {
+        display: inline-flex;
+        gap: 4px;
+    }
+
+    td[data-align="center"] {
+        text-align: center;
+    }
+    td[data-align="right"] {
+        text-align: right;
+    }
+</style>

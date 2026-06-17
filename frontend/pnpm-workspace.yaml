@@ -1,5 +1,5 @@
 allowBuilds:
-    esbuild: set this to true or false
-    sharp: set this to true or false
+    esbuild: true
+    sharp: true
 minimumReleaseAgeExclude:
     - astro@6.4.6
