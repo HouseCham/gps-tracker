@@ -23,6 +23,7 @@ export const en = {
         totalUsers: 'Total Users',
         totalDevices: 'Total Devices',
         activeToday: 'Active Today',
+        onlineNow: 'Online Now',
         alerts: 'Alerts',
         userTable: {
             name: 'Name',

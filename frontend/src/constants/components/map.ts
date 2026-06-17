@@ -5,20 +5,8 @@ import type {
     RouteSpeed,
 } from '@/types/components';
 /**
- * @constant MAP_STATUS_LABEL
- * @description Label for each marker status
- * @type {Record<MarkerStatus, string>}
- */
-export const MAP_STATUS_LABEL: Record<MarkerStatus, string> = {
-    online: 'Online',
-    offline: 'Offline',
-    'never-seen': 'Never seen',
-    unknown: 'Unknown',
-};
-/**
  * @constant MAP_STATUS_CLASS
- * @description Class for each marker status
- * @type {Record<MarkerStatus, string>}
+ * @description Class names for the map status markers
  */
 export const MAP_STATUS_CLASS: Record<MarkerStatus, string> = {
     online: 'map-popover__badge--online',
@@ -29,7 +17,6 @@ export const MAP_STATUS_CLASS: Record<MarkerStatus, string> = {
 /**
  * @constant MAP_DEMO_PINS
  * @description Demo pins for the map
- * @type {DeviceMapPin[]}
  */
 export const MAP_DEMO_PINS: DeviceMapPin[] = [
     {
@@ -76,7 +63,6 @@ export const MAP_DEMO_PINS: DeviceMapPin[] = [
 /**
  * @constant MAP_DEMO_ROUTE
  * @description Demo route for the map
- * @type {DeviceMapRoutePoint[]}
  */
 export const MAP_DEMO_ROUTE: DeviceMapRoutePoint[] = [
     { lat: 19.405, lng: -99.16 },
@@ -88,6 +74,5 @@ export const MAP_DEMO_ROUTE: DeviceMapRoutePoint[] = [
 /**
  * @constant MAP_SPEED_OPTIONS
  * @description Speed options for the map
- * @type {RouteSpeed[]}
  */
 export const MAP_SPEED_OPTIONS: RouteSpeed[] = [1, 2, 4];

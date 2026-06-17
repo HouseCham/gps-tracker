@@ -1,24 +1,14 @@
 ---
-//-- Types
+import type { Translation } from '@/i18n';
 import type { KpiBarItem, ActivityItem, DeviceTableItem } from '@/types/components';
 import type { Language } from '@/types';
-//-- Components
 import KpiBar from '@/components/sections/KpiBar.astro';
 import ActivityFeed from '@/components/sections/ActivityFeed.astro';
 import DeviceTable from '@/components/device/DeviceTable.astro';
-/**
- * @interface Props
- * @property {KpiBarItem[]} kpiItems - KPI bar items.
- * @property {ActivityItem[]} activities - Activity feed items.
- * @property {DeviceTableItem[]} devices - Device table items.
- * @property {boolean} [devicesLoading=false] - Show loading indicator.
- * @property {boolean} [devicesEmpty=false] - Show empty state.
- * @property {string} [activityTitle='Activity'] - Activity feed title.
- * @property {string | undefined} [viewAllHref] - View all link.
- * @property {string | undefined} [class] - Extra classes.
- */
+
 interface Props {
     locale: Language;
+    translation: Translation;
     kpiItems: KpiBarItem[];
     activities: ActivityItem[];
     devices: DeviceTableItem[];
@@ -31,6 +21,7 @@ interface Props {
 
 const {
     locale,
+    translation,
     kpiItems,
     activities,
     devices,
@@ -45,7 +36,7 @@ const classes = ['dashboard', className].filter(Boolean).join(' ');
 ---
 
 <div class={classes}>
-    <KpiBar items={kpiItems} title="Overview" />
+    <KpiBar items={kpiItems} title={translation.section.kpiBar.title} />
 
     <div class="dashboard__main">
         <div class="dashboard__feed">
@@ -58,6 +49,7 @@ const classes = ['dashboard', className].filter(Boolean).join(' ');
         <div class="dashboard__table">
             <DeviceTable
                 locale={locale}
+                translation={translation}
                 devices={devices}
                 loading={devicesLoading}
                 empty={devicesEmpty}

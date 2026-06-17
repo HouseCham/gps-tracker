@@ -7,6 +7,7 @@ import type {
     DeviceMapPin,
     DeviceMapRoutePoint,
     MapPopoverDevice,
+    MarkerStatus,
 } from '@/types/components';
 //-- Icons
 import { MapPin, Plus, Minus, Locate } from 'lucide-react';
@@ -46,6 +47,7 @@ interface DeviceMapProps {
     onZoomOut?: () => void;
     onLocate?: () => void;
     bottomRightSlot?: ReactNode;
+    statusLabels?: Record<MarkerStatus, string>;
 }
 /**
  * @function DeviceMap
@@ -66,6 +68,7 @@ export default function DeviceMap({
     onZoomOut,
     onLocate,
     bottomRightSlot,
+    statusLabels,
 }: DeviceMapProps): JSX.Element {
     const [internalSelectedId, setInternalSelectedId] = useState<string | null>(
         null
@@ -75,6 +78,10 @@ export default function DeviceMap({
     /**
      * Handles the selection of a pin.
      * @param {string} id - The ID of the pin to select.
+     * React 19 Compiler: manual callback is needed because this is passed
+     * as an `onClick` prop to child MapMarker components inside `.map()`,
+     * and referential stability prevents unnecessary re-renders of the
+     * entire pin set.
      */
     const handleSelect = useCallback(
         (id: string): void => {
@@ -86,6 +93,9 @@ export default function DeviceMap({
     /**
      * Handles the closing of the popover.
      * @returns {void}
+     * React 19 Compiler: manual callback is needed because this is passed
+     * as an `onClose` prop to MapPopover, which the compiler cannot
+     * guarantee referential stability for across renders.
      */
     const handleClose = useCallback((): void => {
         if (!isControlled) setInternalSelectedId(null);
@@ -93,6 +103,9 @@ export default function DeviceMap({
     /**
      * Current pin selected.
      * @returns {DeviceMapPin | null} The selected pin.
+     * React 19 Compiler: manual memo is needed because `pins` is an
+     * array prop from Astro that changes reference on every render;
+     * without memoization `pins.find()` would re-run needlessly.
      */
     const selectedPin = useMemo(
         () => pins.find(p => p.id === selectedId) ?? null,
@@ -101,6 +114,10 @@ export default function DeviceMap({
     /**
      * Array of projected coordinates.
      * @returns {Array} An array of coordinates pins.
+     * React 19 Compiler: manual memo is needed because `pins` is an
+     * array prop from Astro that changes reference on every render;
+     * `projectCoordinate()` is a pure math transform that would
+     * recompute all pins on every render without this guard.
      */
     const pinsProjected = useMemo(
         () =>
@@ -110,6 +127,10 @@ export default function DeviceMap({
     /**
      * Center of the map.
      * @returns {{ lat: number; lng: number; text: string }} The center of the map.
+     * React 19 Compiler: manual memo is needed because `pins` is an
+     * array prop from Astro — the `pins[0]` fallback lookup inside
+     * would re-run on every render, and `formatCoords()` is a pure
+     * computation that should be skipped when inputs are unchanged.
      */
     const coords = useMemo(() => {
         const c =
@@ -128,6 +149,10 @@ export default function DeviceMap({
     /**
      * Route path of the map.
      * @returns {string} The route path.
+     * React 19 Compiler: manual memo is needed because `route` is an
+     * array prop from Astro that changes reference every render;
+     * `getPathFromRoute()` computes an SVG path (heavy string building)
+     * that would be wasted work on every unrelated state update.
      */
     const routePath = useMemo(
         () =>
@@ -217,6 +242,7 @@ export default function DeviceMap({
                                 device={popoverDevice}
                                 href={`/devices/${popoverDevice.id}`}
                                 onClose={handleClose}
+                                statusLabels={statusLabels}
                             />
                         </div>
                     )}

@@ -25,6 +25,7 @@ export const es: Translation = {
         totalUsers: 'Usuarios totales',
         totalDevices: 'Dispositivos totales',
         activeToday: 'Activos hoy',
+        onlineNow: 'En línea ahora',
         alerts: 'Alertas',
         userTable: {
             name: 'Nombre',
