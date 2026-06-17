@@ -14,6 +14,10 @@ export const es: Translation = {
         primaryNav: 'Principal',
         primaryNavMobile: 'Principal móvil',
     },
+    language: {
+        switchToSpanish: 'Cambiar a español',
+        switchToEnglish: 'Cambiar a inglés',
+    },
     admin: {
         title: 'Administración',
         stats: 'Estadísticas',

@@ -3,6 +3,7 @@ import '@/styles/layout/sidebar.css';
 //-- Types
 import type { Translation } from '@/i18n';
 import type { Language } from '@/types';
+import type { SidebarNavItem, SidebarUser } from '@/types/layout';
 //-- Components
 import {
     LayoutDashboard,
@@ -12,7 +13,6 @@ import {
     LogOut,
     MapPin,
 } from '@lucide/astro';
-import type { SidebarNavItem, SidebarUser } from '@/types/layout';
 /**
  * @interface Props
  * @property {Language} locale - Current locale code ('en' | 'es').

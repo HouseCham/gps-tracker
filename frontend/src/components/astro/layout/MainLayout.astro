@@ -65,7 +65,7 @@ const {
             />
             <main class="app-shell__main">
                 <!-- Toolbar -->
-                <Toolbar />
+                <Toolbar locale={locale} />
                 <!-- Content -->
                 <slot />
             </main>
@@ -86,6 +86,15 @@ const {
                       ? 'dark'
                       : 'light';
                 document.documentElement.dataset.theme = preferred;
+            })();
+            (function () {
+                var stored = localStorage.getItem('language');
+                var lang = stored === 'es' || stored === 'en'
+                    ? stored
+                    : navigator.language.toLowerCase().startsWith('es')
+                      ? 'es'
+                      : 'en';
+                document.documentElement.dataset.language = lang;
             })();
         </script>
     </body>

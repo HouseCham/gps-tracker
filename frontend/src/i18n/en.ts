@@ -12,6 +12,10 @@ export const en = {
         primaryNav: 'Primary',
         primaryNavMobile: 'Primary mobile',
     },
+    language: {
+        switchToSpanish: 'Switch to Spanish',
+        switchToEnglish: 'Switch to English',
+    },
     admin: {
         title: 'Admin',
         stats: 'Statistics',
