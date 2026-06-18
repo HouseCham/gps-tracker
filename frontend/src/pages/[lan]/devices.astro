@@ -5,11 +5,13 @@ import { getTranslation } from '@/i18n';
 //-- Types
 import type { Language } from '@/types';
 //-- Constants
-import { DEMO_USER, SECTION_GALLERY_DEMO_DEVICES, SECTION_GALLERY_DEMO_KPI_ITEMS } from '@/constants/components';
+import { DEMO_USER, SECTION_GALLERY_DEMO_DEVICES } from '@/constants/components';
 //-- Components
 import MainLayout from '@/components/astro/layout/MainLayout.astro';
 import DeviceTable from '@/components/device/DeviceTable.astro';
 import KpiBar from '@/components/sections/KpiBar.astro';
+//-- Utils
+import { getDemoKpiItems } from '@/lib';
 /**
  * @type {GetStaticPaths}
  */
@@ -19,6 +21,7 @@ export const getStaticPaths = (() => {
 
 const locale = Astro.params.lan as Language;
 const translation = getTranslation(locale);
+const kpiItems = getDemoKpiItems(translation);
 ---
 
 <MainLayout
@@ -37,13 +40,14 @@ const translation = getTranslation(locale);
     </header>
 
     <KpiBar 
-        items={SECTION_GALLERY_DEMO_KPI_ITEMS}
+        items={kpiItems}
         title={translation.section.kpiBar.title}
     />
 
     <section class="devices-section">
         <DeviceTable 
             locale={locale} 
+            translation={translation}
             devices={SECTION_GALLERY_DEMO_DEVICES} 
         />
     </section>

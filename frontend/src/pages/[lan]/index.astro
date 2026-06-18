@@ -3,17 +3,18 @@
 import { getTranslation } from '@/i18n';
 //-- Types
 import type { Language } from '@/types';
+import type { GetStaticPaths } from 'astro';
 //-- Constants
 import { 
     DEMO_USER,
     SECTION_GALLERY_DEMO_ACTIVITIES,
-    SECTION_GALLERY_DEMO_DEVICES,
-    SECTION_GALLERY_DEMO_KPI_ITEMS
+    SECTION_GALLERY_DEMO_DEVICES
 } from '@/constants/components';
 //-- Components
 import MainLayout from '@/components/astro/layout/MainLayout.astro';
 import Dashboard from '@/components/sections/Dashboard.astro';
-import type { GetStaticPaths } from 'astro';
+//-- Utils
+import { getDemoKpiItems } from '@/lib';
 /**
  * @type {GetStaticPaths}
  */
@@ -23,6 +24,7 @@ export const getStaticPaths = (() => {
 
 const locale = Astro.params.lan as Language;
 const translation = getTranslation(locale);
+const kpiItems = getDemoKpiItems(translation);
 ---
 
 <MainLayout
@@ -42,7 +44,8 @@ const translation = getTranslation(locale);
 
     <Dashboard
         locale={locale}
-        kpiItems={SECTION_GALLERY_DEMO_KPI_ITEMS}
+        translation={translation}
+        kpiItems={kpiItems}
         activities={SECTION_GALLERY_DEMO_ACTIVITIES}
         devices={SECTION_GALLERY_DEMO_DEVICES}
         activityTitle={translation.section.activityFeed.title}

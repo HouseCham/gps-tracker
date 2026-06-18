@@ -1,27 +1,31 @@
 ---
 //-- Types
+import type { Translation } from '@/i18n';
 import type { DeviceTableItem } from '@/types/components/device.types';
+import type { Language } from '@/types';
 //-- Components
 import DataTable from '@/components/ui/DataTable.astro';
 import StatusIndicator from '@/components/ui/StatusIndicator.astro';
 import BatteryIndicator from '@/components/ui/BatteryIndicator.astro';
 import SignalIndicator from '@/components/ui/SignalIndicator.astro';
 import Button from '@/components/ui/Button.astro';
-import { DEVICE_TABLE_COLUMNS } from '@/constants/components/deviceTable';
-import type { Language } from '@/types';
+//-- Utils
+import { getDeviceTableColumns } from '@/lib';
 /**
  * @interface Props
  * @property {DeviceTableItem[]} devices - Device table items.
- * @property {Language} locale - Current locale.
- * @property {boolean} [loading=false] - Show loading indicator.
- * @property {boolean} [empty=false] - Show empty state.
- * @property {string} [emptyTitle='No devices yet'] - Empty state title.
- * @property {string} [emptyMessage='Add your first GPS device to get started.'] - Empty state message.
+ * @property {Language} locale - Current locale code ('en' | 'es').
+ * @property {Translation} translation - Translation bundle (en/es) used for nav labels.
+ * @property {boolean} [loading] - Whether the table is loading.
+ * @property {boolean} [empty] - Whether the table is empty.
+ * @property {string} [emptyTitle] - Empty state title.
+ * @property {string} [emptyMessage] - Empty state message.
  * @property {string | undefined} [class] - Extra classes.
  */
 interface Props {
     devices: DeviceTableItem[];
     locale: Language;
+    translation: Translation;
     loading?: boolean;
     empty?: boolean;
     emptyTitle?: string;
@@ -32,16 +36,18 @@ interface Props {
 const {
     devices,
     locale,
+    translation,
     loading = false,
     empty = false,
-    emptyTitle = 'No devices yet',
-    emptyMessage = 'Add your first GPS device to get started.',
+    emptyTitle = translation.device.noDevices,
+    emptyMessage = translation.device.noDevicesMessage,
     class: className,
 } = Astro.props;
+const columns = getDeviceTableColumns(translation);
 ---
 
 <DataTable
-    columns={DEVICE_TABLE_COLUMNS}
+    columns={columns}
     loading={loading}
     empty={empty}
     emptyTitle={emptyTitle}
@@ -70,8 +76,8 @@ const {
                 </td>
                 <td class="data-table__cell" data-align="right">
                     <div class="device-table__actions">
-                        <Button variant="ghost" size="sm">Edit</Button>
-                        <Button variant="danger" size="sm">Delete</Button>
+                        <Button variant="ghost" size="sm">{translation.device.editDevice}</Button>
+                        <Button variant="danger" size="sm">{translation.device.deleteDevice}</Button>
                     </div>
                 </td>
             </tr>

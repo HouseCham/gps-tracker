@@ -1,16 +1,25 @@
 import '@/styles/map/map-popover.css';
+//-- React
+import type { JSX, MouseEvent } from 'react';
+//-- Translations
+import { en } from '@/i18n';
+//-- Types
+import type { MapPopoverDevice, MarkerStatus } from '@/types/components';
 //-- Constants
-import { MAP_STATUS_CLASS, MAP_STATUS_LABEL } from '@/constants/components/map';
-//-- Components
-import type { MapPopoverDevice } from '@/types/components';
+import { MAP_STATUS_CLASS } from '@/constants/components/map';
+//-- Icons
 import { ArrowRight, X } from 'lucide-react';
+//-- Utils
+import { getMapStatusLabels, formatCoords } from '@/lib';
 /**
  * @interface MapPopoverProps
- * @param {MapPopoverDevice} device - The device to display info for.
- * @param {string} [href] - Optional link to open in a new tab.
- * @param {function} [onClose] - Optional function to call when the popover is closed.
- * @param {function} [onView] - Optional function to call when the view button is clicked.
- * @param {string} [lastSeenLabel] - Optional label to use for the last seen time.
+ * @param {MapPopoverDevice} device - The device to display.
+ * @param {string} href - The href to use for the link.
+ * @param {function} onClose - The function to call when the popover is closed.
+ * @param {function} onView - The function to call when the view button is clicked.
+ * @param {string} lastSeenLabel - The label to use for the last seen date.
+ * @param {Record<MarkerStatus, string>} statusLabels - The labels to use for the status.
+ * @returns {JSX.Element} The MapPopover component.
  */
 interface MapPopoverProps {
     device: MapPopoverDevice;
@@ -18,9 +27,10 @@ interface MapPopoverProps {
     onClose?: () => void;
     onView?: (id: string) => void;
     lastSeenLabel?: string;
+    statusLabels?: Record<MarkerStatus, string>;
 }
 /**
- * Render a popover for a device on the map.
+ * Renders a popover for a device on the map.
  * @param {MapPopoverProps} props - The props for the component.
  * @returns {JSX.Element} The rendered component.
  */
@@ -30,20 +40,36 @@ export default function MapPopover({
     onClose,
     onView,
     lastSeenLabel,
-}: MapPopoverProps): React.JSX.Element {
-    const handleView = (e: React.MouseEvent): void => {
+    statusLabels,
+}: MapPopoverProps): JSX.Element {
+    /**
+     * Handles the view button click.
+     * @param {MouseEvent} e - The click event.
+     * @returns {void}
+     */
+    const handleView = (e: MouseEvent): void => {
         e.preventDefault();
         onView?.(device.id);
     };
-
-    const formattedCoords = `${device.lat.toFixed(4)}° ${device.lat >= 0 ? 'N' : 'S'}, ${device.lng.toFixed(4)}° ${device.lng >= 0 ? 'E' : 'W'}`;
-
+    /**
+     * Formats the coordinates into a human-readable string.
+     * @returns {string} The formatted coordinates.
+     */
+    const formattedCoords = formatCoords(device.lat, device.lng);
+    /**
+     * Get the labels for the map status markers.
+     * @returns {Record<MarkerStatus, string>} The labels for the map status markers.
+     */
+    const labels = statusLabels ?? getMapStatusLabels(en);
+    /**
+     * Get the label for the last seen date.
+     * @returns {string} The label for the last seen date.
+     */
     const lastSeen =
         lastSeenLabel ??
         (device.lastSeen
             ? new Date(device.lastSeen).toLocaleString()
             : 'Never');
-
     return (
         <div
             className="map-popover"
@@ -55,7 +81,7 @@ export default function MapPopover({
                 <span
                     className={`map-popover__badge ${MAP_STATUS_CLASS[device.status]}`}
                 >
-                    {MAP_STATUS_LABEL[device.status]}
+                    {labels[device.status]}
                 </span>
             </div>
             <div className="map-popover__name">{device.name}</div>

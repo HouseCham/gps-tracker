@@ -12,6 +12,10 @@ export const en = {
         primaryNav: 'Primary',
         primaryNavMobile: 'Primary mobile',
     },
+    language: {
+        switchToSpanish: 'Switch to Spanish',
+        switchToEnglish: 'Switch to English',
+    },
     admin: {
         title: 'Admin',
         stats: 'Statistics',
@@ -19,6 +23,7 @@ export const en = {
         totalUsers: 'Total Users',
         totalDevices: 'Total Devices',
         activeToday: 'Active Today',
+        onlineNow: 'Online Now',
         alerts: 'Alerts',
         userTable: {
             name: 'Name',

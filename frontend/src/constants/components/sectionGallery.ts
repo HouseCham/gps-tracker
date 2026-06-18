@@ -1,52 +1,11 @@
 import type {
     ActivityItem,
-    AdminStatItem,
     DeviceDetailData,
     DeviceTableItem,
 } from '@/types/components';
 /**
- * @constant SECTION_GALLERY_DEMO_KPI_ITEMS
- * @description Demo KPI items for the section gallery
- * @type {AdminStatItem[]}
- */
-export const SECTION_GALLERY_DEMO_KPI_ITEMS: Array<AdminStatItem> = [
-    {
-        label: 'Total Devices',
-        value: 24,
-        icon: 'cpu' as const,
-        trend: 'up' as const,
-        trendValue: '+3 today',
-        variant: 'neutral' as const,
-    },
-    {
-        label: 'Online Now',
-        value: 18,
-        icon: 'wifi' as const,
-        trend: 'up' as const,
-        trendValue: '+2',
-        variant: 'success' as const,
-    },
-    {
-        label: 'Offline',
-        value: 5,
-        icon: 'wifi-off' as const,
-        trend: 'down' as const,
-        trendValue: '-1',
-        variant: 'warning' as const,
-    },
-    {
-        label: 'Alerts',
-        value: 1,
-        icon: 'alert' as const,
-        trend: 'flat' as const,
-        trendValue: '0',
-        variant: 'danger' as const,
-    },
-];
-/**
  * @constant SECTION_GALLERY_DEMO_ACTIVITIES
  * @description Demo activities for the section gallery
- * @type {ActivityItem[]}
  */
 export const SECTION_GALLERY_DEMO_ACTIVITIES: Array<ActivityItem> = [
     {
@@ -95,10 +54,10 @@ export const SECTION_GALLERY_DEMO_ACTIVITIES: Array<ActivityItem> = [
         user: 'Admin',
     },
 ];
+
 /**
  * @constant SECTION_GALLERY_DEMO_DEVICES
  * @description Demo devices for the section gallery
- * @type {DeviceTableItem[]}
  */
 export const SECTION_GALLERY_DEMO_DEVICES: Array<DeviceTableItem> = [
     {
@@ -134,10 +93,10 @@ export const SECTION_GALLERY_DEMO_DEVICES: Array<DeviceTableItem> = [
         signal: 0,
     },
 ];
+
 /**
  * @constant SECTION_GALLERY_DEMO_DEVICE
  * @description Demo device for the section gallery
- * @type {DeviceDetailData}
  */
 export const SECTION_GALLERY_DEMO_DEVICE: DeviceDetailData = {
     id: 'D-001',

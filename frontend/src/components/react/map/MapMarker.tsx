@@ -1,6 +1,6 @@
 import '@/styles/map/marker.css';
 //-- React
-import type { ReactNode } from 'react';
+import type { ReactNode, JSX } from 'react';
 //-- Components
 import type { MarkerStatus } from '@/types/components';
 /**
@@ -37,10 +37,21 @@ export default function MapMarker({
     selected = false,
     onClick,
     showLabel = true,
-}: MapMarkerProps): React.JSX.Element {
+}: MapMarkerProps): JSX.Element {
+    /**
+     * The function to call when the marker is clicked.
+     * @returns {void}
+     */
     const handleClick = (): void => onClick?.(id);
-
+    /**
+     * The class to apply to the marker.
+     * @type {string}
+     */
     const statusClass = `map-marker--${status}`;
+    /**
+     * The classes to apply to the marker.
+     * @type {string}
+     */
     const classes = ['map-marker', statusClass, selected && 'is-selected']
         .filter(Boolean)
         .join(' ');

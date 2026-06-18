@@ -14,6 +14,10 @@ export const es: Translation = {
         primaryNav: 'Principal',
         primaryNavMobile: 'Principal móvil',
     },
+    language: {
+        switchToSpanish: 'Cambiar a español',
+        switchToEnglish: 'Cambiar a inglés',
+    },
     admin: {
         title: 'Administración',
         stats: 'Estadísticas',
@@ -21,6 +25,7 @@ export const es: Translation = {
         totalUsers: 'Usuarios totales',
         totalDevices: 'Dispositivos totales',
         activeToday: 'Activos hoy',
+        onlineNow: 'En línea ahora',
         alerts: 'Alertas',
         userTable: {
             name: 'Nombre',

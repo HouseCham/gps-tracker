@@ -1,6 +1,6 @@
 import '@/styles/map/route-player.css';
 //-- React
-import { useCallback } from 'react';
+import { useCallback, type JSX } from 'react';
 //-- Icons
 import { Pause, Play, Rewind, FastForward } from 'lucide-react';
 //-- Types
@@ -52,21 +52,35 @@ export default function RoutePlayer({
     onStepBack,
     onStepForward,
     disabled = false,
-}: RoutePlayerProps): React.JSX.Element {
+}: RoutePlayerProps): JSX.Element {
+    /**
+     * Handles scrubbing through the route.
+     * @param {React.ChangeEvent<HTMLInputElement>} e
+     * React 19 Compiler: manual callback is needed because this is passed
+     * as an `onChange` prop to an `<input type="range">` which fires on
+     * every drag frame; a stable reference avoids unbind/rebind overhead.
+     */
     const handleScrub = useCallback(
         (e: React.ChangeEvent<HTMLInputElement>): void => {
             onSeek?.(Number(e.target.value) / 1000);
         },
         [onSeek]
     );
-
-    const handleSpeed = useCallback(
-        (next: RouteSpeed): void => {
-            onSpeedChange?.(next);
+    /**
+     * Handles changing the speed.
+     * @param {React.MouseEvent<HTMLButtonElement>} e
+     * React 19 Compiler: manual callback is needed because this is used
+     * as an `onClick` handler inside a `.map()` render of speed buttons;
+     * a single stable reference avoids creating a new closure per option
+     * on every render.
+     */
+    const handleSpeedClick = useCallback(
+        (e: React.MouseEvent<HTMLButtonElement>): void => {
+            const speed = Number(e.currentTarget.dataset.speed) as RouteSpeed;
+            onSpeedChange?.(speed);
         },
         [onSpeedChange]
     );
-
     return (
         <div
             className={`route-player ${disabled ? 'is-disabled' : ''}`}
@@ -141,7 +155,8 @@ export default function RoutePlayer({
                         key={option}
                         type="button"
                         className={`route-player__speed-btn ${speed === option ? 'is-active' : ''}`}
-                        onClick={(): void => handleSpeed(option)}
+                        data-speed={option}
+                        onClick={handleSpeedClick}
                         disabled={disabled}
                         aria-pressed={speed === option}
                     >
