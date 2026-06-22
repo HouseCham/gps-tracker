@@ -1,0 +1,43 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getTranslation } from '@/i18n';
+import type { Language } from '@/types';
+import type { SignupFormStrings } from '@/types/components';
+import AuthLayout from '@/components/astro/layout/AuthLayout.astro';
+import SignupForm from '@/components/react/auth/SignupForm';
+
+export const getStaticPaths = (() => {
+    return [{ params: { lan: 'en' } }, { params: { lan: 'es' } }];
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.lan as Language;
+const translation = getTranslation(locale);
+
+const signupStrings: SignupFormStrings = {
+    email: translation.auth.email,
+    emailPlaceholder: translation.auth.emailPlaceholder,
+    password: translation.auth.password,
+    passwordPlaceholder: translation.auth.passwordPlaceholder,
+    name: translation.auth.name,
+    namePlaceholder: translation.auth.namePlaceholder,
+    signingUp: translation.auth.signingUp,
+    signup: translation.auth.signup,
+    haveAccount: translation.auth.haveAccount,
+    loginLink: translation.auth.login,
+    emailRequired: translation.auth.emailRequired,
+    emailInvalid: translation.auth.emailInvalid,
+    passwordRequired: translation.auth.passwordRequired,
+    passwordMin: translation.auth.passwordMin,
+    nameRequired: translation.auth.nameRequired,
+    signupTitle: translation.auth.signupTitle,
+    signupSubtitle: translation.auth.signupSubtitle,
+};
+---
+
+<AuthLayout title={`${translation.auth.signupTitle} · GPS Tracker`}>
+    <SignupForm
+        client:load
+        strings={signupStrings}
+        onSwitchToLogin={() => (window.location.href = `/${locale}/login`)}
+    />
+</AuthLayout>

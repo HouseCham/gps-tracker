@@ -17,7 +17,7 @@ import { Button, Input } from '@/components/ui';
  * @param {LoginFormStrings} [strings] - The strings to use in the form.
  */
 interface LoginFormProps {
-    strings?: LoginFormStrings;
+    strings: LoginFormStrings;
 }
 /**
  * @component LoginForm
@@ -25,7 +25,7 @@ interface LoginFormProps {
  * @returns {ReactElement} The rendered component.
  */
 export default function LoginForm({
-    strings,
+    strings: s,
 }: LoginFormProps): ReactElement {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -34,7 +34,6 @@ export default function LoginForm({
     );
     const [authError, setAuthError] = useState<string | undefined>();
     const [loading, setLoading] = useState(false);
-    const s = strings ?? ({} as LoginFormStrings);
 
     /**
      * Validates the form data.
