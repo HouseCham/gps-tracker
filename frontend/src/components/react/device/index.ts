@@ -1,2 +1,2 @@
 export * from './DeviceForm';
-export * from './DeviceForm';
+export * from './DeviceFormGallery';
