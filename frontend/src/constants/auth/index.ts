@@ -11,3 +11,25 @@ export const REDIRECT_AFTER_AUTH = '/';
  * @constant {string}
  */
 export const REDIRECT_AFTER_SIGNOUT = '/';
+
+/**
+ * Path to the sign-in page. Used by route protection to redirect
+ * unauthenticated users. The locale is resolved by `index.astro`.
+ * @constant {string}
+ */
+export const LOGIN_PATH = '/login';
+
+/**
+ * Path to the sign-up page. Used by route protection to redirect
+ * unauthenticated users. The locale is resolved by `index.astro`.
+ * @constant {string}
+ */
+export const SIGNUP_PATH = '/signup';
+
+/**
+ * Path to the authenticated dashboard. Used by `<PublicOnlyRoute />`
+ * to redirect users who are already signed in away from the sign-in
+ * and sign-up pages. The locale is resolved by `index.astro`.
+ * @constant {string}
+ */
+export const DASHBOARD_PATH = '/';

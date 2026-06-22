@@ -8,13 +8,11 @@ import type { SignupFormStrings } from '@/types/components';
 import { EMAIL_REGEX } from '@/constants';
 /**
  * @interface SignupFormProps
- * @param {Function} onSwitchToLogin - The function to call when the user wants to switch to the login form.
+ * @param {SignupFormStrings} [strings] - The strings to use in the form.
  * @param {string} [error] - The error message to display.
  * @param {boolean} [loading] - Whether the form is loading.
- * @param {SignupFormStrings} [strings] - The strings to use in the form.
  */
 export interface SignupFormProps {
-    onSwitchToLogin: () => void;
     strings: SignupFormStrings;
     error?: string;
     loading?: boolean;
@@ -25,7 +23,6 @@ export interface SignupFormProps {
  * @returns {ReactElement} The rendered component.
  */
 export function SignupForm({
-    onSwitchToLogin,
     error,
     loading = false,
     strings: s,
@@ -178,18 +175,6 @@ export function SignupForm({
             >
                 {loading ? s.signingUp : s.signup}
             </button>
-
-            <p className="signup-form__switch">
-                {s.haveAccount}{' '}
-                <button
-                    type="button"
-                    className="signup-form__link"
-                    onClick={onSwitchToLogin}
-                    disabled={loading}
-                >
-                    {s.loginLink}
-                </button>
-            </p>
         </form>
     );
 }

@@ -1,6 +1,10 @@
 ---
 import '@/styles/global.css';
 import '@/styles/layout/main-layout.css';
+import {
+    AuthProvider,
+    PublicOnlyRoute
+} from '@/components/react/auth';
 
 /**
  * @interface Props
@@ -33,11 +37,15 @@ const classes = ['auth-layout', className].filter(Boolean).join(' ');
         />
     </head>
     <body>
-        <div class={classes}>
-            <div class="auth-layout__card">
-                <slot />
-            </div>
-        </div>
+        <AuthProvider client:load>
+            <PublicOnlyRoute client:load>
+                <div class={classes}>
+                    <div class="auth-layout__card">
+                        <slot />
+                    </div>
+                </div>
+            </PublicOnlyRoute>
+        </AuthProvider>
     </body>
 </html>
 
