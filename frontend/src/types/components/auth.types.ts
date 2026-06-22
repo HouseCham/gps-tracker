@@ -24,19 +24,19 @@ export interface LoginFormData {
  * @property {string} loginSubtitle - The subtitle for the login form.
  */
 export interface LoginFormStrings {
-    email?: string;
-    emailPlaceholder?: string;
-    password?: string;
-    passwordPlaceholder?: string;
-    loggingIn?: string;
-    login?: string;
-    noAccount?: string;
-    signupLink?: string;
-    emailRequired?: string;
-    emailInvalid?: string;
-    passwordRequired?: string;
-    loginTitle?: string;
-    loginSubtitle?: string;
+    email: string;
+    emailPlaceholder: string;
+    password: string;
+    passwordPlaceholder: string;
+    loggingIn: string;
+    login: string;
+    noAccount: string;
+    signupLink: string;
+    emailRequired: string;
+    emailInvalid: string;
+    passwordRequired: string;
+    loginTitle: string;
+    loginSubtitle: string;
 }
 /**
  * @interface SignupFormData
@@ -70,21 +70,21 @@ export interface SignupFormData {
  * @property {string} signupSubtitle - The subtitle for the sign up form.
  */
 export interface SignupFormStrings {
-    email?: string;
-    emailPlaceholder?: string;
-    password?: string;
-    passwordPlaceholder?: string;
-    name?: string;
-    namePlaceholder?: string;
-    signingUp?: string;
-    signup?: string;
-    haveAccount?: string;
-    loginLink?: string;
-    emailRequired?: string;
-    emailInvalid?: string;
-    passwordRequired?: string;
-    passwordMin?: string;
-    nameRequired?: string;
-    signupTitle?: string;
-    signupSubtitle?: string;
+    email: string;
+    emailPlaceholder: string;
+    password: string;
+    passwordPlaceholder: string;
+    name: string;
+    namePlaceholder: string;
+    signingUp: string;
+    signup: string;
+    haveAccount: string;
+    loginLink: string;
+    emailRequired: string;
+    emailInvalid: string;
+    passwordRequired: string;
+    passwordMin: string;
+    nameRequired: string;
+    signupTitle: string;
+    signupSubtitle: string;
 }
