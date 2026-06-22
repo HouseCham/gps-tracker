@@ -49,7 +49,6 @@ func NewRouter(deps RouterDeps) *fiber.App {
 	if deps.AuthHandler != nil {
 		authH := adaptor.HTTPHandler(deps.AuthHandler)
 		app.All(auth.BasePath+"/*", authH)
-		app.All(auth.BasePath, authH)
 	}
 
 	// Reusable auth middlewares. The pair (AuthJWT -> LazyUser) is

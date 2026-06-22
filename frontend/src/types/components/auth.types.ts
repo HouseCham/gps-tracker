@@ -42,13 +42,11 @@ export interface LoginFormStrings {
  * @interface SignupFormData
  * @property {string} email - The email address of the user.
  * @property {string} name - The name of the user.
- * @property {string} lastname - The last name of the user.
  * @property {string} password - The password of the user.
  */
 export interface SignupFormData {
     email: string;
     name: string;
-    lastname: string;
     password: string;
 }
 /**
@@ -59,8 +57,6 @@ export interface SignupFormData {
  * @property {string} passwordPlaceholder - The placeholder for the password input.
  * @property {string} name - The label for the name input.
  * @property {string} namePlaceholder - The placeholder for the name input.
- * @property {string} lastname - The label for the last name input.
- * @property {string} lastnamePlaceholder - The placeholder for the last name input.
  * @property {string} signingUp - The label for the signing up button.
  * @property {string} signup - The label for the sign up button.
  * @property {string} haveAccount - The label for the have account text.
@@ -80,8 +76,6 @@ export interface SignupFormStrings {
     passwordPlaceholder?: string;
     name?: string;
     namePlaceholder?: string;
-    lastname?: string;
-    lastnamePlaceholder?: string;
     signingUp?: string;
     signup?: string;
     haveAccount?: string;

@@ -103,8 +103,6 @@ func Bootstrap(ctx context.Context, cfg Config) (*Auth, error) {
 			Provider: "postgres",
 			URL:      cfg.DatabaseURL,
 		}),
-		// Auto sign-in is intentionally false; sign-in is a
-		// deliberate step that returns the JWT pair.
 		// Email verification is intentionally disabled for v1
 		// (we have no SMTP wiring); it can be enabled later by
 		// providing SendEmailVerification + an SMTP plugin.

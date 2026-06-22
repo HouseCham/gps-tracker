@@ -35,12 +35,10 @@ export default function SignupForm({
 }: SignupFormProps): ReactElement {
     const emailId = useId();
     const nameId = useId();
-    const lastnameId = useId();
     const passId = useId();
 
     const [email, setEmail] = useState('');
     const [name, setName] = useState('');
-    const [lastname, setLastname] = useState('');
     const [password, setPassword] = useState('');
     const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -51,8 +49,6 @@ export default function SignupForm({
         passwordPlaceholder: 'Enter your password',
         name: 'Name',
         namePlaceholder: 'Your name',
-        lastname: 'Last name',
-        lastnamePlaceholder: 'Your last name',
         signingUp: 'Creating account...',
         signup: 'Sign up',
         haveAccount: 'Already have an account?',
@@ -91,7 +87,6 @@ export default function SignupForm({
         onSubmit({
             email: email.trim(),
             name: name.trim(),
-            lastname: lastname.trim(),
             password,
         });
     }
@@ -145,26 +140,6 @@ export default function SignupForm({
                             {errors.name}
                         </p>
                     )}
-                </div>
-
-                <div
-                    className={`signup-form__field ${errors.lastname ? 'signup-form__field--error' : ''}`}
-                >
-                    <label className="signup-form__label" htmlFor={lastnameId}>
-                        {s.lastname}
-                    </label>
-                    <input
-                        id={lastnameId}
-                        className="signup-form__input"
-                        type="text"
-                        value={lastname}
-                        onChange={e => {
-                            setLastname(e.target.value);
-                            clearError('lastname');
-                        }}
-                        placeholder={s.lastnamePlaceholder}
-                        disabled={loading}
-                    />
                 </div>
             </div>
 
