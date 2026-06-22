@@ -1,5 +1,6 @@
 ---
 import MainLayout from '@/components/astro/layout/MainLayout.astro';
+import MapGalleryClient from '@/components/react/map/MapGallery';
 import { en } from '@/i18n';
 ---
 
@@ -14,7 +15,7 @@ import { en } from '@/i18n';
     <p class="hint">
         DeviceMap, MapMarker, MapPopover, RoutePlayer — all client:load islands.
     </p>
-    <MapGallery client:load />
+    <MapGalleryClient client:load />
 </MainLayout>
 
 <style>

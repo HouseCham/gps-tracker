@@ -7,8 +7,11 @@ import { MAP_DEMO_PINS, MAP_DEMO_ROUTE } from '@/constants/components/map';
 //-- Components
 import DeviceMap from './DeviceMap';
 import RoutePlayer from './RoutePlayer';
-
-export default function MapGallery(): JSX.Element {
+/**
+ * Render a map gallery.
+ * @returns {JSX.Element} The rendered map gallery.
+ */
+export default function MapGalleryClient(): JSX.Element {
     const [selectedId, setSelectedId] = useState<string | null>('D-001');
     const [playing, setPlaying] = useState(false);
     const [progress, setProgress] = useState(0.38);
