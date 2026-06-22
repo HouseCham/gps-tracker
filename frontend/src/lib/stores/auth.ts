@@ -1,13 +1,13 @@
 import { atom, computed } from 'nanostores';
-import type { User } from '@/types/api';
+import type { AuthUser } from '@/types/api';
 
 /**
  * The currently authenticated user, or `null` when nobody is signed in.
  * Hydrated by `authService.getSession()` on app startup and updated by
  * `authService.signIn()` / `authService.signOut()`.
- * @type {import('nanostores').Atom<User | null>}
+ * @type {import('nanostores').Atom<AuthUser | null>}
  */
-export const $user = atom<User | null>(null);
+export const $user = atom<AuthUser | null>(null);
 
 /**
  * `true` whenever `$user` holds a non-null value. Components subscribe
@@ -27,10 +27,10 @@ export const $isAuthLoading = atom<boolean>(false);
 /**
  * Replace the currently held user with a new one. Use after a
  * successful sign-in or session refresh.
- * @param {User} user - The authenticated user.
+ * @param {AuthUser} user - The authenticated user.
  * @returns {void}
  */
-export function setUser(user: User): void {
+export function setUser(user: AuthUser): void {
     $user.set(user);
 }
 

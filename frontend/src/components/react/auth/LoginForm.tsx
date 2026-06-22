@@ -3,21 +3,19 @@ import '@/styles/components/login-form.css';
 import { useId, useState } from 'react';
 //-- Types
 import type { ReactElement, SyntheticEvent } from 'react';
-import type { LoginFormData, LoginFormStrings } from '@/types/components';
+import type { LoginFormStrings } from '@/types/components';
+import type { ApiError } from '@/lib/api/helpers/handle-api-error';
+//-- Auth
+import { authService } from '@/lib/auth/service';
+//-- Constants
 import { EMAIL_REGEX } from '@/constants';
 /**
  * @interface LoginFormProps
- * @param {Function} onSubmit - The function to call when the form is submitted.
  * @param {Function} onSwitchToSignup - The function to call when the user wants to switch to the signup form.
- * @param {string} [error] - The error message to display.
- * @param {boolean} [loading] - Whether the form is loading.
  * @param {LoginFormStrings} [strings] - The strings to use in the form.
  */
 interface LoginFormProps {
-    onSubmit: (data: LoginFormData) => void;
     onSwitchToSignup: () => void;
-    error?: string;
-    loading?: boolean;
     strings?: LoginFormStrings;
 }
 /**
@@ -26,10 +24,7 @@ interface LoginFormProps {
  * @returns {ReactElement} The rendered component.
  */
 export default function LoginForm({
-    onSubmit,
     onSwitchToSignup,
-    error,
-    loading = false,
     strings,
 }: LoginFormProps): ReactElement {
     const emailId = useId();
@@ -40,6 +35,8 @@ export default function LoginForm({
     const [errors, setErrors] = useState<{ email?: string; password?: string }>(
         {}
     );
+    const [authError, setAuthError] = useState<string | undefined>();
+    const [loading, setLoading] = useState(false);
 
     const s = {
         email: 'Email address',
@@ -71,14 +68,26 @@ export default function LoginForm({
         return Object.keys(next).length === 0;
     }
     /**
-     * Handles the form submission.
-     * @param {SyntheticEvent<HTMLFormElement>} e - The event
-     * @returns {void}
+     * Handles the form submission by calling authService.signIn().
+     * On success the service triggers a full-page redirect; on failure
+     * the API error message is shown to the user.
+     * @param {SyntheticEvent<HTMLFormElement>} e - The event.
+     * @returns {Promise<void>}
      */
-    function handleSubmit(e: SyntheticEvent<HTMLFormElement>): void {
+    async function handleSubmit(
+        e: SyntheticEvent<HTMLFormElement>
+    ): Promise<void> {
         e.preventDefault();
         if (!validate()) return;
-        onSubmit({ email: email.trim(), password });
+        setAuthError(undefined);
+        setLoading(true);
+        try {
+            await authService.signIn({ email: email.trim(), password });
+        } catch (err) {
+            const apiError = err as Partial<ApiError>;
+            setAuthError(apiError?.message ?? 'Sign-in failed');
+            setLoading(false);
+        }
     }
 
     return (
@@ -88,9 +97,9 @@ export default function LoginForm({
                 <p className="login-form__subtitle">{s.loginSubtitle}</p>
             </div>
 
-            {error && (
+            {authError && (
                 <p className="login-form__banner" role="alert">
-                    {error}
+                    {authError}
                 </p>
             )}
 

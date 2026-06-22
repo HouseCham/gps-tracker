@@ -1,4 +1,18 @@
-import type { User } from './users.types';
+/**
+ * Minimal user shape returned by Authula on its endpoints. The auth
+ * store tracks just enough identity to render "who is logged in"; the
+ * detailed local projection (role, lastname, etc.) is fetched
+ * separately from `/api/v1/users/me` when needed.
+ * @interface AuthUser
+ * @property {string} id - The Authula-assigned user id.
+ * @property {string} email - The user's email address.
+ * @property {string} name - The user's display name.
+ */
+export interface AuthUser {
+    id: string;
+    email: string;
+    name: string;
+}
 
 /**
  * Credentials sent to POST /email-password/sign-in.
@@ -27,18 +41,27 @@ export interface SignUpCredentials {
 /**
  * Response shape returned by Authula's email-password sign-in and
  * sign-up routes when the `jwt.respond_json` route mapping is active.
- * The `user.id` is the Authula-assigned id, while the `accessToken`
- * and `refreshToken` are JWTs we ignore on the client because the
- * session is established via an HTTP-only cookie.
+ * The `accessToken` and `refreshToken` are JWTs we ignore on the client
+ * because the session is established via an HTTP-only cookie.
  * @interface AuthSession
- * @property {User} user - The authenticated Authula user.
+ * @property {AuthUser} user - The authenticated Authula user.
  * @property {string} accessToken - JWT access token (server-set as cookie).
  * @property {string} refreshToken - JWT refresh token (server-set as cookie).
  */
 export interface AuthSession {
-    user: User;
+    user: AuthUser;
     accessToken: string;
     refreshToken: string;
+}
+
+/**
+ * Response shape returned by GET /me. Only the user is relevant on the
+ * client; session metadata stays server-side.
+ * @interface MeResponse
+ * @property {AuthUser} user - The currently authenticated user.
+ */
+export interface MeResponse {
+    user: AuthUser;
 }
 
 /**
