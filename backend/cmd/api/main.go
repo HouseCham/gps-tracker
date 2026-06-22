@@ -8,7 +8,6 @@ import (
 	"syscall"
 	"time"
 
-	_ "github.com/HouseCham/gps-tracker/backend/internal/config"
 	"github.com/gofiber/fiber/v3/log"
 
 	"github.com/HouseCham/gps-tracker/backend/internal/app/access"
@@ -24,7 +23,7 @@ import (
 func main() {
 	log.Info("Starting server...")
 	addr := ""
-	if v := os.Getenv("SERVER_PORT"); v != "" {
+	if v := os.Getenv("API_PORT"); v != "" {
 		if port, err := strconv.ParseUint(v, 10, 64); err == nil {
 			addr = ":" + strconv.FormatUint(port, 10)
 		}
