@@ -1,26 +1,64 @@
 ---
-import type { GetStaticPaths } from "astro";
-import type { Language } from "@/types";
-import { getTranslation } from "@/i18n";
-import Dashboard from "@/components/astro/features/Dashboard.astro";
-import MainLayout from "@/components/astro/layout/MainLayout.astro";
-
+//-- Translations
+import { getTranslation } from '@/i18n';
+//-- Types
+import type { Language } from '@/types';
+import type { GetStaticPaths } from 'astro';
+//-- Constants
+import { 
+    DEMO_USER,
+    SECTION_GALLERY_DEMO_ACTIVITIES,
+    SECTION_GALLERY_DEMO_DEVICES
+} from '@/constants/components';
+//-- Components
+import MainLayout from '@/components/astro/layout/MainLayout.astro';
+import Dashboard from '@/components/sections/Dashboard.astro';
+//-- Utils
+import { getDemoKpiItems } from '@/lib';
 /**
- * This page is the main entry point for the website. It will redirect to the default language (English) if no language is specified in the URL.
- * @returns {void} Redirects to the default language page.
+ * @type {GetStaticPaths}
  */
 export const getStaticPaths = (() => {
-  return [{ params: { lan: 'en' } }, { params: { lan: 'es' } }];
+    return [{ params: { lan: 'en' } }, { params: { lan: 'es' } }];
 }) satisfies GetStaticPaths;
 
 const locale = Astro.params.lan as Language;
 const translation = getTranslation(locale);
-const user = {
-  name: "John Doe",
-  role: "Admin"
-};
+const kpiItems = getDemoKpiItems(translation);
 ---
 
-<MainLayout locale={locale} translation={translation} user={user}>
-  <Dashboard />
+<MainLayout
+    locale={locale}
+    translation={translation}
+    user={DEMO_USER}
+    active="dashboard"
+    showAdmin={true}
+    title="Dashboard · GPS Tracker"
+>
+    <header class="page-header">
+        <div>
+            <p class="page-header__eyebrow">{translation.section.kpiBar.title}</p>
+            <h1 class="page-header__title">{translation.nav.dashboard}</h1>
+        </div>
+    </header>
+
+    <Dashboard
+        locale={locale}
+        translation={translation}
+        kpiItems={kpiItems}
+        activities={SECTION_GALLERY_DEMO_ACTIVITIES}
+        devices={SECTION_GALLERY_DEMO_DEVICES}
+        activityTitle={translation.section.activityFeed.title}
+    />
 </MainLayout>
+
+<style>
+    .page-header { margin-bottom: 24px; }
+    .page-header__eyebrow {
+        font-size: 12px; font-weight: 600; color: var(--muted);
+        text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px;
+    }
+    .page-header__title {
+        font-size: 24px; font-weight: 700; letter-spacing: -0.02em; color: var(--text);
+    }
+</style>

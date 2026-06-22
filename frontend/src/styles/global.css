@@ -1,54 +1,94 @@
 :root {
+    /* Backgrounds */
     --bg: #ffffff;
-    --surface: #f9fafb;
-    --surface-2: #f3f4f6;
-    --border: #e5e7eb;
-    --text: #111827;
-    --muted: #6b7280;
-    --accent: #4f46e5;
-    --accent-hover: #4338ca;
-    --accent-soft: #eef2ff;
-    --accent-soft-2: #e0e7ff;
+    --surface: #ffffff;
+    --surface-2: #f5f5f5;
+
+    /* Text */
+    --text: #242424;
+    --muted: #898989;
+
+    /* Border — used for structural dividers (table rows, inputs, sidebar) */
+    --border: rgba(34, 42, 53, 0.1);
+
+    /* Accent — Link Blue, reserved for hyperlinks only */
+    --accent: #0099ff;
+    --accent-hover: #0073cc;
+    --accent-soft: rgba(0, 153, 255, 0.08);
+
+    /* Focus ring — accessibility-only */
+    --focus-ring: rgba(59, 130, 246, 0.5);
+
+    /* Button primary — charcoal in light, near-black in dark */
+    --btn-primary-bg: var(--text);
+
+    /* Semantic colors */
     --green: #10b981;
-    --green-soft: #d1fae5;
+    --green-soft: rgba(16, 185, 129, 0.1);
     --amber: #f59e0b;
-    --amber-soft: #fef3c7;
+    --amber-soft: rgba(245, 158, 11, 0.1);
     --red: #ef4444;
-    --red-soft: #fee2e2;
+    --red-soft: rgba(239, 68, 68, 0.1);
     --blue: #3b82f6;
-    --blue-soft: #dbeafe;
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.12);
+    --blue-soft: rgba(59, 130, 246, 0.1);
+
+    /* Multi-layered shadow system — ring border + contact + diffuse */
+    --shadow-ring: 0 0 0 1px rgba(34, 42, 53, 0.08);
+    --shadow-contact: 0 1px 5px -4px rgba(19, 19, 22, 0.7);
+    --shadow-diffuse: 0 4px 8px rgba(34, 42, 53, 0.05);
+    --shadow-sm: var(--shadow-ring);
+    --shadow-md:
+        var(--shadow-contact), var(--shadow-ring), var(--shadow-diffuse);
+    --shadow-lg:
+        0 1px 5px -4px rgba(36, 36, 36, 0.7), 0 4px 8px rgba(36, 36, 36, 0.05);
+    --shadow-inset: 0 1px 1.9px 0 rgba(0, 0, 0, 0.16) inset;
+    --shadow-highlight: 0 2px 0 0 rgba(255, 255, 255, 0.15) inset;
+
+    /* Border radius — Cal.com scale */
+    --radius-xs: 2px;
+    --radius-sm: 4px;
     --radius: 8px;
-    --radius-sm: 6px;
-    --radius-xs: 4px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
     --radius-pill: 9999px;
-    --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+
+    /* Fonts — Cal Sans for display, Inter for body */
     --font:
         'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui,
         sans-serif;
+    --font-display:
+        'Cal Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     --mono: ui-monospace, 'SF Mono', 'Cascadia Code', 'Roboto Mono', monospace;
+
+    --transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 [data-theme='dark'] {
-    --bg: #09090b;
-    --surface: #18181b;
-    --surface-2: #27272a;
-    --border: #27272a;
-    --text: #fafafa;
-    --muted: #a1a1aa;
-    --accent: #6366f1;
-    --accent-hover: #818cf8;
-    --accent-soft: rgba(99, 102, 241, 0.12);
-    --accent-soft-2: rgba(99, 102, 241, 0.2);
+    --bg: #090a0c;
+    --surface: #121316;
+    --surface-2: #1a1b1f;
+    --text: #e8eaee;
+    --muted: #81858f;
+    --accent: #0099ff;
+    --accent-hover: #60a5fa;
+    --accent-soft: rgba(0, 153, 255, 0.12);
+    --border: rgba(255, 255, 255, 0.08);
     --green-soft: rgba(16, 185, 129, 0.15);
     --amber-soft: rgba(245, 158, 11, 0.15);
     --red-soft: rgba(239, 68, 68, 0.15);
     --blue-soft: rgba(59, 130, 246, 0.15);
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
-    --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
+    --shadow-ring: 0 0 0 1px rgba(255, 255, 255, 0.06);
+    --shadow-contact: 0 1px 5px -4px rgba(0, 0, 0, 0.7);
+    --shadow-diffuse: 0 4px 8px rgba(0, 0, 0, 0.3);
+    --shadow-sm: var(--shadow-ring);
+    --shadow-md:
+        var(--shadow-contact), var(--shadow-ring), var(--shadow-diffuse);
+    --shadow-lg:
+        0 1px 5px -4px rgba(0, 0, 0, 0.7), 0 4px 8px rgba(0, 0, 0, 0.4);
+    --shadow-inset: 0 1px 1.9px 0 rgba(0, 0, 0, 0.3) inset;
+    --shadow-highlight: 0 2px 0 0 rgba(255, 255, 255, 0.05) inset;
+
+    --btn-primary-bg: var(--surface-2);
 }
 
 /* ============================================
@@ -106,7 +146,8 @@ textarea {
 
 a {
     color: var(--accent);
-    text-decoration: none;
+    text-decoration: underline;
+    text-underline-offset: 2px;
     transition: color var(--transition);
 }
 
@@ -115,32 +156,41 @@ a:hover {
 }
 
 :focus-visible {
-    outline: 2px solid var(--accent);
+    outline: 2px solid var(--focus-ring);
     outline-offset: 2px;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
 }
 
 /* ============================================
-   TYPOGRAPHY
+   TYPOGRAPHY — Cal Sans for display, Inter for body
    ============================================ */
 h1,
 h2,
-h3,
+h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+}
+
 h4 {
     font-weight: 600;
-    letter-spacing: -0.01em;
 }
 
 h1 {
     font-size: 24px;
+    line-height: 1.3;
+    letter-spacing: 0;
 }
 
 h2 {
     font-size: 20px;
+    line-height: 1.2;
+    letter-spacing: 0.2px;
 }
 
 h3 {
     font-size: 16px;
+    line-height: 1.1;
+    letter-spacing: 0;
 }
 
 h4 {
@@ -175,8 +225,8 @@ code,
    ============================================ */
 .dash-mock {
     background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 12px;
+    border: none;
+    border-radius: var(--radius-md);
     overflow: hidden;
     box-shadow: var(--shadow-md);
     display: grid;
@@ -196,9 +246,11 @@ code,
 }
 
 .section-title {
-    font-size: 32px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
+    font-family: var(--font-display);
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 1.15;
     margin-bottom: 8px;
 }
 
@@ -282,18 +334,16 @@ code,
     background: rgba(255, 255, 255, 0.8);
     backdrop-filter: saturate(180%) blur(12px);
     -webkit-backdrop-filter: saturate(180%) blur(12px);
-    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow-ring);
     display: flex;
     align-items: center;
     padding: 0 24px;
     gap: 16px;
-    transition:
-        background var(--transition),
-        border-color var(--transition);
+    transition: background var(--transition);
 }
 
 [data-theme='dark'] .topbar {
-    background: rgba(9, 9, 11, 0.8);
+    background: rgba(9, 10, 12, 0.8);
 }
 
 .brand {
@@ -302,13 +352,15 @@ code,
     gap: 10px;
     font-weight: 700;
     font-size: 15px;
+    color: var(--text);
+    text-decoration: none;
 }
 
 .brand-mark {
     width: 32px;
     height: 32px;
-    border-radius: 8px;
-    background: var(--accent);
+    border-radius: var(--radius);
+    background: var(--text);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -331,9 +383,10 @@ code,
 .topbar-nav a {
     color: var(--muted);
     padding: 8px 12px;
-    border-radius: 6px;
+    border-radius: var(--radius-sm);
     font-size: 13px;
     font-weight: 500;
+    text-decoration: none;
     transition: all var(--transition);
 }
 
@@ -387,7 +440,7 @@ code,
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: var(--accent);
+    background: var(--text);
     color: white;
     display: flex;
     align-items: center;
@@ -422,18 +475,20 @@ code,
 }
 
 .btn-primary {
-    background: var(--accent);
+    background: var(--btn-primary-bg);
     color: white;
+    box-shadow: var(--shadow-highlight);
 }
 
 .btn-primary:hover {
-    background: var(--accent-hover);
+    opacity: 0.85;
 }
 
 .btn-secondary {
     background: var(--surface);
     color: var(--text);
-    border-color: var(--border);
+    box-shadow: var(--shadow-ring);
+    border-color: transparent;
 }
 
 .btn-secondary:hover {
@@ -461,7 +516,8 @@ code,
 .btn-outline {
     background: transparent;
     color: var(--text);
-    border-color: var(--border);
+    box-shadow: var(--shadow-ring);
+    border-color: transparent;
 }
 
 .btn-outline:hover {
@@ -523,9 +579,10 @@ code,
    ============================================ */
 .card {
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius);
     padding: 20px;
+    box-shadow: var(--shadow-md);
     transition: all var(--transition);
 }
 
@@ -921,8 +978,8 @@ textarea.input {
     max-width: 400px;
     padding: 32px;
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 12px;
+    border: none;
+    border-radius: var(--radius-md);
     box-shadow: var(--shadow-md);
 }
 
@@ -1025,8 +1082,8 @@ textarea.input {
 }
 
 .nav-item.active {
-    background: var(--accent-soft);
-    color: var(--accent);
+    background: var(--surface-2);
+    color: var(--text);
     font-weight: 600;
 }
 
@@ -1037,7 +1094,7 @@ textarea.input {
     top: 6px;
     bottom: 6px;
     width: 3px;
-    background: var(--accent);
+    background: var(--text);
     border-radius: 0 2px 2px 0;
 }
 
@@ -1057,9 +1114,10 @@ textarea.input {
    ============================================ */
 .table-wrap {
     background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
+    border: none;
+    border-radius: var(--radius);
     overflow: hidden;
+    box-shadow: var(--shadow-md);
 }
 
 .table-toolbar {
@@ -1116,8 +1174,8 @@ textarea.input {
 }
 
 .filter-chip.active {
-    background: var(--accent-soft);
-    color: var(--accent);
+    background: var(--surface-2);
+    color: var(--text);
     border-color: transparent;
 }
 
@@ -1179,16 +1237,17 @@ tbody tr:last-child td {
     align-items: center;
     gap: 8px;
     padding: 10px 16px;
-    background: var(--accent-soft);
-    border: 1px solid var(--accent-soft-2);
-    border-radius: 8px;
+    background: var(--surface-2);
+    border: none;
+    border-radius: var(--radius);
     margin-bottom: 12px;
     font-size: 13px;
+    box-shadow: var(--shadow-ring);
 }
 
 .bulk-bar .count {
     font-weight: 600;
-    color: var(--accent);
+    color: var(--text);
 }
 
 .pagination {
@@ -1228,9 +1287,9 @@ tbody tr:last-child td {
 }
 
 .page-btn.active {
-    background: var(--accent);
+    background: var(--text);
     color: white;
-    border-color: var(--accent);
+    border-color: var(--text);
 }
 
 .checkbox {
@@ -1247,8 +1306,8 @@ tbody tr:last-child td {
 }
 
 .checkbox.checked {
-    background: var(--accent);
-    border-color: var(--accent);
+    background: var(--text);
+    border-color: var(--text);
 }
 
 .checkbox.checked svg {
@@ -1291,8 +1350,8 @@ tbody tr:last-child td {
    ============================================ */
 .detail-mock {
     background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 12px;
+    border: none;
+    border-radius: var(--radius-md);
     overflow: hidden;
     box-shadow: var(--shadow-md);
     padding: 20px;
@@ -1443,9 +1502,9 @@ tbody tr:last-child td {
 .stat-mini .icon {
     width: 28px;
     height: 28px;
-    border-radius: 6px;
-    background: var(--accent-soft);
-    color: var(--accent);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+    color: var(--text);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1492,8 +1551,8 @@ tbody tr:last-child td {
 }
 
 .speed-pill.active {
-    background: var(--accent-soft);
-    color: var(--accent);
+    background: var(--surface-2);
+    color: var(--text);
 }
 
 .player-body {
@@ -1506,7 +1565,7 @@ tbody tr:last-child td {
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    background: var(--accent);
+    background: var(--text);
     color: white;
     display: flex;
     align-items: center;
@@ -1515,7 +1574,7 @@ tbody tr:last-child td {
 }
 
 .play-btn:hover {
-    background: var(--accent-hover);
+    opacity: 0.85;
 }
 
 .play-btn svg {
@@ -1537,7 +1596,7 @@ tbody tr:last-child td {
     top: 0;
     left: 0;
     height: 100%;
-    background: var(--accent);
+    background: var(--text);
     border-radius: 2px;
 }
 
@@ -1550,7 +1609,7 @@ tbody tr:last-child td {
     width: 14px;
     height: 14px;
     background: var(--bg);
-    border: 2px solid var(--accent);
+    border: 2px solid var(--text);
     border-radius: 50%;
     box-shadow: var(--shadow-sm);
 }
@@ -1617,7 +1676,7 @@ tbody tr:last-child td {
     height: 12px;
     border-radius: 50%;
     background: var(--bg);
-    border: 2px solid var(--accent);
+    border: 2px solid var(--text);
 }
 
 .timeline-item.amber::before {
@@ -1686,14 +1745,14 @@ tbody tr:last-child td {
 
 .tab .count {
     padding: 1px 6px;
-    border-radius: 9999px;
+    border-radius: var(--radius-pill);
     background: var(--surface-2);
     font-size: 10px;
 }
 
 .tab.active .count {
-    background: var(--accent-soft);
-    color: var(--accent);
+    background: var(--surface-2);
+    color: var(--text);
 }
 
 .alert-group {
@@ -1971,7 +2030,7 @@ tbody tr:last-child td {
 }
 
 .radio-item.active .radio-circle {
-    border-color: var(--accent);
+    border-color: var(--text);
 }
 
 .radio-item.active .radio-circle::after {
@@ -1979,7 +2038,7 @@ tbody tr:last-child td {
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: var(--accent);
+    background: var(--text);
 }
 
 .radio-item span {
@@ -2099,9 +2158,9 @@ tbody tr:last-child td {
 .feed-icon {
     width: 32px;
     height: 32px;
-    border-radius: 8px;
-    background: var(--accent-soft);
-    color: var(--accent);
+    border-radius: var(--radius);
+    background: var(--surface-2);
+    color: var(--text);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2174,7 +2233,7 @@ tbody tr:last-child td {
 
 .modal {
     background: var(--bg);
-    border-radius: 12px;
+    border-radius: var(--radius-md);
     width: 100%;
     max-width: 480px;
     box-shadow: var(--shadow-lg);
@@ -2369,7 +2428,7 @@ tbody tr:last-child td {
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: var(--accent);
+    background: var(--text);
     color: white;
     display: flex;
     align-items: center;
@@ -2409,7 +2468,7 @@ tbody tr:last-child td {
 }
 
 .phone-nav-item.active {
-    color: var(--accent);
+    color: var(--text);
 }
 
 .phone-nav-item.active::after {
@@ -2418,7 +2477,7 @@ tbody tr:last-child td {
     top: -10px;
     width: 4px;
     height: 4px;
-    background: var(--accent);
+    background: var(--text);
     border-radius: 50%;
 }
 
@@ -2832,8 +2891,8 @@ tbody tr:last-child td {
 }
 
 .footer-socials a:hover {
-    background: var(--accent-soft);
-    color: var(--accent);
+    background: var(--surface-2);
+    color: var(--text);
 }
 
 .footer-socials svg {

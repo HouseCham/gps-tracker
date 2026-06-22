@@ -1,0 +1,12 @@
+---
+import AuthLayout from '@/components/astro/layout/AuthLayout.astro';
+import SignupForm from '@/components/react/auth/SignupForm';
+---
+
+<AuthLayout title="Sign up · GPS Tracker">
+    <SignupForm
+        client:load
+        onSubmit={(data) => alert(`Signup: ${data.email}`)}
+        onSwitchToLogin={() => window.location.href = '/login'}
+    />
+</AuthLayout>

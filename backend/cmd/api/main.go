@@ -24,7 +24,7 @@ import (
 func main() {
 	log.Info("Starting server...")
 	addr := ""
-	if v := os.Getenv("APP_PORT"); v != "" {
+	if v := os.Getenv("SERVER_PORT"); v != "" {
 		if port, err := strconv.ParseUint(v, 10, 64); err == nil {
 			addr = ":" + strconv.FormatUint(port, 10)
 		}
