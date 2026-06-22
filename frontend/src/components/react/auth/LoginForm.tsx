@@ -4,16 +4,15 @@ import { useState } from 'react';
 //-- Types
 import type { ReactElement, SyntheticEvent } from 'react';
 import type { LoginFormStrings } from '@/types/components';
-import type { ApiError } from '@/lib/api/helpers/handle-api-error';
 //-- Auth
 import { authService } from '@/lib/auth/service';
 //-- Constants
 import { EMAIL_REGEX } from '@/constants';
 //-- UI
 import { Button, Input } from '@/components/ui';
+import { isApiError } from '@/lib/api';
 /**
  * @interface LoginFormProps
- * @param {Function} onSwitchToSignup - The function to call when the user wants to switch to the signup form.
  * @param {LoginFormStrings} [strings] - The strings to use in the form.
  */
 interface LoginFormProps {
@@ -24,7 +23,7 @@ interface LoginFormProps {
  * @param {LoginFormProps} props - The props for the component.
  * @returns {ReactElement} The rendered component.
  */
-export default function LoginForm({
+export function LoginForm({
     strings: s,
 }: LoginFormProps): ReactElement {
     const [email, setEmail] = useState('');
@@ -64,8 +63,8 @@ export default function LoginForm({
         try {
             await authService.signIn({ email: email.trim(), password });
         } catch (err) {
-            const apiError = err as Partial<ApiError>;
-            setAuthError(apiError?.message ?? 'Sign-in failed');
+            const apiError = isApiError(err) ? err : { message: 'Sign-in failed' };
+            setAuthError(apiError.message);
             setLoading(false);
         }
     }

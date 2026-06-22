@@ -1,11 +1,17 @@
 ---
 import type { GetStaticPaths } from 'astro';
+//-- Translations
 import { getTranslation } from '@/i18n';
+//-- types
 import type { Language } from '@/types';
 import type { SignupFormStrings } from '@/types/components';
+//-- Components
 import AuthLayout from '@/components/astro/layout/AuthLayout.astro';
-import SignupForm from '@/components/react/auth/SignupForm';
+import { SignupForm } from '@/components/react/auth';
 
+/**
+ * @type {GetStaticPaths}
+ */
 export const getStaticPaths = (() => {
     return [{ params: { lan: 'en' } }, { params: { lan: 'es' } }];
 }) satisfies GetStaticPaths;

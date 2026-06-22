@@ -74,3 +74,21 @@ export interface AuthErrorBody {
     message: string;
     code?: string;
 }
+/**
+ * Result shape for the `useAuth` hook.
+ * @interface UseAuthResult
+ * @property {AuthUser | null} user - The currently authenticated user, or `null` when signed out.
+ * @property {boolean} isAuthenticated - `true` when `user` is not `null`.
+ * @property {boolean} isAuthLoading - `true` while a sign-in / sign-up / sign-out / session refresh is in flight.
+ * @property {(credentials: SignInCredentials) => Promise<void>} signIn - Sign in with email + password. Throws on invalid credentials.
+ * @property {(credentials: SignUpCredentials) => Promise<void>} signUp - Register a new account. Throws on validation failure.
+ * @property {() => void} signOut - Forget the local session and redirect away.
+ */
+export interface UseAuthResult {
+    user: AuthUser | null;
+    isAuthenticated: boolean;
+    isAuthLoading: boolean;
+    signIn: (credentials: SignInCredentials) => Promise<void>;
+    signUp: (credentials: SignUpCredentials) => Promise<void>;
+    signOut: () => void;
+}

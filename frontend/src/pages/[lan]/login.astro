@@ -7,7 +7,7 @@ import type { Language } from '@/types';
 import type { LoginFormStrings } from '@/types/components';
 //-- Components
 import AuthLayout from '@/components/astro/layout/AuthLayout.astro';
-import LoginForm from '@/components/react/auth/LoginForm';
+import { LoginForm } from '@/components/react/auth';
 /**
  * @type {GetStaticPaths}
  */
@@ -25,8 +25,6 @@ const loginStrings: LoginFormStrings = {
     passwordPlaceholder: translation.auth.passwordPlaceholder,
     loggingIn: translation.auth.loggingIn,
     login: translation.auth.login,
-    noAccount: translation.auth.noAccount,
-    signupLink: translation.auth.signup,
     emailRequired: translation.auth.emailRequired,
     emailInvalid: translation.auth.emailInvalid,
     passwordRequired: translation.auth.passwordRequired,

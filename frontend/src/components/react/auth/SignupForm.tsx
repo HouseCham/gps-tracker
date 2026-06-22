@@ -24,7 +24,7 @@ export interface SignupFormProps {
  * @param {SignupFormProps} props - The props for the component.
  * @returns {ReactElement} The rendered component.
  */
-export default function SignupForm({
+export function SignupForm({
     onSwitchToLogin,
     error,
     loading = false,

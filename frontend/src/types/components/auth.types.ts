@@ -15,8 +15,6 @@ export interface LoginFormData {
  * @property {string} passwordPlaceholder - The placeholder for the password input.
  * @property {string} loggingIn - The text to display while the form is loading.
  * @property {string} login - The label for the login button.
- * @property {string} noAccount - The text to display if the user doesn't have an account.
- * @property {string} signupLink - The label for the sign up link.
  * @property {string} emailRequired - The error message to display if the email is required.
  * @property {string} emailInvalid - The error message to display if the email is invalid.
  * @property {string} passwordRequired - The error message to display if the password is required.
@@ -30,8 +28,6 @@ export interface LoginFormStrings {
     passwordPlaceholder: string;
     loggingIn: string;
     login: string;
-    noAccount: string;
-    signupLink: string;
     emailRequired: string;
     emailInvalid: string;
     passwordRequired: string;

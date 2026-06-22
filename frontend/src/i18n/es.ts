@@ -76,7 +76,6 @@ export const es: Translation = {
         lastnamePlaceholder: 'Tu apellido',
         loggingIn: 'Iniciando sesión...',
         signingUp: 'Creando cuenta...',
-        noAccount: '¿No tienes cuenta?',
         haveAccount: '¿Ya tienes cuenta?',
         emailRequired: 'El correo es obligatorio',
         emailInvalid: 'Formato de correo inválido',

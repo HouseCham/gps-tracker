@@ -4,3 +4,4 @@ export * from './api/users.service';
 export * from './api/devices.service';
 export * from './device-utils';
 export * from './map-utils';
+export * from './router-utils';

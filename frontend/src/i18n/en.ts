@@ -74,7 +74,6 @@ export const en = {
         lastnamePlaceholder: 'Your last name',
         loggingIn: 'Logging in...',
         signingUp: 'Creating account...',
-        noAccount: "Don't have an account?",
         haveAccount: 'Already have an account?',
         emailRequired: 'Email is required',
         emailInvalid: 'Invalid email format',
