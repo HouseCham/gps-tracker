@@ -1,10 +1,15 @@
 # Application Name
 app_name = "gps-tracker-api"
 
-# Base URL for the application (used as the base url of the API and for redirects, emails, etc.)
-base_url = "http://localhost:8080"
+# Base URL for the application. Used as the base url of the API and for
+# redirects, emails, OAuth callback URLs, etc. In local dev this is the
+# public origin of the app (the nginx reverse proxy), NOT the api
+# container's internal address. In production point it at the public
+# hostname where the api is served.
+base_url = "https://localhost"
 
-# Base Path for API endpoints (e.g., "/auth")
+# Base Path for Authula's own endpoints. Mounted under /api by Fiber
+# (see internal/auth/auth.go) so the public surface is /api/auth/*.
 base_path = "/auth"
 
 # Used for encryption. Generate using `openssl rand -hex 32`.
@@ -63,17 +68,21 @@ cleanup_interval = "1m" # Interval for automatic cleanup of expired verification
 # -----------------------------------
 
 [security]
-trusted_origins = ["http://localhost:3000"]
+# Local dev runs behind the nginx reverse proxy on https://localhost, so
+# the trusted origin is the public origin (not the api container's
+# internal port). Override via env-driven config in production if the
+# frontend and api are deployed at different origins.
+trusted_origins = ["https://localhost"]
 trusted_headers = [] # e.g., ["X-Real-IP", "CF-Connecting-IP" (cloudflare), ...]
 trusted_proxies = []
 # IMPORTANT CORS NOTE: If using the session plugin, the CORS config below must specify exact allowed_origins.
 # Setting allowed_origins = ["*"] with allow_credentials = true is NOT allowed by browsers and will fail.
 # Example CORS configuration when using sessions:
 # allow_credentials = true
-# allowed_origins = ["http://localhost:3000"]
+# allowed_origins = ["https://localhost"]
 [security.cors]
 allow_credentials = true
-allowed_origins = ["http://localhost:3000"] # If using session plugin, specify exact origins instead of "*"
+allowed_origins = ["https://localhost"] # If using session plugin, specify exact origins instead of "*"
 allowed_methods = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"]
 # If using the CSRF plugin, ensure the CSRF token header is included here
 allowed_headers = ["Authorization", "Content-Type", "Set-Cookie", "Cookie"]
