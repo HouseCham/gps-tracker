@@ -5,10 +5,11 @@ import (
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/adaptor"
+	"github.com/gofiber/fiber/v3/middleware/cors"
 
-	"github.com/HouseCham/gps-tracker/backend/internal/auth"
 	"github.com/HouseCham/gps-tracker/backend/internal/app/access"
 	"github.com/HouseCham/gps-tracker/backend/internal/app/users"
+	"github.com/HouseCham/gps-tracker/backend/internal/auth"
 	"github.com/HouseCham/gps-tracker/backend/internal/domain"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/dto"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/handlers"
@@ -17,15 +18,21 @@ import (
 )
 
 type RouterDeps struct {
-	HealthHandler  *handlers.HealthHandler
-	DevicesHandler *handlers.DevicesHandler
-	UsersHandler   *handlers.UsersHandler
-	AccessHandler  *handlers.AccessHandler
-	AccessService  *access.AccessService
-	UsersService   *users.UserService
+	HealthHandler    *handlers.HealthHandler
+	DevicesHandler   *handlers.DevicesHandler
+	UsersHandler     *handlers.UsersHandler
+	AccessHandler    *handlers.AccessHandler
+	BootstrapHandler *handlers.BootstrapHandler
+	AccessService    *access.AccessService
+	UsersService     *users.UserService
 	AuthHandler      http.Handler
 	AuthJWTValidator ports.JWTValidator
 	AuthUserLookup   ports.UserLookup
+	// CORSOrigins enables the CORS middleware when non-empty. Each
+	// entry is an allowed origin (e.g. "http://localhost:4321"). When
+	// the frontend and backend share an origin (reverse-proxied or
+	// same-host) leave this nil and the middleware is skipped.
+	CORSOrigins []string
 }
 
 // NewRouter creates a new fiber app and registers the routes and handlers.
@@ -34,6 +41,18 @@ func NewRouter(deps RouterDeps) *fiber.App {
 		AppName:      "gps-tracker-api",
 		ErrorHandler: httpErrorHandler,
 	})
+
+	// CORS is opt-in: only mounted when origins are configured.
+	// Must run before any route, including the Authula catch-all.
+	if len(deps.CORSOrigins) > 0 {
+		app.Use(cors.New(cors.Config{
+			AllowOrigins:     deps.CORSOrigins,
+			AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"},
+			AllowHeaders:     []string{"Origin", "Content-Type", "Accept", "Authorization", "Cookie"},
+			AllowCredentials: true,
+		}))
+	}
+
 	app.Get("/health", deps.HealthHandler.Handle)
 
 	// --- Authula: sign-in, sign-up, JWKS, token refresh, etc. ---
@@ -56,6 +75,13 @@ func NewRouter(deps RouterDeps) *fiber.App {
 	requirePasswordChanged := middleware.RequirePasswordChanged()
 
 	apiV1 := app.Group("/api/v1")
+
+	// === System routes (public, no auth) ===
+	// The bootstrap endpoint is intentionally exposed without any
+	// auth middleware so the frontend can ask "is the app empty?"
+	// before the user has signed in.
+	apiV1.Get("/system/bootstrap", deps.BootstrapHandler.Handle)
+
 	// === Devices routes ===
 	devices := apiV1.Group("/devices")
 	devices.Get("/", authJWT, lazyUser, requirePasswordChanged, deps.DevicesHandler.List)

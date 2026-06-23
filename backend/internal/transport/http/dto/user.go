@@ -9,6 +9,8 @@ import (
 type UserResponse struct {
 	ID                 string    `json:"id"`
 	Email              string    `json:"email"`
+	EmailVerified      bool      `json:"email_verified"`
+	Image              *string   `json:"image,omitempty"`
 	Name               string    `json:"name"`
 	Lastname           string    `json:"lastname"`
 	Role               string    `json:"role"`
@@ -20,6 +22,8 @@ func UserFromDomain(u *domain.User) UserResponse {
 	return UserResponse{
 		ID:                 u.ID.String(),
 		Email:              u.Email,
+		EmailVerified:      u.EmailVerified,
+		Image:              u.Image,
 		Name:               u.Name,
 		Lastname:           u.Lastname,
 		Role:               string(u.Role),

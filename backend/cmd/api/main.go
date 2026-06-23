@@ -2,12 +2,14 @@ package main
 
 import (
 	"context"
+	nethttp "net/http"
 	"os"
 	"os/signal"
 	"strconv"
 	"syscall"
 	"time"
 
+	"github.com/Authula/authula/models"
 	"github.com/gofiber/fiber/v3/log"
 
 	"github.com/HouseCham/gps-tracker/backend/internal/app/access"
@@ -81,6 +83,36 @@ func main() {
 	userCreator := authInstance.NewUserCreator()
 	usersService := users.NewUserService(usersRepo, userCreator)
 
+	// After-signup sync: Authula owns credentials, we own the
+	// application-level projection (role, must_change_password, FKs).
+	// Mirror every new Authula user into our local users table so the
+	// unauthenticated bootstrap endpoint sees a non-empty table on
+	// the first request after sign-up. LazyUser is the safety net
+	// if the hook ever fails.
+	authInstance.RegisterHook(models.Hook{
+		Stage: models.HookAfter,
+		Matcher: func(rc *models.RequestContext) bool {
+			return rc.Method == nethttp.MethodPost &&
+				rc.Path == auth.BasePath+"/email-password/sign-up" &&
+				rc.Actor != nil && rc.Actor.Type == models.ActorUser
+		},
+		Handler: func(rc *models.RequestContext) error {
+			lookup := authInstance.NewUserLookup()
+			authulaUser, err := lookup.GetByID(rc.Request.Context(), rc.Actor.ID)
+			if err != nil {
+				//authula signup succeeded, local mirror is non-critical
+				log.Error("signup hook: fetch authula user", "err", err)
+				return nil
+			}
+			if _, err := usersService.GetOrCreate(rc.Request.Context(), authulaUser.Email, authulaUser.Name); err != nil {
+				// failing to mirror doesn't roll back the signup
+				log.Error("signup hook: mirror to local users", "err", err)
+				return nil
+			}
+			return nil
+		},
+	})
+
 	//-- access
 	accessRepo := postgres.NewAccessAdapter(pool)
 	accessService := access.NewAccessService(accessRepo, usersRepo)
@@ -98,11 +130,13 @@ func main() {
 		DevicesHandler:   devicesHandler,
 		UsersHandler:     usersHandler,
 		AccessHandler:    accessHandler,
+		BootstrapHandler: handlers.NewBootstrapHandler(usersService),
 		AccessService:    accessService,
 		UsersService:     usersService,
 		AuthHandler:      authInstance.Handler(),
 		AuthJWTValidator: authInstance.NewJWTValidator().(ports.JWTValidator),
 		AuthUserLookup:   authInstance.NewUserLookup().(ports.UserLookup),
+		CORSOrigins:      config.LoadCORSOrigins(),
 	})
 
 	server := http.NewServer(app, http.ServerConfig{

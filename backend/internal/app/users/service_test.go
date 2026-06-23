@@ -14,7 +14,7 @@ type mockRepo struct {
 	listFn                 func(ctx context.Context, excludeUserID uuid.UUID) ([]domain.User, error)
 	getByIDFn              func(ctx context.Context, userID uuid.UUID) (*domain.User, error)
 	getByEmailFn           func(ctx context.Context, email string) (*domain.User, error)
-	createUserFn           func(ctx context.Context, email, name, lastname string, role domain.UserRole) (*domain.User, error)
+	createUserFn           func(ctx context.Context, email, name, lastname string, role domain.UserRole, mustChangePassword bool) (*domain.User, error)
 	updateUserFn           func(ctx context.Context, userID uuid.UUID, name, lastname string) (*domain.User, error)
 	softDeleteUserFn       func(ctx context.Context, userID uuid.UUID) error
 	setMustChangePasswordFn func(ctx context.Context, userID uuid.UUID, mustChange bool) error
@@ -33,8 +33,8 @@ func (m *mockRepo) GetByEmail(ctx context.Context, email string) (*domain.User, 
 	return m.getByEmailFn(ctx, email)
 }
 
-func (m *mockRepo) CreateUser(ctx context.Context, email, name, lastname string, role domain.UserRole) (*domain.User, error) {
-	return m.createUserFn(ctx, email, name, lastname, role)
+func (m *mockRepo) CreateUser(ctx context.Context, email, name, lastname string, role domain.UserRole, mustChangePassword bool) (*domain.User, error) {
+	return m.createUserFn(ctx, email, name, lastname, role, mustChangePassword)
 }
 
 func (m *mockRepo) UpdateUser(ctx context.Context, userID uuid.UUID, name, lastname string) (*domain.User, error) {
@@ -232,7 +232,7 @@ func TestGetOrCreate(t *testing.T) {
 				}
 				return existing, nil
 			},
-			createUserFn: func(_ context.Context, _, _, _ string, _ domain.UserRole) (*domain.User, error) {
+			createUserFn: func(_ context.Context, _, _, _ string, _ domain.UserRole, _ bool) (*domain.User, error) {
 				created = true
 				return nil, nil
 			},
@@ -255,7 +255,7 @@ func TestGetOrCreate(t *testing.T) {
 				return nil, domain.ErrNotFound
 			},
 			countUsersFn: func(_ context.Context) (int, error) { return 0, nil },
-			createUserFn: func(_ context.Context, email, _, _ string, role domain.UserRole) (*domain.User, error) {
+			createUserFn: func(_ context.Context, email, _, _ string, role domain.UserRole, _ bool) (*domain.User, error) {
 				if role != domain.UserRoleSuperAdmin {
 					t.Errorf("repo received role %v, want super_admin", role)
 				}
@@ -277,7 +277,7 @@ func TestGetOrCreate(t *testing.T) {
 				return nil, domain.ErrNotFound
 			},
 			countUsersFn: func(_ context.Context) (int, error) { return 5, nil },
-			createUserFn: func(_ context.Context, _, _, _ string, role domain.UserRole) (*domain.User, error) {
+			createUserFn: func(_ context.Context, _, _, _ string, role domain.UserRole, _ bool) (*domain.User, error) {
 				if role != domain.UserRoleUser {
 					t.Errorf("repo received role %v, want user", role)
 				}
@@ -299,7 +299,7 @@ func TestGetOrCreate(t *testing.T) {
 				return nil, domain.ErrNotFound
 			},
 			countUsersFn: func(_ context.Context) (int, error) { return 3, nil },
-			createUserFn: func(_ context.Context, _, _, _ string, _ domain.UserRole) (*domain.User, error) {
+			createUserFn: func(_ context.Context, _, _, _ string, _ domain.UserRole, _ bool) (*domain.User, error) {
 				return nil, domain.ErrConflict
 			},
 		}, &mockUserCreator{})
@@ -330,6 +330,32 @@ func TestGetOrCreate(t *testing.T) {
 			t.Errorf("expected %v, got %v", expected, err)
 		}
 	})
+
+	t.Run("new user is created with must_change_password=false", func(t *testing.T) {
+		var gotMustChange bool
+		var mustChangeCaptured bool
+		svc := NewUserService(&mockRepo{
+			getByEmailFn: func(_ context.Context, _ string) (*domain.User, error) {
+				return nil, domain.ErrNotFound
+			},
+			countUsersFn: func(_ context.Context) (int, error) { return 1, nil },
+			createUserFn: func(_ context.Context, _, _, _ string, _ domain.UserRole, mustChange bool) (*domain.User, error) {
+				gotMustChange = mustChange
+				mustChangeCaptured = true
+				return &domain.User{}, nil
+			},
+		}, &mockUserCreator{})
+		_, err := svc.GetOrCreate(ctx, "self@test.com", "Self")
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if !mustChangeCaptured {
+			t.Fatal("repo CreateUser was never called")
+		}
+		if gotMustChange {
+			t.Error("expected must_change_password=false for self-service signup")
+		}
+	})
 }
 
 func TestCreateUser(t *testing.T) {
@@ -338,7 +364,7 @@ func TestCreateUser(t *testing.T) {
 	t.Run("preserves role when users already exist", func(t *testing.T) {
 		svc := NewUserService(&mockRepo{
 			countUsersFn: func(_ context.Context) (int, error) { return 3, nil },
-			createUserFn: func(_ context.Context, _, _, _ string, role domain.UserRole) (*domain.User, error) {
+			createUserFn: func(_ context.Context, _, _, _ string, role domain.UserRole, _ bool) (*domain.User, error) {
 				if role != domain.UserRoleUser {
 					t.Errorf("repo received role %v, want user", role)
 				}
@@ -359,7 +385,7 @@ func TestCreateUser(t *testing.T) {
 	t.Run("first registered user is promoted to super admin", func(t *testing.T) {
 		svc := NewUserService(&mockRepo{
 			countUsersFn: func(_ context.Context) (int, error) { return 0, nil },
-			createUserFn: func(_ context.Context, _, _, _ string, role domain.UserRole) (*domain.User, error) {
+			createUserFn: func(_ context.Context, _, _, _ string, role domain.UserRole, _ bool) (*domain.User, error) {
 				if role != domain.UserRoleSuperAdmin {
 					t.Errorf("repo received role %v, want super_admin", role)
 				}
@@ -404,7 +430,7 @@ func TestCreateUser(t *testing.T) {
 	t.Run("returns temporary password", func(t *testing.T) {
 		svc := NewUserService(&mockRepo{
 			countUsersFn: func(_ context.Context) (int, error) { return 1, nil },
-			createUserFn: func(_ context.Context, _, _, _ string, _ domain.UserRole) (*domain.User, error) {
+			createUserFn: func(_ context.Context, _, _, _ string, _ domain.UserRole, _ bool) (*domain.User, error) {
 				return &domain.User{Email: "a@b.com"}, nil
 			},
 		}, &mockUserCreator{
@@ -422,7 +448,7 @@ func TestCreateUser(t *testing.T) {
 	t.Run("propagates create error", func(t *testing.T) {
 		svc := NewUserService(&mockRepo{
 			countUsersFn: func(_ context.Context) (int, error) { return 1, nil },
-			createUserFn: func(_ context.Context, _, _, _ string, _ domain.UserRole) (*domain.User, error) {
+			createUserFn: func(_ context.Context, _, _, _ string, _ domain.UserRole, _ bool) (*domain.User, error) {
 				return nil, domain.ErrConflict
 			},
 		}, &mockUserCreator{
@@ -431,6 +457,67 @@ func TestCreateUser(t *testing.T) {
 		_, err := svc.CreateUser(ctx, "a@b.com", "A", "B", domain.UserRoleUser)
 		if !errors.Is(err, domain.ErrConflict) {
 			t.Errorf("expected ErrConflict, got %v", err)
+		}
+	})
+
+	t.Run("new user is created with must_change_password=true", func(t *testing.T) {
+		var gotMustChange bool
+		svc := NewUserService(&mockRepo{
+			countUsersFn: func(_ context.Context) (int, error) { return 1, nil },
+			createUserFn: func(_ context.Context, _, _, _ string, _ domain.UserRole, mustChange bool) (*domain.User, error) {
+				gotMustChange = mustChange
+				return &domain.User{}, nil
+			},
+		}, &mockUserCreator{
+			createFn: func(_ context.Context, _, _, _ string) error { return nil },
+		})
+		_, err := svc.CreateUser(ctx, "a@b.com", "A", "B", domain.UserRoleUser)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if !gotMustChange {
+			t.Error("expected must_change_password=true for admin-created user")
+		}
+	})
+}
+
+func TestCountUsers(t *testing.T) {
+	ctx := context.Background()
+
+	t.Run("returns repository count", func(t *testing.T) {
+		svc := NewUserService(&mockRepo{
+			countUsersFn: func(_ context.Context) (int, error) { return 7, nil },
+		}, &mockUserCreator{})
+		got, err := svc.CountUsers(ctx)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if got != 7 {
+			t.Errorf("got %d, want 7", got)
+		}
+	})
+
+	t.Run("returns zero when no users", func(t *testing.T) {
+		svc := NewUserService(&mockRepo{
+			countUsersFn: func(_ context.Context) (int, error) { return 0, nil },
+		}, &mockUserCreator{})
+		got, err := svc.CountUsers(ctx)
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if got != 0 {
+			t.Errorf("got %d, want 0", got)
+		}
+	})
+
+	t.Run("propagates repository error", func(t *testing.T) {
+		expected := errors.New("db closed")
+		svc := NewUserService(&mockRepo{
+			countUsersFn: func(_ context.Context) (int, error) { return 0, expected },
+		}, &mockUserCreator{})
+		_, err := svc.CountUsers(ctx)
+		if !errors.Is(err, expected) {
+			t.Errorf("expected %v, got %v", expected, err)
 		}
 	})
 }

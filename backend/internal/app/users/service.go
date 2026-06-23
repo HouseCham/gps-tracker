@@ -32,6 +32,13 @@ func (s *UserService) ListUsers(ctx context.Context, excludeUserID uuid.UUID) ([
 	return s.repo.ListUsers(ctx, excludeUserID)
 }
 
+// CountUsers returns the number of active (non-soft-deleted) users.
+// Used by the bootstrap endpoint to decide whether the first-time
+// setup flow should be shown.
+func (s *UserService) CountUsers(ctx context.Context) (int, error) {
+	return s.repo.CountUsers(ctx)
+}
+
 func (s *UserService) GetByID(ctx context.Context, requestingUserID, targetUserID uuid.UUID) (*domain.User, error) {
 	targetUser, err := s.repo.GetByID(ctx, targetUserID)
 	if err != nil {
@@ -73,7 +80,9 @@ func (s *UserService) CreateUser(ctx context.Context, email, name, lastname stri
 		return nil, fmt.Errorf("create authula user: %w", err)
 	}
 
-	user, err := s.repo.CreateUser(ctx, email, name, lastname, role)
+	// Admin-created users get a temporary password and must change
+	// it before they can do anything else.
+	user, err := s.repo.CreateUser(ctx, email, name, lastname, role, true)
 	if err != nil {
 		return nil, err
 	}
@@ -105,7 +114,7 @@ func (s *UserService) GetOrCreate(ctx context.Context, email, name string) (*dom
 		role = domain.UserRoleSuperAdmin
 	}
 
-	created, err := s.repo.CreateUser(ctx, email, name, "", role)
+	created, err := s.repo.CreateUser(ctx, email, name, "", role, false)
 	if err == nil {
 		return created, nil
 	}

@@ -278,6 +278,14 @@ func (c authulaUserCreator) CreateUserWithPassword(ctx context.Context, name, em
 	return nil
 }
 
+// RegisterHook exposes Authula's hook registration. The caller is
+// the composition root and decides what to do with the new
+// RequestContext. Must be called after Bootstrap and before the
+// first request reaches Handler().
+func (a *Auth) RegisterHook(hook models.Hook) {
+	a.instance.RegisterHook(hook)
+}
+
 // NewPasswordUpdater returns an updater backed by the live Authula services.
 func (a *Auth) NewPasswordUpdater() authulaPasswordUpdater {
 	return authulaPasswordUpdater{
