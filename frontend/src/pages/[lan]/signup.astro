@@ -7,7 +7,7 @@ import type { Language } from '@/types';
 import type { SignupFormStrings } from '@/types/components';
 //-- Components
 import AuthLayout from '@/components/astro/layout/AuthLayout.astro';
-import { SignupForm } from '@/components/react/auth';
+import { BootstrapGate, SignupForm } from '@/components/react/auth';
 
 /**
  * @type {GetStaticPaths}
@@ -41,8 +41,7 @@ const signupStrings: SignupFormStrings = {
 ---
 
 <AuthLayout title={`${translation.auth.signupTitle} · GPS Tracker`}>
-    <SignupForm
-        client:load
-        strings={signupStrings}
-    />
+    <BootstrapGate client:load locale={locale}>
+        <SignupForm client:load strings={signupStrings} />
+    </BootstrapGate>
 </AuthLayout>

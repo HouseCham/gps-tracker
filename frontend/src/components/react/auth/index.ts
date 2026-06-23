@@ -5,3 +5,5 @@ export * from './ProtectedRoute';
 export * from './PublicOnlyRoute';
 export * from './OAuthCallback';
 export * from './GoogleIcon';
+export * from './FirstRunGate';
+export * from './BootstrapGate';

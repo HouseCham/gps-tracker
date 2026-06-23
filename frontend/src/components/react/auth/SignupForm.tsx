@@ -3,9 +3,13 @@ import '@/styles/components/signup-form.css';
 import { useState, type ReactElement, type SyntheticEvent } from 'react';
 //-- Types
 import type { SignupFormStrings } from '@/types/components';
-//-- Components
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
+//-- Auth
+import { authService } from '@/lib/auth/service';
+//-- Constants
+import { EMAIL_REGEX } from '@/constants';
+//-- UI
+import { Button, Input } from '@/components/ui';
+import { isApiError } from '@/lib/api';
 /**
  * @interface SignupFormProps
  * @param {SignupFormStrings} strings - The strings to use in the form.
@@ -19,18 +23,18 @@ export interface SignupFormProps {
 }
 /**
  * The signup form component.
- * @param {SignupFormProps} props - The props for the component.            
+ * @param {SignupFormProps} props - The props for the component.
  * @returns {ReactElement} The rendered component.
  */
 export function SignupForm({
-    error,
-    loading = false,
     strings: s,
 }: SignupFormProps): ReactElement {
     const [email, setEmail] = useState('');
     const [name, setName] = useState('');
     const [password, setPassword] = useState('');
     const [errors, setErrors] = useState<Record<string, string>>({});
+    const [authError, setAuthError] = useState<string | undefined>();
+    const [loading, setLoading] = useState(false);
     /**
      * Validates the form data.
      * @returns {boolean} Whether the form is valid.
@@ -38,7 +42,7 @@ export function SignupForm({
     function validate(): boolean {
         const next: Record<string, string> = {};
         if (!email.trim()) next.email = s.emailRequired;
-        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) next.email = s.emailInvalid;
+        else if (!EMAIL_REGEX.test(email.trim())) next.email = s.emailInvalid;
         if (!name.trim()) next.name = s.nameRequired;
         if (!password) next.password = s.passwordRequired;
         else if (password.length < 8) next.password = s.passwordMin;
@@ -46,13 +50,30 @@ export function SignupForm({
         return Object.keys(next).length === 0;
     }
     /**
-     * Handles the form submission.
+     * Handles the form submission by calling authService.signUp().
+     * On success the service triggers a full-page redirect; on
+     * failure the API error message is shown to the user.
      * @param {SyntheticEvent<HTMLFormElement>} e - The event.
-     * @returns {void}
+     * @returns {Promise<void>}
      */
-    function handleSubmit(e: SyntheticEvent<HTMLFormElement>): void {
+    async function handleSubmit(
+        e: SyntheticEvent<HTMLFormElement>
+    ): Promise<void> {
         e.preventDefault();
         if (!validate()) return;
+        setAuthError(undefined);
+        setLoading(true);
+        try {
+            await authService.signUp({
+                email: email.trim(),
+                name: name.trim(),
+                password,
+            });
+        } catch (err) {
+            const apiError = isApiError(err) ? err : { message: 'Sign-up failed' };
+            setAuthError(apiError.message);
+            setLoading(false);
+        }
     }
     /**
      * Clears the error for a specific field.
@@ -74,29 +95,27 @@ export function SignupForm({
                 <p className="signup-form__subtitle">{s.signupSubtitle}</p>
             </div>
 
-            {error && (
+            {authError && (
                 <p className="signup-form__banner" role="alert">
-                    {error}
+                    {authError}
                 </p>
             )}
 
-            <div className="signup-form__row">
-                <div className="signup-form__field">
-                    <Input
-                        name="name"
-                        label={s.name}
-                        value={name}
-                        placeholder={s.namePlaceholder}
-                        error={errors.name}
-                        disabled={loading}
-                        required
-                        autocomplete="name"
-                        onChange={e => {
-                            setName(e.target.value);
-                            clearError('name');
-                        }}
-                    />
-                </div>
+            <div className="signup-form__field">
+                <Input
+                    name="name"
+                    label={s.name}
+                    value={name}
+                    placeholder={s.namePlaceholder}
+                    error={errors.name}
+                    disabled={loading}
+                    required
+                    autocomplete="name"
+                    onChange={e => {
+                        setName(e.target.value);
+                        clearError('name');
+                    }}
+                />
             </div>
 
             <div className="signup-form__field">
