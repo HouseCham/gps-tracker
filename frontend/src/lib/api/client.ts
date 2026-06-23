@@ -5,7 +5,7 @@ import { createFetch } from '@better-fetch/fetch';
  * @type {typeof import('@better-fetch/fetch').createFetch}
  */
 export const client = createFetch({
-    baseURL: import.meta.env.PUBLIC_API_URL || '/api/v1',
+    baseURL: `${import.meta.env.PUBLIC_API_URL}/api/v1` || '/api/v1',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
 });

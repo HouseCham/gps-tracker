@@ -47,7 +47,8 @@ async function postSignIn(credentials: SignInCredentials): Promise<AuthSession> 
         if (!data) {
             handleApiError(new Error('sign-in returned an empty response'));
         }
-        return data;
+        // handleApiError throws, data is non-null here
+        return data!;
     } catch (error) {
         handleApiError(error);
     }
@@ -72,7 +73,8 @@ async function postSignUp(credentials: SignUpCredentials): Promise<AuthSession> 
         if (!data) {
             handleApiError(new Error('sign-up returned an empty response'));
         }
-        return data;
+        // handleApiError throws, data is non-null here
+        return data!;
     } catch (error) {
         handleApiError(error);
     }
@@ -91,7 +93,7 @@ async function fetchMe(): Promise<AuthUser | null> {
             method: 'GET',
         } as BetterFetchOption);
         return data?.user ?? null;
-    } catch (_err) {
+    } catch {
         return null;
     }
 }
@@ -204,17 +206,15 @@ export const authService = {
             await authClient('/sign-out', {
                 method: 'POST',
             } as BetterFetchOption);
-        } catch (_err) {
+        } catch {
             // Sign-out is best-effort: a network failure here
             // shouldn't prevent us from clearing the local
             // store. The server-side session will expire on its
             // own per its TTL.
         }
         clearUser();
-            window.location.href = REDIRECT_AFTER_SIGNOUT;
-        } finally {
-            setAuthLoading(false);
-        }
+        window.location.href = REDIRECT_AFTER_SIGNOUT;
+        setAuthLoading(false);
     },
 
     /**

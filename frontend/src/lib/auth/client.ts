@@ -13,7 +13,7 @@ import { createFetch } from '@better-fetch/fetch';
  * @type {typeof import('@better-fetch/fetch').createFetch}
  */
 export const authClient = createFetch({
-    baseURL: '/api/auth',
+    baseURL: `${import.meta.env.PUBLIC_API_URL}/api/auth` || '/api/auth',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
 });
