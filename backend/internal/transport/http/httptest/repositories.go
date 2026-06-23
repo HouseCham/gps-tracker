@@ -163,17 +163,18 @@ func (m *MockUsersRepository) GetByEmail(ctx context.Context, email string) (*do
 	return user, nil
 }
 
-func (m *MockUsersRepository) CreateUser(ctx context.Context, email, name, lastname string, role domain.UserRole) (*domain.User, error) {
+func (m *MockUsersRepository) CreateUser(ctx context.Context, email, name, lastname string, role domain.UserRole, mustChangePassword bool) (*domain.User, error) {
 	if m.CreateErr != nil {
 		return nil, m.CreateErr
 	}
 	user := &domain.User{
-		ID:        uuid.New(),
-		Email:     email,
-		Name:      name,
-		Lastname:  lastname,
-		Role:      role,
-		CreatedAt: time.Now(),
+		ID:                 uuid.New(),
+		Email:              email,
+		Name:               name,
+		Lastname:           lastname,
+		Role:               role,
+		MustChangePassword: mustChangePassword,
+		CreatedAt:          time.Now(),
 	}
 	m.Users[user.ID] = user
 	m.UsersByEmail[email] = user
@@ -199,6 +200,7 @@ func (m *MockUsersRepository) UpdateUser(ctx context.Context, userID uuid.UUID, 
 }
 
 func (m *MockUsersRepository) SetMustChangePassword(ctx context.Context, userID uuid.UUID, mustChange bool) error {
+	// ponytail: no-op mock
 	return nil
 }
 

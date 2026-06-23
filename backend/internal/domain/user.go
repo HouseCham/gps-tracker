@@ -10,6 +10,8 @@ import (
 type User struct {
 	ID                 uuid.UUID
 	Email              string
+	EmailVerified      bool
+	Image              *string
 	Name               string
 	Lastname           string
 	Role               UserRole

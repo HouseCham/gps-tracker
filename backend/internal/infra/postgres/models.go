@@ -93,6 +93,8 @@ type User struct {
 	Name               string
 	Lastname           string
 	MustChangePassword bool
+	EmailVerified      bool
+	Image              *string
 }
 
 type UserDeviceAccess struct {
