@@ -83,7 +83,7 @@ export function FirstRunGate({
             })
             .catch(() => {
                 if (cancelled) return;
-                window.location.replace(`/${locale}/login`);
+                window.location.replace(`/${locale}/error`);
                 setDecided(true);
             });
 
