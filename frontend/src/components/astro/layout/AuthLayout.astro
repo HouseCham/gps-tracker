@@ -1,12 +1,14 @@
 ---
 import '@/styles/global.css';
 import '@/styles/layout/main-layout.css';
+//-- Types
 import type { Language } from '@/types';
-import Toolbar from './Toolbar.astro';
+//-- Components
 import {
     AuthProvider,
     PublicOnlyRoute
 } from '@/components/react/auth';
+import Toolbar from '@/components/astro/Toolbar.astro';
 
 /**
  * @interface Props
