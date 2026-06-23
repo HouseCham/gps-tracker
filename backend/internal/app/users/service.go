@@ -9,7 +9,6 @@ import (
 
 	"github.com/google/uuid"
 
-	"github.com/HouseCham/gps-tracker/backend/internal/auth"
 	"github.com/HouseCham/gps-tracker/backend/internal/domain"
 )
 
@@ -22,10 +21,10 @@ type CreateUserResult struct {
 
 type UserService struct {
 	repo        Repository
-	authCreator auth.UserCreator
+	authCreator UserCreator
 }
 
-func NewUserService(repo Repository, authCreator auth.UserCreator) *UserService {
+func NewUserService(repo Repository, authCreator UserCreator) *UserService {
 	return &UserService{repo: repo, authCreator: authCreator}
 }
 

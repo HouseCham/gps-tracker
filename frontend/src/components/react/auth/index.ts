@@ -3,3 +3,5 @@ export * from './LoginForm';
 export * from './SignupForm';
 export * from './ProtectedRoute';
 export * from './PublicOnlyRoute';
+export * from './OAuthCallback';
+export * from './GoogleIcon';

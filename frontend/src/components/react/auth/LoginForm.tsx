@@ -11,6 +11,8 @@ import { EMAIL_REGEX } from '@/constants';
 //-- UI
 import { Button, Input } from '@/components/ui';
 import { isApiError } from '@/lib/api';
+//-- Icons
+import { GoogleIcon } from '@/components/react/auth/GoogleIcon';
 /**
  * @interface LoginFormProps
  * @param {LoginFormStrings} [strings] - The strings to use in the form.
@@ -33,6 +35,7 @@ export function LoginForm({
     );
     const [authError, setAuthError] = useState<string | undefined>();
     const [loading, setLoading] = useState(false);
+    const [oauthLoading, setOauthLoading] = useState(false);
 
     /**
      * Validates the form data.
@@ -69,6 +72,26 @@ export function LoginForm({
         }
     }
 
+    /**
+     * Handles the Google sign-in button. The service redirects the
+     * browser away on success; we only need to recover from a
+     * pre-redirect failure (network, missing credentials).
+     * @returns {Promise<void>}
+     */
+    async function handleGoogleSignIn(): Promise<void> {
+        setAuthError(undefined);
+        setOauthLoading(true);
+        try {
+            await authService.signInOAuth('google');
+        } catch (err) {
+            const apiError = isApiError(err)
+                ? err
+                : { message: 'Google sign-in failed' };
+            setAuthError(apiError.message);
+            setOauthLoading(false);
+        }
+    }
+
     return (
         <form className="login-form" onSubmit={handleSubmit} noValidate>
             <div className="login-form__head">
@@ -82,6 +105,20 @@ export function LoginForm({
                 </p>
             )}
 
+            <button
+                type="button"
+                className="login-form__oauth"
+                onClick={handleGoogleSignIn}
+                disabled={loading || oauthLoading}
+            >
+                <GoogleIcon />
+                <span>{s.signInWithGoogle}</span>
+            </button>
+
+            <div className="login-form__divider" role="separator">
+                <span>{s.orContinueWith}</span>
+            </div>
+
             <Input
                 type="email"
                 label={s.email}
@@ -91,7 +128,7 @@ export function LoginForm({
                     setErrors(p => ({ ...p, email: undefined }));
                 }}
                 placeholder={s.emailPlaceholder}
-                disabled={loading}
+                disabled={loading || oauthLoading}
                 autocomplete="email"
                 error={errors.email}
                 required
@@ -106,7 +143,7 @@ export function LoginForm({
                     setErrors(p => ({ ...p, password: undefined }));
                 }}
                 placeholder={s.passwordPlaceholder}
-                disabled={loading}
+                disabled={loading || oauthLoading}
                 autocomplete="current-password"
                 error={errors.password}
                 required
@@ -115,7 +152,7 @@ export function LoginForm({
             <Button
                 type="submit"
                 className="login-form__btn"
-                disabled={loading}
+                disabled={loading || oauthLoading}
             >
                 {loading ? s.loggingIn : s.login}
             </Button>

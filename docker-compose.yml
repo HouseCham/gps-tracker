@@ -60,6 +60,8 @@ services:
       AUTHULA_BASE_URL: ${AUTHULA_BASE_URL}
       AUTHULA_SECRET: ${AUTHULA_SECRET}
       AUTHULA_DATABASE_URL: postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD:-gps_pass}@db:5432/${POSTGRES_DB}?sslmode=disable
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
     depends_on:
       migrate:
         condition: service_completed_successfully

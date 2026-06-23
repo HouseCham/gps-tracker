@@ -30,6 +30,7 @@ export function useAuth(): UseAuthResult {
         isAuthLoading,
         signIn: authService.signIn,
         signUp: authService.signUp,
+        signInOAuth: authService.signInOAuth,
         signOut: authService.signOut,
     };
 }

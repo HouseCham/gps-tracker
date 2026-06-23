@@ -10,10 +10,10 @@ import (
 
 	"github.com/HouseCham/gps-tracker/backend/internal/app/devices"
 	"github.com/HouseCham/gps-tracker/backend/internal/app/users"
-	"github.com/HouseCham/gps-tracker/backend/internal/auth"
 	"github.com/HouseCham/gps-tracker/backend/internal/domain"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/dto"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/middleware"
+	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/ports"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/response"
 	"github.com/HouseCham/gps-tracker/backend/utils"
 )
@@ -21,10 +21,10 @@ import (
 type UsersHandler struct {
 	usersService    *users.UserService
 	devicesService  *devices.Service
-	passwordUpdater auth.PasswordUpdater
+	passwordUpdater ports.PasswordUpdater
 }
 
-func NewUsersHandler(usersSvc *users.UserService, devicesSvc *devices.Service, passwordUpdater auth.PasswordUpdater) *UsersHandler {
+func NewUsersHandler(usersSvc *users.UserService, devicesSvc *devices.Service, passwordUpdater ports.PasswordUpdater) *UsersHandler {
 	return &UsersHandler{usersService: usersSvc, devicesService: devicesSvc, passwordUpdater: passwordUpdater}
 }
 

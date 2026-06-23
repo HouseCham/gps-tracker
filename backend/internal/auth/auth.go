@@ -30,6 +30,8 @@ import (
 	emailpasswordplugintypes "github.com/Authula/authula/plugins/email-password/types"
 	jwtplugin "github.com/Authula/authula/plugins/jwt"
 	jwtplugintypes "github.com/Authula/authula/plugins/jwt/types"
+	oauth2plugin "github.com/Authula/authula/plugins/oauth2"
+	oauth2plugintypes "github.com/Authula/authula/plugins/oauth2/types"
 	authulaservices "github.com/Authula/authula/services"
 
 	"github.com/HouseCham/gps-tracker/backend/internal/domain"
@@ -57,6 +59,20 @@ type Config struct {
 	// used by the main app; Authula will create its own tables on
 	// first init.
 	DatabaseURL string
+	// GoogleOAuth holds the Google OAuth2 provider credentials. When
+	// non-nil, the OAuth2 plugin is enabled and registered for the
+	// "google" provider. The RedirectURL is built automatically as
+	// <BaseURL><BasePath>/oauth2/callback/google when empty.
+	GoogleOAuth *GoogleOAuthConfig
+}
+
+// GoogleOAuthConfig carries the credentials for the Google OAuth2
+// provider. Mirrors the field names expected by Authula's oauth2
+// plugin.
+type GoogleOAuthConfig struct {
+	ClientID     string
+	ClientSecret string
+	RedirectURL  string
 }
 
 // Auth is the composition root for Authula. It exposes the bits of
@@ -92,6 +108,33 @@ func Bootstrap(ctx context.Context, cfg Config) (*Auth, error) {
 	// config, so we set it here to keep wiring in one place.
 	if err := setEnvIfEmpty(env.EnvDatabaseURL, cfg.DatabaseURL); err != nil {
 		return nil, fmt.Errorf("auth: failed to set %s: %w", env.EnvDatabaseURL, err)
+	}
+
+	// Build the OAuth2 plugin config only when Google is wired. The
+	// plugin is intentionally opt-in: leaving GoogleOAuth nil keeps
+	// the surface area exactly what it was before and means existing
+	// deployments don't get extra routes mounted.
+	var oauth2Cfg *oauth2plugintypes.OAuth2PluginConfig
+	if cfg.GoogleOAuth != nil {
+		redirectURL := cfg.GoogleOAuth.RedirectURL
+		if redirectURL == "" {
+			base := cfg.BaseURL
+			if base == "" {
+				base = "http://localhost:8080"
+			}
+			redirectURL = base + BasePath + "/oauth2/callback/google"
+		}
+		oauth2Cfg = &oauth2plugintypes.OAuth2PluginConfig{
+			Enabled: true,
+			Providers: map[string]oauth2plugintypes.ProviderConfig{
+				"google": {
+					Enabled:      true,
+					ClientID:     cfg.GoogleOAuth.ClientID,
+					ClientSecret: cfg.GoogleOAuth.ClientSecret,
+					RedirectURL:  redirectURL,
+				},
+			},
+		}
 	}
 
 	authulaCfg := authulaconfig.NewConfig(
@@ -133,19 +176,24 @@ func Bootstrap(ctx context.Context, cfg Config) (*Auth, error) {
 		}),
 	)
 
+	plugins := []models.Plugin{
+		emailpasswordplugin.New(emailpasswordplugintypes.EmailPasswordPluginConfig{
+			Enabled:   true,
+			AutoSignIn: true,
+		}),
+		jwtplugin.New(jwtplugintypes.JWTPluginConfig{
+			Enabled:          true,
+			ExpiresIn:        15 * time.Minute,
+			RefreshExpiresIn: 7 * 24 * time.Hour,
+		}),
+	}
+	if oauth2Cfg != nil {
+		plugins = append(plugins, oauth2plugin.New(*oauth2Cfg))
+	}
+
 	instance := authula.New(&authula.AuthConfig{
-		Config: authulaCfg,
-		Plugins: []models.Plugin{
-			emailpasswordplugin.New(emailpasswordplugintypes.EmailPasswordPluginConfig{
-				Enabled:   true,
-				AutoSignIn: true,
-			}),
-			jwtplugin.New(jwtplugintypes.JWTPluginConfig{
-				Enabled:          true,
-				ExpiresIn:        15 * time.Minute,
-				RefreshExpiresIn: 7 * 24 * time.Hour,
-			}),
-		},
+		Config:  authulaCfg,
+		Plugins: plugins,
 	})
 
 	// Pre-warm the handler so route registration + plugin init
@@ -189,40 +237,18 @@ func (a *Auth) Handler() http.Handler {
 	return a.instance.Handler()
 }
 
-// JWTValidator validates a raw JWT access token string and returns the
-// resolved Authula actor. It is a small interface (over a typed
-// concrete struct) so that middleware code can be unit-tested with
-// fakes.
-type JWTValidator interface {
-	ValidateToken(ctx context.Context, token string) (*models.Actor, error)
-}
-
-// UserLookup fetches a user's record from Authula's `users` table by
-// its Authula-assigned id. We use it to obtain the email for the lazy
-// local-user creation step.
-type UserLookup interface {
-	GetByID(ctx context.Context, id string) (*models.User, error)
-}
-
-// NewJWTValidator returns a JWTValidator backed by the live Authula
-// JWT service.
-func (a *Auth) NewJWTValidator() JWTValidator {
+// NewJWTValidator returns the live Authula JWT service.
+func (a *Auth) NewJWTValidator() authulaservices.JWTService {
 	return a.jwtService
 }
 
-// NewUserLookup returns a UserLookup backed by the live Authula core
-// user service.
-func (a *Auth) NewUserLookup() UserLookup {
+// NewUserLookup returns the live Authula core user service.
+func (a *Auth) NewUserLookup() authulaservices.UserService {
 	return a.userService
 }
 
-// UserCreator creates a user account with a password in Authula.
-type UserCreator interface {
-	CreateUserWithPassword(ctx context.Context, name, email, password string) error
-}
-
-// NewUserCreator returns a UserCreator backed by the live Authula services.
-func (a *Auth) NewUserCreator() UserCreator {
+// NewUserCreator returns a creator backed by the live Authula services.
+func (a *Auth) NewUserCreator() authulaUserCreator {
 	return authulaUserCreator{
 		userService:    a.userService,
 		accountService: a.accountService,
@@ -252,15 +278,8 @@ func (c authulaUserCreator) CreateUserWithPassword(ctx context.Context, name, em
 	return nil
 }
 
-// PasswordUpdater updates a user's password in Authula, verifying the old
-// password first.
-type PasswordUpdater interface {
-	UpdatePassword(ctx context.Context, authulaUserID, oldPassword, newPassword string) error
-}
-
-// NewPasswordUpdater returns a PasswordUpdater backed by the live Authula
-// services.
-func (a *Auth) NewPasswordUpdater() PasswordUpdater {
+// NewPasswordUpdater returns an updater backed by the live Authula services.
+func (a *Auth) NewPasswordUpdater() authulaPasswordUpdater {
 	return authulaPasswordUpdater{
 		accountService:  a.accountService,
 		passwordService: a.passwordService,

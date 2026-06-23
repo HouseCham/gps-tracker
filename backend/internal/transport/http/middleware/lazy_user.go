@@ -4,9 +4,9 @@ import (
 	"github.com/Authula/authula/models"
 	"github.com/gofiber/fiber/v3"
 
-	"github.com/HouseCham/gps-tracker/backend/internal/auth"
 	"github.com/HouseCham/gps-tracker/backend/internal/app/users"
 	"github.com/HouseCham/gps-tracker/backend/internal/domain"
+	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/ports"
 )
 
 // LazyUser materialises a *domain.User from the validated Authula
@@ -23,7 +23,7 @@ import (
 // The local users service is responsible for the soft-deleted
 // "resurrection" guard; this middleware merely translates its
 // domain.ErrUnauthorized into a 401.
-func LazyUser(svc *users.UserService, lookup auth.UserLookup) fiber.Handler {
+func LazyUser(svc *users.UserService, lookup ports.UserLookup) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		actor, ok := c.Locals(LocalsKeyClaims).(*models.Actor)
 		if !ok || actor == nil {

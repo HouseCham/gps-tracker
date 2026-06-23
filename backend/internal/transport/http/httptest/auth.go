@@ -6,6 +6,20 @@ import (
 	"github.com/Authula/authula/models"
 )
 
+var ErrUserNotFound = &mockError{msg: "user not found"}
+
+type mockError struct {
+	msg string
+}
+
+func (e *mockError) Error() string {
+	return e.msg
+}
+
+func (e *mockError) Is(target error) bool {
+	return target == ErrUserNotFound
+}
+
 type TestActor struct {
 	ID             string
 	Type           models.ActorType
@@ -58,18 +72,4 @@ func (m *MockUserLookup) GetByID(_ context.Context, id string) (*models.User, er
 		return nil, ErrUserNotFound
 	}
 	return user, nil
-}
-
-var ErrUserNotFound = &mockError{msg: "user not found"}
-
-type mockError struct {
-	msg string
-}
-
-func (e *mockError) Error() string {
-	return e.msg
-}
-
-func (e *mockError) Is(target error) bool {
-	return target == ErrUserNotFound
 }

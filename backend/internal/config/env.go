@@ -8,43 +8,42 @@ import (
 	"github.com/joho/godotenv"
 )
 
-// init calls loadEnv
-func init() {
-	loadEnv()
-}
-
-// loads environment variables from a .env file if it exists and logs the process.
-func loadEnv() {
+func LoadEnv() {
 	log.Info("Setting up environment variables")
 	if err := godotenv.Load(); err != nil {
 		log.Warnf("Could not load .env file: %v", err)
 	}
 }
 
-// AuthConfig carries the Authula-specific environment values consumed
-// by internal/auth.Bootstrap. Loading is centralised here so the main
-// entrypoint can fail fast with a single, descriptive error when a
-// required variable is missing.
 type AuthConfig struct {
 	AppName     string
 	BaseURL     string
 	Secret      string
 	DatabaseURL string
+	GoogleOAuth *GoogleOAuthConfig
 }
 
-// LoadAuthConfig reads the Authula configuration from the
-// environment. It returns an error if AUTHULA_SECRET is missing (it is
-// the only required value; the rest have sensible defaults that match
-// Authula's own internal defaults).
-//
-// Required: AUTHULA_SECRET
-// Optional: APP_NAME, AUTHULA_BASE_URL, DATABASE_URL
+type GoogleOAuthConfig struct {
+	ClientID     string
+	ClientSecret string
+	RedirectURL  string
+}
+
 func LoadAuthConfig() (AuthConfig, error) {
 	cfg := AuthConfig{
 		AppName:     getEnvDefault("APP_NAME", "gps-tracker-api"),
 		BaseURL:     os.Getenv("AUTHULA_BASE_URL"),
 		Secret:      os.Getenv("AUTHULA_SECRET"),
 		DatabaseURL: os.Getenv("DATABASE_URL"),
+	}
+	if googleClientID := os.Getenv("GOOGLE_CLIENT_ID"); googleClientID != "" {
+		googleClientSecret := os.Getenv("GOOGLE_CLIENT_SECRET")
+		if googleClientSecret != "" {
+			cfg.GoogleOAuth = &GoogleOAuthConfig{
+				ClientID:     googleClientID,
+				ClientSecret: googleClientSecret,
+			}
+		}
 	}
 	if cfg.Secret == "" {
 		return AuthConfig{}, fmt.Errorf("AUTHULA_SECRET is required")

@@ -6,7 +6,7 @@ import (
 	"github.com/Authula/authula/models"
 	"github.com/gofiber/fiber/v3"
 
-	"github.com/HouseCham/gps-tracker/backend/internal/auth"
+	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/ports"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/response"
 )
 
@@ -23,7 +23,7 @@ const bearerPrefix = "bearer "
 // The middleware is intentionally transport-only: it never touches the
 // database. Resolving a *domain.User from the actor is the job of the
 // LazyUser middleware, which must run after this one.
-func AuthJWT(validator auth.JWTValidator) fiber.Handler {
+func AuthJWT(validator ports.JWTValidator) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		header := c.Get(fiber.HeaderAuthorization)
 		if header == "" {

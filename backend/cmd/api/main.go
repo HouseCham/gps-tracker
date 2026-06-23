@@ -18,9 +18,11 @@ import (
 	"github.com/HouseCham/gps-tracker/backend/internal/infra/postgres"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/handlers"
+	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/ports"
 )
 
 func main() {
+	config.LoadEnv()
 	log.Info("Starting server...")
 	addr := ""
 	if v := os.Getenv("API_PORT"); v != "" {
@@ -57,11 +59,19 @@ func main() {
 		log.Error("load auth config", "err", err)
 		os.Exit(1)
 	}
+	var googleOAuth *auth.GoogleOAuthConfig
+	if authCfg.GoogleOAuth != nil {
+		googleOAuth = &auth.GoogleOAuthConfig{
+			ClientID:     authCfg.GoogleOAuth.ClientID,
+			ClientSecret: authCfg.GoogleOAuth.ClientSecret,
+		}
+	}
 	authInstance, err := auth.Bootstrap(context.Background(), auth.Config{
 		AppName:     authCfg.AppName,
 		BaseURL:     authCfg.BaseURL,
 		Secret:      authCfg.Secret,
 		DatabaseURL: authCfg.DatabaseURL,
+		GoogleOAuth: googleOAuth,
 	})
 	if err != nil {
 		log.Error("bootstrap auth", "err", err)
@@ -91,8 +101,8 @@ func main() {
 		AccessService:    accessService,
 		UsersService:     usersService,
 		AuthHandler:      authInstance.Handler(),
-		AuthJWTValidator: authInstance.NewJWTValidator(),
-		AuthUserLookup:   authInstance.NewUserLookup(),
+		AuthJWTValidator: authInstance.NewJWTValidator().(ports.JWTValidator),
+		AuthUserLookup:   authInstance.NewUserLookup().(ports.UserLookup),
 	})
 
 	server := http.NewServer(app, http.ServerConfig{

@@ -13,6 +13,7 @@ import (
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/dto"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/handlers"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/middleware"
+	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/ports"
 )
 
 type RouterDeps struct {
@@ -22,16 +23,9 @@ type RouterDeps struct {
 	AccessHandler  *handlers.AccessHandler
 	AccessService  *access.AccessService
 	UsersService   *users.UserService
-	// AuthHandler is the net/http handler exposed by Authula. Mounted
-	// under /api/auth/* to serve sign-in, sign-up, JWKS, token
-	// refresh, etc.
-	AuthHandler http.Handler
-	// AuthJWTValidator validates raw JWT access tokens. Consumed
-	// by the AuthJWT middleware.
-	AuthJWTValidator auth.JWTValidator
-	// AuthUserLookup fetches Authula's user record by id, used by
-	// the LazyUser middleware to resolve the email.
-	AuthUserLookup auth.UserLookup
+	AuthHandler      http.Handler
+	AuthJWTValidator ports.JWTValidator
+	AuthUserLookup   ports.UserLookup
 }
 
 // NewRouter creates a new fiber app and registers the routes and handlers.

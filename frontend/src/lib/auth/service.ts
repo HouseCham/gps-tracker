@@ -3,6 +3,8 @@ import type {
     AuthSession,
     AuthUser,
     MeResponse,
+    OAuthAuthorizeResponse,
+    OAuthProvider,
     SignInCredentials,
     SignUpCredentials,
 } from '@/types/api';
@@ -13,7 +15,18 @@ import {
     setAuthLoading,
     setUser,
 } from '@/lib/stores/auth';
-import { REDIRECT_AFTER_AUTH, REDIRECT_AFTER_SIGNOUT } from '@/constants/auth';
+import {
+    REDIRECT_AFTER_AUTH,
+    REDIRECT_AFTER_SIGNOUT,
+} from '@/constants/auth';
+
+/**
+ * Path the browser lands on after the OAuth2 provider redirects back
+ * to the frontend. The page at this path hydrates the session and
+ * forwards the user to the dashboard.
+ * @constant {string}
+ */
+const OAUTH_CALLBACK_PATH = '/callback/google';
 
 /**
  * Calls POST /email-password/sign-in on the Authula backend and
@@ -78,8 +91,36 @@ async function fetchMe(): Promise<AuthUser | null> {
             method: 'GET',
         } as BetterFetchOption);
         return data?.user ?? null;
-    } catch {
+    } catch (_err) {
         return null;
+    }
+}
+
+/**
+ * Asks Authula for the provider's authorization URL. The backend
+ * also sets the state/redirect cookies needed to validate the
+ * callback. Throws via `handleApiError` on any non-2xx response.
+ * @param {OAuthProvider} provider - The provider identifier (e.g. "google").
+ * @param {string} redirectTo - Absolute URL the backend should redirect to after the callback.
+ * @returns {Promise<string>} The authorization URL to send the browser to.
+ */
+async function fetchOAuthAuthorizeUrl(
+    provider: OAuthProvider,
+    redirectTo: string
+): Promise<string> {
+    try {
+        const { data } = await authClient<OAuthAuthorizeResponse | null>(
+            `/oauth2/authorize/${provider}?redirect_to=${encodeURIComponent(redirectTo)}`,
+            {
+                method: 'GET',
+            } as BetterFetchOption
+        );
+        if (!data?.authUrl) {
+            handleApiError(new Error('oauth authorize returned an empty response'));
+        }
+        return data.authUrl;
+    } catch (error) {
+        handleApiError(error);
     }
 }
 
@@ -127,15 +168,53 @@ export const authService = {
     },
 
     /**
-     * Forget the local session. Authula does not expose a sign-out
-     * endpoint in this version, so the server-side cookie stays valid
-     * until it expires per `cookie_max_age`. The next sign-in replaces
-     * the cookie anyway, so the impact is bounded by the session TTL.
-     * @returns {void}
+     * Begin the OAuth2 sign-in flow and immediately redirect the
+     * browser to the provider's authorization page. This is the
+     * common path: after the provider authenticates the user it
+     * returns to the backend, which sets the session cookie and
+     * 302-redirects to `OAUTH_CALLBACK_PATH` on the frontend.
+     * @param {OAuthProvider} provider - The provider to use (e.g. "google").
+     * @returns {Promise<void>}
+     * @throws {ApiError} When the backend refuses the authorize call.
      */
-    signOut(): void {
+    async signInOAuth(provider: OAuthProvider): Promise<void> {
+        setAuthLoading(true);
+        try {
+            const authUrl = await fetchOAuthAuthorizeUrl(
+                provider,
+                `${window.location.origin}${OAUTH_CALLBACK_PATH}`
+            );
+            window.location.href = authUrl;
+        } catch (error) {
+            setAuthLoading(false);
+            throw error;
+        }
+    },
+
+    /**
+     * Invalidate the server-side session and forget the local user.
+     * Calls Authula's POST /sign-out, which clears the session
+     * cookie via the session plugin's after-hook, then clears the
+     * local store and redirects to `REDIRECT_AFTER_SIGNOUT`.
+     * @returns {Promise<void>}
+     */
+    async signOut(): Promise<void> {
+        setAuthLoading(true);
+        try {
+            await authClient('/sign-out', {
+                method: 'POST',
+            } as BetterFetchOption);
+        } catch (_err) {
+            // Sign-out is best-effort: a network failure here
+            // shouldn't prevent us from clearing the local
+            // store. The server-side session will expire on its
+            // own per its TTL.
+        }
         clearUser();
-        window.location.href = REDIRECT_AFTER_SIGNOUT;
+            window.location.href = REDIRECT_AFTER_SIGNOUT;
+        } finally {
+            setAuthLoading(false);
+        }
     },
 
     /**
