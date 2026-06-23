@@ -1,16 +1,16 @@
 import '@/styles/components/signup-form.css';
 //-- React
-import { useId, useState } from 'react';
+import { useState, type ReactElement, type SyntheticEvent } from 'react';
 //-- Types
-import type { ReactElement, SyntheticEvent } from 'react';
 import type { SignupFormStrings } from '@/types/components';
-//-- Constants
-import { EMAIL_REGEX } from '@/constants';
+//-- Components
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 /**
  * @interface SignupFormProps
- * @param {SignupFormStrings} [strings] - The strings to use in the form.
+ * @param {SignupFormStrings} strings - The strings to use in the form.
  * @param {string} [error] - The error message to display.
- * @param {boolean} [loading] - Whether the form is loading.
+ * @param {boolean} [loading=false] - Whether the form is loading.
  */
 export interface SignupFormProps {
     strings: SignupFormStrings;
@@ -18,8 +18,8 @@ export interface SignupFormProps {
     loading?: boolean;
 }
 /**
- * @component SignupForm
- * @param {SignupFormProps} props - The props for the component.
+ * The signup form component.
+ * @param {SignupFormProps} props - The props for the component.            
  * @returns {ReactElement} The rendered component.
  */
 export function SignupForm({
@@ -27,23 +27,18 @@ export function SignupForm({
     loading = false,
     strings: s,
 }: SignupFormProps): ReactElement {
-    const emailId = useId();
-    const nameId = useId();
-    const passId = useId();
-
     const [email, setEmail] = useState('');
     const [name, setName] = useState('');
     const [password, setPassword] = useState('');
     const [errors, setErrors] = useState<Record<string, string>>({});
-
     /**
      * Validates the form data.
-     * @returns {boolean} Whether the form data is valid.
+     * @returns {boolean} Whether the form is valid.
      */
     function validate(): boolean {
         const next: Record<string, string> = {};
         if (!email.trim()) next.email = s.emailRequired;
-        else if (!EMAIL_REGEX.test(email.trim())) next.email = s.emailInvalid;
+        else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) next.email = s.emailInvalid;
         if (!name.trim()) next.name = s.nameRequired;
         if (!password) next.password = s.passwordRequired;
         else if (password.length < 8) next.password = s.passwordMin;
@@ -52,18 +47,17 @@ export function SignupForm({
     }
     /**
      * Handles the form submission.
-     * @param {SyntheticEvent<HTMLFormElement>} e - The event
+     * @param {SyntheticEvent<HTMLFormElement>} e - The event.
      * @returns {void}
      */
     function handleSubmit(e: SyntheticEvent<HTMLFormElement>): void {
         e.preventDefault();
         if (!validate()) return;
-
-        //TODO: Send signup request
     }
     /**
      * Clears the error for a specific field.
      * @param {string} field - The field to clear the error for.
+     * @returns {void}
      */
     function clearError(field: string): void {
         setErrors(p => {
@@ -86,95 +80,69 @@ export function SignupForm({
                 </p>
             )}
 
-            <div className={`signup-form__row`}>
-                <div
-                    className={`signup-form__field ${errors.name ? 'signup-form__field--error' : ''}`}
-                >
-                    <label className="signup-form__label" htmlFor={nameId}>
-                        {s.name}
-                    </label>
-                    <input
-                        id={nameId}
-                        className="signup-form__input"
-                        type="text"
+            <div className="signup-form__row">
+                <div className="signup-form__field">
+                    <Input
+                        name="name"
+                        label={s.name}
                         value={name}
+                        placeholder={s.namePlaceholder}
+                        error={errors.name}
+                        disabled={loading}
+                        required
+                        autocomplete="name"
                         onChange={e => {
                             setName(e.target.value);
                             clearError('name');
                         }}
-                        placeholder={s.namePlaceholder}
-                        disabled={loading}
-                        aria-invalid={!!errors.name}
                     />
-                    {errors.name && (
-                        <p className="signup-form__error" role="alert">
-                            {errors.name}
-                        </p>
-                    )}
                 </div>
             </div>
 
-            <div
-                className={`signup-form__field ${errors.email ? 'signup-form__field--error' : ''}`}
-            >
-                <label className="signup-form__label" htmlFor={emailId}>
-                    {s.email}
-                </label>
-                <input
-                    id={emailId}
-                    className="signup-form__input"
+            <div className="signup-form__field">
+                <Input
+                    name="email"
                     type="email"
+                    label={s.email}
                     value={email}
+                    placeholder={s.emailPlaceholder}
+                    error={errors.email}
+                    disabled={loading}
+                    required
+                    autocomplete="email"
                     onChange={e => {
                         setEmail(e.target.value);
                         clearError('email');
                     }}
-                    placeholder={s.emailPlaceholder}
-                    disabled={loading}
-                    autoComplete="email"
-                    aria-invalid={!!errors.email}
                 />
-                {errors.email && (
-                    <p className="signup-form__error" role="alert">
-                        {errors.email}
-                    </p>
-                )}
             </div>
 
-            <div
-                className={`signup-form__field ${errors.password ? 'signup-form__field--error' : ''}`}
-            >
-                <label className="signup-form__label" htmlFor={passId}>
-                    {s.password}
-                </label>
-                <input
-                    id={passId}
-                    className="signup-form__input"
+            <div className="signup-form__field">
+                <Input
+                    name="password"
                     type="password"
+                    label={s.password}
                     value={password}
+                    placeholder={s.passwordPlaceholder}
+                    error={errors.password}
+                    disabled={loading}
+                    required
+                    autocomplete="new-password"
                     onChange={e => {
                         setPassword(e.target.value);
                         clearError('password');
                     }}
-                    placeholder={s.passwordPlaceholder}
-                    disabled={loading}
-                    autoComplete="new-password"
-                    aria-invalid={!!errors.password}
                 />
-                {errors.password && (
-                    <p className="signup-form__error" role="alert">
-                        {errors.password}
-                    </p>
-                )}
             </div>
 
-            <button
+            <Button
                 type="submit"
-                className="signup-form__btn"
-                disabled={loading}
+                variant="primary"
+                block
+                loading={loading}
             >
                 {loading ? s.signingUp : s.signup}
-            </button>
+            </Button>
         </form>
     );
 }

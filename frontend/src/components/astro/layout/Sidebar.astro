@@ -10,9 +10,9 @@ import {
     Cpu,
     ShieldCheck,
     User,
-    LogOut,
     MapPin,
 } from '@lucide/astro';
+import LogoutButton from '@/components/react/auth/LogoutButton';
 /**
  * @interface Props
  * @property {Language} locale - Current locale code ('en' | 'es').
@@ -112,12 +112,9 @@ navItems.push({
                 <span class="sidebar__user-role">{user?.role ?? 'Member'}</span>
             </span>
         </a>
-        <button
-            type="button"
-            class="icon-btn sidebar__logout"
-            aria-label={translation.nav.logout}
-        >
-            <LogOut size={18} stroke-width={1.75} />
-        </button>
+        <LogoutButton
+            client:load
+            ariaLabel={translation.nav.logout}
+        />
     </div>
 </aside>

@@ -1,6 +1,8 @@
 ---
 import '@/styles/global.css';
 import '@/styles/layout/main-layout.css';
+import type { Language } from '@/types';
+import Toolbar from './Toolbar.astro';
 import {
     AuthProvider,
     PublicOnlyRoute
@@ -8,15 +10,17 @@ import {
 
 /**
  * @interface Props
+ * @property {Language} [locale='en'] - Current locale code.
  * @property {string | undefined} [title] - Page title.
  * @property {string | undefined} [class] - Extra classes.
  */
 interface Props {
+    locale?: Language;
     title?: string;
     class?: string;
 }
 
-const { title = 'GPS Tracker', class: className } = Astro.props;
+const { locale = 'en', title = 'GPS Tracker', class: className } = Astro.props;
 const classes = ['auth-layout', className].filter(Boolean).join(' ');
 ---
 
@@ -39,6 +43,7 @@ const classes = ['auth-layout', className].filter(Boolean).join(' ');
     <body>
         <AuthProvider client:load>
             <PublicOnlyRoute client:load>
+                <Toolbar locale={locale} />
                 <div class={classes}>
                     <div class="auth-layout__card">
                         <slot />
