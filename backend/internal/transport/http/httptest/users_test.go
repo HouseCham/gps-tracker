@@ -1,6 +1,7 @@
 package httptest
 
 import (
+	"encoding/json"
 	"net/http"
 	"testing"
 	"time"
@@ -506,6 +507,62 @@ func TestUsersDelete(t *testing.T) {
 
 		userID := uuid.New()
 		resp, err := ta.Request("DELETE", "/api/v1/users/"+userID.String(), "", nil)
+		if err != nil {
+			t.Fatalf("request error: %v", err)
+		}
+
+		if resp.StatusCode != http.StatusUnauthorized {
+			t.Errorf("expected status 401, got %d", resp.StatusCode)
+		}
+	})
+}
+
+func TestUsersMe(t *testing.T) {
+	t.Run("200 - returns Authula user projection", func(t *testing.T) {
+		ta := NewTestApp()
+
+		_ = ta.SetupUser("token-me", "authula-me", "me@test.com", "Me", domain.UserRoleUser)
+
+		resp, err := ta.Request("GET", "/api/auth/me", "token-me", nil)
+		if err != nil {
+			t.Fatalf("request error: %v", err)
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			t.Fatalf("expected status 200, got %d", resp.StatusCode)
+		}
+
+		body, err := ParseResponseBody(resp)
+		if err != nil {
+			t.Fatalf("read body: %v", err)
+		}
+
+		var got struct {
+			User struct {
+				ID    string `json:"id"`
+				Email string `json:"email"`
+				Name  string `json:"name"`
+			} `json:"user"`
+		}
+		if err := json.Unmarshal(body, &got); err != nil {
+			t.Fatalf("unmarshal: %v\nbody: %s", err, body)
+		}
+
+		if got.User.ID != "authula-me" {
+			t.Errorf("user.id: want %q, got %q", "authula-me", got.User.ID)
+		}
+		if got.User.Email != "me@test.com" {
+			t.Errorf("user.email: want %q, got %q", "me@test.com", got.User.Email)
+		}
+		if got.User.Name != "Me" {
+			t.Errorf("user.name: want %q, got %q", "Me", got.User.Name)
+		}
+	})
+
+	t.Run("401 - no session cookie", func(t *testing.T) {
+		ta := NewTestApp()
+
+		resp, err := ta.Request("GET", "/api/auth/me", "", nil)
 		if err != nil {
 			t.Fatalf("request error: %v", err)
 		}

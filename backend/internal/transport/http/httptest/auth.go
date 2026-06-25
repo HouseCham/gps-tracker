@@ -28,20 +28,24 @@ type TestActor struct {
 	Metadata       map[string]any
 }
 
-type MockJWTValidator struct {
+// MockSessionAuthenticator maps session-cookie values to actors.
+// Tests use it in place of the real Authula session service by
+// calling AddActor(token, actor) during setup and the middleware
+// looks the actor up by cookie value at request time.
+type MockSessionAuthenticator struct {
 	Actors map[string]*TestActor
 }
 
-func NewMockJWTValidator() *MockJWTValidator {
-	return &MockJWTValidator{Actors: make(map[string]*TestActor)}
+func NewMockSessionAuthenticator() *MockSessionAuthenticator {
+	return &MockSessionAuthenticator{Actors: make(map[string]*TestActor)}
 }
 
-func (m *MockJWTValidator) AddActor(token string, actor *TestActor) {
+func (m *MockSessionAuthenticator) AddActor(token string, actor *TestActor) {
 	m.Actors[token] = actor
 }
 
-func (m *MockJWTValidator) ValidateToken(_ context.Context, token string) (*models.Actor, error) {
-	actor, ok := m.Actors[token]
+func (m *MockSessionAuthenticator) Authenticate(_ context.Context, sessionToken string) (*models.Actor, error) {
+	actor, ok := m.Actors[sessionToken]
 	if !ok {
 		return nil, nil
 	}

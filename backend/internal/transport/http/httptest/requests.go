@@ -22,7 +22,7 @@ func (ta *TestApp) Request(method, path string, token string, body interface{}) 
 	req.Header.Set("Content-Type", "application/json")
 
 	if token != "" {
-		req.Header.Set("Authorization", "Bearer "+token)
+		req.AddCookie(&http.Cookie{Name: ta.SessionCookieName, Value: token})
 	}
 
 	resp, err := ta.App.Test(req)
@@ -47,7 +47,7 @@ func (ta *TestApp) RequestWithHeaders(method, path, token string, body interface
 	req.Header.Set("Content-Type", "application/json")
 
 	if token != "" {
-		req.Header.Set("Authorization", "Bearer "+token)
+		req.AddCookie(&http.Cookie{Name: ta.SessionCookieName, Value: token})
 	}
 
 	for k, v := range headers {

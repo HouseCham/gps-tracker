@@ -21,7 +21,7 @@ import (
 
 type TestApp struct {
 	App              *fiber.App
-	JWTValidator     *MockJWTValidator
+	SessionAuth      *MockSessionAuthenticator
 	UserLookup       *MockUserLookup
 	HealthHandler    *handlers.HealthHandler
 	PasswordUpdater  *MockPasswordUpdater
@@ -34,6 +34,7 @@ type TestApp struct {
 	DevicesHandler   *handlers.DevicesHandler
 	UsersHandler     *handlers.UsersHandler
 	AccessHandler    *handlers.AccessHandler
+	SessionCookieName string
 }
 
 type TestAppOption func(*TestApp)
@@ -63,12 +64,13 @@ func WithAccessRepo(repo *MockAccessRepository) TestAppOption {
 
 func NewTestApp(opts ...TestAppOption) *TestApp {
 	ta := &TestApp{
-		JWTValidator:   NewMockJWTValidator(),
-		UserLookup:     NewMockUserLookup(),
-		PasswordUpdater: &MockPasswordUpdater{},
-		DevicesRepo:    NewMockDevicesRepository(),
-		UsersRepo:      NewMockUsersRepository(),
-		AccessRepo:     NewMockAccessRepository(),
+		SessionAuth:       NewMockSessionAuthenticator(),
+		UserLookup:        NewMockUserLookup(),
+		PasswordUpdater:   &MockPasswordUpdater{},
+		DevicesRepo:       NewMockDevicesRepository(),
+		UsersRepo:         NewMockUsersRepository(),
+		AccessRepo:        NewMockAccessRepository(),
+		SessionCookieName: "authula.session_token",
 	}
 
 	ta.DevicesService = devices.New(ta.DevicesRepo)
@@ -92,55 +94,54 @@ func (ta *TestApp) registerRoutes() {
 	ta.HealthHandler = handlers.NewHealthHandler()
 	ta.App.Get("/health", ta.HealthHandler.Handle)
 
-	authJWT := middleware.AuthJWT(ta)
-	lazyUser := middleware.LazyUser(ta.UsersService, ta)
+	authSession := middleware.AuthSession(ta.SessionCookieName, ta.SessionAuth, ta, ta.UsersService)
+
+	// Mirrors the production router: GET /api/auth/me is served by
+	// Fiber (not by an Authula catch-all) so the request uses our
+	// own session middleware instead of relying on Authula's
+	// PluginID-scoped validateSessionHook.
+	ta.App.Get("/api/auth/me", authSession, ta.getUsersHandler().Me)
 	requirePasswordChanged := middleware.RequirePasswordChanged()
 
 	apiV1 := ta.App.Group("/api/v1")
 
 	devicesGroup := apiV1.Group("/devices")
-	devicesGroup.Get("/", authJWT, lazyUser, requirePasswordChanged, ta.getDevicesHandler().List)
-	devicesGroup.Get("/:id", authJWT, lazyUser, requirePasswordChanged, ta.getDevicesHandler().Get)
+	devicesGroup.Get("/", authSession, requirePasswordChanged, ta.getDevicesHandler().List)
+	devicesGroup.Get("/:id", authSession, requirePasswordChanged, ta.getDevicesHandler().Get)
 	devicesGroup.Post("/",
-		authJWT,
-		lazyUser,
+		authSession,
 		requirePasswordChanged,
 		middleware.ValidateRequestBody[dto.CreateDeviceRequest](),
 		ta.getDevicesHandler().Create,
 	)
 	devicesGroup.Put("/:id",
-		authJWT,
-		lazyUser,
+		authSession,
 		requirePasswordChanged,
 		middleware.ValidateRequestBody[dto.UpdateDeviceRequest](),
 		middleware.RequireDeviceRole(domain.AccessRoleEditor, ta.AccessService),
 		ta.getDevicesHandler().Update,
 	)
 	devicesGroup.Delete("/:id",
-		authJWT,
-		lazyUser,
+		authSession,
 		requirePasswordChanged,
 		middleware.RequireDeviceRole(domain.AccessRoleOwner, ta.AccessService),
 		ta.getDevicesHandler().Delete,
 	)
 	devicesGroup.Post("/:id/access",
-		authJWT,
-		lazyUser,
+		authSession,
 		requirePasswordChanged,
 		middleware.ValidateRequestBody[dto.GrantAccessRequest](),
 		middleware.RequireDeviceRole(domain.AccessRoleOwner, ta.AccessService),
 		ta.getAccessHandler().Grant,
 	)
 	devicesGroup.Get("/:id/access",
-		authJWT,
-		lazyUser,
+		authSession,
 		requirePasswordChanged,
 		middleware.RequireDeviceRole(domain.AccessRoleOwner, ta.AccessService),
 		ta.getAccessHandler().List,
 	)
 	devicesGroup.Delete("/:id/access/:userId",
-		authJWT,
-		lazyUser,
+		authSession,
 		requirePasswordChanged,
 		middleware.RequireDeviceRole(domain.AccessRoleOwner, ta.AccessService),
 		ta.getAccessHandler().Revoke,
@@ -148,34 +149,30 @@ func (ta *TestApp) registerRoutes() {
 
 	usersGroup := apiV1.Group("/users")
 	usersGroup.Get("/",
-		authJWT,
-		lazyUser,
+		authSession,
 		requirePasswordChanged,
 		middleware.RequireUserRole(domain.UserRoleSuperAdmin),
 		ta.getUsersHandler().List,
 	)
-	usersGroup.Get("/:id", authJWT, lazyUser, requirePasswordChanged, ta.getUsersHandler().GetByID)
+	usersGroup.Get("/:id", authSession, requirePasswordChanged, ta.getUsersHandler().GetByID)
 	usersGroup.Post("/",
-		authJWT,
-		lazyUser,
+		authSession,
 		requirePasswordChanged,
 		middleware.RequireUserRole(domain.UserRoleSuperAdmin),
 		middleware.ValidateRequestBody[dto.CreateUserRequest](),
 		ta.getUsersHandler().Create,
 	)
 	usersGroup.Put("/:id",
-		authJWT,
-		lazyUser,
+		authSession,
 		requirePasswordChanged,
 		middleware.ValidateRequestBody[dto.UpdateUserRequest](),
 		ta.getUsersHandler().Update,
 	)
-	usersGroup.Delete("/:id", authJWT, lazyUser, requirePasswordChanged, ta.getUsersHandler().Delete)
+	usersGroup.Delete("/:id", authSession, requirePasswordChanged, ta.getUsersHandler().Delete)
 
 	authGroup := apiV1.Group("/auth")
 	authGroup.Post("/change-password",
-		authJWT,
-		lazyUser,
+		authSession,
 		middleware.ValidateRequestBody[dto.ChangePasswordRequest](),
 		ta.getUsersHandler().ChangePassword,
 	)
@@ -236,16 +233,6 @@ func httpErrorHandler(c fiber.Ctx, err error) error {
 	})
 }
 
-func (ta *TestApp) ValidateToken(_ context.Context, token string) (*models.Actor, error) {
-	actor, ok := ta.JWTValidator.Actors[token]
-	if !ok {
-		return nil, nil
-	}
-	return &models.Actor{
-		ID: actor.ID,
-	}, nil
-}
-
 func (ta *TestApp) GetByID(_ context.Context, id string) (*models.User, error) {
 	user, ok := ta.UserLookup.Users[id]
 	if !ok {
@@ -271,7 +258,7 @@ func (m *MockPasswordUpdater) UpdatePassword(_ context.Context, _, _, _ string) 
 }
 
 func (ta *TestApp) AuthActor(token string) *TestActor {
-	return ta.JWTValidator.Actors[token]
+	return ta.SessionAuth.Actors[token]
 }
 
 func (ta *TestApp) AddDevice(ownerID uuid.UUID, device *domain.Device, role domain.AccessRole) {
@@ -291,7 +278,7 @@ func (ta *TestApp) AddUser(user *domain.User) {
 }
 
 func (ta *TestApp) SetupUser(token, authulaID, email, name string, role domain.UserRole) uuid.UUID {
-	ta.JWTValidator.AddActor(token, &TestActor{
+	ta.SessionAuth.AddActor(token, &TestActor{
 		ID: authulaID,
 	})
 	ta.UserLookup.AddUser(authulaID, &models.User{
