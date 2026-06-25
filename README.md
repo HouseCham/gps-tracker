@@ -47,7 +47,7 @@ In local development, every component — the Astro SPA, the Go API, and Authula
 | Backend | Go 1.26, Fiber v3, pgx/v5, sqlc |
 | Frontend | Astro 6.4, React 19, TypeScript |
 | Database | PostgreSQL 16, pg_partman, pg_cron |
-| Auth | JWT + JWKS (Authula), better-auth |
+| Auth | Session cookie (Authula), better-fetch/fetch |
 | Reverse proxy | nginx (TLS termination, static file serving) |
 | Infrastructure | Docker Compose |
 

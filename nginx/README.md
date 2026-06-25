@@ -20,7 +20,7 @@ or `credentials: 'include'` acrobatics required.
 | Path prefix     | Upstream               | Purpose                                  |
 |-----------------|------------------------|------------------------------------------|
 | `/`             | frontend `/var/www/html` | Astro static build (SPA fallback)        |
-| `/api/auth/*`   | `http://api:8080`      | Authula (sign-in, sign-up, JWKS, OAuth)  |
+| `/api/auth/*`   | `http://api:8080`      | Authula routes + custom /me handler (Fiber) |
 | `/api/v1/*`     | `http://api:8080`      | App routes (devices, users, access)      |
 | `/health`       | `http://api:8080/health` | Health check                            |
 
