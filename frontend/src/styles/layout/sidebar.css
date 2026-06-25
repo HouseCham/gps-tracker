@@ -133,6 +133,29 @@
     background: var(--surface-2);
 }
 
+.nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    text-decoration: none;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 500;
+    transition: background var(--transition), color var(--transition);
+}
+
+.nav-item:hover {
+    background: var(--surface-2);
+    color: var(--text);
+}
+
+.nav-item.active {
+    background: var(--surface-2);
+    color: var(--text);
+}
+
 /* Hidden on mobile — TabBar takes over */
 @media (max-width: 767.98px) {
     .sidebar {

@@ -29,6 +29,7 @@ type RouterDeps struct {
 	SessionCookieName string
 	AuthSession      ports.SessionAuthenticator
 	AuthUserLookup   ports.UserLookup
+	SessionManager   ports.SessionManager
 	// CORSOrigins enables the CORS middleware when non-empty. Each
 	// entry is an allowed origin (e.g. "http://localhost:4321"). When
 	// the frontend and backend share an origin (reverse-proxied or
@@ -75,6 +76,13 @@ func NewRouter(deps RouterDeps) *fiber.App {
 		// project the user. Registered first so Fiber's static route
 		// wins over the catch-all below.
 		app.Get(auth.BasePath+"/me", authSession, deps.UsersHandler.Me)
+
+		// Sign-out reads the token from X-Session-Token header (which the
+		// frontend sends instead of the Cookie header), invalidates via
+		// Authula's session service, and clears the cookie. Registered
+		// before the catch-all so it takes priority over Authula's own
+		// /sign-out route which requires the Cookie header.
+		app.Post(auth.BasePath+"/sign-out", deps.UsersHandler.SignOut)
 
 		authH := adaptor.HTTPHandler(deps.AuthHandler)
 		app.All(auth.BasePath+"/*", authH)

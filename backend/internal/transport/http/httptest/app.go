@@ -25,6 +25,7 @@ type TestApp struct {
 	UserLookup       *MockUserLookup
 	HealthHandler    *handlers.HealthHandler
 	PasswordUpdater  *MockPasswordUpdater
+	SessionManager   *MockSessionManager
 	DevicesRepo      *MockDevicesRepository
 	UsersRepo        *MockUsersRepository
 	AccessRepo       *MockAccessRepository
@@ -67,6 +68,7 @@ func NewTestApp(opts ...TestAppOption) *TestApp {
 		SessionAuth:       NewMockSessionAuthenticator(),
 		UserLookup:        NewMockUserLookup(),
 		PasswordUpdater:   &MockPasswordUpdater{},
+		SessionManager:    &MockSessionManager{},
 		DevicesRepo:       NewMockDevicesRepository(),
 		UsersRepo:         NewMockUsersRepository(),
 		AccessRepo:        NewMockAccessRepository(),
@@ -187,7 +189,7 @@ func (ta *TestApp) getDevicesHandler() *handlers.DevicesHandler {
 
 func (ta *TestApp) getUsersHandler() *handlers.UsersHandler {
 	if ta.UsersHandler == nil {
-		ta.UsersHandler = handlers.NewUsersHandler(ta.UsersService, ta.DevicesService, ta.PasswordUpdater)
+		ta.UsersHandler = handlers.NewUsersHandler(ta.UsersService, ta.DevicesService, ta.PasswordUpdater, ta.SessionManager)
 	}
 	return ta.UsersHandler
 }

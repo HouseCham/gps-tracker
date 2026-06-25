@@ -126,7 +126,8 @@ func main() {
 	healthHandler := handlers.NewHealthHandler()
 	devicesHandler := handlers.NewDevicesHandler(devicesService)
 	passwordUpdater := authInstance.NewPasswordUpdater()
-	usersHandler := handlers.NewUsersHandler(usersService, devicesService, passwordUpdater)
+	sessionManager := authInstance.NewSessionManager()
+	usersHandler := handlers.NewUsersHandler(usersService, devicesService, passwordUpdater, sessionManager)
 	accessHandler := handlers.NewAccessHandler(accessService)
 
 
@@ -142,6 +143,7 @@ func main() {
 		SessionCookieName: authInstance.CookieName(),
 		AuthSession:       authInstance.NewSessionAuthenticator(),
 		AuthUserLookup:    authInstance.NewUserLookup().(ports.UserLookup),
+		SessionManager:    sessionManager,
 		CORSOrigins:       config.LoadCORSOrigins(),
 	})
 

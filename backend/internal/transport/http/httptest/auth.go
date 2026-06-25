@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/Authula/authula/models"
+	"github.com/gofiber/fiber/v3"
 )
 
 var ErrUserNotFound = &mockError{msg: "user not found"}
@@ -76,4 +77,21 @@ func (m *MockUserLookup) GetByID(_ context.Context, id string) (*models.User, er
 		return nil, ErrUserNotFound
 	}
 	return user, nil
+}
+
+type MockSessionManager struct {
+	InvalidatedTokens map[string]bool
+	ClearedCookies    bool
+}
+
+func (m *MockSessionManager) Invalidate(_ context.Context, sessionToken string) error {
+	if m.InvalidatedTokens == nil {
+		m.InvalidatedTokens = make(map[string]bool)
+	}
+	m.InvalidatedTokens[sessionToken] = true
+	return nil
+}
+
+func (m *MockSessionManager) ClearCookie(_ fiber.Ctx) {
+	m.ClearedCookies = true
 }

@@ -10,7 +10,7 @@ export const REDIRECT_AFTER_AUTH = '/';
  * Path the user lands on after a successful sign-out.
  * @constant {string}
  */
-export const REDIRECT_AFTER_SIGNOUT = '/';
+export const REDIRECT_AFTER_SIGNOUT = '/login';
 
 /**
  * Path to the sign-in page. Used by route protection to redirect

@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/Authula/authula/models"
+	"github.com/gofiber/fiber/v3"
 )
 
 // SessionAuthenticator resolves an Authula actor from a raw session
@@ -20,4 +21,9 @@ type UserLookup interface {
 
 type PasswordUpdater interface {
 	UpdatePassword(ctx context.Context, authulaUserID, oldPassword, newPassword string) error
+}
+
+type SessionManager interface {
+	Invalidate(ctx context.Context, sessionToken string) error
+	ClearCookie(c fiber.Ctx)
 }

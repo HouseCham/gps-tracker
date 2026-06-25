@@ -1,4 +1,7 @@
+//-- API
 import type { BetterFetchOption } from '@better-fetch/fetch';
+import { authClient } from './client';
+//-- Types
 import type {
     AuthSession,
     AuthUser,
@@ -8,13 +11,15 @@ import type {
     SignInCredentials,
     SignUpCredentials,
 } from '@/types/api';
+//-- Utils
 import { handleApiError } from '@/lib/api/helpers/handle-api-error';
-import { authClient } from './client';
 import {
     clearUser,
     setAuthLoading,
     setUser,
 } from '@/lib/stores/auth';
+import { redirectTo } from '@/lib';
+//-- Constants
 import {
     REDIRECT_AFTER_AUTH,
     REDIRECT_AFTER_SIGNOUT,
@@ -42,8 +47,6 @@ async function postSignIn(credentials: SignInCredentials): Promise<AuthSession> 
             {
                 method: 'POST',
                 body: credentials,
-                // authClient's inferred option type is narrower than the
-                // BetterFetch contract accepts; the literal above is valid.
             } as BetterFetchOption,
         );
         if (!data) {
@@ -69,8 +72,6 @@ async function postSignUp(credentials: SignUpCredentials): Promise<AuthSession> 
             {
                 method: 'POST',
                 body: credentials,
-                // same as postSignIn — narrow the literal to the
-                // BetterFetch contract that authClient's signature won't expose.
             } as BetterFetchOption,
         );
         if (!data) {
@@ -95,7 +96,6 @@ async function fetchMe(): Promise<AuthUser | null> {
             '/me',
             {
                 method: 'GET',
-                // narrow the options literal to the BetterFetch contract.
             } as BetterFetchOption,
         );
         return data?.user ?? null;
@@ -124,7 +124,6 @@ async function fetchOAuthAuthorizeUrl(
             `/oauth2/authorize/${provider}?redirect_to=${encodeURIComponent(callbackUrl)}`,
             {
                 method: 'GET',
-                // narrow the options literal to the BetterFetch contract.
             } as BetterFetchOption,
         );
         if (!data?.authUrl) {
@@ -155,7 +154,7 @@ export const authService = {
         try {
             const session = await postSignIn(credentials);
             setUser(session.user);
-            window.location.href = REDIRECT_AFTER_AUTH;
+            redirectTo(REDIRECT_AFTER_AUTH);
         } finally {
             setAuthLoading(false);
         }
@@ -173,7 +172,7 @@ export const authService = {
         try {
             const session = await postSignUp(credentials);
             setUser(session.user);
-            window.location.href = REDIRECT_AFTER_AUTH;
+            redirectTo(REDIRECT_AFTER_AUTH);
         } finally {
             setAuthLoading(false);
         }
@@ -217,13 +216,12 @@ export const authService = {
         try {
             await authClient('/sign-out', {
                 method: 'POST',
-                // narrow the options literal to the BetterFetch contract.
             } as BetterFetchOption);
         } catch (error) {
             throw new Error('sign-out failed', { cause: error });
         } finally {
             clearUser();
-            window.location.href = REDIRECT_AFTER_SIGNOUT;
+            redirectTo(REDIRECT_AFTER_SIGNOUT);
             setAuthLoading(false);
         }
     },

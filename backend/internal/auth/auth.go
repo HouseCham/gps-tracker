@@ -27,6 +27,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/gofiber/fiber/v3"
+
 	authula "github.com/Authula/authula"
 	authulaconfig "github.com/Authula/authula/config"
 	"github.com/Authula/authula/env"
@@ -39,6 +41,7 @@ import (
 	authulaservices "github.com/Authula/authula/services"
 
 	"github.com/HouseCham/gps-tracker/backend/internal/domain"
+	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/ports"
 )
 
 // BasePath is the URL prefix where Authula's own routes (sign-in,
@@ -333,6 +336,39 @@ func (u authulaPasswordUpdater) UpdatePassword(ctx context.Context, authulaUserI
 		return fmt.Errorf("auth: update account password: %w", err)
 	}
 	return nil
+}
+
+func (a *Auth) NewSessionManager() ports.SessionManager {
+	return authulaSessionManager{
+		sessionSvc: a.sessionService,
+		tokenSvc:   a.tokenService,
+		cookieName: a.cookieName,
+	}
+}
+
+type authulaSessionManager struct {
+	sessionSvc authulaservices.SessionService
+	tokenSvc   authulaservices.TokenService
+	cookieName string
+}
+
+func (m authulaSessionManager) Invalidate(ctx context.Context, sessionToken string) error {
+	if sessionToken == "" {
+		return nil
+	}
+	hashed := m.tokenSvc.Hash(sessionToken)
+	return m.sessionSvc.Delete(ctx, hashed)
+}
+
+func (m authulaSessionManager) ClearCookie(c fiber.Ctx) {
+	c.Cookie(&fiber.Cookie{
+		Name:     m.cookieName,
+		Value:    "",
+		MaxAge:   -1,
+		HTTPOnly: true,
+		Secure:   parseAppEnv() == "production",
+		SameSite: "Lax",
+	})
 }
 
 // sessionAuthenticator is the production-side implementation of

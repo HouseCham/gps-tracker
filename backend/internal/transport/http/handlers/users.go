@@ -22,10 +22,11 @@ type UsersHandler struct {
 	usersService    *users.UserService
 	devicesService  *devices.Service
 	passwordUpdater ports.PasswordUpdater
+	sessionManager  ports.SessionManager
 }
 
-func NewUsersHandler(usersSvc *users.UserService, devicesSvc *devices.Service, passwordUpdater ports.PasswordUpdater) *UsersHandler {
-	return &UsersHandler{usersService: usersSvc, devicesService: devicesSvc, passwordUpdater: passwordUpdater}
+func NewUsersHandler(usersSvc *users.UserService, devicesSvc *devices.Service, passwordUpdater ports.PasswordUpdater, sessionManager ports.SessionManager) *UsersHandler {
+	return &UsersHandler{usersService: usersSvc, devicesService: devicesSvc, passwordUpdater: passwordUpdater, sessionManager: sessionManager}
 }
 
 // List handles GET /api/v1/users.
@@ -298,6 +299,27 @@ func (h *UsersHandler) Me(c fiber.Ctx) error {
 			"email": user.Email,
 			"name":  user.Name,
 		},
+	})
+}
+
+func (h *UsersHandler) SignOut(c fiber.Ctx) error {
+	const operation = "UsersHandler:SignOut"
+	log.Debug(operation, "request received")
+
+	token := c.Get("X-Session-Token")
+	if token == "" {
+		token = c.Cookies("authula.session_token")
+	}
+
+	if err := h.sessionManager.Invalidate(c.Context(), token); err != nil {
+		log.Error(operation, "err", err)
+	}
+
+	h.sessionManager.ClearCookie(c)
+
+	return c.Status(fiber.StatusOK).JSON(response.HTTPResponse[bool]{
+		StatusCode: fiber.StatusOK,
+		Message:    "signed out",
 	})
 }
 
