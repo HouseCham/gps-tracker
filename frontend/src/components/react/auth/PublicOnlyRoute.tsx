@@ -3,6 +3,10 @@ import { useEffect, type ReactNode } from 'react';
 import { useAuth } from '@/lib/hooks/useAuth';
 //-- Constants
 import { DASHBOARD_PATH } from '@/constants/auth';
+//-- Utils
+import { redirectTo } from '@/lib';
+//-- Components
+import { RouteFallback } from './RouteFallback';
 
 /**
  * @interface PublicOnlyRouteProps
@@ -10,34 +14,11 @@ import { DASHBOARD_PATH } from '@/constants/auth';
  *   sign-up form, etc.). Rendered only when the user is NOT
  *   authenticated.
  * @property {ReactNode} [fallback] - Optional custom loading UI.
- *   Defaults to a minimal centered spinner, mirroring
- *   `<ProtectedRoute />`.
+ *   Defaults to `<RouteFallback />`, mirroring `<ProtectedRoute />`.
  */
 interface PublicOnlyRouteProps {
     children: ReactNode;
     fallback?: ReactNode;
-}
-
-/**
- * Default loading UI. Matches `<ProtectedRoute />`'s default so the
- * transition between guarded and public pages is consistent.
- * @returns {JSX.Element} A simple spinner.
- */
-function DefaultFallback(): React.JSX.Element {
-    return (
-        <div
-            role="status"
-            aria-live="polite"
-            style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                minHeight: '100dvh',
-            }}
-        >
-            <span>Loading…</span>
-        </div>
-    );
 }
 
 /**
@@ -48,13 +29,13 @@ function DefaultFallback(): React.JSX.Element {
  * sign-up screens — so that an already-authenticated visitor is
  * bounced to the dashboard instead of being shown the form again.
  *
- * - While `$isAuthLoading` is `true`, renders `fallback` (or the
- *   default spinner) so the user never sees a sign-in form flash
- *   before the session check resolves.
+ * - While `$isAuthLoading` is `true`, renders `fallback` (or
+ *   `<RouteFallback />`) so the user never sees a sign-in form
+ *   flash before the session check resolves.
  * - When loading settles and the user **is** authenticated, sends
- *   the browser to `DASHBOARD_PATH` via `window.location.assign`.
- *   Using a full navigation (rather than the History API) prevents
- *   the public page from being cached in the back/forward stack.
+ *   the browser to `DASHBOARD_PATH` via a full navigation. That
+ *   prevents the public page from being cached in the back/forward
+ *   stack.
  * - When the user is not authenticated, renders `children`.
  *
  * This component assumes it lives inside an `<AuthProvider />`
@@ -73,16 +54,14 @@ export function PublicOnlyRoute({
     const { isAuthenticated, isAuthLoading } = useAuth();
 
     useEffect(() => {
-        if (isAuthLoading) {
-            return;
-        }
+        if (isAuthLoading) return;
         if (isAuthenticated) {
-            window.location.assign(DASHBOARD_PATH);
+            redirectTo(DASHBOARD_PATH);
         }
     }, [isAuthLoading, isAuthenticated]);
 
     if (isAuthLoading) {
-        return <>{fallback ?? <DefaultFallback />}</>;
+        return <>{fallback ?? <RouteFallback />}</>;
     }
 
     if (isAuthenticated) {

@@ -42,6 +42,8 @@ async function postSignIn(credentials: SignInCredentials): Promise<AuthSession> 
             {
                 method: 'POST',
                 body: credentials,
+                // authClient's inferred option type is narrower than the
+                // BetterFetch contract accepts; the literal above is valid.
             } as BetterFetchOption,
         );
         if (!data) {
@@ -67,6 +69,8 @@ async function postSignUp(credentials: SignUpCredentials): Promise<AuthSession> 
             {
                 method: 'POST',
                 body: credentials,
+                // same as postSignIn — narrow the literal to the
+                // BetterFetch contract that authClient's signature won't expose.
             } as BetterFetchOption,
         );
         if (!data) {
@@ -87,11 +91,18 @@ async function postSignUp(credentials: SignUpCredentials): Promise<AuthSession> 
  */
 async function fetchMe(): Promise<AuthUser | null> {
     try {
-        const { data } = await authClient<MeResponse | null>('/me', {
-            method: 'GET',
-        } as BetterFetchOption);
+        const { data } = await authClient<MeResponse | null>(
+            '/me',
+            {
+                method: 'GET',
+                // narrow the options literal to the BetterFetch contract.
+            } as BetterFetchOption,
+        );
         return data?.user ?? null;
-    } catch {
+    } catch (error) {
+        console.warn('[auth] fetchMe failed; treating session as anonymous', {
+            reason: error instanceof Error ? error.message : String(error),
+        });
         return null;
     }
 }
@@ -101,19 +112,20 @@ async function fetchMe(): Promise<AuthUser | null> {
  * also sets the state/redirect cookies needed to validate the
  * callback. Throws via `handleApiError` on any non-2xx response.
  * @param {OAuthProvider} provider - The provider identifier (e.g. "google").
- * @param {string} redirectTo - Absolute URL the backend should redirect to after the callback.
+ * @param {string} callbackUrl - Absolute URL the backend should redirect to after the callback.
  * @returns {Promise<string>} The authorization URL to send the browser to.
  */
 async function fetchOAuthAuthorizeUrl(
     provider: OAuthProvider,
-    redirectTo: string
+    callbackUrl: string,
 ): Promise<string> {
     try {
         const { data } = await authClient<OAuthAuthorizeResponse | null>(
-            `/oauth2/authorize/${provider}?redirect_to=${encodeURIComponent(redirectTo)}`,
+            `/oauth2/authorize/${provider}?redirect_to=${encodeURIComponent(callbackUrl)}`,
             {
                 method: 'GET',
-            } as BetterFetchOption
+                // narrow the options literal to the BetterFetch contract.
+            } as BetterFetchOption,
         );
         if (!data?.authUrl) {
             handleApiError(new Error('oauth authorize returned an empty response'));
@@ -193,9 +205,11 @@ export const authService = {
 
     /**
      * Invalidate the server-side session and forget the local user.
-     * Calls Authula's POST /sign-out, which clears the session
-     * cookie via the session plugin's after-hook, then clears the
-     * local store and redirects to `REDIRECT_AFTER_SIGNOUT`.
+     * Calls Authula's POST /api/auth/sign-out, which deletes the
+     * session row and clears the `authula.session_token` cookie
+     * via the session plugin's after-hook, then clears the local
+     * store and redirects to `REDIRECT_AFTER_SIGNOUT`. The endpoint
+     * is idempotent so a second call is a no-op.
      * @returns {Promise<void>}
      */
     async signOut(): Promise<void> {
@@ -203,16 +217,15 @@ export const authService = {
         try {
             await authClient('/sign-out', {
                 method: 'POST',
+                // narrow the options literal to the BetterFetch contract.
             } as BetterFetchOption);
-        } catch {
-            // Sign-out is best-effort: a network failure here
-            // shouldn't prevent us from clearing the local
-            // store. The server-side session will expire on its
-            // own per its TTL.
+        } catch (error) {
+            throw new Error('sign-out failed', { cause: error });
+        } finally {
+            clearUser();
+            window.location.href = REDIRECT_AFTER_SIGNOUT;
+            setAuthLoading(false);
         }
-        clearUser();
-        window.location.href = REDIRECT_AFTER_SIGNOUT;
-        setAuthLoading(false);
     },
 
     /**

@@ -4,47 +4,28 @@ import { useAuth } from '@/lib/hooks/useAuth';
 //-- Constants
 import { LOGIN_PATH } from '@/constants/auth';
 import { redirectTo } from '@/lib';
+//-- Components
+import { RouteFallback } from './RouteFallback';
 
 /**
  * @interface ProtectedRouteProps
  * @property {ReactNode} children - The protected tree. Rendered only when the user is authenticated.
- * @property {ReactNode} [fallback] - Optional custom loading UI. Defaults to a minimal centered spinner.
+ * @property {ReactNode} [fallback] - Optional custom loading UI. Defaults to `<RouteFallback />`.
  */
 interface ProtectedRouteProps extends PropsWithChildren {
     fallback?: ReactNode;
-}
-/**
- * Default loading UI. Matches the auth screen's centered layout so
- * there is no layout shift when the gate resolves.
- * @returns {JSX.Element} A simple spinner.
- */
-function DefaultFallback(): React.JSX.Element {
-    return (
-        <div
-            role="status"
-            aria-live="polite"
-            style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                minHeight: '100dvh',
-            }}
-        >
-            <span>Loading…</span>
-        </div>
-    );
 }
 
 /**
  * React island that gates its children behind the auth state.
  *
- * - While `$isAuthLoading` is `true`, renders `fallback` (or the
- *   default spinner). The session hydration launched by
+ * - While `$isAuthLoading` is `true`, renders `fallback` (or
+ *   `<RouteFallback />`). The session hydration launched by
  *   `<AuthProvider />` is the only legitimate source of this state.
  * - When loading settles and the user is not authenticated, sends
- *   the browser to the sign-in page via `LOGIN_PATH`. We use
- *   `window.location.assign` rather than the History API so the
- *   protected HTML is not cached in the back/forward stack.
+ *   the browser to the sign-in page via `LOGIN_PATH`. We use a full
+ *   navigation rather than the History API so the protected HTML
+ *   is not cached in the back/forward stack.
  * - When the user is authenticated, renders `children`.
  *
  * This component assumes it lives inside an `<AuthProvider />`
@@ -62,16 +43,14 @@ export function ProtectedRoute({
     const { isAuthenticated, isAuthLoading } = useAuth();
 
     useEffect(() => {
-        if (isAuthLoading) {
-            return;
-        }
+        if (isAuthLoading) return;
         if (!isAuthenticated) {
             redirectTo(LOGIN_PATH);
         }
     }, [isAuthLoading, isAuthenticated]);
 
     if (isAuthLoading) {
-        return <>{fallback ?? <DefaultFallback />}</>;
+        return <>{fallback ?? <RouteFallback />}</>;
     }
 
     if (!isAuthenticated) {

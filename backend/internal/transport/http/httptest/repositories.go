@@ -11,18 +11,18 @@ import (
 )
 
 type MockDevicesRepository struct {
-	Devices       map[uuid.UUID]*domain.Device
+	Devices           map[uuid.UUID]*domain.Device
 	DevicesWithAccess map[uuid.UUID][]domain.DeviceWithAccess
-	CreateErr     error
-	ListErr       error
-	GetErr        error
-	UpdateErr     error
-	DeleteErr     error
+	CreateErr         error
+	ListErr           error
+	GetErr            error
+	UpdateErr         error
+	DeleteErr         error
 }
 
 func NewMockDevicesRepository() *MockDevicesRepository {
 	return &MockDevicesRepository{
-		Devices:          make(map[uuid.UUID]*domain.Device),
+		Devices:           make(map[uuid.UUID]*domain.Device),
 		DevicesWithAccess: make(map[uuid.UUID][]domain.DeviceWithAccess),
 	}
 }
@@ -110,15 +110,15 @@ func (m *MockDevicesRepository) SoftDelete(ctx context.Context, deviceID uuid.UU
 }
 
 type MockUsersRepository struct {
-	Users         map[uuid.UUID]*domain.User
-	UsersByEmail  map[string]*domain.User
-	Count         int
-	CreateErr     error
-	GetErr        error
-	UpdateErr     error
-	DeleteErr     error
-	ListErr       error
-	CountErr      error
+	Users        map[uuid.UUID]*domain.User
+	UsersByEmail map[string]*domain.User
+	Count        int
+	CreateErr    error
+	GetErr       error
+	UpdateErr    error
+	DeleteErr    error
+	ListErr      error
+	CountErr     error
 }
 
 func NewMockUsersRepository() *MockUsersRepository {
@@ -200,7 +200,7 @@ func (m *MockUsersRepository) UpdateUser(ctx context.Context, userID uuid.UUID, 
 }
 
 func (m *MockUsersRepository) SetMustChangePassword(ctx context.Context, userID uuid.UUID, mustChange bool) error {
-	// ponytail: no-op mock
+	// no-op mock
 	return nil
 }
 

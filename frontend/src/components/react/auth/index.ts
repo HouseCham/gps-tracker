@@ -3,6 +3,7 @@ export * from './LoginForm';
 export * from './SignupForm';
 export * from './ProtectedRoute';
 export * from './PublicOnlyRoute';
+export * from './RouteFallback';
 export * from './OAuthCallback';
 export * from './GoogleIcon';
 export * from './FirstRunGate';
