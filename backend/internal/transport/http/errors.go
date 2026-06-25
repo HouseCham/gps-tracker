@@ -37,6 +37,8 @@ func mapDomainError(err error) (status int, message string) {
 		return fiber.StatusConflict, "conflict"
 	case errors.Is(err, domain.ErrValidation):
 		return fiber.StatusBadRequest, "validation error"
+	case errors.Is(err, domain.ErrMustChangePassword):
+		return fiber.StatusForbidden, "must change password"
 	}
 
 	return fiber.StatusInternalServerError, "internal server error"

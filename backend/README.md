@@ -66,14 +66,44 @@ go run ./cmd/api
 ```
 GET  /health
 
+# Auth routes (Authula + custom /me handler on Fiber)
+POST   /api/auth/email-password/sign-in
+POST   /api/auth/email-password/sign-up
+POST   /api/auth/sign-out
+GET    /api/auth/oauth2/authorize/:provider
+GET    /api/auth/oauth2/callback/:provider
+GET    /api/auth/me                    (custom Fiber handler — see note below)
+
+# App routes
 GET    /api/v1/devices
 GET    /api/v1/devices/:id
 POST   /api/v1/devices
-PUT    /api/v1/devices/:id       (requires editor role)
-DELETE /api/v1/devices/:id       (requires owner role)
+PUT    /api/v1/devices/:id             (requires editor role)
+DELETE /api/v1/devices/:id             (requires owner role)
+GET    /api/v1/users
+GET    /api/v1/users/:id
+POST   /api/v1/users                   (requires super_admin role)
+PUT    /api/v1/users/:id
+DELETE /api/v1/users/:id              (requires super_admin role)
+POST   /api/v1/auth/change-password
+GET    /api/v1/system/bootstrap
 ```
 
-Authentication is currently via the `X-User-Id` header (dev middleware).
+### Authentication
+
+All `/api/v1/*` routes require an active session cookie (`authula.session_token`).
+The cookie is set by Authula on sign-in / sign-up and sent automatically by the
+browser via `credentials: 'include'`. The Go middleware (`AuthSession`) reads the
+cookie, resolves the Authula actor, and materialises the local user projection.
+
+**Note on `/api/auth/me`:** Authula's built-in `/me` route is bypassed by a
+custom Fiber handler registered at the same path. The reason: Authula's session
+plugin registers its `validateSessionHook` with `PluginID: "session.auth"`, which
+only executes when the route's `Metadata["plugins"]` includes `"session.auth"`.
+Authula's core routes carry no plugin metadata, so the hook never fires and the
+route always 401s. The Fiber handler (`UsersHandler.Me`) reads the actor and
+user already stored in Fiber locals by the `AuthSession` middleware and returns
+the same `{ user: { id, email, name } }` shape the frontend expects.
 
 ## Response Format
 

@@ -30,3 +30,14 @@ func BadRequestResponse(c fiber.Ctx, message string) error {
 		Message:    message,
 	})
 }
+
+// unauthorizedResponse is the package-internal helper used by the
+// auth middleware. The exported UnauthorizedResponse above has the
+// same wire shape; this one exists so the middleware file does not
+// have to spell out the response envelope on every 401.
+func unauthorizedResponse(c fiber.Ctx, message string) error {
+	return c.Status(fiber.StatusUnauthorized).JSON(response.HTTPResponse[bool]{
+		StatusCode: fiber.StatusUnauthorized,
+		Message:    message,
+	})
+}

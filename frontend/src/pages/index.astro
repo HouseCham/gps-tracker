@@ -1,16 +1,12 @@
+---
+import { FirstRunGate } from '@/components/react/auth';
+---
+
 <html>
   <head>
-    <script is:inline>
-      (function() {
-        var supported = new Set(["en", "es"]);
-        var lang = (navigator.language || "en").split("-")[0];
-        if (!supported.has(lang)) lang = "en";
-        window.location.replace("/" + lang + "/");
-      })();
-    </script>
-    <noscript>
-      <meta http-equiv="refresh" content="0;url=/en/" />
-    </noscript>
+    <meta charset="utf-8" />
+    <title>GPS Tracker</title>
+    <FirstRunGate client:load />
   </head>
   <body></body>
 </html>

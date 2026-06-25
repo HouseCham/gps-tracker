@@ -13,10 +13,10 @@ import (
 )
 
 type AccessHandler struct {
-	service *access.Service
+	service *access.AccessService
 }
 
-func NewAccessHandler(svc *access.Service) *AccessHandler {
+func NewAccessHandler(svc *access.AccessService) *AccessHandler {
 	return &AccessHandler{service: svc}
 }
 

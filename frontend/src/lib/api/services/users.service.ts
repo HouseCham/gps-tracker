@@ -6,8 +6,8 @@ import type {
     User,
     UserWithDevices,
 } from '@/types/api';
-import { client } from './client';
-import { handleApiError } from './helpers/handle-api-error';
+import { client } from '../client';
+import { handleApiError } from '../helpers/handle-api-error';
 
 /**
  * The HTTP client used to interact with the API.

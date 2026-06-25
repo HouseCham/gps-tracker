@@ -74,7 +74,6 @@ export const en = {
         lastnamePlaceholder: 'Your last name',
         loggingIn: 'Logging in...',
         signingUp: 'Creating account...',
-        noAccount: "Don't have an account?",
         haveAccount: 'Already have an account?',
         emailRequired: 'Email is required',
         emailInvalid: 'Invalid email format',
@@ -86,6 +85,9 @@ export const en = {
         signupTitle: 'Create an account',
         signupSubtitle: 'Start tracking your fleet in minutes',
         logoutConfirm: 'Are you sure you want to log out?',
+        signInWithGoogle: 'Sign in with Google',
+        signUpWithGoogle: 'Sign up with Google',
+        orContinueWith: 'Or continue with email',
     },
     profile: {
         title: 'Profile',

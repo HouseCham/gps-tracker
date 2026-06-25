@@ -76,7 +76,6 @@ export const es: Translation = {
         lastnamePlaceholder: 'Tu apellido',
         loggingIn: 'Iniciando sesión...',
         signingUp: 'Creando cuenta...',
-        noAccount: '¿No tienes cuenta?',
         haveAccount: '¿Ya tienes cuenta?',
         emailRequired: 'El correo es obligatorio',
         emailInvalid: 'Formato de correo inválido',
@@ -88,6 +87,9 @@ export const es: Translation = {
         signupTitle: 'Crear una cuenta',
         signupSubtitle: 'Empieza a rastrear tu flota en minutos',
         logoutConfirm: '¿Estás seguro de cerrar sesión?',
+        signInWithGoogle: 'Iniciar sesión con Google',
+        signUpWithGoogle: 'Registrarse con Google',
+        orContinueWith: 'O continúa con tu correo',
     },
     profile: {
         title: 'Perfil',

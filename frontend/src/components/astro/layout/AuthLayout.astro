@@ -1,15 +1,28 @@
 ---
+import '@/styles/global.css';
+import '@/styles/layout/main-layout.css';
+//-- Types
+import type { Language } from '@/types';
+//-- Components
+import {
+    AuthProvider,
+    PublicOnlyRoute
+} from '@/components/react/auth';
+import Toolbar from '@/components/astro/Toolbar.astro';
+
 /**
  * @interface Props
+ * @property {Language} [locale='en'] - Current locale code.
  * @property {string | undefined} [title] - Page title.
  * @property {string | undefined} [class] - Extra classes.
  */
 interface Props {
+    locale?: Language;
     title?: string;
     class?: string;
 }
 
-const { title = 'GPS Tracker', class: className } = Astro.props;
+const { locale = 'en', title = 'GPS Tracker', class: className } = Astro.props;
 const classes = ['auth-layout', className].filter(Boolean).join(' ');
 ---
 
@@ -30,11 +43,16 @@ const classes = ['auth-layout', className].filter(Boolean).join(' ');
         />
     </head>
     <body>
-        <div class={classes}>
-            <div class="auth-layout__card">
-                <slot />
-            </div>
-        </div>
+        <AuthProvider client:load>
+            <PublicOnlyRoute client:load>
+                <Toolbar locale={locale} />
+                <div class={classes}>
+                    <div class="auth-layout__card">
+                        <slot />
+                    </div>
+                </div>
+            </PublicOnlyRoute>
+        </AuthProvider>
     </body>
 </html>
 

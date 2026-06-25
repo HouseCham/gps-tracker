@@ -28,30 +28,39 @@ func (q *Queries) CountUsers(ctx context.Context) (int64, error) {
 }
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (email, name, lastname, role)
-VALUES ($1, $2, $3, $4)
-RETURNING id, email, name, lastname, role, created_at, updated_at, deleted_at
+INSERT INTO users (email, name, lastname, role, must_change_password)
+VALUES ($1, $2, $3, $4, $5)
+RETURNING id, email, email_verified, image, name, lastname, role, must_change_password, created_at, updated_at, deleted_at
 `
 
 type CreateUserParams struct {
-	Email    string
-	Name     string
-	Lastname string
-	Role     UserRole
+	Email              string
+	Name               string
+	Lastname           string
+	Role               UserRole
+	MustChangePassword bool
 }
 
 type CreateUserRow struct {
-	ID        pgtype.UUID
-	Email     string
-	Name      string
-	Lastname  string
-	Role      UserRole
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
-	DeletedAt pgtype.Timestamptz
+	ID                 pgtype.UUID
+	Email              string
+	EmailVerified      bool
+	Image              *string
+	Name               string
+	Lastname           string
+	Role               UserRole
+	MustChangePassword bool
+	CreatedAt          pgtype.Timestamptz
+	UpdatedAt          pgtype.Timestamptz
+	DeletedAt          pgtype.Timestamptz
 }
 
-// Creates a new user with name, lastname, and role.
+// Creates a new user. Callers must pass must_change_password
+// explicitly: true for admin-created users (they get a temporary
+// password and must change it on first login), false for self-service
+// signups (the user picks their own password).
+// image and email_verified are not set by the app; email_verified
+// defaults to false and image is nullable.
 // Returns the created user.
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
 	row := q.db.QueryRow(ctx, createUser,
@@ -59,14 +68,18 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateU
 		arg.Name,
 		arg.Lastname,
 		arg.Role,
+		arg.MustChangePassword,
 	)
 	var i CreateUserRow
 	err := row.Scan(
 		&i.ID,
 		&i.Email,
+		&i.EmailVerified,
+		&i.Image,
 		&i.Name,
 		&i.Lastname,
 		&i.Role,
+		&i.MustChangePassword,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
@@ -75,20 +88,23 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateU
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, email, name, lastname, role, created_at, updated_at, deleted_at
+SELECT id, email, email_verified, image, name, lastname, role, must_change_password, created_at, updated_at, deleted_at
 FROM users
 WHERE email = $1 AND deleted_at IS NULL
 `
 
 type GetUserByEmailRow struct {
-	ID        pgtype.UUID
-	Email     string
-	Name      string
-	Lastname  string
-	Role      UserRole
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
-	DeletedAt pgtype.Timestamptz
+	ID                 pgtype.UUID
+	Email              string
+	EmailVerified      bool
+	Image              *string
+	Name               string
+	Lastname           string
+	Role               UserRole
+	MustChangePassword bool
+	CreatedAt          pgtype.Timestamptz
+	UpdatedAt          pgtype.Timestamptz
+	DeletedAt          pgtype.Timestamptz
 }
 
 // Lookup by email. Used by the lazy user creation flow as a fallback
@@ -99,9 +115,12 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEm
 	err := row.Scan(
 		&i.ID,
 		&i.Email,
+		&i.EmailVerified,
+		&i.Image,
 		&i.Name,
 		&i.Lastname,
 		&i.Role,
+		&i.MustChangePassword,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
@@ -110,20 +129,23 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (GetUserByEm
 }
 
 const getUserByID = `-- name: GetUserByID :one
-SELECT id, email, name, lastname, role, created_at, updated_at, deleted_at
+SELECT id, email, email_verified, image, name, lastname, role, must_change_password, created_at, updated_at, deleted_at
 FROM users
 WHERE id = $1 AND deleted_at IS NULL
 `
 
 type GetUserByIDRow struct {
-	ID        pgtype.UUID
-	Email     string
-	Name      string
-	Lastname  string
-	Role      UserRole
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
-	DeletedAt pgtype.Timestamptz
+	ID                 pgtype.UUID
+	Email              string
+	EmailVerified      bool
+	Image              *string
+	Name               string
+	Lastname           string
+	Role               UserRole
+	MustChangePassword bool
+	CreatedAt          pgtype.Timestamptz
+	UpdatedAt          pgtype.Timestamptz
+	DeletedAt          pgtype.Timestamptz
 }
 
 // Used by the Authula middleware to load the current user from the DB
@@ -134,9 +156,12 @@ func (q *Queries) GetUserByID(ctx context.Context, id pgtype.UUID) (GetUserByIDR
 	err := row.Scan(
 		&i.ID,
 		&i.Email,
+		&i.EmailVerified,
+		&i.Image,
 		&i.Name,
 		&i.Lastname,
 		&i.Role,
+		&i.MustChangePassword,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,
@@ -145,20 +170,23 @@ func (q *Queries) GetUserByID(ctx context.Context, id pgtype.UUID) (GetUserByIDR
 }
 
 const getUserList = `-- name: GetUserList :many
-SELECT id, email, name, lastname, role, created_at, updated_at, deleted_at
+SELECT id, email, email_verified, image, name, lastname, role, must_change_password, created_at, updated_at, deleted_at
 FROM users
 WHERE deleted_at IS NULL AND id != $1
 `
 
 type GetUserListRow struct {
-	ID        pgtype.UUID
-	Email     string
-	Name      string
-	Lastname  string
-	Role      UserRole
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
-	DeletedAt pgtype.Timestamptz
+	ID                 pgtype.UUID
+	Email              string
+	EmailVerified      bool
+	Image              *string
+	Name               string
+	Lastname           string
+	Role               UserRole
+	MustChangePassword bool
+	CreatedAt          pgtype.Timestamptz
+	UpdatedAt          pgtype.Timestamptz
+	DeletedAt          pgtype.Timestamptz
 }
 
 // Returns all active users except the given user ID.
@@ -175,9 +203,12 @@ func (q *Queries) GetUserList(ctx context.Context, id pgtype.UUID) ([]GetUserLis
 		if err := rows.Scan(
 			&i.ID,
 			&i.Email,
+			&i.EmailVerified,
+			&i.Image,
 			&i.Name,
 			&i.Lastname,
 			&i.Role,
+			&i.MustChangePassword,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 			&i.DeletedAt,
@@ -190,6 +221,23 @@ func (q *Queries) GetUserList(ctx context.Context, id pgtype.UUID) ([]GetUserLis
 		return nil, err
 	}
 	return items, nil
+}
+
+const setUserMustChangePassword = `-- name: SetUserMustChangePassword :exec
+UPDATE users
+SET must_change_password = $2, updated_at = NOW()
+WHERE id = $1 AND deleted_at IS NULL
+`
+
+type SetUserMustChangePasswordParams struct {
+	ID                 pgtype.UUID
+	MustChangePassword bool
+}
+
+// Sets the must_change_password flag for the given user.
+func (q *Queries) SetUserMustChangePassword(ctx context.Context, arg SetUserMustChangePasswordParams) error {
+	_, err := q.db.Exec(ctx, setUserMustChangePassword, arg.ID, arg.MustChangePassword)
+	return err
 }
 
 const softDeleteUser = `-- name: SoftDeleteUser :exec
@@ -210,7 +258,7 @@ const updateUser = `-- name: UpdateUser :one
 UPDATE users
 SET name = $2, lastname = $3, updated_at = NOW()
 WHERE id = $1 AND deleted_at IS NULL
-RETURNING id, email, name, lastname, role, created_at, updated_at, deleted_at
+RETURNING id, email, email_verified, image, name, lastname, role, must_change_password, created_at, updated_at, deleted_at
 `
 
 type UpdateUserParams struct {
@@ -220,14 +268,17 @@ type UpdateUserParams struct {
 }
 
 type UpdateUserRow struct {
-	ID        pgtype.UUID
-	Email     string
-	Name      string
-	Lastname  string
-	Role      UserRole
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
-	DeletedAt pgtype.Timestamptz
+	ID                 pgtype.UUID
+	Email              string
+	EmailVerified      bool
+	Image              *string
+	Name               string
+	Lastname           string
+	Role               UserRole
+	MustChangePassword bool
+	CreatedAt          pgtype.Timestamptz
+	UpdatedAt          pgtype.Timestamptz
+	DeletedAt          pgtype.Timestamptz
 }
 
 // Updates a user's name and lastname. Only the user themselves can update
@@ -238,9 +289,12 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (UpdateU
 	err := row.Scan(
 		&i.ID,
 		&i.Email,
+		&i.EmailVerified,
+		&i.Image,
 		&i.Name,
 		&i.Lastname,
 		&i.Role,
+		&i.MustChangePassword,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.DeletedAt,

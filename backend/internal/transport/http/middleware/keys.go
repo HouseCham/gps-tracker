@@ -3,7 +3,7 @@ package middleware
 const (
 	// LocalsKeyRequestID stores the request ID.
 	LocalsKeyRequestID = "request_id"
-	// LocalsKeyClaims stores the JWT claims after AuthJWT middleware.
+	// LocalsKeyClaims stores the Authula actor after AuthSession middleware.
 	LocalsKeyClaims = "claims"
 	// LocalsKeyUser stores the authenticated *domain.User after user-attach middleware.
 	LocalsKeyUser = "user"

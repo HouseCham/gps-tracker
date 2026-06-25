@@ -6,8 +6,8 @@ import type {
     Envelope,
     UpdateDeviceDto,
 } from '@/types/api';
-import { client } from './client';
-import { handleApiError } from './helpers/handle-api-error';
+import { client } from '../client';
+import { handleApiError } from '../helpers/handle-api-error';
 import type { BetterFetchOption } from '@better-fetch/fetch';
 /**
  * The HTTP client used to interact with the API.

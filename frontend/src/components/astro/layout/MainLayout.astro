@@ -6,9 +6,13 @@ import type { Translation } from '@/i18n';
 import type { Language } from '@/types';
 import type { SidebarNavItem, SidebarUser } from '@/types/layout';
 //-- Components
-import Sidebar from './Sidebar.astro';
-import TabBar from './TabBar.astro';
-import Toolbar from './Toolbar.astro';
+import Sidebar from '@/components/astro/Sidebar.astro';
+import TabBar from '@/components/astro/TabBar.astro';
+import Toolbar from '@/components/astro/Toolbar.astro';
+import {
+    AuthProvider,
+    ProtectedRoute
+} from '@/components/react/auth';
 
 /**
  * @interface Props
@@ -55,28 +59,32 @@ const {
         />
     </head>
     <body>
-        <div class="app-shell">
-            <Sidebar
-                locale={locale}
-                translation={translation}
-                active={active}
-                user={user}
-                showAdmin={showAdmin}
-            />
-            <main class="app-shell__main">
-                <!-- Toolbar -->
-                <Toolbar locale={locale} />
-                <!-- Content -->
-                <slot />
-            </main>
-            <!-- Tab Bar (for mobile) -->
-            <TabBar
-                locale={locale}
-                translation={translation}
-                active={active}
-                showAdmin={showAdmin}
-            />
-        </div>
+        <AuthProvider client:load>
+            <ProtectedRoute client:load>
+                <div class="app-shell">
+                    <Sidebar
+                        locale={locale}
+                        translation={translation}
+                        active={active}
+                        user={user}
+                        showAdmin={showAdmin}
+                    />
+                    <main class="app-shell__main">
+                        <!-- Toolbar -->
+                        <Toolbar locale={locale} />
+                        <!-- Content -->
+                        <slot />
+                    </main>
+                    <!-- Tab Bar (for mobile) -->
+                    <TabBar
+                        locale={locale}
+                        translation={translation}
+                        active={active}
+                        showAdmin={showAdmin}
+                    />
+                </div>
+            </ProtectedRoute>
+        </AuthProvider>
         <script is:inline>
             (function () {
                 var stored = localStorage.getItem('theme');

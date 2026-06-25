@@ -15,7 +15,7 @@ The frontend communicates with a Go + Fiber backend and PostgreSQL database to p
 | Styling         | Pure CSS — custom properties, dark/light themes, BEM methodology                      |
 | Icons           | [Lucide](https://lucide.dev) (`@lucide/astro` + `lucide-react`)                       |
 | HTTP            | [`@better-fetch/fetch`](https://github.com/better-fetch/fetch)                        |
-| Auth            | [`better-auth`](https://www.better-auth.com)                                          |
+| Auth            | [`Authula`](https://github.com/Authula/authula) (HTTP-only session cookie)             |
 | Package manager | [pnpm](https://pnpm.io)                                                               |
 | Engine          | Node >= 22.12.0                                                                       |
 
@@ -72,7 +72,7 @@ src/
 ├── lib/                       # Utilities, API services, auth client
 │   ├── api/                   # HTTP client, device/user services
 │   │   └── helpers/           # handleApiError utility
-│   ├── auth/                  # better-auth client instance
+│   ├── auth/                  # Authula HTTP-only session-cookie client
 │   ├── map-utils.ts           # Map calculation utilities
 │   └── user-utils.ts          # User helper utilities
 ├── pages/                     # File-based routing
@@ -199,7 +199,7 @@ API services use `@better-fetch/fetch` and are structured as classes with depend
 
 - **`DevicesService`** — CRUD operations + access control (grant, list, revoke)
 - **`UsersService`** — CRUD operations with pagination support
-- **`authClient`** — Better-auth client configured with cookie-based sessions
+- **`authClient`** — Authula HTTP client configured with cookie-based sessions
 
 All API calls return responses wrapped in a generic `Envelope<T>` type with status code, message, and data payload. Errors are normalized through `handleApiError` into a structured `ApiError` type.
 

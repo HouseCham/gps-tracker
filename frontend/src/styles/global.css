@@ -963,6 +963,27 @@ textarea.input {
 }
 
 /* ============================================
+   OAUTH CALLBACK
+   ============================================ */
+.oauth-callback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100dvh;
+}
+
+/* ============================================
+   LOADING FALLBACK
+   ============================================ */
+.loading-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100dvh;
+    color: var(--muted, #888);
+}
+
+/* ============================================
    LOGIN SECTION
    ============================================ */
 .login-wrap {
