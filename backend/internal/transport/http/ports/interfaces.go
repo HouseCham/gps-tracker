@@ -6,8 +6,12 @@ import (
 	"github.com/Authula/authula/models"
 )
 
-type JWTValidator interface {
-	ValidateToken(ctx context.Context, token string) (*models.Actor, error)
+// SessionAuthenticator resolves an Authula actor from a raw session
+// token string (the value of the session cookie, NOT yet hashed).
+// The cookie name is read separately from the Authula instance so the
+// middleware can look the value up on the Fiber request.
+type SessionAuthenticator interface {
+	Authenticate(ctx context.Context, sessionToken string) (*models.Actor, error)
 }
 
 type UserLookup interface {
