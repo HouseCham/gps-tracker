@@ -2,12 +2,16 @@
 //
 // Authula runs in embedded library mode inside the same process as the API.
 // It owns its own Postgres-backed tables (users, sessions, accounts,
-// jwt_keys, jwt_refresh_tokens, verifications) which live alongside our
-// app tables in the same database. The integration is intentionally thin:
-// we mount Authula's HTTP handler at /api/auth/* and consume two services
-// from its registry (JWTService and UserService) to power our own Fiber
-// middlewares, rather than letting Authula drive middleware on Fiber
-// routes directly.
+// verifications) which live alongside our app tables in the same database.
+// The integration is intentionally thin: we mount Authula's HTTP handler
+// at /api/auth/* and consume two services from its registry (SessionService
+// + UserService) to power our own Fiber middleware, rather than letting
+// Authula drive middleware on Fiber routes directly.
+//
+// Authentication is cookie-only: Authula's session plugin sets an
+// HTTP-only `authula.session_token` cookie on sign-in / sign-up, and the
+// cookie is the only thing that authorises subsequent requests. The
+// frontend never sees a token.
 //
 // Our own `users` table remains the source of truth for the local
 // projection (role, name, lastname, FK relationships to devices/access
@@ -20,6 +24,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	authula "github.com/Authula/authula"
@@ -28,10 +33,9 @@ import (
 	"github.com/Authula/authula/models"
 	emailpasswordplugin "github.com/Authula/authula/plugins/email-password"
 	emailpasswordplugintypes "github.com/Authula/authula/plugins/email-password/types"
-	jwtplugin "github.com/Authula/authula/plugins/jwt"
-	jwtplugintypes "github.com/Authula/authula/plugins/jwt/types"
 	oauth2plugin "github.com/Authula/authula/plugins/oauth2"
 	oauth2plugintypes "github.com/Authula/authula/plugins/oauth2/types"
+	sessionplugin "github.com/Authula/authula/plugins/session"
 	authulaservices "github.com/Authula/authula/services"
 
 	"github.com/HouseCham/gps-tracker/backend/internal/domain"
@@ -52,8 +56,8 @@ type Config struct {
 	// environment variable, then to "http://localhost:8080".
 	BaseURL string
 	// Secret is the symmetric secret used to encrypt sensitive
-	// fields at rest (e.g. JWT private keys). MUST be set; we fail
-	// fast during Bootstrap if it is empty.
+	// fields at rest. MUST be set; we fail fast during Bootstrap
+	// if it is empty.
 	Secret string
 	// DatabaseURL is a postgres:// connection string. The same DB
 	// used by the main app; Authula will create its own tables on
@@ -64,6 +68,11 @@ type Config struct {
 	// "google" provider. The RedirectURL is built automatically as
 	// <BaseURL><BasePath>/oauth2/callback/google when empty.
 	GoogleOAuth *GoogleOAuthConfig
+	// SecureCookies overrides the `secure` flag on the session
+	// cookie. When nil, Authula's config.toml value is used. When
+	// non-nil, true forces Secure=true regardless of environment
+	// (use this in production deployments).
+	SecureCookies *bool
 }
 
 // GoogleOAuthConfig carries the credentials for the Google OAuth2
@@ -79,16 +88,19 @@ type GoogleOAuthConfig struct {
 // the Authula surface that the rest of the application needs.
 type Auth struct {
 	instance        *authula.Auth
-	jwtService      authulaservices.JWTService
+	cookieName      string
+	sessionService  authulaservices.SessionService
+	tokenService    authulaservices.TokenService
 	userService     authulaservices.UserService
 	accountService  authulaservices.AccountService
 	passwordService authulaservices.PasswordService
 }
 
 // Bootstrap initializes Authula: it runs core + plugin migrations
-// (idempotent) and registers the email-password and JWT plugins. The
-// returned *Auth is safe to call Handler() / JWTValidator() /
-// UserLookup() on for the rest of the process lifetime.
+// (idempotent) and registers the email-password, session, and OAuth2
+// plugins. The returned *Auth is safe to call Handler() /
+// NewSessionAuthenticator() / NewUserLookup() on for the rest of the
+// process lifetime.
 func Bootstrap(ctx context.Context, cfg Config) (*Auth, error) {
 	if cfg.Secret == "" {
 		return nil, fmt.Errorf("auth: AUTHULA_SECRET is required")
@@ -146,45 +158,30 @@ func Bootstrap(ctx context.Context, cfg Config) (*Auth, error) {
 			Provider: "postgres",
 			URL:      cfg.DatabaseURL,
 		}),
-		// Email verification is intentionally disabled for v1
-		// (we have no SMTP wiring); it can be enabled later by
-		// providing SendEmailVerification + an SMTP plugin.
 		authulaconfig.WithPlugins(models.PluginsConfig{
 			models.PluginEmailPassword.String(): &emailpasswordplugintypes.EmailPasswordPluginConfig{
-				Enabled:   true,
+				Enabled:    true,
 				AutoSignIn: true,
 			},
-			models.PluginJWT.String(): &jwtplugintypes.JWTPluginConfig{
-				Enabled:          true,
-				ExpiresIn:        15 * time.Minute,
-				RefreshExpiresIn: 7 * 24 * time.Hour,
-			},
-		}),
-		// Make the email-password sign-in route also emit a JWT
-		// pair in the JSON response (access + refresh). The
-		// `issue_tokens` hook is global; the `respond_json` hook
-		// is per-route, hence this mapping.
-		authulaconfig.WithRouteMappings([]models.RouteMapping{
-			{
-				Paths:   []string{"POST:/email-password/sign-in"},
-				Plugins: []string{"jwt.respond_json"},
-			},
-			{
-				Paths:   []string{"POST:/email-password/sign-up"},
-				Plugins: []string{"jwt.respond_json"},
+			models.PluginSession.String(): &sessionplugin.SessionPluginConfig{
+				Enabled: true,
 			},
 		}),
 	)
 
+	// The explicit SecureCookies override (driven by APP_ENV in main)
+	// takes precedence over whatever Authula picked up from TOML.
+	if cfg.SecureCookies != nil {
+		authulaCfg.Session.Secure = *cfg.SecureCookies
+	}
+
 	plugins := []models.Plugin{
 		emailpasswordplugin.New(emailpasswordplugintypes.EmailPasswordPluginConfig{
-			Enabled:   true,
+			Enabled:    true,
 			AutoSignIn: true,
 		}),
-		jwtplugin.New(jwtplugintypes.JWTPluginConfig{
-			Enabled:          true,
-			ExpiresIn:        15 * time.Minute,
-			RefreshExpiresIn: 7 * 24 * time.Hour,
+		sessionplugin.New(sessionplugin.SessionPluginConfig{
+			Enabled: true,
 		}),
 	}
 	if oauth2Cfg != nil {
@@ -201,9 +198,14 @@ func Bootstrap(ctx context.Context, cfg Config) (*Auth, error) {
 	// than on first request).
 	_ = instance.Handler()
 
-	jwtSvc, ok := instance.ServiceRegistry.Get(models.ServiceJWT.String()).(authulaservices.JWTService)
+	sessionSvc, ok := instance.ServiceRegistry.Get(models.ServiceSession.String()).(authulaservices.SessionService)
 	if !ok {
-		return nil, fmt.Errorf("auth: jwt service not registered by the jwt plugin")
+		return nil, fmt.Errorf("auth: session service not registered by core services")
+	}
+
+	tokenSvc, ok := instance.ServiceRegistry.Get(models.ServiceToken.String()).(authulaservices.TokenService)
+	if !ok {
+		return nil, fmt.Errorf("auth: token service not registered by core services")
 	}
 
 	userSvc, ok := instance.ServiceRegistry.Get(models.ServiceUser.String()).(authulaservices.UserService)
@@ -223,7 +225,9 @@ func Bootstrap(ctx context.Context, cfg Config) (*Auth, error) {
 
 	return &Auth{
 		instance:        instance,
-		jwtService:      jwtSvc,
+		cookieName:      authulaCfg.Session.CookieName,
+		sessionService:  sessionSvc,
+		tokenService:    tokenSvc,
 		userService:     userSvc,
 		accountService:  accountSvc,
 		passwordService: passwordSvc,
@@ -237,9 +241,22 @@ func (a *Auth) Handler() http.Handler {
 	return a.instance.Handler()
 }
 
-// NewJWTValidator returns the live Authula JWT service.
-func (a *Auth) NewJWTValidator() authulaservices.JWTService {
-	return a.jwtService
+// CookieName returns the name of the HTTP-only session cookie that
+// Authula's session plugin reads and writes. The middleware looks the
+// value up on the Fiber request with this name.
+func (a *Auth) CookieName() string {
+	return a.cookieName
+}
+
+// NewSessionAuthenticator returns a value that resolves an Authula
+// actor from a raw session token (the unhashed value of the session
+// cookie). Hashing + session lookup + expiry check are encapsulated
+// here so the middleware can stay transport-only.
+func (a *Auth) NewSessionAuthenticator() sessionAuthenticator {
+	return sessionAuthenticator{
+		sessionSvc: a.sessionService,
+		tokenSvc:   a.tokenService,
+	}
 }
 
 // NewUserLookup returns the live Authula core user service.
@@ -316,4 +333,66 @@ func (u authulaPasswordUpdater) UpdatePassword(ctx context.Context, authulaUserI
 		return fmt.Errorf("auth: update account password: %w", err)
 	}
 	return nil
+}
+
+// sessionAuthenticator is the production-side implementation of
+// ports.SessionAuthenticator. It hashes the raw cookie value with
+// Authula's TokenService, looks up the matching session row, and
+// returns the actor bound to it. Expired sessions are treated as
+// missing — the same way the session plugin treats them on its own
+// validate hook.
+type sessionAuthenticator struct {
+	sessionSvc authulaservices.SessionService
+	tokenSvc   authulaservices.TokenService
+}
+
+func (a sessionAuthenticator) Authenticate(ctx context.Context, sessionToken string) (*models.Actor, error) {
+	if sessionToken == "" {
+		return nil, nil
+	}
+	hashed := a.tokenSvc.Hash(sessionToken)
+	session, err := a.sessionSvc.GetByToken(ctx, hashed)
+	if err != nil || session == nil {
+		return nil, nil
+	}
+	if session.ExpiresAt.Before(timeNow()) {
+		return nil, nil
+	}
+	return &models.Actor{ID: session.UserID, Type: models.ActorUser}, nil
+}
+
+// timeNow is a package-level seam so the middleware can be tested
+// with a frozen clock without dragging in a clockwork-style
+// dependency.
+var timeNow = func() time.Time { return time.Now().UTC() }
+
+// IsProduction reports whether the process is running in production.
+// It is read from APP_ENV (case-insensitive) so deployments can flip
+// production-only behaviour (HSTS, secure cookies, strict CORS, etc.)
+// via a single env var without code changes.
+func IsProduction() bool {
+	return parseAppEnv() == "production"
+}
+
+// parseAppEnv returns the lower-cased APP_ENV value, defaulting to
+// "development" when unset. Split out for tests that need to assert
+// the parser itself.
+func parseAppEnv() string {
+	v := os.Getenv("APP_ENV")
+	if v == "" {
+		return "development"
+	}
+	return lower(v)
+}
+
+func lower(s string) string {
+	b := make([]byte, len(s))
+	for i := 0; i < len(s); i++ {
+		c := s[i]
+		if c >= 'A' && c <= 'Z' {
+			c += 'a' - 'A'
+		}
+		b[i] = c
+	}
+	return string(b)
 }

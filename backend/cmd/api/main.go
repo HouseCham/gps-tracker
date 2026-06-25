@@ -68,12 +68,17 @@ func main() {
 			ClientSecret: authCfg.GoogleOAuth.ClientSecret,
 		}
 	}
+	// Flip the session cookie's `secure` flag on whenever we're
+	// running in production. APP_ENV=development (the default) keeps
+	// it off so contributors running without HTTPS can still sign in.
+	secure := auth.IsProduction()
 	authInstance, err := auth.Bootstrap(context.Background(), auth.Config{
-		AppName:     authCfg.AppName,
-		BaseURL:     authCfg.BaseURL,
-		Secret:      authCfg.Secret,
-		DatabaseURL: authCfg.DatabaseURL,
-		GoogleOAuth: googleOAuth,
+		AppName:       authCfg.AppName,
+		BaseURL:       authCfg.BaseURL,
+		Secret:        authCfg.Secret,
+		DatabaseURL:   authCfg.DatabaseURL,
+		GoogleOAuth:   googleOAuth,
+		SecureCookies: &secure,
 	})
 	if err != nil {
 		log.Error("bootstrap auth", "err", err)
@@ -126,17 +131,18 @@ func main() {
 
 
 	app := http.NewRouter(http.RouterDeps{
-		HealthHandler:    healthHandler,
-		DevicesHandler:   devicesHandler,
-		UsersHandler:     usersHandler,
-		AccessHandler:    accessHandler,
-		BootstrapHandler: handlers.NewBootstrapHandler(usersService),
-		AccessService:    accessService,
-		UsersService:     usersService,
-		AuthHandler:      authInstance.Handler(),
-		AuthJWTValidator: authInstance.NewJWTValidator().(ports.JWTValidator),
-		AuthUserLookup:   authInstance.NewUserLookup().(ports.UserLookup),
-		CORSOrigins:      config.LoadCORSOrigins(),
+		HealthHandler:     healthHandler,
+		DevicesHandler:    devicesHandler,
+		UsersHandler:      usersHandler,
+		AccessHandler:     accessHandler,
+		BootstrapHandler:  handlers.NewBootstrapHandler(usersService),
+		AccessService:     accessService,
+		UsersService:      usersService,
+		AuthHandler:       authInstance.Handler(),
+		SessionCookieName: authInstance.CookieName(),
+		AuthSession:       authInstance.NewSessionAuthenticator(),
+		AuthUserLookup:    authInstance.NewUserLookup().(ports.UserLookup),
+		CORSOrigins:       config.LoadCORSOrigins(),
 	})
 
 	server := http.NewServer(app, http.ServerConfig{

@@ -26,7 +26,8 @@ type RouterDeps struct {
 	AccessService    *access.AccessService
 	UsersService     *users.UserService
 	AuthHandler      http.Handler
-	AuthJWTValidator ports.JWTValidator
+	SessionCookieName string
+	AuthSession      ports.SessionAuthenticator
 	AuthUserLookup   ports.UserLookup
 	// CORSOrigins enables the CORS middleware when non-empty. Each
 	// entry is an allowed origin (e.g. "http://localhost:4321"). When
@@ -55,23 +56,33 @@ func NewRouter(deps RouterDeps) *fiber.App {
 
 	app.Get("/health", deps.HealthHandler.Handle)
 
+	// Single session-cookie auth middleware. Replaces the old
+	// (AuthJWT -> LazyUser) pair: cookie lookup + actor resolution
+	// + local user materialisation all happen here, downstream code
+	// reads the same LocalsKeyClaims / LocalsKeyUser locals.
+	authSession := middleware.AuthSession(deps.SessionCookieName, deps.AuthSession, deps.AuthUserLookup, deps.UsersService)
+
 	// --- Authula: sign-in, sign-up, JWKS, token refresh, etc. ---
 	// Mounted as a catch-all under the Authula base path. Authula
 	// returns a net/http.Handler; we adapt it to a Fiber handler
 	// via fasthttp's adaptor.
 	if deps.AuthHandler != nil {
+		// GET /api/auth/me is served by Fiber, not Authula, because
+		// Authula's validateSessionHook is PluginID-scoped and the
+		// core /me route has no plugin metadata, so the actor is
+		// never set and the route 401s. We have the session cookie
+		// and the actor in locals already (authSession above) — just
+		// project the user. Registered first so Fiber's static route
+		// wins over the catch-all below.
+		app.Get(auth.BasePath+"/me", authSession, deps.UsersHandler.Me)
+
 		authH := adaptor.HTTPHandler(deps.AuthHandler)
 		app.All(auth.BasePath+"/*", authH)
 	}
 
-	// Reusable auth middlewares. The pair (AuthJWT -> LazyUser) is
-	// applied to every protected route below.
-	authJWT := middleware.AuthJWT(deps.AuthJWTValidator)
-	lazyUser := middleware.LazyUser(deps.UsersService, deps.AuthUserLookup)
-
 	// RequirePasswordChanged blocks users who haven't changed their
-	// temporary password yet. Placed after LazyUser so we have the
-	// domain.User available.
+	// temporary password yet. Placed after AuthSession so we have
+	// the domain.User available.
 	requirePasswordChanged := middleware.RequirePasswordChanged()
 
 	apiV1 := app.Group("/api/v1")
@@ -84,48 +95,42 @@ func NewRouter(deps RouterDeps) *fiber.App {
 
 	// === Devices routes ===
 	devices := apiV1.Group("/devices")
-	devices.Get("/", authJWT, lazyUser, requirePasswordChanged, deps.DevicesHandler.List)
-	devices.Get("/:id", authJWT, lazyUser, requirePasswordChanged, deps.DevicesHandler.Get)
+	devices.Get("/", authSession, requirePasswordChanged, deps.DevicesHandler.List)
+	devices.Get("/:id", authSession, requirePasswordChanged, deps.DevicesHandler.Get)
 	devices.Post("/",
-		authJWT,
-		lazyUser,
+		authSession,
 		requirePasswordChanged,
 		middleware.ValidateRequestBody[dto.CreateDeviceRequest](),
 		deps.DevicesHandler.Create,
 	)
 	devices.Put("/:id",
-		authJWT,
-		lazyUser,
+		authSession,
 		requirePasswordChanged,
 		middleware.ValidateRequestBody[dto.UpdateDeviceRequest](),
 		middleware.RequireDeviceRole(domain.AccessRoleEditor, deps.AccessService),
 		deps.DevicesHandler.Update,
 	)
 	devices.Delete("/:id",
-		authJWT,
-		lazyUser,
+		authSession,
 		requirePasswordChanged,
 		middleware.RequireDeviceRole(domain.AccessRoleOwner, deps.AccessService),
 		deps.DevicesHandler.Delete,
 	)
 	devices.Post("/:id/access",
-		authJWT,
-		lazyUser,
+		authSession,
 		requirePasswordChanged,
 		middleware.ValidateRequestBody[dto.GrantAccessRequest](),
 		middleware.RequireDeviceRole(domain.AccessRoleOwner, deps.AccessService),
 		deps.AccessHandler.Grant,
 	)
 	devices.Get("/:id/access",
-		authJWT,
-		lazyUser,
+		authSession,
 		requirePasswordChanged,
 		middleware.RequireDeviceRole(domain.AccessRoleOwner, deps.AccessService),
 		deps.AccessHandler.List,
 	)
 	devices.Delete("/:id/access/:userId",
-		authJWT,
-		lazyUser,
+		authSession,
 		requirePasswordChanged,
 		middleware.RequireDeviceRole(domain.AccessRoleOwner, deps.AccessService),
 		deps.AccessHandler.Revoke,
@@ -134,37 +139,33 @@ func NewRouter(deps RouterDeps) *fiber.App {
 	// === Users routes ===
 	users := apiV1.Group("/users")
 	users.Get("/",
-		authJWT,
-		lazyUser,
+		authSession,
 		requirePasswordChanged,
 		middleware.RequireUserRole(domain.UserRoleSuperAdmin),
 		deps.UsersHandler.List,
 	)
-	users.Get("/:id", authJWT, lazyUser, requirePasswordChanged, deps.UsersHandler.GetByID)
+	users.Get("/:id", authSession, requirePasswordChanged, deps.UsersHandler.GetByID)
 	users.Post("/",
-		authJWT,
-		lazyUser,
+		authSession,
 		requirePasswordChanged,
 		middleware.RequireUserRole(domain.UserRoleSuperAdmin),
 		middleware.ValidateRequestBody[dto.CreateUserRequest](),
 		deps.UsersHandler.Create,
 	)
 	users.Put("/:id",
-		authJWT,
-		lazyUser,
+		authSession,
 		requirePasswordChanged,
 		middleware.ValidateRequestBody[dto.UpdateUserRequest](),
 		deps.UsersHandler.Update,
 	)
-	users.Delete("/:id", authJWT, lazyUser, requirePasswordChanged, deps.UsersHandler.Delete)
+	users.Delete("/:id", authSession, requirePasswordChanged, deps.UsersHandler.Delete)
 
 	// === Auth-related routes (application-level) ===
 	// Change-password endpoint is exempt from requirePasswordChanged
 	// so users with must_change_password = true can update it.
 	authAPI := apiV1.Group("/auth")
 	authAPI.Post("/change-password",
-		authJWT,
-		lazyUser,
+		authSession,
 		middleware.ValidateRequestBody[dto.ChangePasswordRequest](),
 		deps.UsersHandler.ChangePassword,
 	)

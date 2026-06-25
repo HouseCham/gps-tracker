@@ -259,6 +259,48 @@ func (h *UsersHandler) ChangePassword(c fiber.Ctx) error {
 	})
 }
 
+// Me handles GET /api/auth/me. It returns the Authula user projection
+// for the currently authenticated session, mounted on Fiber so it sits
+// in front of Authula's own /me route — whose validateSessionHook is
+// never reached because the session plugin's hook is PluginID-scoped
+// and Authula's core routes carry no plugin metadata. Reaches the same
+// shape (`{ user: { id, email, name } }`) the frontend expects from
+// the original Authula endpoint, so the client keeps using `data?.user`.
+//
+// Reads from Fiber locals populated by the AuthSession middleware; no
+// extra DB call.
+func (h *UsersHandler) Me(c fiber.Ctx) error {
+	const operation = "UsersHandler:Me"
+	log.Debug(operation, "request received")
+
+	actor, ok := c.Locals(middleware.LocalsKeyClaims).(*models.Actor)
+	if !ok || actor == nil {
+		log.Error(operation, "err", fiber.ErrUnauthorized, "reason", "missing actor")
+		return c.Status(fiber.StatusUnauthorized).JSON(response.HTTPResponse[bool]{
+			StatusCode: fiber.StatusUnauthorized,
+			Message:    "unauthorized",
+		})
+	}
+
+	user, ok := c.Locals(middleware.LocalsKeyUser).(*domain.User)
+	if !ok || user == nil {
+		log.Error(operation, "err", fiber.ErrUnauthorized, "reason", "missing local user")
+		return c.Status(fiber.StatusUnauthorized).JSON(response.HTTPResponse[bool]{
+			StatusCode: fiber.StatusUnauthorized,
+			Message:    "unauthorized",
+		})
+	}
+
+	log.Debug(operation, "session resolved", "authulaUserID", actor.ID, "localUserID", user.ID)
+	return c.Status(fiber.StatusOK).JSON(map[string]any{
+		"user": map[string]any{
+			"id":    actor.ID,
+			"email": user.Email,
+			"name":  user.Name,
+		},
+	})
+}
+
 func (h *UsersHandler) Delete(c fiber.Ctx) error {
 	const operation = "UsersHandler:Delete"
 	log.Debug(operation, "request received")
