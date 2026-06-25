@@ -2,7 +2,7 @@ import { useEffect, useState, type ReactElement } from 'react';
 //-- Types
 import type { Language } from '@/types';
 //-- Services
-import { bootstrapService } from '@/lib/api/bootstrap.service';
+import { bootstrapService } from '@/lib/api/services';
 
 /**
  * @interface FirstRunGateProps

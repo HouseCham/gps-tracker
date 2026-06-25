@@ -1,7 +1,7 @@
 import type { BetterFetchOption } from '@better-fetch/fetch';
 import type { BootstrapResponseEnvelope, BootstrapStatus } from '@/types/api';
-import { client } from './client';
-import { handleApiError } from './helpers/handle-api-error';
+import { client } from '../client';
+import { handleApiError } from '../helpers/handle-api-error';
 
 /**
  * The HTTP client used to interact with the system bootstrap endpoint.
