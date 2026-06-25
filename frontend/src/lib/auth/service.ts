@@ -47,7 +47,6 @@ async function postSignIn(credentials: SignInCredentials): Promise<AuthSession> 
         if (!data) {
             handleApiError(new Error('sign-in returned an empty response'));
         }
-        // handleApiError throws, data is non-null here
         return data!;
     } catch (error) {
         handleApiError(error);
@@ -73,7 +72,6 @@ async function postSignUp(credentials: SignUpCredentials): Promise<AuthSession> 
         if (!data) {
             handleApiError(new Error('sign-up returned an empty response'));
         }
-        // handleApiError throws, data is non-null here
         return data!;
     } catch (error) {
         handleApiError(error);

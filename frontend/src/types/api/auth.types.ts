@@ -40,18 +40,14 @@ export interface SignUpCredentials {
 
 /**
  * Response shape returned by Authula's email-password sign-in and
- * sign-up routes when the `jwt.respond_json` route mapping is active.
- * The `accessToken` and `refreshToken` are JWTs we ignore on the client
- * because the session is established via an HTTP-only cookie.
+ * sign-up routes. The session itself is the HTTP-only cookie set by
+ * Authula's session plugin; only the `user` projection is useful on
+ * the client.
  * @interface AuthSession
  * @property {AuthUser} user - The authenticated Authula user.
- * @property {string} accessToken - JWT access token (server-set as cookie).
- * @property {string} refreshToken - JWT refresh token (server-set as cookie).
  */
 export interface AuthSession {
     user: AuthUser;
-    accessToken: string;
-    refreshToken: string;
 }
 
 /**
