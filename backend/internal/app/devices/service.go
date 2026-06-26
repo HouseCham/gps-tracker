@@ -46,11 +46,13 @@ func (s *Service) Create(ctx context.Context, input CreateInput) (*domain.Device
 	return s.repo.Create(ctx, input)
 }
 
-// UpdateName renames a device. The caller is responsible for ensuring the
-// authenticated user has at least editor access (enforced by HTTP middleware).
-// Returns domain.ErrNotFound if the device does not exist or is soft-deleted.
-func (s *Service) UpdateName(ctx context.Context, deviceID uuid.UUID, name string) (*domain.Device, error) {
-	return s.repo.UpdateName(ctx, deviceID, name)
+// Update applies the provided fields to a device. Name is required by the
+// DTO; VehicleType is optional (nil pointer means "leave as-is"). The caller
+// is responsible for ensuring the authenticated user has at least editor
+// access (enforced by HTTP middleware). Returns domain.ErrNotFound if the
+// device does not exist or is soft-deleted.
+func (s *Service) Update(ctx context.Context, deviceID uuid.UUID, input UpdateInput) (*domain.Device, error) {
+	return s.repo.Update(ctx, deviceID, input)
 }
 
 // SoftDelete marks the device as deleted by setting deleted_at = NOW().

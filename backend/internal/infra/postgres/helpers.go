@@ -28,13 +28,16 @@ func timestamptzToPtr(t pgtype.Timestamptz) *time.Time {
 	return &v
 }
 
-// deviceFromSqlc converts a sqlc-generated Device into the domain.Device.
-func deviceFromSqlc(d Device) *domain.Device {
+// toDomainDevice builds a domain.Device from the common device columns.
+// Every sqlc row type for the `devices` table shares this projection, so
+// the conversion lives in one place.
+func toDomainDevice(id pgtype.UUID, uuidFirmware, name string, vehicleType DeviceVehicleType, createdAt, lastSeenAt pgtype.Timestamptz) *domain.Device {
 	return &domain.Device{
-		ID:           uuidFromPgtype(d.ID),
-		UuidFirmware: d.UuidFirmware,
-		Name:         d.Name,
-		CreatedAt:    d.CreatedAt.Time,
-		LastSeenAt:   timestamptzToPtr(d.LastSeenAt),
+		ID:           uuidFromPgtype(id),
+		UuidFirmware: uuidFirmware,
+		Name:         name,
+		VehicleType:  domain.DeviceVehicleType(vehicleType),
+		CreatedAt:    createdAt.Time,
+		LastSeenAt:   timestamptzToPtr(lastSeenAt),
 	}
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/gofiber/fiber/v3/log"
 
 	"github.com/HouseCham/gps-tracker/backend/internal/app/devices"
+	"github.com/HouseCham/gps-tracker/backend/internal/domain"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/dto"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/middleware"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/response"
@@ -145,8 +146,13 @@ func (h *DevicesHandler) Update(c fiber.Ctx) error {
 		return middleware.BadRequestResponse(c, "invalid request body")
 	}
 
-	log.Debug(operation, "executing use case", "deviceID", id, "name", req.Name)
-	device, err := h.service.UpdateName(c.Context(), id, req.Name)
+	log.Debug(operation, "executing use case", "deviceID", id, "name", req.Name, "vehicleType", req.VehicleType)
+	input := devices.UpdateInput{Name: req.Name}
+	if req.VehicleType != "" {
+		vt := domain.DeviceVehicleType(req.VehicleType)
+		input.VehicleType = &vt
+	}
+	device, err := h.service.Update(c.Context(), id, input)
 	if err != nil {
 		log.Error(operation, "err", err, "deviceID", id)
 		return err
@@ -178,10 +184,11 @@ func (h *DevicesHandler) Create(c fiber.Ctx) error {
 		return middleware.BadRequestResponse(c, "invalid request body")
 	}
 
-	log.Debug(operation, "executing use case", "userID", user.ID, "uuidFirmware", req.UuidFirmware)
+	log.Debug(operation, "executing use case", "userID", user.ID, "uuidFirmware", req.UuidFirmware, "vehicleType", req.VehicleType)
 	device, err := h.service.Create(c.Context(), devices.CreateInput{
 		UuidFirmware: req.UuidFirmware,
 		Name:         req.Name,
+		VehicleType:  domain.DeviceVehicleType(req.VehicleType),
 		OwnerID:      user.ID,
 	})
 	if err != nil {
