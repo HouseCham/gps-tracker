@@ -84,7 +84,13 @@ export function DataTable({
                     </caption>
                 )}
                 <thead>
-                    <tr>{columns.map(renderHeadCell)}</tr>
+                    <tr>
+                        {
+                            loading ? (
+                                <th colSpan={columns.length} className="data-table__skeleton--head" aria-hidden="true" />
+                            ) : <>{columns.map(renderHeadCell)}</>
+                        }
+                    </tr>
                 </thead>
                 <tbody>
                     {loading ? (
