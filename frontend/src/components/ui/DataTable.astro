@@ -5,36 +5,22 @@ import type { DataTableColumn } from '@/types/components/ui';
  * @interface Props
  * @property {string | undefined} [caption] - Table caption.
  * @property {DataTableColumn[]} columns - Table columns.
- * @property {boolean} [loading=false] - Show loading indicator.
- * @property {boolean} [empty=false] - Show empty state.
- * @property {string} [emptyTitle='No records found'] - Empty state title.
- * @property {string} [emptyMessage='Nothing to show here yet.'] - Empty state message.
  * @property {string | undefined} [class] - Extra classes.
  */
 interface Props {
     caption?: string;
     columns: DataTableColumn[];
-    loading?: boolean;
-    empty?: boolean;
-    emptyTitle?: string;
-    emptyMessage?: string;
     class?: string;
 }
 
 const {
     caption,
     columns,
-    loading = false,
-    empty = false,
-    emptyTitle = 'No records found',
-    emptyMessage = 'Nothing to show here yet.',
     class: className,
 } = Astro.props;
 
 const rootClasses = [
     'data-table',
-    loading && 'is-loading',
-    empty && 'is-empty',
     className,
 ]
     .filter(Boolean)
@@ -84,29 +70,7 @@ const rootClasses = [
             </tr>
         </thead>
         <tbody>
-            {empty ? (
-                <tr class="data-table__empty-row">
-                    <td class="data-table__cell data-table__empty" colspan={columns.length}>
-                        <span class="data-table__empty-icon" aria-hidden="true">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg>
-                        </span>
-                        <span class="data-table__empty-title">{emptyTitle}</span>
-                        <span class="data-table__empty-msg">{emptyMessage}</span>
-                    </td>
-                </tr>
-            ) : loading ? (
-                Array.from({ length: 5 }).map(() => (
-                    <tr class="data-table__row data-table__row--skeleton" aria-hidden="true">
-                        {columns.map((col) => (
-                            <td class="data-table__cell">
-                                <span class:list={['data-table__skeleton', `data-table__skeleton--${col.key}`]} />
-                            </td>
-                        ))}
-                    </tr>
-                ))
-            ) : (
-                <slot />
-            )}
+            <slot />
         </tbody>
     </table>
 </div>
@@ -246,7 +210,7 @@ const rootClasses = [
     .data-table__skeleton--status {
         width: 64px;
         height: 20px;
-        border-radius: 9999px;
+        border-radius: var(--radius-pill);
     }
     .data-table__skeleton--role,
     .data-table__skeleton--actions,

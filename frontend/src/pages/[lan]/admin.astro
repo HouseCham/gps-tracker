@@ -5,7 +5,7 @@ import { getTranslation } from '@/i18n';
 //-- Types
 import type { Language } from '@/types';
 //-- Constants
-import { ADMIN_GALLERY_DEMO_STATS, ADMIN_GALLERY_DEMO_USERS, DEMO_USER } from '@/constants/components';
+import { ADMIN_GALLERY_DEMO_STATS, DEMO_USER } from '@/constants/components';
 //-- Components
 import MainLayout from '@/components/astro/layout/MainLayout.astro';
 import AdminStats from '@/components/admin/AdminStats.astro';
@@ -41,7 +41,7 @@ const translation = getTranslation(locale);
 
     <section class="admin-users">
         <h2 class="admin-users__title">{translation.admin.users}</h2>
-        <UserTable users={ADMIN_GALLERY_DEMO_USERS} />
+        <UserTable />
     </section>
 </MainLayout>
 

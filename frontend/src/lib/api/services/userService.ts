@@ -14,7 +14,7 @@ import type { BetterFetchOption } from '@better-fetch/fetch';
 /**
  * The HTTP client used to interact with the users API.
  */
-export function useUserService() {
+export const useUserService = () => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<ApiError | null>(null);
     const [users, setUsers] = useState<User[]>([]);

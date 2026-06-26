@@ -1,77 +1,23 @@
 ---
-//-- Types
-import type { UserTableItem } from '@/types/components/admin.types';
+//-- Constants
+import { USER_TABLE_COLUMNS } from '@/constants/components';
 //-- Components
 import DataTable from '@/components/ui/DataTable.astro';
-import Badge from '@/components/ui/Badge.astro';
-import { USER_ROLE_LABEL, USER_ROLE_VARIANT, USER_TABLE_COLUMNS } from '@/constants/components';
-import { Button } from '@/components/ui';
+import { UserTableRows } from '@/components/react/UserTableRows';
+
 /**
  * @interface Props
- * @property {UserTableItem[]} users - User table items.
- * @property {boolean} [loading=false] - Show loading indicator.
- * @property {boolean} [empty=false] - Show empty state.
- * @property {string} [emptyTitle='No users found'] - Empty state title.
- * @property {string} [emptyMessage='No users match the current filters.'] - Empty state message.
  * @property {string | undefined} [class] - Extra classes.
  */
 interface Props {
-    users: UserTableItem[];
-    loading?: boolean;
-    empty?: boolean;
-    emptyTitle?: string;
-    emptyMessage?: string;
     class?: string;
 }
 
-const {
-    users,
-    loading = false,
-    empty = false,
-    emptyTitle = 'No users found',
-    emptyMessage = 'No users match the current filters.',
-    class: className,
-} = Astro.props;
+const { class: className } = Astro.props;
 ---
 
-<DataTable
-    columns={USER_TABLE_COLUMNS}
-    loading={loading}
-    empty={empty}
-    emptyTitle={emptyTitle}
-    emptyMessage={emptyMessage}
-    class={className}
->
-    {
-        users.map((user) => (
-            <tr class="data-table__row user-table__row">
-                <td class="data-table__cell">
-                    <span class="user-table__name">{user.name}</span>
-                </td>
-                <td class="data-table__cell user-table__email">{user.email}</td>
-                <td class="data-table__cell">
-                    <Badge variant={USER_ROLE_VARIANT[user.role] ?? 'default'} size="sm" label={USER_ROLE_LABEL[user.role] ?? user.role} />
-                </td>
-                <td class="data-table__cell">
-                    <Badge
-                        variant={user.active ? 'success' : 'warning'}
-                        size="sm"
-                        label={user.active ? 'Active' : 'Inactive'}
-                    />
-                </td>
-                <td class="data-table__cell user-table__time">{user.createdAt}</td>
-                <td class="data-table__cell" data-align="center">
-                    {user.deviceCount ?? 0}
-                </td>
-                <td class="data-table__cell" data-align="right">
-                    <div class="user-table__actions">
-                        <Button variant="ghost" size="sm">Edit</Button>
-                        <Button variant="danger" size="sm">Delete</Button>
-                    </div>
-                </td>
-            </tr>
-        ))
-    }
+<DataTable columns={USER_TABLE_COLUMNS} class={className}>
+    <UserTableRows client:load />
 </DataTable>
 
 <style>
@@ -101,10 +47,10 @@ const {
         gap: 4px;
     }
 
-    td[data-align="center"] {
+    td[data-align='center'] {
         text-align: center;
     }
-    td[data-align="right"] {
+    td[data-align='right'] {
         text-align: right;
     }
 </style>

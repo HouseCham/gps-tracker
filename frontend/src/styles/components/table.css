@@ -1,0 +1,98 @@
+/* ─── Skeleton loading state ────────────────────────────────────────────────── */
+
+.data-table__row--skeleton td {
+    border-bottom: 1px solid var(--border);
+}
+
+.data-table__skeleton {
+    display: block;
+    height: 12px;
+    width: 100%;
+    border-radius: 4px;
+    background: linear-gradient(
+        90deg,
+        var(--surface-2) 0%,
+        var(--border) 50%,
+        var(--surface-2) 100%
+    );
+    background-size: 200% 100%;
+    animation: dt-shimmer 1.4s linear infinite;
+}
+
+.data-table__skeleton--name { width: 60%; }
+.data-table__skeleton--email { width: 80%; }
+.data-table__skeleton--status {
+    width: 64px;
+    height: 20px;
+    border-radius: 9999px;
+}
+.data-table__skeleton--role,
+.data-table__skeleton--actions,
+.data-table__skeleton--time { width: 50%; }
+.data-table__skeleton--devices {
+    width: 24px;
+    height: 12px;
+}
+
+@keyframes dt-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ─── Error state ───────────────────────────────────────────────────────────── */
+
+.data-table__empty--error {
+    text-align: center;
+    padding: 48px 16px;
+    color: var(--muted);
+}
+
+.data-table__empty-row td {
+    border-bottom: 0;
+}
+
+.data-table__empty--error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.data-table__empty--error .data-table__empty-icon {
+    color: var(--red);
+    background: var(--red-soft);
+}
+
+.data-table__empty-title {
+    color: var(--text);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.data-table__empty-msg {
+    font-size: 13px;
+    max-width: 36ch;
+    line-height: 1.5;
+}
+
+.data-table__retry {
+    margin-top: 8px;
+    padding: 6px 14px;
+    border: 0;
+    background: var(--surface-2);
+    color: var(--text);
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background var(--transition), color var(--transition);
+}
+
+.data-table__retry:hover {
+    background: var(--border);
+}
+
+.data-table__retry:focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+}
