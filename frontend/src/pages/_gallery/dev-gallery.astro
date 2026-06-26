@@ -3,8 +3,7 @@
 import { en } from '@/i18n';
 //-- Components
 import MainLayout from '@/components/astro/layout/MainLayout.astro';
-import { Button, Input } from '@/components/ui';
-import Badge from '@/components/ui/Badge.astro';
+import { Button, Input, Badge } from '@/components/ui';
 import StatusIndicator from '@/components/ui/StatusIndicator.astro';
 import KpiCard from '@/components/ui/KpiCard.astro';
 import BatteryIndicator from '@/components/ui/BatteryIndicator.astro';
@@ -146,12 +145,12 @@ const columns = [
 
     <section>
         <h2>DataTable — loading</h2>
-        <DataTable columns={columns} loading />
+        <DataTable columns={columns} />
     </section>
 
     <section>
         <h2>DataTable — empty</h2>
-        <DataTable columns={columns} empty emptyTitle="No matching users" emptyMessage="Try adjusting your filters." />
+        <DataTable columns={columns} />
     </section>
 
     <section>
