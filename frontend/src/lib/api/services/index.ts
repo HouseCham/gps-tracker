@@ -1,3 +1,3 @@
 export * from './bootstrap.service';
-export * from './devices.service';
+export * from './deviceService';
 export * from './userService';

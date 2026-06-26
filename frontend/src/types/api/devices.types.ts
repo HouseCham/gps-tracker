@@ -4,22 +4,48 @@ export interface Envelope<T> {
     data: T;
 }
 
+export type DeviceVehicleType =
+    | 'bicycle'
+    | 'motorcycle'
+    | 'car'
+    | 'truck'
+    | 'van'
+    | 'other';
+
 export interface Device {
     id: string;
     uuid_firmware: string;
     name: string;
+    vehicle_type: DeviceVehicleType;
     created_at: string;
     last_seen_at: string | null;
-    access_role?: 'owner' | 'editor' | 'viewer';
+}
+
+export interface DeviceWithAccess extends Device {
+    access_role: 'owner' | 'editor' | 'viewer';
+}
+
+export interface PaginationMeta {
+    page: number;
+    page_size: number;
+    total: number;
+    total_pages: number;
+}
+
+export interface DeviceListResponse {
+    items: DeviceWithAccess[];
+    pagination: PaginationMeta;
 }
 
 export interface CreateDeviceDto {
     uuid_firmware: string;
     name: string;
+    vehicle_type: DeviceVehicleType;
 }
 
 export interface UpdateDeviceDto {
     name: string;
+    vehicle_type?: DeviceVehicleType;
 }
 
 export interface DeviceAccess {
