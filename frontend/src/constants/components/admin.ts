@@ -2,7 +2,6 @@ import type { User } from '@/types/api';
 import type {
     AdminStatItem,
     DataTableColumn,
-    UserTableItem,
 } from '@/types/components';
 /**
  * @constant DEMO_USER
@@ -16,6 +15,8 @@ export const DEMO_USER: User = {
     lastname: 'Doe',
     role: 'super_admin',
     created_at: '2022-01-01T00:00:00.000Z',
+    email_verified: true,
+    must_change_password: false,
 };
 /**
  * @constant USER_TABLE_COLUMNS
@@ -86,66 +87,5 @@ export const ADMIN_GALLERY_DEMO_STATS: Array<AdminStatItem> = [
         trend: 'down' as const,
         trendValue: '-2 vs yesterday',
         variant: 'warning' as const,
-    },
-];
-/**
- * @constant ADMIN_GALLERY_DEMO_USERS
- * @description Demo users for the admin gallery
- * @type {UserTableItem[]}
- */
-export const ADMIN_GALLERY_DEMO_USERS: Array<UserTableItem> = [
-    {
-        id: 'U-001',
-        name: 'Alex Chen',
-        email: 'alex@meridian.io',
-        role: 'super_admin',
-        active: true,
-        createdAt: '2026-01-15',
-        deviceCount: 12,
-    },
-    {
-        id: 'U-002',
-        name: 'Maya Okafor',
-        email: 'm.okafor@meridian.io',
-        role: 'user',
-        active: true,
-        createdAt: '2026-02-03',
-        deviceCount: 8,
-    },
-    {
-        id: 'U-003',
-        name: 'Diego Ruiz',
-        email: 'd.ruiz@meridian.io',
-        role: 'user',
-        active: false,
-        createdAt: '2026-03-20',
-        deviceCount: 4,
-    },
-    {
-        id: 'U-004',
-        name: 'Sarah Kim',
-        email: 's.kim@meridian.io',
-        role: 'user',
-        active: true,
-        createdAt: '2026-04-11',
-        deviceCount: 15,
-    },
-    {
-        id: 'U-005',
-        name: 'James Wilson',
-        email: 'j.wilson@meridian.io',
-        role: 'user',
-        active: true,
-        createdAt: '2026-05-08',
-        deviceCount: 6,
-    },
-    {
-        id: 'U-006',
-        name: 'Elena Vasquez',
-        email: 'e.vasquez@meridian.io',
-        role: 'super_admin',
-        active: true,
-        createdAt: '2026-01-02',
-        deviceCount: 22,
     },
 ];

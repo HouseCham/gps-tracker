@@ -12,7 +12,7 @@ import type {
     SignUpCredentials,
 } from '@/types/api';
 //-- Utils
-import { handleApiError } from '@/lib/api/helpers/handle-api-error';
+import { handleApiError } from '@/lib/api/api-utils';
 import {
     clearUser,
     setAuthLoading,
@@ -100,9 +100,7 @@ async function fetchMe(): Promise<AuthUser | null> {
         );
         return data?.user ?? null;
     } catch (error) {
-        console.warn('[auth] fetchMe failed; treating session as anonymous', {
-            reason: error instanceof Error ? error.message : String(error),
-        });
+
         return null;
     }
 }
