@@ -68,6 +68,7 @@ Cookie: authula.session_token=<cookie>
         "id": "550e8400-e29b-41d4-a716-446655440000",
         "uuid_firmware": "esp32-001",
         "name": "Living Room GPS",
+        "vehicle_type": "car",
         "created_at": "2024-01-15T10:30:00Z",
         "last_seen_at": "2024-06-10T08:45:00Z",
         "access_role": "owner"
@@ -75,7 +76,8 @@ Cookie: authula.session_token=<cookie>
       {
         "id": "550e8400-e29b-41d4-a716-446655440001",
         "uuid_firmware": "esp32-002",
-        "name": "Car Tracker",
+        "name": "Bike Tracker",
+        "vehicle_type": "bicycle",
         "created_at": "2024-02-20T14:00:00Z",
         "last_seen_at": null,
         "access_role": "editor"
@@ -95,6 +97,7 @@ Cookie: authula.session_token=<cookie>
 - `id` — Device UUID
 - `uuid_firmware` — ESP32 firmware UUID (unique per device)
 - `name` — Human-readable device name
+- `vehicle_type` — Vehicle category: `bicycle`, `motorcycle`, `car`, `truck`, `van`, or `other`
 - `created_at` — ISO 8601 timestamp when device was registered
 - `last_seen_at` — ISO 8601 timestamp of last IoT ping (null if never seen)
 - `access_role` — User's role on this device: `owner`, `editor`, or `viewer`
@@ -130,6 +133,7 @@ Cookie: authula.session_token=<cookie>
     "id": "550e8400-e29b-41d4-a716-446655440000",
     "uuid_firmware": "esp32-001",
     "name": "Living Room GPS",
+    "vehicle_type": "car",
     "created_at": "2024-01-15T10:30:00Z",
     "last_seen_at": "2024-06-10T08:45:00Z"
   }
@@ -158,7 +162,8 @@ Content-Type: application/json
 
 {
   "uuid_firmware": "esp32-003",
-  "name": "Office Tracker"
+  "name": "Office Tracker",
+  "vehicle_type": "car"
 }
 ```
 
@@ -167,6 +172,7 @@ Content-Type: application/json
 |-------|------|----------|-------------|
 | `uuid_firmware` | string | Yes | Must be a valid UUID format |
 | `name` | string | Yes | Min 1 char, max 255 chars |
+| `vehicle_type` | string | Yes | One of: `bicycle`, `motorcycle`, `car`, `truck`, `van`, `other` |
 
 **Response `201 Created`**
 
@@ -178,6 +184,7 @@ Content-Type: application/json
     "id": "550e8400-e29b-41d4-a716-446655440002",
     "uuid_firmware": "esp32-003",
     "name": "Office Tracker",
+    "vehicle_type": "car",
     "created_at": "2024-06-14T12:00:00Z",
     "last_seen_at": null
   }
@@ -193,7 +200,7 @@ Content-Type: application/json
 
 ### PUT /api/v1/devices/:id
 
-Updates a device's display name.
+Updates a device's display name and/or vehicle type.
 
 **Authorization:** Requires `editor` or `owner` access role on the device.
 
@@ -205,7 +212,8 @@ Cookie: authula.session_token=<cookie>
 Content-Type: application/json
 
 {
-  "name": "New Device Name"
+  "name": "New Device Name",
+  "vehicle_type": "van"
 }
 ```
 
@@ -213,6 +221,7 @@ Content-Type: application/json
 | Field | Type | Required | Validation |
 |-------|------|----------|-------------|
 | `name` | string | Yes | Min 1 char, max 255 chars |
+| `vehicle_type` | string | No | One of: `bicycle`, `motorcycle`, `car`, `truck`, `van`, `other`. Omitting this field leaves the current value unchanged. |
 
 **Response `200 OK`**
 
@@ -224,6 +233,7 @@ Content-Type: application/json
     "id": "550e8400-e29b-41d4-a716-446655440000",
     "uuid_firmware": "esp32-001",
     "name": "New Device Name",
+    "vehicle_type": "van",
     "created_at": "2024-01-15T10:30:00Z",
     "last_seen_at": "2024-06-10T08:45:00Z"
   }

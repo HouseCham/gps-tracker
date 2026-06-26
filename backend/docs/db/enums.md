@@ -1,5 +1,43 @@
 # Custom Enum Types
 
+## device_vehicle_type
+
+Defined in migration `000013_add_device_vehicle_type.up.sql`.
+
+```sql
+CREATE TYPE device_vehicle_type AS ENUM ('bicycle', 'motorcycle', 'car', 'truck', 'van', 'other');
+```
+
+| Value | Description |
+|-------|-------------|
+| `bicycle` | Pedal bicycle |
+| `motorcycle` | Motorbike / scooter |
+| `car` | Standard passenger car |
+| `truck` | Commercial truck / lorry |
+| `van` | Van / light commercial vehicle |
+| `other` | Default for existing devices and unspecified vehicle types |
+
+### Usage
+
+Used as the `vehicle_type` column type in the `devices` table. The frontend maps this value to an icon. The Go mapping is:
+
+```go
+type DeviceVehicleType string
+
+const (
+    DeviceVehicleTypeBicycle    DeviceVehicleType = "bicycle"
+    DeviceVehicleTypeMotorcycle DeviceVehicleType = "motorcycle"
+    DeviceVehicleTypeCar        DeviceVehicleType = "car"
+    DeviceVehicleTypeTruck      DeviceVehicleType = "truck"
+    DeviceVehicleTypeVan        DeviceVehicleType = "van"
+    DeviceVehicleTypeOther     DeviceVehicleType = "other"
+)
+```
+
+All new devices must specify a `vehicle_type` at creation time. Existing devices default to `'other'`.
+
+---
+
 ## user_role
 
 Defined in migration `000002_create_user_role_enum.up.sql`.
