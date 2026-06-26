@@ -9,7 +9,7 @@ import { ADMIN_GALLERY_DEMO_STATS, DEMO_USER } from '@/constants/components';
 //-- Components
 import MainLayout from '@/components/astro/layout/MainLayout.astro';
 import AdminStats from '@/components/admin/AdminStats.astro';
-import UserTable from '@/components/admin/UserTable.astro';
+import { UserTable } from '@/components/admin/UserTable';
 /**
  * @type {GetStaticPaths}
  */
@@ -41,7 +41,11 @@ const translation = getTranslation(locale);
 
     <section class="admin-users">
         <h2 class="admin-users__title">{translation.admin.users}</h2>
-        <UserTable />
+        <UserTable
+            client:idle
+            locale={locale}
+            translation={translation}
+        />
     </section>
 </MainLayout>
 
