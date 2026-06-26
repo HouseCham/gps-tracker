@@ -2,11 +2,10 @@
 //-- Translations
 import { en } from '@/i18n';
 //-- Constants
-import { ADMIN_GALLERY_DEMO_STATS, ADMIN_GALLERY_DEMO_USERS } from '@/constants/components';
+import { ADMIN_GALLERY_DEMO_STATS } from '@/constants/components';
 //-- Components
 import MainLayout from '@/components/astro/layout/MainLayout.astro';
 import AdminStats from '@/components/admin/AdminStats.astro';
-import UserTable from '@/components/admin/UserTable.astro';
 ---
 
 <MainLayout
@@ -26,17 +25,17 @@ import UserTable from '@/components/admin/UserTable.astro';
 
     <section>
         <h2>UserTable — populated</h2>
-        <UserTable users={ADMIN_GALLERY_DEMO_USERS} />
+        <!-- <UserTable /> -->
     </section>
 
     <section>
         <h2>UserTable — empty</h2>
-        <UserTable users={[]} empty />
+        <!-- <UserTable /> -->
     </section>
 
     <section>
         <h2>UserTable — loading</h2>
-        <UserTable users={[]} loading />
+        <!-- <UserTable /> -->
     </section>
 </MainLayout>
 

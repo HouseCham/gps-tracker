@@ -3,22 +3,17 @@
 import { en } from '@/i18n';
 //-- Components
 import MainLayout from '@/components/astro/layout/MainLayout.astro';
-import { Button, Input } from '@/components/ui';
-import Badge from '@/components/ui/Badge.astro';
+import { Button, Input, Badge } from '@/components/ui';
 import StatusIndicator from '@/components/ui/StatusIndicator.astro';
 import KpiCard from '@/components/ui/KpiCard.astro';
 import BatteryIndicator from '@/components/ui/BatteryIndicator.astro';
 import SignalIndicator from '@/components/ui/SignalIndicator.astro';
-import DataTable from '@/components/ui/DataTable.astro';
 import EmptyState from '@/components/ui/EmptyState.astro';
-
-const columns = [
-    { key: 'name', label: 'Name', sortable: true },
-    { key: 'email', label: 'Email' },
-    { key: 'role', label: 'Role' },
-    { key: 'status', label: 'Status' },
-    { key: 'time', label: 'Updated' },
-];
+import {
+    DataTableDemo,
+    DataTableDemoLoading,
+    DataTableDemoEmpty,
+} from '@/components/react/DataTableDemo';
 ---
 
 <MainLayout
@@ -119,39 +114,17 @@ const columns = [
 
     <section>
         <h2>DataTable — default</h2>
-        <DataTable columns={columns}>
-            <tr class="data-table__row">
-                <td class="data-table__cell">Alex Chen</td>
-                <td class="data-table__cell"><span class="data-table__email">alex@meridian.io</span></td>
-                <td class="data-table__cell">Dispatcher</td>
-                <td class="data-table__cell"><Badge variant="success" label="Active" size="sm" /></td>
-                <td class="data-table__cell">2 min ago</td>
-            </tr>
-            <tr class="data-table__row">
-                <td class="data-table__cell">Maya Okafor</td>
-                <td class="data-table__cell"><span class="data-table__email">m.okafor@meridian.io</span></td>
-                <td class="data-table__cell">Fleet Manager</td>
-                <td class="data-table__cell"><Badge variant="success" label="Active" size="sm" /></td>
-                <td class="data-table__cell">12 min ago</td>
-            </tr>
-            <tr class="data-table__row">
-                <td class="data-table__cell">Diego Ruiz</td>
-                <td class="data-table__cell"><span class="data-table__email">d.ruiz@meridian.io</span></td>
-                <td class="data-table__cell">Operator</td>
-                <td class="data-table__cell"><Badge variant="warning" label="Away" size="sm" /></td>
-                <td class="data-table__cell">1 hr ago</td>
-            </tr>
-        </DataTable>
+        <DataTableDemo client:load />
     </section>
 
     <section>
         <h2>DataTable — loading</h2>
-        <DataTable columns={columns} loading />
+        <DataTableDemoLoading client:load />
     </section>
 
     <section>
         <h2>DataTable — empty</h2>
-        <DataTable columns={columns} empty emptyTitle="No matching users" emptyMessage="Try adjusting your filters." />
+        <DataTableDemoEmpty client:load />
     </section>
 
     <section>

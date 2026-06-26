@@ -82,12 +82,6 @@ export default defineConfig({
 });
 ```
 
-### Tailwind CSS (if used)
-
-- Use `@tailwindcss/vite` as the Vite plugin. The `@astrojs/tailwind` integration is **deprecated for Tailwind v4** — do not use it.
-- Define design tokens in CSS with `@theme {}` inside `src/styles/global.css`. There is no `tailwind.config.js` in v4.
-- Import `global.css` once in the base layout.
-
 ---
 
 ## TypeScript Conventions
@@ -195,16 +189,27 @@ When writing global utility classes or layout primitives, follow BEM naming:
 - Every React component file is `.tsx`. No `.jsx`.
 - Export one component per file. The component name must match the filename.
 - Define props as a TypeScript `interface` above the component. Avoid inline type literals.
+- Include documentation for interface props and the component itself, follow the next example:
 
 ```tsx
+/**
+ * Interface for Button component
+ * @interface ButtonProps
+ * @prop {string} label - The current label for
+ * [... rest of the docs]
+ */
 interface ButtonProps {
     label: string;
     variant?: 'primary' | 'secondary' | 'ghost';
     onClick?: () => void;
     disabled?: boolean;
 }
-
-export default function Button({
+/**
+ * Button component.
+ * @param {ButtonProps} props - The props for the component.
+ * @returns {JSX.Element} The rendered component.
+ */
+export function Button({
     label,
     variant = 'primary',
     onClick,
@@ -308,5 +313,8 @@ The project uses **ESLint** and **Prettier**. All code must pass both before bei
 | Prop drilling 3+ levels                  | Nano Stores or React Context                    |
 
 ---
+
+## Node commands
+If you want to use node commands (for example: "npm run lint"), use only pnpm. Don't use npm commands, only pnpm
 
 _This file is the source of truth for code conventions in this repository. When in doubt, the most readable, type-safe, and performance-conscious solution wins._

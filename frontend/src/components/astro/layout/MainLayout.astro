@@ -9,10 +9,7 @@ import type { SidebarNavItem, SidebarUser } from '@/types/layout';
 import Sidebar from '@/components/astro/Sidebar.astro';
 import TabBar from '@/components/astro/TabBar.astro';
 import Toolbar from '@/components/astro/Toolbar.astro';
-import {
-    AuthProvider,
-    ProtectedRoute
-} from '@/components/react/auth';
+import { AuthProvider, ProtectedRoute } from '@/components/react/auth';
 
 /**
  * @interface Props
@@ -97,11 +94,12 @@ const {
             })();
             (function () {
                 var stored = localStorage.getItem('language');
-                var lang = stored === 'es' || stored === 'en'
-                    ? stored
-                    : navigator.language.toLowerCase().startsWith('es')
-                      ? 'es'
-                      : 'en';
+                var lang =
+                    stored === 'es' || stored === 'en'
+                        ? stored
+                        : navigator.language.toLowerCase().startsWith('es')
+                          ? 'es'
+                          : 'en';
                 document.documentElement.dataset.language = lang;
             })();
         </script>

@@ -1,0 +1,59 @@
+/* ─── StatusIndicator ────────────────────────────────────────────────────────── */
+
+.status-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1;
+}
+
+.status-indicator__dot {
+    width: 8px;
+    height: 8px;
+}
+
+.status-indicator[data-status='offline'] .status-indicator__dot,
+.status-indicator[data-status='unknown'] .status-indicator__dot {
+    background: var(--muted);
+    box-shadow: none;
+}
+
+.status-indicator[data-status='never-seen'] .status-indicator__dot {
+    background: var(--amber);
+    box-shadow: 0 0 0 3px var(--amber-soft);
+}
+
+.status-indicator__label {
+    color: var(--text);
+}
+
+/* ─── BatteryIndicator ───────────────────────────────────────────────────────── */
+
+.battery-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.battery-indicator__label {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 500;
+}
+
+.battery-bar--empty {
+    animation: battery-flash 1.4s ease-in-out infinite;
+}
+
+@keyframes battery-flash {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0.35; }
+}
+
+/* ─── SignalIndicator ────────────────────────────────────────────────────────── */
+
+.signal-indicator {
+    gap: 2px;
+}
