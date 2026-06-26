@@ -38,4 +38,3 @@ func deviceFromSqlc(d Device) *domain.Device {
 		LastSeenAt:   timestamptzToPtr(d.LastSeenAt),
 	}
 }
-

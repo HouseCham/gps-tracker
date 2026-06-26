@@ -47,6 +47,42 @@ func (a *DevicesAdapter) ListForUser(ctx context.Context, userID uuid.UUID) ([]d
 	return result, nil
 }
 
+// ListForUserWithAccessPaginated returns a paginated list of devices the user has
+// access to, with their access role.
+func (a *DevicesAdapter) ListForUserWithAccessPaginated(ctx context.Context, userID uuid.UUID, limit, offset int) ([]domain.DeviceWithAccess, int, error) {
+	queries := New(a.pool)
+
+	count, err := queries.CountDevicesForUser(ctx, pgtypeUUID(userID))
+	if err != nil {
+		return nil, 0, wrapPgError(err)
+	}
+
+	rows, err := queries.ListDevicesForUserWithAccessPaginated(ctx, ListDevicesForUserWithAccessPaginatedParams{
+		UserID: pgtypeUUID(userID),
+		Limit:  int32(limit),
+		Offset: int32(offset),
+	})
+	if err != nil {
+		return nil, 0, wrapPgError(err)
+	}
+
+	result := make([]domain.DeviceWithAccess, 0, len(rows))
+	for _, r := range rows {
+		result = append(result, domain.DeviceWithAccess{
+			Device: domain.Device{
+				ID:           uuidFromPgtype(r.ID),
+				UuidFirmware: r.UuidFirmware,
+				Name:         r.Name,
+				CreatedAt:    r.CreatedAt.Time,
+				LastSeenAt:   timestamptzToPtr(r.LastSeenAt),
+			},
+			AccessRole: domain.AccessRole(r.AccessRole),
+		})
+	}
+
+	return result, int(count), nil
+}
+
 func (a *DevicesAdapter) ListForUserPaginated(ctx context.Context, userID uuid.UUID, limit, offset int) ([]domain.Device, int, error) {
 	queries := New(a.pool)
 

@@ -84,14 +84,17 @@ type Location struct {
 }
 
 type User struct {
-	ID        pgtype.UUID
-	Email     string
-	Role      UserRole
-	CreatedAt pgtype.Timestamptz
-	UpdatedAt pgtype.Timestamptz
-	DeletedAt pgtype.Timestamptz
-	Name      string
-	Lastname  string
+	ID                 pgtype.UUID
+	Email              string
+	Role               UserRole
+	CreatedAt          pgtype.Timestamptz
+	UpdatedAt          pgtype.Timestamptz
+	DeletedAt          pgtype.Timestamptz
+	Name               string
+	Lastname           string
+	MustChangePassword bool
+	EmailVerified      bool
+	Image              *string
 }
 
 type UserDeviceAccess struct {

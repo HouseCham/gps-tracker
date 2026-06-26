@@ -96,3 +96,21 @@ INNER JOIN user_device_access uda
   ON d.id = uda.device_id AND uda.deleted_at IS NULL
 WHERE uda.user_id = $1
   AND d.deleted_at IS NULL;
+
+-- name: ListDevicesForUserWithAccessPaginated :many
+-- Returns paginated devices the given user has access to, with the access role.
+-- Used by the device list endpoint with pagination.
+SELECT
+  d.id,
+  d.uuid_firmware,
+  d.name,
+  d.created_at,
+  d.last_seen_at,
+  uda.role AS access_role
+FROM devices d
+INNER JOIN user_device_access uda
+  ON d.id = uda.device_id AND uda.deleted_at IS NULL
+WHERE uda.user_id = $1
+  AND d.deleted_at IS NULL
+ORDER BY d.created_at DESC
+LIMIT $2 OFFSET $3;

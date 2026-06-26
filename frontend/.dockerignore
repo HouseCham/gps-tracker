@@ -1,0 +1,14 @@
+node_modules/
+dist/
+.git/
+.gitignore
+.astro/
+.env
+.env.production
+*.md
+Makefile
+.prettierrc
+eslint.config.js
+.vscode/
+project-overview.md
+wireframes.html

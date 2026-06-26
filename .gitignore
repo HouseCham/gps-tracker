@@ -6,6 +6,10 @@
 # Bind mounts (volumen persistente de Postgres)
 .data/
 
+# TLS certs (self-signed for local dev — generated via scripts/generate-certs.sh)
+nginx/certs/*.crt
+nginx/certs/*.key
+
 # Dependencias
 node_modules/
 
@@ -21,3 +25,6 @@ build/
 # OS
 .DS_Store
 Thumbs.db
+
+# Custom commands
+Makefile

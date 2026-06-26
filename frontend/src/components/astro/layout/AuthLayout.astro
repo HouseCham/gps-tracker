@@ -1,0 +1,91 @@
+---
+import '@/styles/global.css';
+import '@/styles/layout/main-layout.css';
+//-- Types
+import type { Language } from '@/types';
+//-- Components
+import {
+    AuthProvider,
+    PublicOnlyRoute
+} from '@/components/react/auth';
+import Toolbar from '@/components/astro/Toolbar.astro';
+
+/**
+ * @interface Props
+ * @property {Language} [locale='en'] - Current locale code.
+ * @property {string | undefined} [title] - Page title.
+ * @property {string | undefined} [class] - Extra classes.
+ */
+interface Props {
+    locale?: Language;
+    title?: string;
+    class?: string;
+}
+
+const { locale = 'en', title = 'GPS Tracker', class: className } = Astro.props;
+const classes = ['auth-layout', className].filter(Boolean).join(' ');
+---
+
+<html lang="en" data-theme="dark">
+    <head>
+        <meta charset="utf-8" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" href="/favicon.ico" />
+        <meta name="viewport" content="width=device-width" />
+        <meta name="generator" content={Astro.generator} />
+        <title>{title}</title>
+        <meta name="description" content="GPS Tracker App" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cal+Sans:wght@600&display=swap"
+        />
+    </head>
+    <body>
+        <AuthProvider client:load>
+            <PublicOnlyRoute client:load>
+                <Toolbar locale={locale} />
+                <div class={classes}>
+                    <div class="auth-layout__card">
+                        <slot />
+                    </div>
+                </div>
+            </PublicOnlyRoute>
+        </AuthProvider>
+    </body>
+</html>
+
+<style is:global>
+    *,
+    *::before,
+    *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: var(--font);
+        background: var(--bg);
+        color: var(--text);
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+</style>
+
+<style>
+    .auth-layout {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100dvh;
+        padding: 24px;
+        background: var(--bg);
+    }
+
+    .auth-layout__card {
+        width: 100%;
+        max-width: 400px;
+        background: var(--surface);
+        border: none;
+        border-radius: var(--radius-md);
+        padding: 32px;
+        box-shadow: var(--shadow-md);
+    }
+</style>

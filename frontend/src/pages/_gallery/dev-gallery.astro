@@ -1,0 +1,220 @@
+---
+//-- Translations
+import { en } from '@/i18n';
+//-- Components
+import MainLayout from '@/components/astro/layout/MainLayout.astro';
+import { Button, Input } from '@/components/ui';
+import Badge from '@/components/ui/Badge.astro';
+import StatusIndicator from '@/components/ui/StatusIndicator.astro';
+import KpiCard from '@/components/ui/KpiCard.astro';
+import BatteryIndicator from '@/components/ui/BatteryIndicator.astro';
+import SignalIndicator from '@/components/ui/SignalIndicator.astro';
+import DataTable from '@/components/ui/DataTable.astro';
+import EmptyState from '@/components/ui/EmptyState.astro';
+
+const columns = [
+    { key: 'name', label: 'Name', sortable: true },
+    { key: 'email', label: 'Email' },
+    { key: 'role', label: 'Role' },
+    { key: 'status', label: 'Status' },
+    { key: 'time', label: 'Updated' },
+];
+---
+
+<MainLayout
+    locale="en"
+    translation={en}
+    user={{ name: 'Gallery', role: 'Dev' }}
+    active="dashboard"
+    title="UI Primitives · Gallery"
+>
+    <h1>UI Primitives Gallery</h1>
+    <p class="hint">Visual verification of all stage 2 components.</p>
+
+    <section>
+        <h2>Button</h2>
+        <div class="row">
+            <Button variant="primary">Primary</Button>
+            <Button variant="secondary">Secondary</Button>
+            <Button variant="ghost">Ghost</Button>
+            <Button variant="danger">Danger</Button>
+            <Button variant="outline">Outline</Button>
+        </div>
+        <div class="row">
+            <Button variant="primary" size="sm">Small</Button>
+            <Button variant="primary" size="md">Medium</Button>
+            <Button variant="primary" size="lg">Large</Button>
+            <Button variant="primary" disabled>Disabled</Button>
+            <Button variant="primary" loading>Saving…</Button>
+        </div>
+    </section>
+
+    <section>
+        <h2>Input</h2>
+        <div class="grid-2">
+            <Input label="Email" name="email" type="email" placeholder="you@example.com" required />
+            <Input label="Password" name="password" type="password" placeholder="••••••••" />
+            <Input label="Search" name="q" type="search" placeholder="Filter devices…" />
+            <Input label="With error" name="err" type="text" value="bad" error="This field is required" />
+            <Input label="With hint" name="hint" type="text" hint="Must be at least 8 characters." />
+            <Input label="Disabled" name="dis" type="text" value="locked" disabled />
+        </div>
+    </section>
+
+    <section>
+        <h2>Badge</h2>
+        <div class="row">
+            <Badge variant="default" label="Default" />
+            <Badge variant="success" label="Success" />
+            <Badge variant="warning" label="Warning" />
+            <Badge variant="danger" label="Danger" />
+            <Badge variant="info" label="Info" />
+            <Badge variant="accent" label="Accent" />
+            <Badge variant="success" size="sm" label="Small" />
+        </div>
+    </section>
+
+    <section>
+        <h2>StatusIndicator</h2>
+        <div class="row">
+            <StatusIndicator status="online" />
+            <StatusIndicator status="offline" />
+            <StatusIndicator status="never-seen" />
+            <StatusIndicator status="unknown" />
+        </div>
+    </section>
+
+    <section>
+        <h2>KpiCard</h2>
+        <div class="grid-4">
+            <KpiCard icon="cpu" value={12} label="Total devices" trend="up" trendValue="+2 this week" />
+            <KpiCard icon="wifi" value={7} label="Online now" variant="success" trend="up" trendValue="+1" />
+            <KpiCard icon="wifi-off" value={4} label="Offline" variant="warning" />
+            <KpiCard icon="alert" value={1} label="Never seen" variant="danger" />
+        </div>
+    </section>
+
+    <section>
+        <h2>BatteryIndicator</h2>
+        <div class="row">
+            <BatteryIndicator level={78} />
+            <BatteryIndicator level={42} />
+            <BatteryIndicator level={15} />
+            <BatteryIndicator level={0} />
+            <BatteryIndicator level={100} showIcon />
+        </div>
+    </section>
+
+    <section>
+        <h2>SignalIndicator</h2>
+        <div class="row">
+            <SignalIndicator strength={5} />
+            <SignalIndicator strength={4} />
+            <SignalIndicator strength={3} />
+            <SignalIndicator strength={2} />
+            <SignalIndicator strength={1} />
+            <SignalIndicator strength={0} />
+        </div>
+    </section>
+
+    <section>
+        <h2>DataTable — default</h2>
+        <DataTable columns={columns}>
+            <tr class="data-table__row">
+                <td class="data-table__cell">Alex Chen</td>
+                <td class="data-table__cell"><span class="data-table__email">alex@meridian.io</span></td>
+                <td class="data-table__cell">Dispatcher</td>
+                <td class="data-table__cell"><Badge variant="success" label="Active" size="sm" /></td>
+                <td class="data-table__cell">2 min ago</td>
+            </tr>
+            <tr class="data-table__row">
+                <td class="data-table__cell">Maya Okafor</td>
+                <td class="data-table__cell"><span class="data-table__email">m.okafor@meridian.io</span></td>
+                <td class="data-table__cell">Fleet Manager</td>
+                <td class="data-table__cell"><Badge variant="success" label="Active" size="sm" /></td>
+                <td class="data-table__cell">12 min ago</td>
+            </tr>
+            <tr class="data-table__row">
+                <td class="data-table__cell">Diego Ruiz</td>
+                <td class="data-table__cell"><span class="data-table__email">d.ruiz@meridian.io</span></td>
+                <td class="data-table__cell">Operator</td>
+                <td class="data-table__cell"><Badge variant="warning" label="Away" size="sm" /></td>
+                <td class="data-table__cell">1 hr ago</td>
+            </tr>
+        </DataTable>
+    </section>
+
+    <section>
+        <h2>DataTable — loading</h2>
+        <DataTable columns={columns} loading />
+    </section>
+
+    <section>
+        <h2>DataTable — empty</h2>
+        <DataTable columns={columns} empty emptyTitle="No matching users" emptyMessage="Try adjusting your filters." />
+    </section>
+
+    <section>
+        <h2>EmptyState</h2>
+        <div class="surface">
+            <EmptyState
+                title="No devices yet"
+                message="Add your first GPS device to get started."
+            >
+                <Button variant="primary">Add Device</Button>
+            </EmptyState>
+        </div>
+    </section>
+</MainLayout>
+
+<style>
+    h1 {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 4px;
+    }
+    .hint {
+        color: var(--muted);
+        font-size: 14px;
+        margin-bottom: 24px;
+    }
+    section {
+        margin-bottom: 32px;
+    }
+    section h2 {
+        font-size: 14px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+        margin-bottom: 12px;
+    }
+    .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+    }
+    .grid-2 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        max-width: 640px;
+    }
+    .grid-4 {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+    }
+    .surface {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+    }
+    @media (max-width: 767.98px) {
+        .grid-2,
+        .grid-4 {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>

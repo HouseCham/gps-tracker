@@ -1,0 +1,120 @@
+---
+import '@/styles/layout/sidebar.css';
+//-- Types
+import type { Translation } from '@/i18n';
+import type { Language } from '@/types';
+import type { SidebarNavItem, SidebarUser } from '@/types/layout';
+//-- Components
+import {
+    LayoutDashboard,
+    Cpu,
+    ShieldCheck,
+    User,
+    MapPin,
+} from '@lucide/astro';
+import LogoutButton from '@/components/react/auth/LogoutButton';
+/**
+ * @interface Props
+ * @property {Language} locale - Current locale code ('en' | 'es').
+ * @property {Translation} translation - Translation bundle (en/es) used for nav labels.
+ * @property {SidebarNavItem} active - Active nav item, drives the .active highlight and aria-current.
+ * @property {SidebarUser} [user] - Current user for the sidebar footer card.
+ * @property {boolean} [showAdmin] - Whether to surface the Admin nav item (super_admin only).
+ */
+interface Props {
+    locale: Language;
+    translation: Translation;
+    active: SidebarNavItem;
+    user?: SidebarUser;
+    showAdmin?: boolean;
+}
+
+const { locale, translation, active, user, showAdmin = false } = Astro.props;
+
+const initials = user?.name
+    ? user.name
+          .split(/\s+/)
+          .map(part => part[0] ?? '')
+          .slice(0, 2)
+          .join('')
+          .toUpperCase()
+    : '?';
+
+const navItems: Array<{
+    key: SidebarNavItem;
+    href: string;
+    label: string;
+    Icon: typeof LayoutDashboard;
+}> = [
+    {
+        key: 'dashboard',
+        href: `/${locale}/`,
+        label: translation.nav.dashboard,
+        Icon: LayoutDashboard,
+    },
+    {
+        key: 'devices',
+        href: `/${locale}/devices/`,
+        label: translation.nav.devices,
+        Icon: Cpu,
+    },
+];
+if (showAdmin) {
+    navItems.push({
+        key: 'admin',
+        href: `/${locale}/admin/`,
+        label: translation.nav.admin,
+        Icon: ShieldCheck,
+    });
+}
+navItems.push({
+    key: 'profile',
+    href: `/${locale}/profile`,
+    label: translation.nav.profile,
+    Icon: User,
+});
+---
+
+<aside class="sidebar" aria-label={translation.layout.primaryNav}>
+    <a href={`/${locale}/`} class="sidebar__brand">
+        <span class="sidebar__logo" aria-hidden="true">
+            <MapPin size={16} stroke-width={2.5} />
+        </span>
+        <span class="sidebar__title">{translation.layout.appName}</span>
+    </a>
+
+    <nav class="sidebar__nav">
+        {
+            navItems.map(({ key, href, label, Icon }) => (
+                <a
+                    href={href}
+                    class:list={['nav-item', { active: active === key }]}
+                    aria-current={active === key ? 'page' : undefined}
+                >
+                    <Icon size={18} stroke-width={1.75} />
+                    <span>{label}</span>
+                </a>
+            ))
+        }
+    </nav>
+
+    <div class="sidebar__user">
+        <a
+            href={`/${locale}/profile`}
+            class="sidebar__user-card"
+            aria-label={translation.layout.userMenu}
+        >
+            <span class="avatar sidebar__avatar" aria-hidden="true"
+                >{initials}</span
+            >
+            <span class="sidebar__user-meta">
+                <span class="sidebar__user-name">{user?.name ?? 'User'}</span>
+                <span class="sidebar__user-role">{user?.role ?? 'Member'}</span>
+            </span>
+        </a>
+        <LogoutButton
+            client:load
+            ariaLabel={translation.nav.logout}
+        />
+    </div>
+</aside>
