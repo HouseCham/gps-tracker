@@ -34,6 +34,12 @@ export const es: Translation = {
             status: 'Estado',
             created: 'Creado',
             actions: 'Acciones',
+            devices: 'Dispositivos',
+            verified: 'Verificado',
+            unverified: 'Sin verificar',
+            editUser: 'Editar',
+            deleteUser: 'Eliminar',
+            failedToLoad: 'Error al cargar usuarios',
         },
         roles: {
             user: 'Usuario',

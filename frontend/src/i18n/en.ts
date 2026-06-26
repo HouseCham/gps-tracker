@@ -32,6 +32,12 @@ export const en = {
             status: 'Status',
             created: 'Created',
             actions: 'Actions',
+            devices: 'Devices',
+            verified: 'Verified',
+            unverified: 'Unverified',
+            editUser: 'Edit',
+            deleteUser: 'Delete',
+            failedToLoad: 'Failed to load users',
         },
         roles: {
             user: 'User',

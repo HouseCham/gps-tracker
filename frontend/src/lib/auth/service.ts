@@ -96,10 +96,10 @@ async function fetchMe(): Promise<AuthUser | null> {
             '/me',
             {
                 method: 'GET',
-            } as BetterFetchOption,
+            },
         );
         return data?.user ?? null;
-    } catch (error) {
+    } catch {
 
         return null;
     }

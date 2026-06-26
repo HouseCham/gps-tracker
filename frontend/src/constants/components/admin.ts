@@ -28,9 +28,9 @@ export const USER_TABLE_COLUMNS: DataTableColumn[] = [
     { key: 'email', label: 'Email' },
     { key: 'role', label: 'Role' },
     { key: 'status', label: 'Status' },
-    { key: 'created', label: 'Created' },
+    { key: 'created', label: 'Created', align: 'center' },
     { key: 'devices', label: 'Devices', align: 'center' },
-    { key: 'actions', label: 'Actions', align: 'right' },
+    { key: 'actions', label: 'Actions', align: 'center' },
 ];
 /**
  * @constant USER_ROLE_VARIANT
