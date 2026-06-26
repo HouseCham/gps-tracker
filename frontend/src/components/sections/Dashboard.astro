@@ -4,7 +4,6 @@ import type { KpiBarItem, ActivityItem, DeviceTableItem } from '@/types/componen
 import type { Language } from '@/types';
 import KpiBar from '@/components/sections/KpiBar.astro';
 import ActivityFeed from '@/components/sections/ActivityFeed.astro';
-import DeviceTable from '@/components/device/DeviceTable.astro';
 
 interface Props {
     locale: Language;
@@ -47,13 +46,13 @@ const classes = ['dashboard', className].filter(Boolean).join(' ');
             />
         </div>
         <div class="dashboard__table">
-            <DeviceTable
+            <!-- <DeviceTable
                 locale={locale}
                 translation={translation}
                 devices={devices}
                 loading={devicesLoading}
                 empty={devicesEmpty}
-            />
+            /> -->
         </div>
     </div>
 </div>

@@ -1,20 +1,36 @@
+import { useState } from 'react';
+//-- Types
 import type {
     ApiError,
-    // CreateUserDto,
+    CreateUserDto,
     Envelope,
-    // UpdateUserDto,
     User,
-    // UserWithDevices,
 } from '@/types/api';
-import { handleApiError } from '@/lib/api/api-utils';
-import { useState } from 'react';
-import { apiClient } from '@/lib/auth/client';
 import type { BetterFetchOption } from '@better-fetch/fetch';
-
+//-- Utils
+import { handleApiError } from '@/lib/api/api-utils';
+//-- Http Client
+import { apiClient } from '@/lib/auth/client';
+/**
+ * The interface for the user service.
+ * @interface IUserService
+ * @property {boolean} isLoading - Whether the service is currently loading data.
+ * @property {ApiError | null} error - The error that occurred, if any.
+ * @property {User[]} users - The list of users.
+ * @method getAllUsers - Retrieves a list of all users.
+ * @method createUser - Creates a new user.
+ */
+interface IUserService {
+    isLoading: boolean;
+    error: ApiError | null;
+    users: User[];
+    getAllUsers: () => Promise<void>;
+    createUser: (payload: CreateUserDto) => Promise<void>;
+}
 /**
  * The HTTP client used to interact with the users API.
  */
-export const useUserService = () => {
+export const useUserService = (): IUserService => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<ApiError | null>(null);
     const [users, setUsers] = useState<User[]>([]);
@@ -25,7 +41,6 @@ export const useUserService = () => {
     function resetState(): void {
         setIsLoading(false);
         setError(null);
-        setUsers([]);
     };
     /**
      * Retrieves a list of all users.
@@ -34,6 +49,7 @@ export const useUserService = () => {
     async function getAllUsers(): Promise<void> {
         resetState();
         setIsLoading(true);
+        setUsers([]);
         try {
             const { data: response } = await apiClient<Envelope<User[]> | null>(
                 '/users',
@@ -68,35 +84,34 @@ export const useUserService = () => {
      * @returns {Promise<User>} A promise that resolves to the created user object.
      * @throws {ApiError} An error object containing the error status, message, and code.
      */
-    // function create(payload: CreateUserDto): Promise<User> {
-
-    // }
-
-    /**
-     * Updates an existing user.
-     * @param {string} id - The ID of the user to update.
-     * @param {UpdateUserDto} payload - The fields to update.
-     * @returns {Promise<User>} A promise that resolves to the updated user object.
-     * @throws {ApiError} An error object containing the error status, message, and code.
-     */
-    // function update(id: string, payload: UpdateUserDto): Promise<User> {
-
-    // }
-
-    /**
-     * Deletes a user by their ID.
-     * @param {string} id - The ID of the user to delete.
-     * @returns {Promise<void>} A promise that resolves once the user is deleted.
-     * @throws {ApiError} An error object containing the error status, message, and code.
-     */
-    // function delete(id: string): Promise<void> {
-
-    // }
+    async function createUser(payload: CreateUserDto): Promise<void> {
+        resetState();
+        setIsLoading(true);
+        try {
+            const { data: response } = await apiClient<Envelope<User> | null>(
+                '/users',
+                {
+                    method: 'POST',
+                    body: payload
+                } as BetterFetchOption
+            );
+            if (!response || !response.data) {
+                handleApiError(new Error('create user returned a null response'));
+            };
+            setUsers([...users, response.data]);
+        } catch (error) {
+            handleApiError(error);
+        } finally {
+            setIsLoading(false);
+        }
+    }
 
     return {
         isLoading,
         error,
         users,
-        getAllUsers
+        //-- actions
+        getAllUsers,
+        createUser
     }
 };

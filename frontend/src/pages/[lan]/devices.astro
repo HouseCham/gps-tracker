@@ -8,7 +8,6 @@ import type { Language } from '@/types';
 import { DEMO_USER, SECTION_GALLERY_DEMO_DEVICES } from '@/constants/components';
 //-- Components
 import MainLayout from '@/components/astro/layout/MainLayout.astro';
-import DeviceTable from '@/components/device/DeviceTable.astro';
 import KpiBar from '@/components/sections/KpiBar.astro';
 //-- Utils
 import { getDemoKpiItems } from '@/lib';
@@ -45,11 +44,11 @@ const kpiItems = getDemoKpiItems(translation);
     />
 
     <section class="devices-section">
-        <DeviceTable 
+        <!-- <DeviceTable 
             locale={locale} 
             translation={translation}
             devices={SECTION_GALLERY_DEMO_DEVICES} 
-        />
+        /> -->
     </section>
 </MainLayout>
 
