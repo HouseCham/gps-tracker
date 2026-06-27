@@ -8,6 +8,7 @@ import type { AdminStatItem, DataTableColumn } from "@/types/components";
 export function getDeviceTableColumns(t: Translation): DataTableColumn[] {
     return [
         { key: 'name', label: t.device.table.name, sortable: true },
+        { key: 'vehicleType', label: t.device.table.vehicleType },
         { key: 'status', label: t.device.table.status },
         { key: 'lastSeen', label: t.device.table.lastSeen },
         { key: 'battery', label: t.device.table.battery, align: 'center' },

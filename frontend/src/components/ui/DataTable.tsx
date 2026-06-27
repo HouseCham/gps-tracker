@@ -27,6 +27,58 @@ interface DataTableProps {
     emptyMessage?: string;
     children?: ReactNode;
 }
+
+/**
+ * @constant EMPTY_COLUMNS
+ * @description Single-column placeholder used by loading/empty states so the
+ * table renders a valid header row without committing to real columns.
+ */
+export const EMPTY_COLUMNS: readonly DataTableColumn[] = [
+    { key: 'empty-header', label: '' },
+];
+
+/**
+ * Interface for TableStatus component
+ * @interface TableStatusProps
+ * @param {'loading' | 'empty'} mode - Which skeleton/empty state to render.
+ * @param {string} [className] - Extra class appended to the class list.
+ * @param {string} [title] - Empty-state title (used when mode === 'empty').
+ * @param {string} [message] - Empty-state message (used when mode === 'empty').
+ */
+interface TableStatusProps {
+    mode: 'loading' | 'empty';
+    className?: string;
+    title?: string;
+    message?: string;
+}
+
+/**
+ * @function TableStatus
+ * @description Shared loading/empty wrapper around DataTable so callers don't
+ * repeat the placeholder-columns + flag plumbing. Adds one when a second table
+ * needs a third bespoke loading/empty branch.
+ * @param {TableStatusProps} props - The props for the component.
+ * @returns {JSX.Element} The rendered DataTable in the requested state.
+ */
+export function TableStatus({
+    mode,
+    className,
+    title,
+    message,
+}: TableStatusProps): JSX.Element {
+    if (mode === 'loading') {
+        return <DataTable columns={EMPTY_COLUMNS} className={className} loading />;
+    }
+    return (
+        <DataTable
+            columns={EMPTY_COLUMNS}
+            className={className}
+            empty
+            emptyTitle={title}
+            emptyMessage={message}
+        />
+    );
+}
 /**
  * @function DataTable
  * @param {DataTableProps} props - The props for the DataTable component.

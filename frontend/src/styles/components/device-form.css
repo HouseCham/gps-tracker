@@ -79,6 +79,7 @@
     display: flex;
     gap: 8px;
     padding-top: 4px;
+    justify-content: flex-end;
 }
 
 .device-form__btn {

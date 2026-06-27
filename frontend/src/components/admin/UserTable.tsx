@@ -7,7 +7,7 @@ import type { Language } from '@/types';
 import type { DataTableColumn } from '@/types/components/ui';
 import type { Translation } from '@/i18n';
 //-- Components
-import { DataTable } from '@/components/ui/DataTable';
+import { DataTable, TableStatus } from '@/components/ui/DataTable';
 import { Badge, Button } from '@/components/ui';
 import Modal from '@/components/react/ui/Modal';
 import { CreateUserForm } from '@/components/react/form';
@@ -100,18 +100,15 @@ export function UserTable({
         setCreateOpen(false);
     }
 
-    if (isLoading) {
-        return <DataTable columns={columns} className={className} loading />;
-    }
+    if (isLoading) return <TableStatus mode="loading" className={className} />;
 
     if (error) {
         return (
-            <DataTable
-                columns={columns}
+            <TableStatus
+                mode="empty"
                 className={className}
-                empty
-                emptyTitle={t.failedToLoad}
-                emptyMessage={error.message}
+                title={t.failedToLoad}
+                message={error.message}
             />
         );
     }

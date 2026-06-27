@@ -284,6 +284,12 @@
     gap: 4px;
 }
 
+.device-table__toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 16px;
+}
+
 /* ─── User table ───────────────────────────────────────────────────────────── */
 
 .user-table__row td {

@@ -4,6 +4,7 @@ import { useId, useState } from 'react';
 import type { ReactElement, SyntheticEvent } from 'react';
 //-- Types
 import type { DeviceFormStrings, DeviceFormValues } from '@/types/components';
+import type { DeviceVehicleType } from '@/types/api';
 //-- Constants
 import { UUID_REGEX } from '@/constants';
 /**
@@ -14,15 +15,29 @@ import { UUID_REGEX } from '@/constants';
  * @param {Function} onDelete - The function to call when the device is deleted.
  * @param {boolean} saving - Whether the form is saving.
  * @param {DeviceFormStrings} strings - The strings to use in the form.
+ * @param {Record<DeviceVehicleType, string>} vehicleTypes - Localized labels for each vehicle type.
  */
 export interface DeviceFormProps {
-    device?: { id: string; name: string; uuid_firmware: string };
+    device?: { id: string; name: string; uuid_firmware: string; vehicle_type: DeviceVehicleType };
     onSubmit: (data: DeviceFormValues) => void;
     onCancel: () => void;
     onDelete?: (id: string) => void;
     saving?: boolean;
     strings?: DeviceFormStrings;
+    vehicleTypes?: Record<DeviceVehicleType, string>;
 }
+/**
+ * @constant VEHICLE_TYPE_OPTIONS
+ * @description The ordered list of selectable vehicle types.
+ */
+const VEHICLE_TYPE_OPTIONS: DeviceVehicleType[] = [
+    'bicycle',
+    'motorcycle',
+    'car',
+    'truck',
+    'van',
+    'other',
+];
 /**
  * @function DeviceForm
  * @param {DeviceFormProps} props - The props for the component.
@@ -35,40 +50,60 @@ export default function DeviceForm({
     onDelete,
     saving = false,
     strings,
+    vehicleTypes,
 }: DeviceFormProps): ReactElement {
     const nameId = useId();
     const uuidId = useId();
+    const vehicleTypeId = useId();
     const isEdit = !!device;
 
     const [name, setName] = useState(device?.name ?? '');
     const [uuid, setUuid] = useState(device?.uuid_firmware ?? '');
-    const [errors, setErrors] = useState<{ name?: string; uuid?: string }>({});
+    const [vehicleType, setVehicleType] = useState<DeviceVehicleType>(
+        device?.vehicle_type ?? 'other',
+    );
+    const [errors, setErrors] = useState<{
+        name?: string;
+        uuid?: string;
+        vehicleType?: string;
+    }>({});
     const [deleteConfirm, setDeleteConfirm] = useState(false);
 
-    const s = {
-        ...({
-            title: 'Create Device',
-            nameLabel: 'Name',
-            namePlaceholder: 'Delivery Van #3',
-            uuidLabel: 'UUID',
-            uuidPlaceholder: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
-            nameRequired: 'Name is required',
-            uuidRequired: 'UUID is required',
-            uuidInvalid: 'UUID is invalid',
-            save: 'Save',
-            saving: 'Saving',
-            cancel: 'Cancel',
-            deleteConfirm: 'Are you sure you want to delete this device?',
-            deleteDevice: 'Delete Device',
-        } as DeviceFormStrings),
+    const s: DeviceFormStrings = {
+        title: 'Create Device',
+        nameLabel: 'Name',
+        namePlaceholder: 'Delivery Van #3',
+        uuidLabel: 'UUID',
+        uuidPlaceholder: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+        vehicleTypeLabel: 'Vehicle type',
+        vehicleTypeRequired: 'Vehicle type is required',
+        nameRequired: 'Name is required',
+        uuidRequired: 'UUID is required',
+        uuidInvalid: 'UUID is invalid',
+        save: 'Save',
+        saving: 'Saving',
+        cancel: 'Cancel',
+        deleteConfirm: 'Are you sure you want to delete this device?',
+        deleteDevice: 'Delete Device',
         ...strings,
     };
 
+    const defaultVehicleLabels: Record<DeviceVehicleType, string> = {
+        bicycle: 'Bicycle',
+        motorcycle: 'Motorcycle',
+        car: 'Car',
+        truck: 'Truck',
+        van: 'Van',
+        other: 'Other',
+    };
+    const vtLabels = vehicleTypes ?? defaultVehicleLabels;
+
     function validate(): boolean {
-        const next: { name?: string; uuid?: string } = {};
+        const next: { name?: string; uuid?: string; vehicleType?: string } = {};
         if (!name.trim()) next.name = s.nameRequired;
         if (!uuid.trim()) next.uuid = s.uuidRequired;
         else if (!UUID_REGEX.test(uuid.trim())) next.uuid = s.uuidInvalid;
+        if (!vehicleType) next.vehicleType = s.vehicleTypeRequired;
         setErrors(next);
         return Object.keys(next).length === 0;
     }
@@ -78,9 +113,12 @@ export default function DeviceForm({
      */
     function handleSubmit(e: SyntheticEvent<HTMLFormElement>): void {
         e.preventDefault();
-        e.preventDefault();
         if (!validate()) return;
-        onSubmit({ name: name.trim(), uuid_firmware: uuid.trim() });
+        onSubmit({
+            name: name.trim(),
+            uuid_firmware: uuid.trim(),
+            vehicle_type: vehicleType,
+        });
     }
     /**
      * Handles the deletion of the device
@@ -95,8 +133,6 @@ export default function DeviceForm({
 
     return (
         <form className="device-form" onSubmit={handleSubmit} noValidate>
-            <h2 className="device-form__title">{s.title}</h2>
-
             <div
                 className={`device-form__field ${errors.name ? 'device-form__field--error' : ''}`}
             >
@@ -155,6 +191,41 @@ export default function DeviceForm({
                         role="alert"
                     >
                         {errors.uuid}
+                    </p>
+                )}
+            </div>
+
+            <div
+                className={`device-form__field ${errors.vehicleType ? 'device-form__field--error' : ''}`}
+            >
+                <label className="device-form__label" htmlFor={vehicleTypeId}>
+                    {s.vehicleTypeLabel}
+                </label>
+                <select
+                    id={vehicleTypeId}
+                    className="device-form__input"
+                    value={vehicleType}
+                    onChange={e => {
+                        setVehicleType(e.target.value as DeviceVehicleType);
+                        setErrors(p => ({ ...p, vehicleType: undefined }));
+                    }}
+                    disabled={saving}
+                    aria-invalid={!!errors.vehicleType}
+                    aria-describedby={errors.vehicleType ? `${vehicleTypeId}-err` : undefined}
+                >
+                    {VEHICLE_TYPE_OPTIONS.map(vt => (
+                        <option key={vt} value={vt}>
+                            {vtLabels[vt]}
+                        </option>
+                    ))}
+                </select>
+                {errors.vehicleType && (
+                    <p
+                        id={`${vehicleTypeId}-err`}
+                        className="device-form__error"
+                        role="alert"
+                    >
+                        {errors.vehicleType}
                     </p>
                 )}
             </div>

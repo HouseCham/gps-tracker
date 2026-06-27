@@ -5,10 +5,11 @@ import { getTranslation } from '@/i18n';
 //-- Types
 import type { Language } from '@/types';
 //-- Constants
-import { DEMO_USER, SECTION_GALLERY_DEMO_DEVICES } from '@/constants/components';
+import { DEMO_USER } from '@/constants/components';
 //-- Components
 import MainLayout from '@/components/astro/layout/MainLayout.astro';
 import KpiBar from '@/components/sections/KpiBar.astro';
+import { DeviceTable } from '@/components/react/table/DeviceTable';
 //-- Utils
 import { getDemoKpiItems } from '@/lib';
 /**
@@ -38,17 +39,17 @@ const kpiItems = getDemoKpiItems(translation);
         </div>
     </header>
 
-    <KpiBar 
+    <KpiBar
         items={kpiItems}
         title={translation.section.kpiBar.title}
     />
 
     <section class="devices-section">
-        <!-- <DeviceTable 
-            locale={locale} 
+        <DeviceTable
+            client:idle
+            locale={locale}
             translation={translation}
-            devices={SECTION_GALLERY_DEMO_DEVICES} 
-        /> -->
+        />
     </section>
 </MainLayout>
 

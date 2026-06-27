@@ -1,3 +1,4 @@
+import type { DeviceVehicleType } from '@/types/api';
 import type { MarkerStatus } from './map.types';
 /**
  * @interface DeviceTableItem
@@ -40,21 +41,25 @@ export interface DeviceCardItem {
  * @param {string} id - The ID of the device.
  * @param {string} name - The name of the device.
  * @param {string} uuid_firmware - The UUID of the firmware.
+ * @param {DeviceVehicleType} vehicle_type - The vehicle category.
  */
 export interface DeviceFormValues {
     name: string;
     uuid_firmware: string;
+    vehicle_type: DeviceVehicleType;
 }
 /**
  * @interface DeviceData
  * @param {string} id - The ID of the device.
  * @param {string} name - The name of the device.
  * @param {string} uuid_firmware - The UUID of the firmware.
+ * @param {DeviceVehicleType} vehicle_type - The vehicle category.
  */
 export interface DeviceData {
     id: string;
     name: string;
     uuid_firmware: string;
+    vehicle_type: DeviceVehicleType;
 }
 /**
  * @interface DeviceFormStrings
@@ -63,6 +68,8 @@ export interface DeviceData {
  * @param {string} namePlaceholder - The placeholder for the name field.
  * @param {string} uuidLabel - The label for the UUID field.
  * @param {string} uuidPlaceholder - The placeholder for the UUID field.
+ * @param {string} vehicleTypeLabel - The label for the vehicle type field.
+ * @param {string} vehicleTypeRequired - The error message for the vehicle type field.
  * @param {string} nameRequired - The error message for the name field.
  * @param {string} uuidRequired - The error message for the UUID field.
  * @param {string} uuidInvalid - The error message for the UUID field.
@@ -78,6 +85,8 @@ export interface DeviceFormStrings {
     namePlaceholder?: string;
     uuidLabel?: string;
     uuidPlaceholder?: string;
+    vehicleTypeLabel?: string;
+    vehicleTypeRequired?: string;
     nameRequired?: string;
     uuidRequired?: string;
     uuidInvalid?: string;
