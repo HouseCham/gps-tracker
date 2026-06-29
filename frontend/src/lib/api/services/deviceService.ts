@@ -4,6 +4,7 @@ import type {
     ApiError,
     CreateDeviceDto,
     Device,
+    DeviceDetail,
     DeviceListResponse,
     DeviceWithAccess,
     Envelope,
@@ -20,9 +21,9 @@ import { apiClient } from '@/lib/auth/client';
  * @property {boolean} isLoading - Whether the service is currently loading data.
  * @property {ApiError | null} error - The error that occurred, if any.
  * @property {DeviceWithAccess[]} devices - The list of devices the authenticated user has access to.
- * @property {Device | null} device - The single device retrieved by ID (if any).
+ * @property {DeviceDetail | null} device - The single device retrieved by ID (if any), including its user-access list.
  * @method getAllDevices - Retrieves a paginated list of devices for the authenticated user.
- * @method getDeviceById - Retrieves a single device by its ID.
+ * @method getDeviceById - Retrieves a single device by its ID along with the users that have access to it.
  * @method createDevice - Creates a new device.
  * @method updateDevice - Updates an existing device's name and/or vehicle type.
  * @method deleteDevice - Soft-deletes a device by its ID.
@@ -31,7 +32,7 @@ interface IDeviceService {
     isLoading: boolean;
     error: ApiError | null;
     devices: DeviceWithAccess[];
-    device: Device | null;
+    device: DeviceDetail | null;
     getAllDevices: (page?: number, pageSize?: number) => Promise<void>;
     getDeviceById: (id: string) => Promise<void>;
     createDevice: (payload: CreateDeviceDto) => Promise<void>;
@@ -46,7 +47,7 @@ export const useDeviceService = (): IDeviceService => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<ApiError | null>(null);
     const [devices, setDevices] = useState<DeviceWithAccess[]>([]);
-    const [device, setDevice] = useState<Device | null>(null);
+    const [device, setDevice] = useState<DeviceDetail | null>(null);
 
     /**
      * Resets the state of the service to its initial values.
@@ -90,7 +91,8 @@ export const useDeviceService = (): IDeviceService => {
     }
 
     /**
-     * Retrieves a single device by its ID.
+     * Retrieves a single device by its ID, including the list of every user
+     * that has access to it.
      * @param {string} id - The ID of the device to retrieve.
      * @returns {Promise<void>} Resolves when the device is fetched and state is updated.
      */
@@ -99,7 +101,7 @@ export const useDeviceService = (): IDeviceService => {
         setIsLoading(true);
         setDevice(null);
         try {
-            const { data: response } = await apiClient<Envelope<Device> | null>(
+            const { data: response } = await apiClient<Envelope<DeviceDetail> | null>(
                 `/devices/${id}`,
                 {
                     method: 'GET',
@@ -174,9 +176,10 @@ export const useDeviceService = (): IDeviceService => {
                     d.id === id ? { ...d, ...response!.data } : d,
                 ),
             );
-            // Update the single-device state if it matches
+            // Update the single-device state if it matches; preserve fields
+            // the PUT response does not carry (users, access_role).
             if (device && device.id === id) {
-                setDevice(response!.data);
+                setDevice({ ...device, ...response!.data });
             }
         } catch (error) {
             handleApiError(error);

@@ -6,7 +6,7 @@ import type { ReactElement, SyntheticEvent } from 'react';
 import type { DeviceFormStrings, DeviceFormValues } from '@/types/components';
 import type { DeviceVehicleType } from '@/types/api';
 //-- Constants
-import { UUID_REGEX } from '@/constants';
+import { UUID_REGEX, VEHICLE_TYPE_OPTIONS } from '@/constants';
 /**
  * @interface DeviceFormProps
  * @param {DeviceFormValues} device - The device to edit.
@@ -27,23 +27,11 @@ export interface DeviceFormProps {
     vehicleTypes?: Record<DeviceVehicleType, string>;
 }
 /**
- * @constant VEHICLE_TYPE_OPTIONS
- * @description The ordered list of selectable vehicle types.
- */
-const VEHICLE_TYPE_OPTIONS: DeviceVehicleType[] = [
-    'bicycle',
-    'motorcycle',
-    'car',
-    'truck',
-    'van',
-    'other',
-];
-/**
  * @function DeviceForm
  * @param {DeviceFormProps} props - The props for the component.
  * @returns {ReactElement} The rendered component.
  */
-export default function DeviceForm({
+export function DeviceForm({
     device,
     onSubmit,
     onCancel,
@@ -206,7 +194,10 @@ export default function DeviceForm({
                     className="device-form__input"
                     value={vehicleType}
                     onChange={e => {
-                        setVehicleType(e.target.value as DeviceVehicleType);
+                        const value = e.target.value;
+                        if ((VEHICLE_TYPE_OPTIONS as readonly string[]).includes(value)) {
+                            setVehicleType(value as DeviceVehicleType);
+                        }
                         setErrors(p => ({ ...p, vehicleType: undefined }));
                     }}
                     disabled={saving}

@@ -25,6 +25,10 @@ export interface DeviceWithAccess extends Device {
     access_role: 'owner' | 'editor' | 'viewer';
 }
 
+export interface DeviceDetail extends DeviceWithAccess {
+    users: DeviceAccessListItem[];
+}
+
 export interface PaginationMeta {
     page: number;
     page_size: number;

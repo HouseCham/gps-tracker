@@ -10,8 +10,8 @@ import type { Translation } from '@/i18n';
 //-- Components
 import { DataTable, TableStatus } from '@/components/ui/DataTable';
 import { Badge, Button } from '@/components/ui';
+import { DeviceTypeIcon, DeviceForm } from '@/components/react/device';
 import Modal from '@/components/react/ui/Modal';
-import DeviceForm from '@/components/react/device/DeviceForm';
 //-- Icons
 import { Pencil, Plus, Trash } from 'lucide-react';
 //-- Utils
@@ -140,11 +140,7 @@ export function DeviceTable({
                                 </td>
                                 {/* Device type */}
                                 <td className="data-table__cell">
-                                    <Badge
-                                        variant="default"
-                                        size="sm"
-                                        label={t.vehicleTypes[device.vehicle_type]}
-                                    />
+                                    <DeviceTypeIcon type={device.vehicle_type} />
                                 </td>
                                 {/* Device status */}
                                 <td className="data-table__cell">
@@ -159,14 +155,6 @@ export function DeviceTable({
                                     {device.last_seen_at
                                         ? formatDate(locale, device.last_seen_at)
                                         : translation.device.neverSeen}
-                                </td>
-                                {/* Battery */}
-                                <td className="data-table__cell is-align-center">
-                                    {t.notAvailable}
-                                </td>
-                                {/* Signal */}
-                                <td className="data-table__cell is-align-center">
-                                    {t.notAvailable}
                                 </td>
                                 {/* Actions */}
                                 <td className="data-table__cell is-align-right">

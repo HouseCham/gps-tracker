@@ -11,8 +11,6 @@ export function getDeviceTableColumns(t: Translation): DataTableColumn[] {
         { key: 'vehicleType', label: t.device.table.vehicleType },
         { key: 'status', label: t.device.table.status },
         { key: 'lastSeen', label: t.device.table.lastSeen },
-        { key: 'battery', label: t.device.table.battery, align: 'center' },
-        { key: 'signal', label: t.device.table.signal, align: 'center' },
         { key: 'actions', label: t.device.table.actions, align: 'right' },
     ];
 };

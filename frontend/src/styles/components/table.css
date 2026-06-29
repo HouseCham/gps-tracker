@@ -279,6 +279,12 @@
     white-space: nowrap;
 }
 
+.device-type-icon {
+    display: inline-flex;
+    align-items: center;
+    color: var(--muted);
+}
+
 .device-table__actions {
     display: inline-flex;
     gap: 4px;
