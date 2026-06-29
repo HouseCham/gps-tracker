@@ -31,6 +31,15 @@ type DeviceWithAccessResponse struct {
 	AccessRole string `json:"access_role"`
 }
 
+// DeviceDetailResponse is the body of GET /api/v1/devices/:id. It pairs the
+// caller's view of the device (including their own access role) with the list
+// of every user that currently has access to it, so the frontend can render
+// the access-management panel without a second round-trip.
+type DeviceDetailResponse struct {
+	DeviceWithAccessResponse
+	Users []UserAccessOnDeviceResponse `json:"users"`
+}
+
 type DeviceListResponse struct {
 	Items      []DeviceWithAccessResponse `json:"items"`
 	Pagination PaginationMeta             `json:"pagination"`
@@ -53,5 +62,23 @@ func DeviceWithAccessFromDomain(d *domain.DeviceWithAccess) DeviceWithAccessResp
 	return DeviceWithAccessResponse{
 		DeviceResponse: DeviceFromDomain(&d.Device),
 		AccessRole:     string(d.AccessRole),
+	}
+}
+
+// DeviceDetailFromDomain converts a *domain.DeviceWithAccess and the list of
+// users that have access to it into a DeviceDetailResponse.
+func DeviceDetailFromDomain(d *domain.DeviceWithAccess, users []domain.UserWithAccessOnDevice) DeviceDetailResponse {
+	userDTOs := make([]UserAccessOnDeviceResponse, 0, len(users))
+	for _, u := range users {
+		userDTOs = append(userDTOs, UserAccessOnDeviceResponse{
+			UserID:          u.UserID.String(),
+			Email:           u.Email,
+			Role:            string(u.AccessRole),
+			AccessGrantedAt: u.AccessGrantedAt,
+		})
+	}
+	return DeviceDetailResponse{
+		DeviceWithAccessResponse: DeviceWithAccessFromDomain(d),
+		Users:                    userDTOs,
 	}
 }

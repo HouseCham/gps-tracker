@@ -182,7 +182,7 @@ func (ta *TestApp) registerRoutes() {
 
 func (ta *TestApp) getDevicesHandler() *handlers.DevicesHandler {
 	if ta.DevicesHandler == nil {
-		ta.DevicesHandler = handlers.NewDevicesHandler(ta.DevicesService)
+		ta.DevicesHandler = handlers.NewDevicesHandler(ta.DevicesService, ta.AccessService)
 	}
 	return ta.DevicesHandler
 }

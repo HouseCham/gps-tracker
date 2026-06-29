@@ -112,7 +112,9 @@ Cookie: authula.session_token=<cookie>
 
 ### GET /api/v1/devices/:id
 
-Retrieves a single device by ID. Returns 404 if the device does not exist OR the user has no access to it (intentional security through obscurity — avoids revealing whether an ID exists).
+Retrieves a single device by ID, including the caller's access role and the full list of users that currently have access to it. Returns 404 if the device does not exist OR the user has no access to it (intentional security through obscurity — avoids revealing whether an ID exists).
+
+The `users` array lets the frontend render the access-management panel without a second round-trip; the owner's UI typically hides the grant/revoke controls when `access_role` is not `owner`.
 
 **Authorization:** Any authenticated user with at least `viewer` access to the device.
 
@@ -135,10 +137,41 @@ Cookie: authula.session_token=<cookie>
     "name": "Living Room GPS",
     "vehicle_type": "car",
     "created_at": "2024-01-15T10:30:00Z",
-    "last_seen_at": "2024-06-10T08:45:00Z"
+    "last_seen_at": "2024-06-10T08:45:00Z",
+    "access_role": "owner",
+    "users": [
+      {
+        "user_id": "550e8400-e29b-41d4-a716-446655440000",
+        "email": "owner@example.com",
+        "role": "owner",
+        "access_granted_at": "2026-06-10T08:00:00Z"
+      },
+      {
+        "user_id": "660e8400-e29b-41d4-a716-446655440001",
+        "email": "viewer@example.com",
+        "role": "viewer",
+        "access_granted_at": "2026-06-14T12:00:00Z"
+      }
+    ]
   }
 }
 ```
+
+**Fields (`data`):**
+- `id` — Device UUID
+- `uuid_firmware` — ESP32 firmware UUID (unique per device)
+- `name` — Human-readable device name
+- `vehicle_type` — Vehicle category: `bicycle`, `motorcycle`, `car`, `truck`, `van`, or `other`
+- `created_at` — ISO 8601 timestamp when device was registered
+- `last_seen_at` — ISO 8601 timestamp of last IoT ping (null if never seen)
+- `access_role` — Caller's role on this device: `owner`, `editor`, or `viewer`
+- `users` — Array of every user that has (non-deleted) access to the device, including the owner
+
+**Fields (`users[]`):**
+- `user_id` — User UUID
+- `email` — User's email at the time the grant was loaded
+- `role` — Role the user holds on the device: `owner`, `editor`, or `viewer`
+- `access_granted_at` — ISO 8601 timestamp when the grant was created
 
 **Error Responses**
 - `400` — Invalid device ID format
