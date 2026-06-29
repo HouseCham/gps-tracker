@@ -1,12 +1,14 @@
 ---
 //- Types
 import type { DeviceDetailData, ActivityItem } from '@/types/components';
+//-- Translations
+import { getTranslation } from '@/i18n';
+import type { Language } from '@/types';
 //-- Components
 import ActivityFeed from '@/components/sections/ActivityFeed.astro';
-import StatusIndicator from '@/components/ui/StatusIndicator.astro';
 import BatteryIndicator from '@/components/ui/BatteryIndicator.astro';
 import SignalIndicator from '@/components/ui/SignalIndicator.astro';
-import { Badge } from '@/components/ui';
+import { Badge, StatusIndicator } from '@/components/ui';
 /**
  * @interface Props
  * @property {DeviceDetailData} device - Device detail data.
@@ -19,6 +21,7 @@ interface Props {
     activities: ActivityItem[];
     activityTitle?: string;
     class?: string;
+    locale?: Language;
 }
 
 const {
@@ -26,9 +29,14 @@ const {
     activities,
     activityTitle,
     class: className,
+    locale = 'en',
 } = Astro.props;
 
+const translation = getTranslation(locale);
 const classes = ['device-detail', className].filter(Boolean).join(' ');
+
+const deviceStatus = device.status === 'online' ? 'online' : 'offline';
+const statusLabel = deviceStatus === 'online' ? translation.device.online : translation.device.offline;
 ---
 
 <article class={classes}>
@@ -48,7 +56,7 @@ const classes = ['device-detail', className].filter(Boolean).join(' ');
                     <div class="device-detail__field">
                         <dt class="device-detail__label">Status</dt>
                         <dd class="device-detail__value">
-                            <StatusIndicator status={device.status} />
+                            <StatusIndicator status={deviceStatus} label={statusLabel} />
                         </dd>
                     </div>
                     <div class="device-detail__field">

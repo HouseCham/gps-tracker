@@ -4,7 +4,7 @@ import { en } from '@/i18n';
 //-- Components
 import MainLayout from '@/components/astro/layout/MainLayout.astro';
 import { Button, Input, Badge } from '@/components/ui';
-import StatusIndicator from '@/components/ui/StatusIndicator.astro';
+import { StatusIndicator } from '@/components/ui';
 import KpiCard from '@/components/ui/KpiCard.astro';
 import BatteryIndicator from '@/components/ui/BatteryIndicator.astro';
 import SignalIndicator from '@/components/ui/SignalIndicator.astro';
@@ -72,10 +72,8 @@ import {
     <section>
         <h2>StatusIndicator</h2>
         <div class="row">
-            <StatusIndicator status="online" />
-            <StatusIndicator status="offline" />
-            <StatusIndicator status="never-seen" />
-            <StatusIndicator status="unknown" />
+            <StatusIndicator status="online" label={en.device.online} />
+            <StatusIndicator status="offline" label={en.device.offline} />
         </div>
     </section>
 

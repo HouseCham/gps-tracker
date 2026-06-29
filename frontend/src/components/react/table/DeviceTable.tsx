@@ -10,11 +10,10 @@ import type { Translation } from '@/i18n';
 //-- Components
 import { DataTable, TableStatus } from '@/components/ui/DataTable';
 import { Badge, Button } from '@/components/ui';
-import { StatusIndicator } from '@/components/ui/StatusIndicator';
 import Modal from '@/components/react/ui/Modal';
 import DeviceForm from '@/components/react/device/DeviceForm';
 //-- Icons
-import { Plus } from 'lucide-react';
+import { Pencil, Plus, Trash } from 'lucide-react';
 //-- Utils
 import { formatDate } from '@/lib';
 import { getDeviceTableColumns } from '@/lib/device-utils';
@@ -33,8 +32,8 @@ const ONLINE_THRESHOLD_MS = 5 * 60 * 1000;
  * @param {string | null} lastSeenAt - ISO timestamp of the last IoT ping.
  * @returns {StatusVariant} 'online' | 'offline' | 'never-seen'.
  */
-function statusFromLastSeen(lastSeenAt: string | null): 'online' | 'offline' | 'never-seen' {
-    if (!lastSeenAt) return 'never-seen';
+function statusFromLastSeen(lastSeenAt: string | null): 'online' | 'offline' {
+    if (!lastSeenAt) return 'offline';
     const last = new Date(lastSeenAt).getTime();
     if (Number.isNaN(last)) return 'offline';
     return Date.now() - last <= ONLINE_THRESHOLD_MS ? 'online' : 'offline';
@@ -106,8 +105,6 @@ export function DeviceTable({
             />
         );
     }
-
-    // -- Populated or empty state
     return (
         <>
             <div className="device-table__toolbar">
@@ -137,9 +134,11 @@ export function DeviceTable({
                                 key={device.id}
                                 className="data-table__row device-table__row"
                             >
+                                {/* Device name */}
                                 <td className="data-table__cell">
                                     <span className="device-table__name">{device.name}</span>
                                 </td>
+                                {/* Device type */}
                                 <td className="data-table__cell">
                                     <Badge
                                         variant="default"
@@ -147,36 +146,36 @@ export function DeviceTable({
                                         label={t.vehicleTypes[device.vehicle_type]}
                                     />
                                 </td>
+                                {/* Device status */}
                                 <td className="data-table__cell">
-                                    <StatusIndicator status={status} />
+                                    <Badge
+                                        variant={status === 'online' ? 'success' : 'danger'}
+                                        size="sm"
+                                        label={status === 'online' ? translation.device.online : translation.device.offline}
+                                    />
                                 </td>
-                                <td
-                                    className="data-table__cell device-table__time"
-                                    data-align="left"
-                                >
+                                {/* Device last seen */}
+                                <td className="data-table__cell device-table__time">
                                     {device.last_seen_at
                                         ? formatDate(locale, device.last_seen_at)
                                         : translation.device.neverSeen}
                                 </td>
-                                <td
-                                    className="data-table__cell is-align-center"
-                                    data-align="center"
-                                >
+                                {/* Battery */}
+                                <td className="data-table__cell is-align-center">
                                     {t.notAvailable}
                                 </td>
-                                <td
-                                    className="data-table__cell is-align-center"
-                                    data-align="center"
-                                >
+                                {/* Signal */}
+                                <td className="data-table__cell is-align-center">
                                     {t.notAvailable}
                                 </td>
-                                <td className="data-table__cell" data-align="right">
+                                {/* Actions */}
+                                <td className="data-table__cell is-align-right">
                                     <div className="device-table__actions">
                                         <Button variant="ghost" size="sm">
-                                            {translation.device.editDevice}
+                                            <Pencil />
                                         </Button>
                                         <Button variant="danger" size="sm">
-                                            {translation.device.deleteDevice}
+                                            <Trash />
                                         </Button>
                                     </div>
                                 </td>

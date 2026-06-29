@@ -2,10 +2,10 @@
 //-- Translations
 import { en } from '@/i18n';
 //-- Types
-import { DEVICE_GALLERY_DEMO_DEVICES, DEVICE_GALLERY_DEMO_CARD_DEVICES } from '@/constants/components';
+import { DEVICE_GALLERY_DEMO_CARD_DEVICES } from '@/constants/components';
 //-- Components
 import MainLayout from '@/components/astro/layout/MainLayout.astro';
-import DeviceCard from '@/components/device/DeviceCard.astro';
+import DeviceCard from '@/components/astro/card/DeviceCard.astro';
 import DeviceFormDemo from '@/components/react/device/DeviceFormGallery';
 ---
 
@@ -26,12 +26,10 @@ import DeviceFormDemo from '@/components/react/device/DeviceFormGallery';
 
     <section>
         <h2>DeviceTable — empty</h2>
-        
     </section>
 
     <section>
         <h2>DeviceTable — loading</h2>
-        
     </section>
 
     <section>
