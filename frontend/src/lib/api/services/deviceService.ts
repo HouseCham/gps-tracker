@@ -66,21 +66,24 @@ export const useDeviceService = (): IDeviceService => {
      */
     async function getAllDevices(
         page: number = 1,
-        pageSize: number = 20,
+        pageSize: number = 20
     ): Promise<void> {
         resetState();
         setIsLoading(true);
         setDevices([]);
         try {
-            const { data: response } = await apiClient<Envelope<DeviceListResponse> | null>(
-                '/devices',
-                {
-                    method: 'GET',
-                    query: { page, page_size: pageSize },
-                },
-            );
+            const { data: response } =
+                await apiClient<Envelope<DeviceListResponse> | null>(
+                    '/devices',
+                    {
+                        method: 'GET',
+                        query: { page, page_size: pageSize },
+                    }
+                );
             if (!response) {
-                handleApiError(new Error('get all devices returned a null response'));
+                handleApiError(
+                    new Error('get all devices returned a null response')
+                );
             }
             setDevices(response!.data.items);
         } catch (error) {
@@ -101,14 +104,17 @@ export const useDeviceService = (): IDeviceService => {
         setIsLoading(true);
         setDevice(null);
         try {
-            const { data: response } = await apiClient<Envelope<DeviceDetail> | null>(
-                `/devices/${id}`,
-                {
-                    method: 'GET',
-                },
-            );
+            const { data: response } =
+                await apiClient<Envelope<DeviceDetail> | null>(
+                    `/devices/${id}`,
+                    {
+                        method: 'GET',
+                    }
+                );
             if (!response) {
-                handleApiError(new Error('get device returned a null response'));
+                handleApiError(
+                    new Error('get device returned a null response')
+                );
             }
             setDevice(response!.data);
         } catch (error) {
@@ -132,10 +138,12 @@ export const useDeviceService = (): IDeviceService => {
                 {
                     method: 'POST',
                     body: payload,
-                },
+                }
             );
             if (!response || !response.data) {
-                handleApiError(new Error('create device returned a null response'));
+                handleApiError(
+                    new Error('create device returned a null response')
+                );
             }
             // Optimistically add the new device to the list as a DeviceWithAccess
             const newDeviceWithAccess: DeviceWithAccess = {
@@ -156,7 +164,10 @@ export const useDeviceService = (): IDeviceService => {
      * @param {UpdateDeviceDto} payload - The fields to update.
      * @returns {Promise<void>} Resolves when the device is updated and state is updated.
      */
-    async function updateDevice(id: string, payload: UpdateDeviceDto): Promise<void> {
+    async function updateDevice(
+        id: string,
+        payload: UpdateDeviceDto
+    ): Promise<void> {
         resetState();
         setIsLoading(true);
         try {
@@ -165,16 +176,16 @@ export const useDeviceService = (): IDeviceService => {
                 {
                     method: 'PUT',
                     body: payload,
-                },
+                }
             );
             if (!response || !response.data) {
-                handleApiError(new Error('update device returned a null response'));
+                handleApiError(
+                    new Error('update device returned a null response')
+                );
             }
             // Update the device in the list if it is present there
-            setDevices((prev) =>
-                prev.map((d) =>
-                    d.id === id ? { ...d, ...response!.data } : d,
-                ),
+            setDevices(prev =>
+                prev.map(d => (d.id === id ? { ...d, ...response!.data } : d))
             );
             // Update the single-device state if it matches; preserve fields
             // the PUT response does not carry (users, access_role).
@@ -197,14 +208,11 @@ export const useDeviceService = (): IDeviceService => {
         resetState();
         setIsLoading(true);
         try {
-            await apiClient<Envelope<null> | null>(
-                `/devices/${id}`,
-                {
-                    method: 'DELETE',
-                },
-            );
+            await apiClient<Envelope<null> | null>(`/devices/${id}`, {
+                method: 'DELETE',
+            });
             // Remove the deleted device from the list
-            setDevices((prev) => prev.filter((d) => d.id !== id));
+            setDevices(prev => prev.filter(d => d.id !== id));
             // Clear single-device state if it matches
             if (device && device.id === id) {
                 setDevice(null);

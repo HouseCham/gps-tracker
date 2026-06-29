@@ -1,5 +1,9 @@
 import type { Translation } from '@/i18n';
-import type { Coordinate, DeviceMapRoutePoint, MarkerStatus } from '@/types/components';
+import type {
+    Coordinate,
+    DeviceMapRoutePoint,
+    MarkerStatus,
+} from '@/types/components';
 /**
  * Project a latitude and longitude onto a 100x100 grid
  * @param {number} lat - The latitude to project.
@@ -44,7 +48,9 @@ export function getPathFromRoute(route: DeviceMapRoutePoint[]): string {
  * @param {Translation} t - The translation object.
  * @returns {Record<MarkerStatus, string>} The labels for the map status markers.
  */
-export function getMapStatusLabels(t: Translation): Record<MarkerStatus, string> {
+export function getMapStatusLabels(
+    t: Translation
+): Record<MarkerStatus, string> {
     return {
         online: t.device.online,
         offline: t.device.offline,

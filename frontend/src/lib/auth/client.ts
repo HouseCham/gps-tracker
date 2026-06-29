@@ -19,7 +19,7 @@ export const authClient = createFetch({
 });
 /**
  * The HTTP client used to interact with the API.
- * 
+ *
  * @type {typeof import('@better-fetch/fetch').createFetch}
  */
 export const apiClient = createFetch({

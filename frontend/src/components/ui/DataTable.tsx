@@ -67,7 +67,9 @@ export function TableStatus({
     message,
 }: TableStatusProps): JSX.Element {
     if (mode === 'loading') {
-        return <DataTable columns={EMPTY_COLUMNS} className={className} loading />;
+        return (
+            <DataTable columns={EMPTY_COLUMNS} className={className} loading />
+        );
     }
     return (
         <DataTable
@@ -131,22 +133,27 @@ export function DataTable({
         <div className="data-table__scroll">
             <table className={rootClasses}>
                 {caption && (
-                    <caption className="data-table__caption">
-                        {caption}
-                    </caption>
+                    <caption className="data-table__caption">{caption}</caption>
                 )}
                 <thead>
                     <tr>
-                        {
-                            loading ? (
-                                <th colSpan={columns.length} className="data-table__skeleton--head" aria-hidden="true" />
-                            ) : <>{columns.map(renderHeadCell)}</>
-                        }
+                        {loading ? (
+                            <th
+                                colSpan={columns.length}
+                                className="data-table__skeleton--head"
+                                aria-hidden="true"
+                            />
+                        ) : (
+                            <>{columns.map(renderHeadCell)}</>
+                        )}
                     </tr>
                 </thead>
                 <tbody>
                     {loading ? (
-                        <tr className="data-table__empty-row" aria-hidden="true">
+                        <tr
+                            className="data-table__empty-row"
+                            aria-hidden="true"
+                        >
                             <td
                                 className="data-table__cell data-table__empty"
                                 colSpan={columns.length}

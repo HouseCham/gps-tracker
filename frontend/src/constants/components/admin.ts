@@ -1,8 +1,5 @@
 import type { User } from '@/types/api';
-import type {
-    AdminStatItem,
-    DataTableColumn,
-} from '@/types/components';
+import type { AdminStatItem, DataTableColumn } from '@/types/components';
 /**
  * @constant DEMO_USER
  * @description Demo user for the admin gallery

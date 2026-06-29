@@ -58,9 +58,12 @@ export function UserTable({
 }: UserTableProps): JSX.Element {
     const {
         //-- state
-        error, isLoading, users,
+        error,
+        isLoading,
+        users,
         //-- actions
-        getAllUsers, createUser
+        getAllUsers,
+        createUser,
     } = useUserService();
     const t = translation.admin.userTable;
     const createStrings = translation.admin.createUser;
@@ -128,10 +131,15 @@ export function UserTable({
             </div>
             {/* Users Table */}
             <DataTable columns={columns} className={className}>
-                {users.map((user) => (
-                    <tr key={user.id} className="data-table__row user-table__row">
+                {users.map(user => (
+                    <tr
+                        key={user.id}
+                        className="data-table__row user-table__row"
+                    >
                         <td className="data-table__cell">
-                            <span className="user-table__name">{user.name}</span>
+                            <span className="user-table__name">
+                                {user.name}
+                            </span>
                         </td>
                         <td className="data-table__cell user-table__email">
                             {user.email}
@@ -145,15 +153,27 @@ export function UserTable({
                         </td>
                         <td className="data-table__cell">
                             <Badge
-                                variant={user.email_verified ? 'success' : 'warning'}
+                                variant={
+                                    user.email_verified ? 'success' : 'warning'
+                                }
                                 size="sm"
-                                label={user.email_verified ? t.verified : t.unverified}
+                                label={
+                                    user.email_verified
+                                        ? t.verified
+                                        : t.unverified
+                                }
                             />
                         </td>
-                        <td className="data-table__cell user-table__time is-align-center" data-align="center">
+                        <td
+                            className="data-table__cell user-table__time is-align-center"
+                            data-align="center"
+                        >
                             {formatDate(locale, user.created_at)}
                         </td>
-                        <td className="data-table__cell is-align-center" data-align="center">
+                        <td
+                            className="data-table__cell is-align-center"
+                            data-align="center"
+                        >
                             {0}
                         </td>
                         <td className="data-table__cell" data-align="center">

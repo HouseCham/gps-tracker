@@ -63,7 +63,9 @@ export function CreateUserForm({
      * Handles the form submission.
      * @param {SyntheticEvent<HTMLFormElement>} e - The event.
      */
-    async function handleSubmit(e: SyntheticEvent<HTMLFormElement>): Promise<void> {
+    async function handleSubmit(
+        e: SyntheticEvent<HTMLFormElement>
+    ): Promise<void> {
         e.preventDefault();
         if (!validate()) return;
         setSubmitError(undefined);
@@ -76,7 +78,9 @@ export function CreateUserForm({
         try {
             await onSubmit(dto);
         } catch (err) {
-            const apiError = isApiError(err) ? err : { message: 'Create user failed' };
+            const apiError = isApiError(err)
+                ? err
+                : { message: 'Create user failed' };
             setSubmitError(apiError.message);
         }
     }

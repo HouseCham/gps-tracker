@@ -1,7 +1,7 @@
 export interface User {
     id: string;
     email: string;
-    email_verified: true,
+    email_verified: true;
     name: string;
     lastname: string;
     role: 'user' | 'super_admin';

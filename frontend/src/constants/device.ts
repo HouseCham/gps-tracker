@@ -1,4 +1,4 @@
-import type { DeviceVehicleType } from "@/types/api";
+import type { DeviceVehicleType } from '@/types/api';
 
 /**
  * @constant VEHICLE_TYPE_OPTIONS

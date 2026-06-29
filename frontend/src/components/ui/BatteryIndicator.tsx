@@ -50,7 +50,9 @@ export function BatteryIndicator({
                 <div className={colorClass} style={{ width: `${clamped}%` }} />
             </div>
             <span className="battery-text">{clamped}%</span>
-            {showIcon && <span className="battery-indicator__label">Battery</span>}
+            {showIcon && (
+                <span className="battery-indicator__label">Battery</span>
+            )}
         </div>
     );
 }

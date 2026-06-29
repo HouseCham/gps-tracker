@@ -2,7 +2,10 @@
 import type { JSX } from 'react/jsx-runtime';
 import type { StatusVariant } from '@/types/components/ui';
 //-- Constants
-import { STATUS_INDICATOR_DEFAULT_LABEL, STATUS_INDICATOR_DOT_COLOR } from '@/constants';
+import {
+    STATUS_INDICATOR_DEFAULT_LABEL,
+    STATUS_INDICATOR_DOT_COLOR,
+} from '@/constants';
 
 /**
  * Interface for StatusIndicator component

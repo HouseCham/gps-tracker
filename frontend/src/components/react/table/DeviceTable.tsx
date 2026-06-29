@@ -65,9 +65,12 @@ export function DeviceTable({
 }: DeviceTableProps): JSX.Element {
     const {
         //-- state
-        error, isLoading, devices,
+        error,
+        isLoading,
+        devices,
         //-- actions
-        getAllDevices, createDevice,
+        getAllDevices,
+        createDevice,
     } = useDeviceService();
     const t = translation.device.table;
     const formStrings = translation.device.form;
@@ -136,24 +139,39 @@ export function DeviceTable({
                             >
                                 {/* Device name */}
                                 <td className="data-table__cell">
-                                    <span className="device-table__name">{device.name}</span>
+                                    <span className="device-table__name">
+                                        {device.name}
+                                    </span>
                                 </td>
                                 {/* Device type */}
                                 <td className="data-table__cell">
-                                    <DeviceTypeIcon type={device.vehicle_type} />
+                                    <DeviceTypeIcon
+                                        type={device.vehicle_type}
+                                    />
                                 </td>
                                 {/* Device status */}
                                 <td className="data-table__cell">
                                     <Badge
-                                        variant={status === 'online' ? 'success' : 'danger'}
+                                        variant={
+                                            status === 'online'
+                                                ? 'success'
+                                                : 'danger'
+                                        }
                                         size="sm"
-                                        label={status === 'online' ? translation.device.online : translation.device.offline}
+                                        label={
+                                            status === 'online'
+                                                ? translation.device.online
+                                                : translation.device.offline
+                                        }
                                     />
                                 </td>
                                 {/* Device last seen */}
                                 <td className="data-table__cell device-table__time">
                                     {device.last_seen_at
-                                        ? formatDate(locale, device.last_seen_at)
+                                        ? formatDate(
+                                              locale,
+                                              device.last_seen_at
+                                          )
                                         : translation.device.neverSeen}
                                 </td>
                                 {/* Actions */}

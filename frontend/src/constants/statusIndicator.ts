@@ -1,4 +1,4 @@
-import type { StatusVariant } from "@/types/components/ui";
+import type { StatusVariant } from '@/types/components/ui';
 /**
  * @constant STATUS_INDICATOR_DEFAULT_LABEL
  * @description Default labels for the status indicator

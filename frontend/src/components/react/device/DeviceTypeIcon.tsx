@@ -16,9 +16,16 @@ const ICON_MAP: Record<DeviceVehicleType, JSX.Element> = {
     other: <Circle size={16} strokeWidth={1.75} />,
 };
 
-export function DeviceTypeIcon({ type, className }: DeviceTypeIconProps): JSX.Element {
+export function DeviceTypeIcon({
+    type,
+    className,
+}: DeviceTypeIconProps): JSX.Element {
     return (
-        <span className={['device-type-icon', className].filter(Boolean).join(' ')}>
+        <span
+            className={['device-type-icon', className]
+                .filter(Boolean)
+                .join(' ')}
+        >
             {ICON_MAP[type]}
         </span>
     );

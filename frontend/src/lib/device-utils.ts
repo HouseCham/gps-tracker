@@ -1,5 +1,5 @@
-import type { Translation } from "@/i18n";
-import type { AdminStatItem, DataTableColumn } from "@/types/components";
+import type { Translation } from '@/i18n';
+import type { AdminStatItem, DataTableColumn } from '@/types/components';
 /**
  * Get the columns for the device table.
  * @param {Translation} t - The translation object.
@@ -13,7 +13,7 @@ export function getDeviceTableColumns(t: Translation): DataTableColumn[] {
         { key: 'lastSeen', label: t.device.table.lastSeen },
         { key: 'actions', label: t.device.table.actions, align: 'right' },
     ];
-};
+}
 
 /**
  * Get the demo KPI items for the admin dashboard.

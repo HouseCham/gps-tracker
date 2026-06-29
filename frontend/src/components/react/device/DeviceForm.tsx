@@ -18,7 +18,12 @@ import { UUID_REGEX, VEHICLE_TYPE_OPTIONS } from '@/constants';
  * @param {Record<DeviceVehicleType, string>} vehicleTypes - Localized labels for each vehicle type.
  */
 export interface DeviceFormProps {
-    device?: { id: string; name: string; uuid_firmware: string; vehicle_type: DeviceVehicleType };
+    device?: {
+        id: string;
+        name: string;
+        uuid_firmware: string;
+        vehicle_type: DeviceVehicleType;
+    };
     onSubmit: (data: DeviceFormValues) => void;
     onCancel: () => void;
     onDelete?: (id: string) => void;
@@ -48,7 +53,7 @@ export function DeviceForm({
     const [name, setName] = useState(device?.name ?? '');
     const [uuid, setUuid] = useState(device?.uuid_firmware ?? '');
     const [vehicleType, setVehicleType] = useState<DeviceVehicleType>(
-        device?.vehicle_type ?? 'other',
+        device?.vehicle_type ?? 'other'
     );
     const [errors, setErrors] = useState<{
         name?: string;
@@ -195,14 +200,20 @@ export function DeviceForm({
                     value={vehicleType}
                     onChange={e => {
                         const value = e.target.value;
-                        if ((VEHICLE_TYPE_OPTIONS as readonly string[]).includes(value)) {
+                        if (
+                            (
+                                VEHICLE_TYPE_OPTIONS as readonly string[]
+                            ).includes(value)
+                        ) {
                             setVehicleType(value as DeviceVehicleType);
                         }
                         setErrors(p => ({ ...p, vehicleType: undefined }));
                     }}
                     disabled={saving}
                     aria-invalid={!!errors.vehicleType}
-                    aria-describedby={errors.vehicleType ? `${vehicleTypeId}-err` : undefined}
+                    aria-describedby={
+                        errors.vehicleType ? `${vehicleTypeId}-err` : undefined
+                    }
                 >
                     {VEHICLE_TYPE_OPTIONS.map(vt => (
                         <option key={vt} value={vt}>
