@@ -8,7 +8,6 @@
     position: relative;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
     padding: 0;
     background: none;
     border: 0;
@@ -123,6 +122,10 @@
 }
 
 .map-marker__label {
+    position: absolute;
+    left: calc(100% + 6px);
+    top: 50%;
+    transform: translateY(-50%);
     background: var(--surface-2);
     border: 1px solid var(--border);
     color: var(--text);
@@ -132,9 +135,9 @@
     border-radius: 4px;
     white-space: nowrap;
     box-shadow: var(--shadow-sm);
-    margin-left: 12px;
     pointer-events: none;
     user-select: none;
+    margin: 0;
 }
 
 .map-marker:hover .map-marker__label {
