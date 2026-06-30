@@ -26,9 +26,7 @@ export interface SignupFormProps {
  * @param {SignupFormProps} props - The props for the component.
  * @returns {ReactElement} The rendered component.
  */
-export function SignupForm({
-    strings: s,
-}: SignupFormProps): ReactElement {
+export function SignupForm({ strings: s }: SignupFormProps): ReactElement {
     const [email, setEmail] = useState('');
     const [name, setName] = useState('');
     const [password, setPassword] = useState('');
@@ -70,7 +68,9 @@ export function SignupForm({
                 password,
             });
         } catch (err) {
-            const apiError = isApiError(err) ? err : { message: 'Sign-up failed' };
+            const apiError = isApiError(err)
+                ? err
+                : { message: 'Sign-up failed' };
             setAuthError(apiError.message);
             setLoading(false);
         }
@@ -154,12 +154,7 @@ export function SignupForm({
                 />
             </div>
 
-            <Button
-                type="submit"
-                variant="primary"
-                block
-                loading={loading}
-            >
+            <Button type="submit" variant="primary" block loading={loading}>
                 {loading ? s.signingUp : s.signup}
             </Button>
         </form>

@@ -315,6 +315,9 @@ The project uses **ESLint** and **Prettier**. All code must pass both before bei
 ---
 
 ## Node commands
+
 If you want to use node commands (for example: "npm run lint"), use only pnpm. Don't use npm commands, only pnpm
 
 _This file is the source of truth for code conventions in this repository. When in doubt, the most readable, type-safe, and performance-conscious solution wins._
+
+## Please, DON'T investigate more than I ask. If I asign you a task, only do what I say, take it as an order. Don't suggest more than asked unless I ask you to

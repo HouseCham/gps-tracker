@@ -1,0 +1,37 @@
+---
+import type { GetStaticPaths } from 'astro';
+//-- Translations
+import { getTranslation } from '@/i18n';
+//-- Types
+import type { Language } from '@/types';
+//-- Components
+import MainLayout from '@/components/astro/layout/MainLayout.astro';
+import { DeviceDetail } from '@/components/react/device';
+import { DEMO_USER } from '@/constants/components';
+/**
+ * @type {GetStaticPaths}
+ */
+export const getStaticPaths = (() => {
+    return [{ params: { lan: 'en' } }, { params: { lan: 'es' } }];
+}) satisfies GetStaticPaths;
+
+// ponytail: getStaticPaths only emits the two supported locales,
+//   so the cast is exhaustive by construction.
+const locale = Astro.params.lan as Language;
+const translation = getTranslation(locale);
+---
+
+<MainLayout
+    locale={locale}
+    translation={translation}
+    user={DEMO_USER}
+    active="devices"
+    showAdmin={true}
+    title={`${translation.page.deviceDetail.title} · GPS Tracker`}
+>
+    <DeviceDetail
+        client:only="react"
+        locale={locale}
+        translation={translation}
+    />
+</MainLayout>

@@ -32,15 +32,10 @@ func (a *DevicesAdapter) ListForUser(ctx context.Context, userID uuid.UUID) ([]d
 		return nil, err
 	}
 	result := make([]domain.DeviceWithAccess, 0, len(rows))
-	for _, r := range rows {
+	for i := range rows {
+		r := rows[i]
 		result = append(result, domain.DeviceWithAccess{
-			Device: domain.Device{
-				ID:           uuidFromPgtype(r.ID),
-				UuidFirmware: r.UuidFirmware,
-				Name:         r.Name,
-				CreatedAt:    r.CreatedAt.Time,
-				LastSeenAt:   timestamptzToPtr(r.LastSeenAt),
-			},
+			Device: *toDomainDevice(r.ID, r.UuidFirmware, r.Name, r.VehicleType, r.CreatedAt, r.LastSeenAt),
 			AccessRole: domain.AccessRole(r.AccessRole),
 		})
 	}
@@ -67,15 +62,10 @@ func (a *DevicesAdapter) ListForUserWithAccessPaginated(ctx context.Context, use
 	}
 
 	result := make([]domain.DeviceWithAccess, 0, len(rows))
-	for _, r := range rows {
+	for i := range rows {
+		r := rows[i]
 		result = append(result, domain.DeviceWithAccess{
-			Device: domain.Device{
-				ID:           uuidFromPgtype(r.ID),
-				UuidFirmware: r.UuidFirmware,
-				Name:         r.Name,
-				CreatedAt:    r.CreatedAt.Time,
-				LastSeenAt:   timestamptzToPtr(r.LastSeenAt),
-			},
+			Device: *toDomainDevice(r.ID, r.UuidFirmware, r.Name, r.VehicleType, r.CreatedAt, r.LastSeenAt),
 			AccessRole: domain.AccessRole(r.AccessRole),
 		})
 	}
@@ -101,14 +91,9 @@ func (a *DevicesAdapter) ListForUserPaginated(ctx context.Context, userID uuid.U
 	}
 
 	result := make([]domain.Device, 0, len(rows))
-	for _, r := range rows {
-		result = append(result, domain.Device{
-			ID:           uuidFromPgtype(r.ID),
-			UuidFirmware: r.UuidFirmware,
-			Name:         r.Name,
-			CreatedAt:    r.CreatedAt.Time,
-			LastSeenAt:   timestamptzToPtr(r.LastSeenAt),
-		})
+	for i := range rows {
+		r := rows[i]
+		result = append(result, *toDomainDevice(r.ID, r.UuidFirmware, r.Name, r.VehicleType, r.CreatedAt, r.LastSeenAt))
 	}
 
 	return result, int(count), nil
@@ -127,13 +112,7 @@ func (a *DevicesAdapter) GetByIDForUser(ctx context.Context, userID, deviceID uu
 		return nil, wrapPgError(err)
 	}
 	return &domain.DeviceWithAccess{
-		Device: domain.Device{
-			ID:           uuidFromPgtype(row.ID),
-			UuidFirmware: row.UuidFirmware,
-			Name:         row.Name,
-			CreatedAt:    row.CreatedAt.Time,
-			LastSeenAt:   timestamptzToPtr(row.LastSeenAt),
-		},
+		Device: *toDomainDevice(row.ID, row.UuidFirmware, row.Name, row.VehicleType, row.CreatedAt, row.LastSeenAt),
 		AccessRole: domain.AccessRole(row.AccessRole),
 	}, nil
 }
@@ -149,9 +128,10 @@ func (a *DevicesAdapter) Create(ctx context.Context, input devices.CreateInput) 
 
 	queries := New(tx)
 
-	device, err := queries.CreateDevice(ctx, CreateDeviceParams{
+	row, err := queries.CreateDevice(ctx, CreateDeviceParams{
 		UuidFirmware: input.UuidFirmware,
 		Name:         input.Name,
+		VehicleType:  DeviceVehicleType(input.VehicleType),
 	})
 	if err != nil {
 		return nil, wrapPgError(err)
@@ -159,7 +139,7 @@ func (a *DevicesAdapter) Create(ctx context.Context, input devices.CreateInput) 
 
 	_, err = queries.GrantDeviceAccess(ctx, GrantDeviceAccessParams{
 		UserID:   pgtypeUUID(input.OwnerID),
-		DeviceID: device.ID,
+		DeviceID: row.ID,
 		Role:     string(domain.AccessRoleOwner),
 	})
 	if err != nil {
@@ -170,22 +150,50 @@ func (a *DevicesAdapter) Create(ctx context.Context, input devices.CreateInput) 
 		return nil, fmt.Errorf("commit tx: %w", err)
 	}
 
-	return deviceFromSqlc(device), nil
+	return toDomainDevice(row.ID, row.UuidFirmware, row.Name, row.VehicleType, row.CreatedAt, row.LastSeenAt), nil
 }
 
-// UpdateName renames a device. The caller is expected to have verified access
-// upstream (HTTP middleware). Returns domain.ErrNotFound if the device does
-// not exist or is soft-deleted.
-func (a *DevicesAdapter) UpdateName(ctx context.Context, deviceID uuid.UUID, name string) (*domain.Device, error) {
-	queries := New(a.pool)
-	row, err := queries.UpdateDeviceName(ctx, UpdateDeviceNameParams{
+// Update applies the provided fields. Name is always set; vehicle_type is
+// only updated when non-nil. The two writes are wrapped in a transaction
+// so a partial failure cannot leave the row with a new name and the old
+// vehicle type (or vice versa).
+func (a *DevicesAdapter) Update(ctx context.Context, deviceID uuid.UUID, input devices.UpdateInput) (*domain.Device, error) {
+	tx, err := a.pool.Begin(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("begin tx: %w", err)
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	queries := New(tx)
+
+	nameRow, err := queries.UpdateDeviceName(ctx, UpdateDeviceNameParams{
 		ID:   pgtypeUUID(deviceID),
-		Name: name,
+		Name: input.Name,
 	})
 	if err != nil {
 		return nil, wrapPgError(err)
 	}
-	return deviceFromSqlc(row), nil
+
+	if input.VehicleType == nil {
+		if err := tx.Commit(ctx); err != nil {
+			return nil, fmt.Errorf("commit tx: %w", err)
+		}
+		return toDomainDevice(nameRow.ID, nameRow.UuidFirmware, nameRow.Name, nameRow.VehicleType, nameRow.CreatedAt, nameRow.LastSeenAt), nil
+	}
+
+	vtRow, err := queries.UpdateDeviceVehicleType(ctx, UpdateDeviceVehicleTypeParams{
+		ID:          pgtypeUUID(deviceID),
+		VehicleType: DeviceVehicleType(*input.VehicleType),
+	})
+	if err != nil {
+		return nil, wrapPgError(err)
+	}
+
+	if err := tx.Commit(ctx); err != nil {
+		return nil, fmt.Errorf("commit tx: %w", err)
+	}
+
+	return toDomainDevice(vtRow.ID, vtRow.UuidFirmware, vtRow.Name, vtRow.VehicleType, vtRow.CreatedAt, vtRow.LastSeenAt), nil
 }
 
 // SoftDelete marks the device as deleted by setting deleted_at = NOW().

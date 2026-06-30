@@ -15,7 +15,7 @@ The frontend communicates with a Go + Fiber backend and PostgreSQL database to p
 | Styling         | Pure CSS — custom properties, dark/light themes, BEM methodology                      |
 | Icons           | [Lucide](https://lucide.dev) (`@lucide/astro` + `lucide-react`)                       |
 | HTTP            | [`@better-fetch/fetch`](https://github.com/better-fetch/fetch)                        |
-| Auth            | [`Authula`](https://github.com/Authula/authula) (HTTP-only session cookie)             |
+| Auth            | [`Authula`](https://github.com/Authula/authula) (HTTP-only session cookie)            |
 | Package manager | [pnpm](https://pnpm.io)                                                               |
 | Engine          | Node >= 22.12.0                                                                       |
 

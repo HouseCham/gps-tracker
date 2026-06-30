@@ -73,6 +73,7 @@ func (q *Queries) GrantDeviceAccess(ctx context.Context, arg GrantDeviceAccessPa
 const listUsersForDevice = `-- name: ListUsersForDevice :many
 SELECT
   u.id,
+  u.name,
   u.email,
   uda.role AS access_role,
   uda.created_at AS access_granted_at
@@ -86,6 +87,7 @@ ORDER BY uda.created_at DESC
 
 type ListUsersForDeviceRow struct {
 	ID              pgtype.UUID
+	Name            string
 	Email           string
 	AccessRole      string
 	AccessGrantedAt pgtype.Timestamptz
@@ -104,6 +106,7 @@ func (q *Queries) ListUsersForDevice(ctx context.Context, deviceID pgtype.UUID) 
 		var i ListUsersForDeviceRow
 		if err := rows.Scan(
 			&i.ID,
+			&i.Name,
 			&i.Email,
 			&i.AccessRole,
 			&i.AccessGrantedAt,

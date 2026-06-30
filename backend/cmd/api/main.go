@@ -2,14 +2,12 @@ package main
 
 import (
 	"context"
-	nethttp "net/http"
 	"os"
 	"os/signal"
 	"strconv"
 	"syscall"
 	"time"
 
-	"github.com/Authula/authula/models"
 	"github.com/gofiber/fiber/v3/log"
 
 	"github.com/HouseCham/gps-tracker/backend/internal/app/access"
@@ -28,7 +26,10 @@ func main() {
 	log.Info("Starting server...")
 	addr := ""
 	if v := os.Getenv("API_PORT"); v != "" {
-		if port, err := strconv.ParseUint(v, 10, 64); err == nil {
+		port, err := strconv.ParseUint(v, 10, 64)
+		if err != nil {
+			log.Warn("parse API_PORT, falling back to server default", "value", v, "err", err)
+		} else {
 			addr = ":" + strconv.FormatUint(port, 10)
 		}
 	}
@@ -92,31 +93,9 @@ func main() {
 	// application-level projection (role, must_change_password, FKs).
 	// Mirror every new Authula user into our local users table so the
 	// unauthenticated bootstrap endpoint sees a non-empty table on
-	// the first request after sign-up. LazyUser is the safety net
-	// if the hook ever fails.
-	authInstance.RegisterHook(models.Hook{
-		Stage: models.HookAfter,
-		Matcher: func(rc *models.RequestContext) bool {
-			return rc.Method == nethttp.MethodPost &&
-				rc.Path == auth.BasePath+"/email-password/sign-up" &&
-				rc.Actor != nil && rc.Actor.Type == models.ActorUser
-		},
-		Handler: func(rc *models.RequestContext) error {
-			lookup := authInstance.NewUserLookup()
-			authulaUser, err := lookup.GetByID(rc.Request.Context(), rc.Actor.ID)
-			if err != nil {
-				//authula signup succeeded, local mirror is non-critical
-				log.Error("signup hook: fetch authula user", "err", err)
-				return nil
-			}
-			if _, err := usersService.GetOrCreate(rc.Request.Context(), authulaUser.Email, authulaUser.Name); err != nil {
-				// failing to mirror doesn't roll back the signup
-				log.Error("signup hook: mirror to local users", "err", err)
-				return nil
-			}
-			return nil
-		},
-	})
+	// the first request after sign-up. LazyUser lookup is the safety
+	// net if the hook ever fails.
+	authInstance.RegisterHook(auth.SignupMirrorHook(authInstance, usersService))
 
 	//-- access
 	accessRepo := postgres.NewAccessAdapter(pool)
@@ -124,12 +103,11 @@ func main() {
 
 	//-- handlers
 	healthHandler := handlers.NewHealthHandler()
-	devicesHandler := handlers.NewDevicesHandler(devicesService)
+	devicesHandler := handlers.NewDevicesHandler(devicesService, accessService)
 	passwordUpdater := authInstance.NewPasswordUpdater()
 	sessionManager := authInstance.NewSessionManager()
 	usersHandler := handlers.NewUsersHandler(usersService, devicesService, passwordUpdater, sessionManager)
 	accessHandler := handlers.NewAccessHandler(accessService)
-
 
 	app := http.NewRouter(http.RouterDeps{
 		HealthHandler:     healthHandler,

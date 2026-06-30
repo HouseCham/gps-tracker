@@ -55,7 +55,9 @@ export function Input({
     const [showPassword, setShowPassword] = useState(false);
 
     const inputId = id ?? (name ? `input-${name}` : undefined);
-    const describedBy = [hint && 'hint', error && 'error'].filter(Boolean).join(' ') || undefined;
+    const describedBy =
+        [hint && 'hint', error && 'error'].filter(Boolean).join(' ') ||
+        undefined;
     const inputClasses = [
         'input',
         type === 'search' && 'with-icon',

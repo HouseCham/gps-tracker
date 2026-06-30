@@ -143,7 +143,9 @@
     color: var(--muted);
     font-size: 14px;
     font-weight: 500;
-    transition: background var(--transition), color var(--transition);
+    transition:
+        background var(--transition),
+        color var(--transition);
 }
 
 .nav-item:hover {

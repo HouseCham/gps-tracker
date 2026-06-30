@@ -11,6 +11,52 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type DeviceVehicleType string
+
+const (
+	DeviceVehicleTypeBicycle    DeviceVehicleType = "bicycle"
+	DeviceVehicleTypeMotorcycle DeviceVehicleType = "motorcycle"
+	DeviceVehicleTypeCar        DeviceVehicleType = "car"
+	DeviceVehicleTypeTruck      DeviceVehicleType = "truck"
+	DeviceVehicleTypeVan        DeviceVehicleType = "van"
+	DeviceVehicleTypeOther      DeviceVehicleType = "other"
+)
+
+func (e *DeviceVehicleType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = DeviceVehicleType(s)
+	case string:
+		*e = DeviceVehicleType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for DeviceVehicleType: %T", src)
+	}
+	return nil
+}
+
+type NullDeviceVehicleType struct {
+	DeviceVehicleType DeviceVehicleType
+	Valid             bool // Valid is true if DeviceVehicleType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullDeviceVehicleType) Scan(value interface{}) error {
+	if value == nil {
+		ns.DeviceVehicleType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.DeviceVehicleType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullDeviceVehicleType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.DeviceVehicleType), nil
+}
+
 type UserRole string
 
 const (
@@ -60,6 +106,7 @@ type Device struct {
 	CreatedAt    pgtype.Timestamptz
 	LastSeenAt   pgtype.Timestamptz
 	DeletedAt    pgtype.Timestamptz
+	VehicleType  DeviceVehicleType
 }
 
 type DeviceApiKey struct {

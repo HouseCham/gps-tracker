@@ -32,6 +32,7 @@ WHERE user_id = $1
 -- to a given device, with their role. Used in the device admin panel.
 SELECT
   u.id,
+  u.name,
   u.email,
   uda.role AS access_role,
   uda.created_at AS access_granted_at

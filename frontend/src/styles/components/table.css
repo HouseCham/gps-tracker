@@ -72,7 +72,9 @@
 
 .data-table__sort-icon {
     opacity: 0.4;
-    transition: transform var(--transition), opacity var(--transition);
+    transition:
+        transform var(--transition),
+        opacity var(--transition);
 }
 
 .data-table__head.is-sorted-asc {
@@ -136,10 +138,16 @@
     animation: dt-shimmer 1.4s linear infinite;
 }
 
-.data-table__skeleton--head { height: 40px; }
+.data-table__skeleton--head {
+    height: 40px;
+}
 
-.data-table__skeleton--name { max-width: 40%; }
-.data-table__skeleton--email { max-width: 60%; }
+.data-table__skeleton--name {
+    max-width: 40%;
+}
+.data-table__skeleton--email {
+    max-width: 60%;
+}
 .data-table__skeleton--status {
     width: 64px;
     height: 20px;
@@ -147,15 +155,21 @@
 }
 .data-table__skeleton--role,
 .data-table__skeleton--actions,
-.data-table__skeleton--time { width: 50%; }
+.data-table__skeleton--time {
+    width: 50%;
+}
 .data-table__skeleton--devices {
     width: 24px;
     height: 12px;
 }
 
 @keyframes dt-shimmer {
-    0%   { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
+    0% {
+        background-position: 200% 0;
+    }
+    100% {
+        background-position: -200% 0;
+    }
 }
 
 /* ─── Error state ──────────────────────────────────────────────────────────── */
@@ -204,7 +218,9 @@
     font-size: 12px;
     font-weight: 500;
     cursor: pointer;
-    transition: background var(--transition), color var(--transition);
+    transition:
+        background var(--transition),
+        color var(--transition);
 }
 
 .data-table__retry:hover {
@@ -279,9 +295,21 @@
     white-space: nowrap;
 }
 
+.device-type-icon {
+    display: inline-flex;
+    align-items: center;
+    color: var(--muted);
+}
+
 .device-table__actions {
     display: inline-flex;
     gap: 4px;
+}
+
+.device-table__toolbar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 16px;
 }
 
 /* ─── User table ───────────────────────────────────────────────────────────── */

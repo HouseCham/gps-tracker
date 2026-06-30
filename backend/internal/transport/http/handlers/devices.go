@@ -6,7 +6,9 @@ import (
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/log"
 
+	"github.com/HouseCham/gps-tracker/backend/internal/app/access"
 	"github.com/HouseCham/gps-tracker/backend/internal/app/devices"
+	"github.com/HouseCham/gps-tracker/backend/internal/domain"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/dto"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/middleware"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/response"
@@ -14,11 +16,12 @@ import (
 )
 
 type DevicesHandler struct {
-	service *devices.Service
+	service   *devices.Service
+	accessSvc *access.AccessService
 }
 
-func NewDevicesHandler(svc *devices.Service) *DevicesHandler {
-	return &DevicesHandler{service: svc}
+func NewDevicesHandler(svc *devices.Service, accessSvc *access.AccessService) *DevicesHandler {
+	return &DevicesHandler{service: svc, accessSvc: accessSvc}
 }
 
 // List handles GET /api/devices.
@@ -36,7 +39,10 @@ func (h *DevicesHandler) List(c fiber.Ctx) error {
 
 	page := 1
 	if p := c.Query("page"); p != "" {
-		if parsed, err := strconv.Atoi(p); err == nil {
+		parsed, err := strconv.Atoi(p)
+		if err != nil {
+			log.Warn(operation, "invalid page, defaulting to 1", "value", p, "err", err)
+		} else {
 			page = parsed
 		}
 	}
@@ -46,7 +52,10 @@ func (h *DevicesHandler) List(c fiber.Ctx) error {
 
 	pageSize := 20
 	if ps := c.Query("page_size"); ps != "" {
-		if parsed, err := strconv.Atoi(ps); err == nil {
+		parsed, err := strconv.Atoi(ps)
+		if err != nil {
+			log.Warn(operation, "invalid page_size, defaulting to 20", "value", ps, "err", err)
+		} else {
 			pageSize = parsed
 		}
 	}
@@ -89,7 +98,8 @@ func (h *DevicesHandler) List(c fiber.Ctx) error {
 
 // Get handles GET /api/devices/:id.
 // Returns 404 when the device does not exist OR the user has no access
-// (security through obscurity).
+// (security through obscurity). The response includes the device plus every
+// user that has access to it, so the frontend can render the access panel.
 func (h *DevicesHandler) Get(c fiber.Ctx) error {
 	const operation = "DevicesHandler:Get"
 	log.Debug(operation, "request received")
@@ -113,12 +123,24 @@ func (h *DevicesHandler) Get(c fiber.Ctx) error {
 		return err
 	}
 
-	deviceData := dto.DeviceWithAccessFromDomain(device)
-	log.Info(operation, "device retrieved", "deviceID", id)
-	return c.Status(fiber.StatusOK).JSON(response.HTTPResponse[dto.DeviceResponse]{
+	// The user-access list is sensitive: it leaks which users are linked to
+	// the device. Only fetch it when the caller is the owner; viewers and
+	// editors get an empty list instead.
+	var accessList []domain.UserWithAccessOnDevice
+	if device.AccessRole == domain.AccessRoleOwner {
+		accessList, err = h.accessSvc.ListUsersForDevice(c.Context(), user.ID, id)
+		if err != nil {
+			log.Error(operation, "err", err, "deviceID", id, "op", "ListUsersForDevice")
+			return err
+		}
+	}
+
+	deviceData := dto.DeviceDetailFromDomain(device, accessList)
+	log.Info(operation, "device retrieved", "deviceID", id, "users", len(accessList))
+	return c.Status(fiber.StatusOK).JSON(response.HTTPResponse[dto.DeviceDetailResponse]{
 		StatusCode: fiber.StatusOK,
 		Message:    "device retrieved",
-		Data:       deviceData.DeviceResponse,
+		Data:       deviceData,
 	})
 }
 
@@ -145,8 +167,13 @@ func (h *DevicesHandler) Update(c fiber.Ctx) error {
 		return middleware.BadRequestResponse(c, "invalid request body")
 	}
 
-	log.Debug(operation, "executing use case", "deviceID", id, "name", req.Name)
-	device, err := h.service.UpdateName(c.Context(), id, req.Name)
+	log.Debug(operation, "executing use case", "deviceID", id, "name", req.Name, "vehicleType", req.VehicleType)
+	input := devices.UpdateInput{Name: req.Name}
+	if req.VehicleType != "" {
+		vt := domain.DeviceVehicleType(req.VehicleType)
+		input.VehicleType = &vt
+	}
+	device, err := h.service.Update(c.Context(), id, input)
 	if err != nil {
 		log.Error(operation, "err", err, "deviceID", id)
 		return err
@@ -178,10 +205,11 @@ func (h *DevicesHandler) Create(c fiber.Ctx) error {
 		return middleware.BadRequestResponse(c, "invalid request body")
 	}
 
-	log.Debug(operation, "executing use case", "userID", user.ID, "uuidFirmware", req.UuidFirmware)
+	log.Debug(operation, "executing use case", "userID", user.ID, "uuidFirmware", req.UuidFirmware, "vehicleType", req.VehicleType)
 	device, err := h.service.Create(c.Context(), devices.CreateInput{
 		UuidFirmware: req.UuidFirmware,
 		Name:         req.Name,
+		VehicleType:  domain.DeviceVehicleType(req.VehicleType),
 		OwnerID:      user.ID,
 	})
 	if err != nil {

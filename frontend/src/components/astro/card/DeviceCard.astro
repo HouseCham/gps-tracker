@@ -1,37 +1,45 @@
 ---
 //-- Types
 import type { DeviceCardItem } from '@/types/components/device.types';
+import type { Language } from '@/types';
+//-- Translations
+import { getTranslation } from '@/i18n';
 //-- Components
-import StatusIndicator from '@/components/ui/StatusIndicator.astro';
 import BatteryIndicator from '@/components/ui/BatteryIndicator.astro';
 import SignalIndicator from '@/components/ui/SignalIndicator.astro';
+import { StatusIndicator } from '@/components/ui';
 /**
  * @interface Props
  * @property {DeviceCardItem} device - Device card item.
  * @property {string} href - Link href.
  * @property {string} [class] - Extra classes.
+ * @property {Language} [locale] - Locale for translations.
  */
 interface Props {
     device: DeviceCardItem;
     href?: string;
     class?: string;
+    locale?: Language;
 }
 const {
     device,
-    href = `/devices/${device.id}`,
+    href = `/devices/detail?id=${device.id}`,
     class: className,
+    locale = 'en',
 } = Astro.props;
-/**
- * @constant {string} classes - Class string.
- */
+
+const translation = getTranslation(locale);
 const classes = ['device-card', className].filter(Boolean).join(' ');
+
+const deviceStatus = device.status === 'online' ? 'online' : 'offline';
+const statusLabel = deviceStatus === 'online' ? translation.device.online : translation.device.offline;
 ---
 
 <article class={classes}>
     <a href={href} class="device-card__link" aria-label={`View ${device.name}`}>
         <header class="device-card__head">
             <h3 class="device-card__name">{device.name}</h3>
-            <StatusIndicator status={device.status} />
+            <StatusIndicator status={deviceStatus} label={statusLabel} />
         </header>
         <div class="device-card__meta">
             <span class="device-card__label">Last seen</span>

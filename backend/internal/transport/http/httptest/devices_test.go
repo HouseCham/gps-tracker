@@ -171,6 +171,7 @@ func TestDevicesCreate(t *testing.T) {
 		body := map[string]string{
 			"uuid_firmware": uuid.New().String(),
 			"name":          "New Device",
+			"vehicle_type":  "car",
 		}
 
 		resp, err := ta.Request("POST", "/api/v1/devices", "token-user", body)
@@ -199,6 +200,7 @@ func TestDevicesCreate(t *testing.T) {
 		body := map[string]string{
 			"uuid_firmware": "not-a-uuid",
 			"name":          "New Device",
+			"vehicle_type":  "car",
 		}
 
 		resp, err := ta.Request("POST", "/api/v1/devices", "token-user", body)
@@ -230,12 +232,34 @@ func TestDevicesCreate(t *testing.T) {
 		}
 	})
 
+	t.Run("400 - invalid vehicle_type", func(t *testing.T) {
+		ta := NewTestApp()
+
+		ta.SetupUser("token-user", "authula-1", "user@test.com", "User", domain.UserRoleUser)
+
+		body := map[string]string{
+			"uuid_firmware": uuid.New().String(),
+			"name":          "New Device",
+			"vehicle_type":  "spaceship",
+		}
+
+		resp, err := ta.Request("POST", "/api/v1/devices", "token-user", body)
+		if err != nil {
+			t.Fatalf("request error: %v", err)
+		}
+
+		if resp.StatusCode != http.StatusBadRequest {
+			t.Errorf("expected status 400, got %d", resp.StatusCode)
+		}
+	})
+
 	t.Run("401 - no authorization header", func(t *testing.T) {
 		ta := NewTestApp()
 
 		body := map[string]string{
 			"uuid_firmware": uuid.New().String(),
 			"name":          "New Device",
+			"vehicle_type":  "car",
 		}
 
 		resp, err := ta.Request("POST", "/api/v1/devices", "", body)
@@ -282,6 +306,68 @@ func TestDevicesUpdate(t *testing.T) {
 		}
 		if httpResp.Message != "device updated" {
 			t.Errorf("expected message 'device updated', got %q", httpResp.Message)
+		}
+	})
+
+	t.Run("200 - updates name and vehicle_type together", func(t *testing.T) {
+		ta := NewTestApp()
+
+		ownerID := ta.SetupUser("token-owner", "authula-1", "owner@test.com", "Owner", domain.UserRoleSuperAdmin)
+
+		device := &domain.Device{
+			ID:           uuid.New(),
+			UuidFirmware: "esp32-001",
+			Name:         "Original Name",
+			CreatedAt:    time.Now(),
+		}
+		ta.AddDevice(ownerID, device, domain.AccessRoleOwner)
+
+		body := map[string]string{
+			"name":         "Updated Name",
+			"vehicle_type": "van",
+		}
+
+		resp, err := ta.Request("PUT", "/api/v1/devices/"+device.ID.String(), "token-owner", body)
+		if err != nil {
+			t.Fatalf("request error: %v", err)
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			t.Errorf("expected status 200, got %d", resp.StatusCode)
+		}
+		if device.Name != "Updated Name" {
+			t.Errorf("device name not updated in store: got %q", device.Name)
+		}
+		if device.VehicleType != "van" {
+			t.Errorf("device vehicle_type not updated in store: got %q", device.VehicleType)
+		}
+	})
+
+	t.Run("400 - invalid vehicle_type on update", func(t *testing.T) {
+		ta := NewTestApp()
+
+		ownerID := ta.SetupUser("token-owner", "authula-1", "owner@test.com", "Owner", domain.UserRoleSuperAdmin)
+
+		device := &domain.Device{
+			ID:           uuid.New(),
+			UuidFirmware: "esp32-001",
+			Name:         "Original Name",
+			CreatedAt:    time.Now(),
+		}
+		ta.AddDevice(ownerID, device, domain.AccessRoleOwner)
+
+		body := map[string]string{
+			"name":         "Updated Name",
+			"vehicle_type": "spaceship",
+		}
+
+		resp, err := ta.Request("PUT", "/api/v1/devices/"+device.ID.String(), "token-owner", body)
+		if err != nil {
+			t.Fatalf("request error: %v", err)
+		}
+
+		if resp.StatusCode != http.StatusBadRequest {
+			t.Errorf("expected status 400, got %d", resp.StatusCode)
 		}
 	})
 

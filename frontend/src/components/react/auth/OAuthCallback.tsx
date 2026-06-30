@@ -36,11 +36,7 @@ export function OAuthCallback(): ReactElement {
     }, [isAuthLoading, isAuthenticated]);
 
     return (
-        <div
-            role="status"
-            aria-live="polite"
-            className="oauth-callback"
-        >
+        <div role="status" aria-live="polite" className="oauth-callback">
             <span>Signing you in…</span>
         </div>
     );

@@ -406,9 +406,9 @@ func TestListUsersForDevice(t *testing.T) {
 	ctx := context.Background()
 
 	expected := []domain.UserWithAccessOnDevice{
-		{UserID: ownerID, Email: "owner@example.com", AccessRole: domain.AccessRoleOwner, AccessGrantedAt: fixedTime},
-		{UserID: viewerID, Email: "viewer@example.com", AccessRole: domain.AccessRoleViewer, AccessGrantedAt: fixedTime},
-		{UserID: otherID, Email: "other@example.com", AccessRole: domain.AccessRoleEditor, AccessGrantedAt: fixedTime},
+		{UserID: ownerID, Name: "Owner", Email: "owner@example.com", AccessRole: domain.AccessRoleOwner, AccessGrantedAt: fixedTime},
+		{UserID: viewerID, Name: "Viewer", Email: "viewer@example.com", AccessRole: domain.AccessRoleViewer, AccessGrantedAt: fixedTime},
+		{UserID: otherID, Name: "Other", Email: "other@example.com", AccessRole: domain.AccessRoleEditor, AccessGrantedAt: fixedTime},
 	}
 
 	t.Run("passes through to the repo", func(t *testing.T) {

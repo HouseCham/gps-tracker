@@ -33,7 +33,7 @@ export function TableDataLoader({
         <>
             {Array.from({ length: rows }).map((_, rowIndex) => (
                 <tr key={rowIndex} className={rowClass} aria-hidden="true">
-                    {columns.map((col) => (
+                    {columns.map(col => (
                         <td key={col.key} className="data-table__cell">
                             <span
                                 className={`data-table__skeleton data-table__skeleton--${col.key}`}

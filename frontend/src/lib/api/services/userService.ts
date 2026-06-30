@@ -1,11 +1,6 @@
 import { useState } from 'react';
 //-- Types
-import type {
-    ApiError,
-    CreateUserDto,
-    Envelope,
-    User,
-} from '@/types/api';
+import type { ApiError, CreateUserDto, Envelope, User } from '@/types/api';
 import type { BetterFetchOption } from '@better-fetch/fetch';
 //-- Utils
 import { handleApiError } from '@/lib/api/api-utils';
@@ -41,7 +36,7 @@ export const useUserService = (): IUserService => {
     function resetState(): void {
         setIsLoading(false);
         setError(null);
-    };
+    }
     /**
      * Retrieves a list of all users.
      * @returns {Promise<void>} Resolves when the users are fetched and state is updated.
@@ -58,8 +53,10 @@ export const useUserService = (): IUserService => {
                 } as BetterFetchOption
             );
             if (!response) {
-                handleApiError(new Error('get all users returned a null response'));
-            };
+                handleApiError(
+                    new Error('get all users returned a null response')
+                );
+            }
             setUsers(response.data);
         } catch (error) {
             handleApiError(error);
@@ -92,12 +89,14 @@ export const useUserService = (): IUserService => {
                 '/users',
                 {
                     method: 'POST',
-                    body: payload
+                    body: payload,
                 } as BetterFetchOption
             );
             if (!response || !response.data) {
-                handleApiError(new Error('create user returned a null response'));
-            };
+                handleApiError(
+                    new Error('create user returned a null response')
+                );
+            }
             setUsers([...users, response.data]);
         } catch (error) {
             handleApiError(error);
@@ -112,6 +111,6 @@ export const useUserService = (): IUserService => {
         users,
         //-- actions
         getAllUsers,
-        createUser
-    }
+        createUser,
+    };
 };

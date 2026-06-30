@@ -22,11 +22,7 @@ interface BootstrapGateProps {
  */
 function DefaultFallback(): React.JSX.Element {
     return (
-        <div
-            role="status"
-            aria-live="polite"
-            className="loading-fallback"
-        >
+        <div role="status" aria-live="polite" className="loading-fallback">
             <span>Loading…</span>
         </div>
     );

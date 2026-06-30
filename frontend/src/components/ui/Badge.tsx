@@ -18,7 +18,7 @@ interface BadgeProps {
 }
 /**
  * @constant VARIANT_CLASS
- * @description Class names for each badge variant 
+ * @description Class names for each badge variant
  */
 const VARIANT_CLASS: Record<BadgeVariant, string> = {
     default: '',

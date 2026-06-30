@@ -14,7 +14,9 @@ interface AuthProviderProps {
  * @param {AuthProviderProps} props - The provider props.
  * @returns {JSX.Element} The children wrapped in a fragment.
  */
-export function AuthProvider({ children }: AuthProviderProps): React.JSX.Element {
+export function AuthProvider({
+    children,
+}: AuthProviderProps): React.JSX.Element {
     const hydrated = useRef(false);
 
     useEffect(() => {
