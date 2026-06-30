@@ -40,45 +40,6 @@
     margin-top: 12px;
 }
 
-.device-detail__not-found {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    padding: 48px 16px;
-    text-align: center;
-    background: var(--surface, var(--color-surface, transparent));
-    border: 1px solid var(--border, rgba(0, 0, 0, 0.08));
-    border-radius: 12px;
-}
-
-.device-detail__not-found-icon {
-    color: var(--muted);
-    margin-bottom: 4px;
-}
-
-.device-detail__not-found-title {
-    margin: 0;
-    font-size: 20px;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    color: var(--text);
-}
-
-.device-detail__not-found-message {
-    margin: 0;
-    max-width: 38ch;
-    font-size: 13px;
-    line-height: 1.5;
-    color: var(--muted);
-}
-
-.device-detail__not-found-action {
-    margin-top: 8px;
-    text-decoration: none;
-}
-
 .device-detail__card {
     background: var(--surface, var(--color-surface, transparent));
     border: 1px solid var(--border, rgba(0, 0, 0, 0.08));

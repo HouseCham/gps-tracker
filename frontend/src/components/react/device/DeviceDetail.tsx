@@ -1,19 +1,18 @@
 import '@/styles/components/device-detail.css';
 //-- React
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { JSX } from 'react/jsx-runtime';
 //-- Types
 import type { Language } from '@/types';
 import type { Translation } from '@/i18n';
 import type { DataTableColumn } from '@/types/components/ui';
 import type { DeviceAccessListItem, DeviceVehicleType } from '@/types/api';
-//-- UI
+//-- Components
 import { Badge, Button } from '@/components/ui';
 import { DataTable, TableStatus } from '@/components/ui/DataTable';
 import Modal from '@/components/react/ui/Modal';
-//-- Components
 import { GrantAccessForm } from '@/components/react/form';
-import { EmptyDeviceState } from '@/components/react/device/EmptyDeviceState';
+import { NotFoundUI } from '@/components/react/ui';
 //-- Icons
 import { Plus, Trash2 } from 'lucide-react';
 //-- Utils
@@ -74,7 +73,7 @@ export function DeviceDetail({
 
     const t = translation.device.detail;
     const fields = t.fields;
-    const columns = useMemo(() => getColumns(t.accessTable), [t.accessTable]);
+    const columns = getColumns(t.accessTable);
     const vehicleLabels = t.vehicleTypes;
 
     const [grantOpen, setGrantOpen] = useState(false);
@@ -96,7 +95,7 @@ export function DeviceDetail({
      * @param {string} userId - The id typed into the form.
      */
     async function handleGrant(userId: string): Promise<void> {
-        await grantAccess(deviceId, userId);
+        await grantAccess(deviceId ?? '', userId);
         setGrantOpen(false);
     }
 
@@ -104,22 +103,18 @@ export function DeviceDetail({
      * Revokes a user's access after a confirm prompt.
      * @param {DeviceAccessListItem} user - The user to revoke.
      */
-    const handleRevoke = useCallback(
-        async (user: DeviceAccessListItem): Promise<void> => {
-            if (!window.confirm(t.accessTable.removeConfirm)) return;
-            await revokeAccess(deviceId, user.user_id);
-        },
-        [revokeAccess, deviceId, t.accessTable.removeConfirm]
-    );
+    async function handleRevoke(user: DeviceAccessListItem): Promise<void> {
+        if (!window.confirm(t.accessTable.removeConfirm)) return;
+        await revokeAccess(deviceId ?? '', user.user_id);
+    }
 
     /**
-     * Returns a stable click handler for a given row.
+     * Returns a click handler bound to a given row.
      * @param {DeviceAccessListItem} user - The row's user.
      */
-    const revokeHandlerFor = useCallback(
-        (user: DeviceAccessListItem) => () => handleRevoke(user),
-        [handleRevoke]
-    );
+    function revokeHandlerFor(user: DeviceAccessListItem) {
+        return () => handleRevoke(user);
+    }
 
     if (isLoading && !device) {
         return (
@@ -130,7 +125,7 @@ export function DeviceDetail({
         );
     }
 
-    if (error) {
+    if (error && deviceId) {
         return (
             <section className={`device-detail ${className ?? ''}`}>
                 <TableStatus
@@ -151,10 +146,10 @@ export function DeviceDetail({
         );
     }
 
-    if (!deviceId) {
+    if (!deviceId || !device) {
         return (
             <section className={`device-detail ${className ?? ''}`}>
-                <EmptyDeviceState
+                <NotFoundUI
                     title={t.missingId}
                     message={t.missingIdMessage}
                     backHref={`/${locale}/devices`}
@@ -167,7 +162,7 @@ export function DeviceDetail({
     if (!device && !isLoading && !error) {
         return (
             <section className={`device-detail ${className ?? ''}`}>
-                <EmptyDeviceState
+                <NotFoundUI
                     title={t.notFound}
                     message={t.notFoundMessage}
                     backHref={`/${locale}/devices`}
@@ -190,7 +185,7 @@ export function DeviceDetail({
         <section className={`device-detail ${className ?? ''}`}>
             <header className="device-detail__head">
                 <div className="device-detail__head-left">
-                    <h1 className="device-detail__name">{device.name}</h1>
+                    <h1 className="device-detail__name">{device?.name}</h1>
                     <Badge
                         variant={isOwner ? 'accent' : 'default'}
                         size="sm"
