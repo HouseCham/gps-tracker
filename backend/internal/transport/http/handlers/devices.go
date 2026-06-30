@@ -123,10 +123,16 @@ func (h *DevicesHandler) Get(c fiber.Ctx) error {
 		return err
 	}
 
-	accessList, err := h.accessSvc.ListUsersForDevice(c.Context(), user.ID, id)
-	if err != nil {
-		log.Error(operation, "err", err, "deviceID", id, "op", "ListUsersForDevice")
-		return err
+	// The user-access list is sensitive: it leaks which users are linked to
+	// the device. Only fetch it when the caller is the owner; viewers and
+	// editors get an empty list instead.
+	var accessList []domain.UserWithAccessOnDevice
+	if device.AccessRole == domain.AccessRoleOwner {
+		accessList, err = h.accessSvc.ListUsersForDevice(c.Context(), user.ID, id)
+		if err != nil {
+			log.Error(operation, "err", err, "deviceID", id, "op", "ListUsersForDevice")
+			return err
+		}
 	}
 
 	deviceData := dto.DeviceDetailFromDomain(device, accessList)

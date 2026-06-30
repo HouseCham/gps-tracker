@@ -99,6 +99,7 @@ func (h *AccessHandler) List(c fiber.Ctx) error {
 	for _, it := range items {
 		resp = append(resp, dto.UserAccessOnDeviceResponse{
 			UserID:          it.UserID.String(),
+			Name:            it.Name,
 			Email:           it.Email,
 			Role:            string(it.AccessRole),
 			AccessGrantedAt: it.AccessGrantedAt,

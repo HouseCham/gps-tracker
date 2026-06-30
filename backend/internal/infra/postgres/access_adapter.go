@@ -77,6 +77,7 @@ func (a *AccessAdapter) ListUsersForDevice(ctx context.Context, deviceID uuid.UU
 	for _, r := range rows {
 		result = append(result, domain.UserWithAccessOnDevice{
 			UserID:          uuidFromPgtype(r.ID),
+			Name:            r.Name,
 			Email:           r.Email,
 			AccessRole:      domain.AccessRole(r.AccessRole),
 			AccessGrantedAt: r.AccessGrantedAt.Time,

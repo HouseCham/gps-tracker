@@ -66,12 +66,15 @@ func DeviceWithAccessFromDomain(d *domain.DeviceWithAccess) DeviceWithAccessResp
 }
 
 // DeviceDetailFromDomain converts a *domain.DeviceWithAccess and the list of
-// users that have access to it into a DeviceDetailResponse.
+// users that have access to it into a DeviceDetailResponse. When `users` is
+// nil (caller is not the owner) the response includes an empty array rather
+// than omitting the field, so the frontend can always render a list.
 func DeviceDetailFromDomain(d *domain.DeviceWithAccess, users []domain.UserWithAccessOnDevice) DeviceDetailResponse {
 	userDTOs := make([]UserAccessOnDeviceResponse, 0, len(users))
 	for _, u := range users {
 		userDTOs = append(userDTOs, UserAccessOnDeviceResponse{
 			UserID:          u.UserID.String(),
+			Name:            u.Name,
 			Email:           u.Email,
 			Role:            string(u.AccessRole),
 			AccessGrantedAt: u.AccessGrantedAt,
