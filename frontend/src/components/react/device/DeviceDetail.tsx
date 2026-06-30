@@ -12,11 +12,20 @@ import { DataTable, TableStatus } from '@/components/ui/DataTable';
 import Modal from '@/components/react/ui/Modal';
 import { GrantAccessForm } from '@/components/react/form';
 import { NotFoundUI } from '@/components/react/ui';
-import DeviceMap from '@/components/react/map/DeviceMap';
+import DeviceMapLive from '@/components/react/map/DeviceMapLive';
 //-- Icons
-import { MapPin, Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 //-- Utils
-import { formatDate, getDeviceAccessTableColumns, readDeviceIdFromUrl } from '@/lib';
+import {
+    formatDate,
+    getDeviceAccessTableColumns,
+    readDeviceIdFromUrl,
+} from '@/lib';
+//-- Constants
+import {
+    MAP_LIVE_DEMO_LOCATION,
+    MAP_LIVE_DEMO_ROUTE,
+} from '@/constants/components/map';
 //-- Services
 import { useDeviceService } from '@/lib/api/services';
 
@@ -61,12 +70,11 @@ export function DeviceDetail({
     const mapStrings = translation.section.deviceDetail;
 
     const [grantOpen, setGrantOpen] = useState(false);
-    const [revokeTarget, setRevokeTarget] = useState<DeviceAccessListItem | null>(
-        null
-    );
+    const [revokeTarget, setRevokeTarget] =
+        useState<DeviceAccessListItem | null>(null);
     const wrapperClass = `device-detail ${className ?? ''}`;
 
-    //*  note: The device id comes from the URL query string so the page 
+    //*  note: The device id comes from the URL query string so the page
     //*  itself can be fully prerendered with no build-time enumeration.
     const deviceId = readDeviceIdFromUrl();
 
@@ -312,7 +320,9 @@ export function DeviceDetail({
                                                 <Button
                                                     variant="danger"
                                                     size="sm"
-                                                    onClick={() => askRevoke(user)}
+                                                    onClick={() =>
+                                                        askRevoke(user)
+                                                    }
                                                     disabled={isLoading}
                                                     aria-label={
                                                         t.accessTable.remove
@@ -382,21 +392,15 @@ export function DeviceDetail({
                     )}
                 </div>
                 {/* Map Section */}
-                <aside className="device-detail__map" aria-label={mapStrings.map}>
-                    <DeviceMap pins={[]} variant="default" />
-                    <div className="device-detail__map-overlay">
-                        <MapPin
-                            size={32}
-                            strokeWidth={1.5}
-                            aria-hidden="true"
-                        />
-                        <h3 className="device-detail__map-overlay-title">
-                            {mapStrings.mapComingSoon}
-                        </h3>
-                        <p className="device-detail__map-overlay-message">
-                            {mapStrings.mapComingSoonMessage}
-                        </p>
-                    </div>
+                <aside
+                    className="device-detail__map"
+                    aria-label={mapStrings.map}
+                >
+                    <DeviceMapLive
+                        location={MAP_LIVE_DEMO_LOCATION}
+                        route={MAP_LIVE_DEMO_ROUTE}
+                        deviceName={device.name}
+                    />
                 </aside>
             </div>
         </section>
