@@ -3,7 +3,10 @@ import '@/styles/map/device-map-live.css';
 import { useMemo, type JSX } from 'react';
 //-- Types
 import type { DeviceLocationPoint, MarkerStatus } from '@/types/components';
+//-- Constants
+import { MAP_ONLINE_THRESHOLD_MS, MAP_STYLE_URL } from '@/constants';
 //-- Components
+import { MapPin } from 'lucide-react';
 import Map, {
     Layer,
     Marker,
@@ -13,17 +16,6 @@ import Map, {
 } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import MapMarker from './MapMarker';
-import { MapPin } from 'lucide-react';
-
-// ponytail: OpenFreeMap's "liberty" style ships no key and no billing, matching
-//   the project's OSS-friendly default. Override via PUBLIC_MAP_STYLE_URL.
-const DEFAULT_MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
-
-const MAP_STYLE_URL: string =
-    (import.meta.env.PUBLIC_MAP_STYLE_URL as string | undefined) ??
-    DEFAULT_MAP_STYLE;
-
-const ONLINE_THRESHOLD_MS = 5 * 60 * 1000;
 
 /**
  * @interface DeviceMapLiveProps
@@ -47,7 +39,7 @@ function statusFromRecordedAt(recordedAt: string | undefined): MarkerStatus {
     if (!recordedAt) return 'never-seen';
     const age = Date.now() - new Date(recordedAt).getTime();
     if (Number.isNaN(age) || age < 0) return 'unknown';
-    return age <= ONLINE_THRESHOLD_MS ? 'online' : 'offline';
+    return age <= MAP_ONLINE_THRESHOLD_MS ? 'online' : 'offline';
 }
 
 /**

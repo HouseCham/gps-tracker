@@ -182,22 +182,20 @@ export function DeviceDetail({
 
     return (
         <section className={wrapperClass}>
+            {/* Header */}
+            <header className="device-detail__head">
+                <div className="device-detail__head-left">
+                    <h1 className="device-detail__name">{device?.name}</h1>
+                    <Badge
+                        variant={isOwner ? 'accent' : 'default'}
+                        size="sm"
+                        label={t.roles[device.access_role]}
+                    />
+                </div>
+            </header>
             <div className="device-detail__layout">
                 {/* Device Detail Section */}
                 <div className="device-detail__main">
-                    {/* Header */}
-                    <header className="device-detail__head">
-                        <div className="device-detail__head-left">
-                            <h1 className="device-detail__name">
-                                {device?.name}
-                            </h1>
-                            <Badge
-                                variant={isOwner ? 'accent' : 'default'}
-                                size="sm"
-                                label={t.roles[device.access_role]}
-                            />
-                        </div>
-                    </header>
                     {/* Main Section */}
                     <section className="device-detail__card">
                         <h2 className="device-detail__card-title">
