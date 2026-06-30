@@ -82,6 +82,9 @@ export const es: Translation = {
         deviceDetail: {
             overview: 'Resumen',
             map: 'Mapa',
+            mapComingSoon: 'Próximamente: rastreo GPS',
+            mapComingSoonMessage:
+                'La ubicación en vivo aparecerá aquí cuando se habilite la función de GPS.',
             activity: 'Actividad',
             noData: 'Sin datos disponibles.',
             createdAt: 'Creado',
@@ -238,6 +241,7 @@ export const es: Translation = {
                 addUser: 'Añadir usuario',
                 noUsers: 'Aún no hay usuarios con acceso a este dispositivo.',
                 remove: 'Quitar',
+                removeTitle: 'Quitar acceso',
                 removeConfirm: '¿Quitar el acceso de este usuario al dispositivo?',
                 failedToLoad: 'Error al cargar el dispositivo',
             },

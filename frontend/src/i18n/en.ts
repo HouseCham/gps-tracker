@@ -80,6 +80,9 @@ export const en = {
         deviceDetail: {
             overview: 'Overview',
             map: 'Map',
+            mapComingSoon: 'GPS tracking coming soon',
+            mapComingSoonMessage:
+                'Live location will appear here once the GPS feature ships.',
             activity: 'Activity',
             noData: 'No data available.',
             createdAt: 'Created',
@@ -236,6 +239,7 @@ export const en = {
                 addUser: 'Add user',
                 noUsers: 'No users have access to this device yet.',
                 remove: 'Remove',
+                removeTitle: 'Remove access',
                 removeConfirm: "Remove this user's access to the device?",
                 failedToLoad: 'Failed to load device',
             },

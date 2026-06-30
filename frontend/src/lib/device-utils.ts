@@ -21,6 +21,7 @@ export function getDeviceTableColumns(t: Translation): DataTableColumn[] {
  * @returns {AdminStatItem[]} The demo KPI items for the admin dashboard.
  */
 export function getDemoKpiItems(t: Translation): Array<AdminStatItem> {
+    // ponytail: narrow literals for AdminStatItem discriminated union
     return [
         {
             label: t.admin.totalDevices,
@@ -54,5 +55,21 @@ export function getDemoKpiItems(t: Translation): Array<AdminStatItem> {
             trendValue: '0',
             variant: 'danger' as const,
         },
+    ];
+}
+
+/**
+ * Returns the columns for the device-access table.
+ * @param {Translation['device']['detail']['accessTable']} t - Localized column labels.
+ * @returns {DataTableColumn[]} Column definitions.
+ */
+export function getDeviceAccessTableColumns(
+    t: Translation['device']['detail']['accessTable']
+): DataTableColumn[] {
+    return [
+        { key: 'name', label: t.name },
+        { key: 'email', label: t.email },
+        { key: 'access_granted_at', label: t.accessGranted },
+        { key: 'actions', label: t.actions, align: 'right' },
     ];
 }
