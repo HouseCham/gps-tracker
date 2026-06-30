@@ -1,6 +1,5 @@
 import type {
     ActivityItem,
-    DeviceDetailData,
     DeviceTableItem,
 } from '@/types/components';
 /**
@@ -93,20 +92,3 @@ export const SECTION_GALLERY_DEMO_DEVICES: Array<DeviceTableItem> = [
         signal: 0,
     },
 ];
-
-/**
- * @constant SECTION_GALLERY_DEMO_DEVICE
- * @description Demo device for the section gallery
- */
-export const SECTION_GALLERY_DEMO_DEVICE: DeviceDetailData = {
-    id: 'D-001',
-    name: 'Delivery Van #3',
-    status: 'online' as const,
-    lastSeen: '2 min ago',
-    battery: 78,
-    signal: 5,
-    uuid_firmware: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
-    lat: 19.4326,
-    lng: -99.1332,
-    createdAt: '2026-01-15',
-};

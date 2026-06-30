@@ -27,6 +27,8 @@ import { apiClient } from '@/lib/auth/client';
  * @method createDevice - Creates a new device.
  * @method updateDevice - Updates an existing device's name and/or vehicle type.
  * @method deleteDevice - Soft-deletes a device by its ID.
+ * @method grantAccess - Grants a user `viewer` access to the device.
+ * @method revokeAccess - Revokes a user's access to the device.
  */
 interface IDeviceService {
     isLoading: boolean;
@@ -38,6 +40,8 @@ interface IDeviceService {
     createDevice: (payload: CreateDeviceDto) => Promise<void>;
     updateDevice: (id: string, payload: UpdateDeviceDto) => Promise<void>;
     deleteDevice: (id: string) => Promise<void>;
+    grantAccess: (deviceId: string, userId: string) => Promise<void>;
+    revokeAccess: (deviceId: string, userId: string) => Promise<void>;
 }
 
 /**
@@ -224,6 +228,65 @@ export const useDeviceService = (): IDeviceService => {
         }
     }
 
+    /**
+     * Grants a user `viewer` access to the device and refreshes the device
+     * detail (which now includes the updated users list).
+     * @param {string} deviceId - The ID of the device.
+     * @param {string} userId - The ID of the user to grant access to.
+     * @returns {Promise<void>} Resolves when the grant completes.
+     */
+    async function grantAccess(
+        deviceId: string,
+        userId: string
+    ): Promise<void> {
+        setIsLoading(true);
+        setError(null);
+        try {
+            await apiClient<Envelope<unknown> | null>(
+                `/devices/${deviceId}/access`,
+                {
+                    method: 'POST',
+                    body: { user_id: userId },
+                }
+            );
+            // Refresh the device so `device.users` reflects the new grant.
+            await getDeviceById(deviceId);
+        } catch (error) {
+            handleApiError(error);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    /**
+     * Revokes a user's access to the device and refreshes the device detail
+     * (which now reflects the missing user).
+     * @param {string} deviceId - The ID of the device.
+     * @param {string} userId - The ID of the user whose access to revoke.
+     * @returns {Promise<void>} Resolves when the revocation completes.
+     */
+    async function revokeAccess(
+        deviceId: string,
+        userId: string
+    ): Promise<void> {
+        setIsLoading(true);
+        setError(null);
+        try {
+            await apiClient<Envelope<null> | null>(
+                `/devices/${deviceId}/access/${userId}`,
+                {
+                    method: 'DELETE',
+                }
+            );
+            // Refresh the device so `device.users` reflects the revocation.
+            await getDeviceById(deviceId);
+        } catch (error) {
+            handleApiError(error);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
     return {
         isLoading,
         error,
@@ -235,5 +298,7 @@ export const useDeviceService = (): IDeviceService => {
         createDevice,
         updateDevice,
         deleteDevice,
+        grantAccess,
+        revokeAccess,
     };
 };

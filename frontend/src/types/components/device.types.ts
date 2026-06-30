@@ -96,3 +96,24 @@ export interface DeviceFormStrings {
     deleteConfirm?: string;
     deleteDevice?: string;
 }
+/**
+ * @interface GrantAccessFormStrings
+ * @param {string} title - The title of the form.
+ * @param {string} userId - Label for the user-id input.
+ * @param {string} userIdPlaceholder - Placeholder for the user-id input.
+ * @param {string} userIdRequired - Validation error when the field is empty.
+ * @param {string} userIdInvalid - Validation error when the UUID format is wrong.
+ * @param {string} grant - Label for the submit button.
+ * @param {string} granting - Label for the submit button while submitting.
+ * @param {string} cancel - Label for the cancel button.
+ */
+export interface GrantAccessFormStrings {
+    title: string;
+    userId: string;
+    userIdPlaceholder: string;
+    userIdRequired: string;
+    userIdInvalid: string;
+    grant: string;
+    granting: string;
+    cancel: string;
+}

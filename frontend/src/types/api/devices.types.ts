@@ -61,6 +61,7 @@ export interface DeviceAccess {
 
 export interface DeviceAccessListItem {
     user_id: string;
+    name: string;
     email: string;
     role: 'owner' | 'editor' | 'viewer';
     access_granted_at: string;

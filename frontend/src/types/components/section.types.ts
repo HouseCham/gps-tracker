@@ -1,5 +1,4 @@
 import type { KpiIcon, KpiTrend, KpiVariant } from './ui';
-import type { MarkerStatus } from './map.types';
 
 export interface KpiBarItem {
     label: string;
@@ -26,17 +25,4 @@ export interface ActivityItem {
     timestamp: string;
     user?: string;
     deviceId?: string;
-}
-
-export interface DeviceDetailData {
-    id: string;
-    name: string;
-    status: MarkerStatus;
-    lastSeen: string | null;
-    battery: number;
-    signal: number;
-    uuid_firmware: string;
-    lat: number;
-    lng: number;
-    createdAt: string;
 }
