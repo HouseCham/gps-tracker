@@ -139,9 +139,12 @@ export function DeviceTable({
                             >
                                 {/* Device name */}
                                 <td className="data-table__cell">
-                                    <span className="device-table__name">
+                                    <a
+                                        href={`/${locale}/devices/detail?id=${device.id}`}
+                                        className="device-table__name"
+                                    >
                                         {device.name}
-                                    </span>
+                                    </a>
                                 </td>
                                 {/* Device type */}
                                 <td className="data-table__cell">

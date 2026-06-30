@@ -1,9 +1,8 @@
 ---
 import { en } from '@/i18n';
 //-- Constants
-import { 
+import {
     SECTION_GALLERY_DEMO_ACTIVITIES,
-    SECTION_GALLERY_DEMO_DEVICE,
     SECTION_GALLERY_DEMO_DEVICES,
 } from '@/constants/components';
 const demoKpiItems = getDemoKpiItems(en);
@@ -12,7 +11,6 @@ import MainLayout from '@/components/astro/layout/MainLayout.astro';
 import KpiBar from '@/components/sections/KpiBar.astro';
 import ActivityFeed from '@/components/sections/ActivityFeed.astro';
 import Dashboard from '@/components/sections/Dashboard.astro';
-import DeviceDetail from '@/components/sections/DeviceDetail.astro';
 //-- Utils
 import { getDemoKpiItems } from '@/lib';
 ---
@@ -25,7 +23,7 @@ import { getDemoKpiItems } from '@/lib';
     title="Sections & Shells · Gallery"
 >
     <h1>Section Components & Feature Shells</h1>
-    <p class="hint">KpiBar, ActivityFeed, Dashboard, DeviceDetail.</p>
+    <p class="hint">KpiBar, ActivityFeed, Dashboard.</p>
 
     <section>
         <h2>KpiBar</h2>
@@ -55,15 +53,6 @@ import { getDemoKpiItems } from '@/lib';
             activities={SECTION_GALLERY_DEMO_ACTIVITIES.slice(0, 4)}
             devices={SECTION_GALLERY_DEMO_DEVICES}
             activityTitle="Latest Activity"
-        />
-    </section>
-
-    <section>
-        <h2>DeviceDetail shell</h2>
-        <DeviceDetail
-            device={SECTION_GALLERY_DEMO_DEVICE}
-            activities={SECTION_GALLERY_DEMO_ACTIVITIES}
-            activityTitle="Device Activity"
         />
     </section>
 </MainLayout>

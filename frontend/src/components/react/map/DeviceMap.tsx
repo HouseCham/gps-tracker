@@ -240,7 +240,7 @@ export default function DeviceMap({
                         >
                             <MapPopover
                                 device={popoverDevice}
-                                href={`/devices/${popoverDevice.id}`}
+                                href={`/devices/detail?id=${popoverDevice.id}`}
                                 onClose={handleClose}
                                 statusLabels={statusLabels}
                             />

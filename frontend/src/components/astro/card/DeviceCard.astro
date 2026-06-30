@@ -23,7 +23,7 @@ interface Props {
 }
 const {
     device,
-    href = `/devices/${device.id}`,
+    href = `/devices/detail?id=${device.id}`,
     class: className,
     locale = 'en',
 } = Astro.props;
