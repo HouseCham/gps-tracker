@@ -1,0 +1,65 @@
+/* ============================================
+   DEVICE MAP LIVE (React island)
+   Co-located with DeviceMapLive.tsx.
+   MapLibre-backed variant of DeviceMap; consumed
+   by the device-detail page only.
+   Consumes tokens from global.css.
+   ============================================ */
+
+.device-map-live {
+    position: relative;
+    width: 100%;
+    height: 360px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--surface);
+}
+
+/* Google-Maps-style control chrome: rounded, soft shadow. */
+.device-map-live :global(.maplibregl-ctrl-group) {
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* MapMarker positions itself; nothing to override here. */
+.device-map-live :global(.map-marker) {
+    /* ponytail: native browser focus ring on the button keeps a11y intact. */
+}
+
+.device-map-live__empty {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 24px;
+    background: rgba(13, 16, 21, 0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    color: var(--text);
+    pointer-events: none;
+    z-index: 4;
+}
+
+.device-map-live__empty-text {
+    margin: 0;
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+    max-width: 32ch;
+}
+
+/* ponytail: CSS-filter dark mode is the lazy rung — drop it the day the
+   PUBLIC_MAP_STYLE_URL is set to a dedicated dark style. */
+[data-theme='dark'] .device-map-live :global(.maplibregl-canvas) {
+    filter: invert(0.92) hue-rotate(180deg) brightness(0.95);
+}
+
+@media (max-width: 640px) {
+    .device-map-live {
+        height: 280px;
+    }
+}

@@ -80,9 +80,6 @@ export const en = {
         deviceDetail: {
             overview: 'Overview',
             map: 'Map',
-            mapComingSoon: 'GPS tracking coming soon',
-            mapComingSoonMessage:
-                'Live location will appear here once the GPS feature ships.',
             activity: 'Activity',
             noData: 'No data available.',
             createdAt: 'Created',

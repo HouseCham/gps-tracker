@@ -147,39 +147,6 @@
     min-width: 0;
 }
 
-.device-detail__map-overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 24px;
-    text-align: center;
-    color: var(--text);
-    background: rgba(13, 16, 21, 0.55);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-    pointer-events: none;
-    z-index: 3;
-}
-
-.device-detail__map-overlay-title {
-    margin: 0;
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--text);
-}
-
-.device-detail__map-overlay-message {
-    margin: 0;
-    max-width: 32ch;
-    font-size: 13px;
-    line-height: 1.5;
-    color: var(--muted);
-}
-
 @media (max-width: 960px) {
     .device-detail__layout {
         grid-template-columns: minmax(0, 1fr);
