@@ -182,6 +182,8 @@ export const es: Translation = {
             battery: 'Batería',
             signal: 'Señal',
             actions: 'Acciones',
+            edit: 'Editar',
+            delete: 'Eliminar',
             addDevice: 'Añadir dispositivo',
             failedToLoad: 'Error al cargar dispositivos',
             retry: 'Reintentar',
@@ -193,6 +195,28 @@ export const es: Translation = {
                 truck: 'Camión',
                 van: 'Furgoneta',
                 other: 'Otro',
+            },
+            inlineEdit: {
+                save: 'Guardar',
+                cancel: 'Cancelar',
+                editing: 'Editando…',
+                saving: 'Guardando…',
+                updateFailed:
+                    'No se pudo actualizar el dispositivo. Inténtalo de nuevo.',
+                nameRequired: 'El nombre del dispositivo es obligatorio',
+            },
+            deleteConfirm: {
+                warning:
+                    'Esto eliminará permanentemente el dispositivo "{name}" y todo su historial de ubicaciones. Esta acción no se puede deshacer.',
+                typeNameLabel:
+                    'Escribe el nombre del dispositivo para confirmar',
+                typeNamePlaceholder: 'Nombre del dispositivo',
+                confirm: 'Eliminar dispositivo',
+                deleting: 'Eliminando…',
+                cancel: 'Cancelar',
+                mismatch: 'El nombre debe coincidir exactamente.',
+                deleteFailed:
+                    'No se pudo eliminar el dispositivo. Inténtalo de nuevo.',
             },
         },
         detail: {

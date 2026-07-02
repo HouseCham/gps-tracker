@@ -193,6 +193,19 @@
     align-items: center;
 }
 
+/* ---- Card edit state (used by inline-edit in DeviceTable) ---- */
+.device-card.is-editing {
+    border-color: var(--accent);
+    box-shadow: var(--shadow-md);
+}
+
+.device-card.is-editing .device-card__meta-value {
+    text-align: left;
+    margin-left: 0;
+    overflow: visible;
+    white-space: normal;
+}
+
 /* ---- Empty state (mobile) ---- */
 .mobile-empty {
     background: var(--surface);
