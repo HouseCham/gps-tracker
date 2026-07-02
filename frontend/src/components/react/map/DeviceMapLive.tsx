@@ -1,4 +1,3 @@
-import '@/styles/map/device-map-live.css';
 //-- React
 import { useMemo, type JSX } from 'react';
 //-- Types
@@ -14,7 +13,6 @@ import Map, {
     ScaleControl,
     Source,
 } from 'react-map-gl/maplibre';
-import 'maplibre-gl/dist/maplibre-gl.css';
 import MapMarker from './MapMarker';
 
 /**
@@ -63,7 +61,7 @@ export default function DeviceMapLive({
 
     const markerStatus = statusFromRecordedAt(location?.recordedAt);
 
-    // ponytail: build the GeoJSON once per route reference; the route shape
+    //* note: build the GeoJSON once per route reference; the route shape
     //   is small (~20 points) so memoising on identity is enough.
     const routeGeoJson = useMemo(() => {
         const points = route ?? [];

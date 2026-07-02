@@ -1,3 +1,6 @@
+import type { Translation } from "@/i18n";
+import type { DataTableColumn } from "@/types/components";
+
 /**
  * Two-letter initials from a display name for the avatar fallback.
  * @param {string} name - Full display name.
@@ -9,16 +12,6 @@ export function getInitials(name: string): string {
         return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     }
     return (parts[0] ?? '').slice(0, 2).toUpperCase();
-}
-/**
- * Returns the initials of a user's name.
- * @param {string} name - The full name of the user.
- * @returns {string} The initials of the user's name in uppercase.
- */
-export function getUserInitials(name: string): string {
-    const nameParts = name.split(' ');
-    const initials = nameParts.map(part => part.charAt(0)).join('');
-    return initials.toUpperCase();
 }
 
 /**
@@ -34,3 +27,20 @@ export function getFirstNameWithInitial(name: string): string {
     if (!secondName) return firstName;
     return `${firstName} ${secondName.charAt(0).toUpperCase()}.`;
 }
+
+/**
+ * Returns the columns for the user table.
+ * @param {Translation['admin']['userTable']} t - The translation object.
+ * @returns {DataTableColumn[]} The columns for the user table.
+ */
+export function getUserTableColumns(t: Translation['admin']['userTable']): DataTableColumn[] {
+    return [
+        { key: 'name', label: t.name, sortable: true },
+        { key: 'email', label: t.email },
+        { key: 'role', label: t.role },
+        { key: 'status', label: t.status },
+        { key: 'created', label: t.created },
+        { key: 'devices', label: t.devices, align: 'center' },
+        { key: 'actions', label: t.actions, align: 'right' },
+    ];
+};

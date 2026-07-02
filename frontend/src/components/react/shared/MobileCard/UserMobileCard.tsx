@@ -8,10 +8,10 @@ import type { Translation } from '@/i18n';
 import { Badge, Button } from '@/components/ui';
 import { MobileCardMetaItem } from '@/components/react/shared/MobileCard/MobileCardMetaItem';
 //-- Icons
-import { Pencil, Trash } from 'lucide-react';
+import { Trash } from 'lucide-react';
 //-- Utils
 import { formatDate, getInitials } from '@/lib';
-import { USER_MOBILE_CARD_ROLE_BADGE_VARIANT, USER_MOBILE_CARD_ROLE_LABEL_KEY } from '@/constants';
+import { USER_ROLE_BADGE_VARIANT, USER_ROLE_LABEL_KEY } from '@/constants/components/admin';
 
 /**
  * Interface for the UserMobileCard component.
@@ -20,7 +20,6 @@ import { USER_MOBILE_CARD_ROLE_BADGE_VARIANT, USER_MOBILE_CARD_ROLE_LABEL_KEY } 
  * @property {User} user - The user whose row to render.
  * @property {Translation['admin']['userTable']} labels - Localized strings.
  * @property {Translation['admin']['roles']} roles - Localized role labels.
- * @property {() => void} [onEdit] - Click handler for the edit button.
  * @property {() => void} [onDelete] - Click handler for the delete button.
  */
 interface UserMobileCardProps {
@@ -28,7 +27,6 @@ interface UserMobileCardProps {
     user: User;
     labels: Translation['admin']['userTable'];
     roles: Translation['admin']['roles'];
-    onEdit?: () => void;
     onDelete?: () => void;
 }
 
@@ -43,7 +41,6 @@ export function UserMobileCard({
     user,
     labels,
     roles,
-    onEdit,
     onDelete,
 }: UserMobileCardProps): JSX.Element {
     return (
@@ -57,11 +54,9 @@ export function UserMobileCard({
                         <div className="user-card__name">{user.name}</div>
                         <div className="user-card__chips">
                             <Badge
-                                variant={
-                                    USER_MOBILE_CARD_ROLE_BADGE_VARIANT[user.role] ?? 'default'
-                                }
+                                variant={USER_ROLE_BADGE_VARIANT[user.role]}
                                 size="sm"
-                                label={roles[USER_MOBILE_CARD_ROLE_LABEL_KEY[user.role]]}
+                                label={roles[USER_ROLE_LABEL_KEY[user.role]]}
                             />
                             <Badge
                                 variant={
@@ -97,10 +92,6 @@ export function UserMobileCard({
                 />
             </dl>
             <footer className="user-card__actions">
-                <Button variant="ghost" size="sm" onClick={onEdit}>
-                    <Pencil />
-                    {labels.editUser}
-                </Button>
                 <Button variant="danger" size="sm" onClick={onDelete}>
                     <Trash />
                     {labels.deleteUser}

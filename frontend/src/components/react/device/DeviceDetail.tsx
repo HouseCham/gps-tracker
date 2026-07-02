@@ -1,7 +1,7 @@
 import '@/styles/components/device-detail.css';
 import '@/styles/components/mobile-cards.css';
 //-- React
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import type { JSX } from 'react/jsx-runtime';
 //-- Types
@@ -18,7 +18,6 @@ import {
     AccessMobileCard,
     MobileCardList,
 } from '@/components/react/shared';
-import DeviceMapLive from '@/components/react/map/DeviceMapLive';
 //-- Icons
 import { Plus } from 'lucide-react';
 //-- Utils
@@ -36,6 +35,8 @@ import {
 //-- Services
 import { useDeviceService } from '@/lib/api/services';
 import { DeviceUserAccessTable } from './DeviceUserAccessTable';
+//-- Lazy components
+const DeviceMapLive = lazy(() => import('@/components/react/map/DeviceMapLive'));
 
 /**
  * Interface for the DeviceDetail island.
@@ -254,7 +255,7 @@ export function DeviceDetail({
         return map;
     }, [users, askRevoke]);
 
-    // ponytail: API serializes vehicle_type as a generic string; the
+    //* note: API serializes vehicle_type as a generic string; the
     //   lookup table only covers the known DeviceVehicleType union, so the
     //   fallback (`?? device.vehicle_type`) handles unknown values safely.
     const vtLabel =
@@ -453,7 +454,7 @@ export function DeviceDetail({
                                     </>
                                 }
                             >
-                                {/* ponytail: reuses the device-delete-confirm
+                                {/** note: reuses the device-delete-confirm
                                      BEM block (visually identical destructive
                                      dialog; same warning + typed-confirmation
                                      pattern). Split if a third caller arrives. */}
@@ -500,11 +501,13 @@ export function DeviceDetail({
                     className="device-detail__map"
                     aria-label={mapStrings.map}
                 >
-                    <DeviceMapLive
-                        location={MAP_LIVE_DEMO_LOCATION}
-                        route={MAP_LIVE_DEMO_ROUTE}
-                        deviceName={device.name}
-                    />
+                    <Suspense fallback={null}>
+                        <DeviceMapLive
+                            location={MAP_LIVE_DEMO_LOCATION}
+                            route={MAP_LIVE_DEMO_ROUTE}
+                            deviceName={device.name}
+                        />
+                    </Suspense>
                 </aside>
             </div>
         </section>

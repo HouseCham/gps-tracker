@@ -22,13 +22,28 @@ export function isApiError(error: unknown): error is ApiError {
  */
 export function asApiError(err: unknown): { message?: string } {
     if (typeof err === 'object' && err !== null) {
-        // ponytail: at this point `err` is `object & not null`. The narrowed
+        //* note: at this point `err` is `object & not null`. The narrowed
         //   shape is consumed defensively (only `?.message` is read) so a
         //   stray `message` field is the worst-case we accept.
         return err as { message?: string };
     }
     return {};
 }
+/**
+ * Normalizes any thrown value into the {@link ApiError} shape. Used as the
+ * network-error fallback in {@link handleApiError} and in services that
+ * capture errors into state instead of re-throwing.
+ * @param {unknown} error - The value to normalize.
+ * @returns {ApiError} An `ApiError` with `status: 0` and the throw's message
+ *   (or `'Network error'` if the value isn't an `Error`).
+ */
+export function toApiError(error: unknown): ApiError {
+    return {
+        status: 0,
+        message: error instanceof Error ? error.message : 'Network error',
+    };
+}
+
 /**
  * Handles errors thrown by the API.
  * @param {unknown} error - The error to handle.
@@ -46,8 +61,5 @@ export function handleApiError(error: unknown): never {
         } satisfies ApiError;
     }
 
-    throw {
-        status: 0,
-        message: error instanceof Error ? error.message : 'Network error',
-    } satisfies ApiError;
+    throw toApiError(error);
 }

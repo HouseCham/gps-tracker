@@ -3,7 +3,7 @@ import type { JSX } from 'react/jsx-runtime';
 //-- Types
 import type { User } from '@/types/api';
 
-// ponytail: ratio picked so two uppercase letters fit cleanly inside
+//* note: ratio picked so two uppercase letters fit cleanly inside
 //   the circular fallback; bump if the letterforms change.
 const AVATAR_FONT_SIZE_RATIO = 0.34;
 

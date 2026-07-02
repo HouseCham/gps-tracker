@@ -39,7 +39,7 @@ interface DeviceUserAccessTableProps {
  * @description Renders a table of users with access to a device, including their name, email, and the date access was granted. Each row includes a button to remove access for that user.
  */
 export function DeviceUserAccessTable({ columns, users, locale, t, isLoading = false, onClickRemoveAccess }: DeviceUserAccessTableProps): JSX.Element {
-    // ponytail: same shape as DeviceTable.rowHandlersById — reads from a
+    //* note: same shape as DeviceTable.rowHandlersById — reads from a
     //   stable Map inside the `.map` below instead of allocating inline
     //   arrows on every render.
     const rowHandlersById = useMemo(() => {
