@@ -15,21 +15,17 @@ import type { DataTableColumn } from '@/types/components/ui';
 import type { Translation } from '@/i18n';
 //-- Components
 import { DataTable, TableStatus } from '@/components/ui/DataTable';
-import { Badge, Button, Input } from '@/components/ui';
-import {
-    DeviceForm,
-    DeviceTypeIcon,
-    VehicleTypeSelector,
-} from '@/components/react/device';
+import { Button, Input } from '@/components/ui';
+import { DeviceForm } from '@/components/react/device';
+import { DeviceTableRow } from '@/components/react/table';
 import {
     DeviceMobileCard,
     MobileCardList,
 } from '@/components/react/shared';
 import Modal from '@/components/react/ui/Modal';
 //-- Icons
-import { Check, Inbox, Pencil, Plus, Trash, X } from 'lucide-react';
+import { Inbox, Plus } from 'lucide-react';
 //-- Utils
-import { formatDate } from '@/lib';
 import { getDeviceTableColumns } from '@/lib/device-utils';
 //-- Services
 import { useDeviceService } from '@/lib/api/services';
@@ -359,162 +355,25 @@ export function DeviceTable({
                             const status = statusFromLastSeen(
                                 device.last_seen_at
                             );
-                            const isEditing = editingId === device.id;
-                            const handlers = rowHandlersById.get(device.id);
-                            if (!handlers) return null;
                             return (
-                                <tr
+                                <DeviceTableRow
                                     key={device.id}
-                                    className={`data-table__row device-table__row ${
-                                        isEditing ? 'is-editing' : ''
-                                    }`}
-                                >
-                                    {/* Device name */}
-                                    <td className="data-table__cell">
-                                        {isEditing ? (
-                                            <div className="device-table__inline-field">
-                                                <Input
-                                                    name="edit-name"
-                                                    value={editName}
-                                                    onChange={onEditNameChange}
-                                                    placeholder={
-                                                        formStrings.namePlaceholder
-                                                    }
-                                                    disabled={isLoading}
-                                                />
-                                                {editError && (
-                                                    <p
-                                                        className="device-table__inline-error"
-                                                        role="alert"
-                                                    >
-                                                        {editError}
-                                                    </p>
-                                                )}
-                                            </div>
-                                        ) : (
-                                            <a
-                                                href={`/${locale}/devices/detail?id=${device.id}`}
-                                                className="device-table__name"
-                                            >
-                                                {device.name}
-                                            </a>
-                                        )}
-                                    </td>
-                                    {/* Device type */}
-                                    <td className="data-table__cell">
-                                        {isEditing ? (
-                                            <VehicleTypeSelector
-                                                value={editType}
-                                                onChange={onEditTypeChange}
-                                                vehicleTypes={t.vehicleTypes}
-                                                label={t.vehicleType}
-                                            />
-                                        ) : (
-                                            <DeviceTypeIcon
-                                                type={device.vehicle_type}
-                                            />
-                                        )}
-                                    </td>
-                                    {/* Device status */}
-                                    <td className="data-table__cell">
-                                        <Badge
-                                            variant={
-                                                status === 'online'
-                                                    ? 'success'
-                                                    : 'danger'
-                                            }
-                                            size="sm"
-                                            label={
-                                                status === 'online'
-                                                    ? translation.device.online
-                                                    : translation.device.offline
-                                            }
-                                        />
-                                    </td>
-                                    {/* Device last seen */}
-                                    <td className="data-table__cell device-table__time">
-                                        {device.last_seen_at
-                                            ? formatDate(
-                                                  locale,
-                                                  device.last_seen_at
-                                              )
-                                            : translation.device.neverSeen}
-                                    </td>
-                                    {/* Actions */}
-                                    <td className="data-table__cell is-align-right">
-                                        <div className="device-table__actions">
-                                            {isEditing ? (
-                                                <>
-                                                    <Button
-                                                        variant="primary"
-                                                        size="sm"
-                                                        onClick={
-                                                            handlers.onSave
-                                                        }
-                                                        disabled={isLoading}
-                                                        aria-label={
-                                                            t.inlineEdit.save
-                                                        }
-                                                    >
-                                                        <Check
-                                                            size={14}
-                                                            strokeWidth={2}
-                                                        />
-                                                        {t.inlineEdit.save}
-                                                    </Button>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        onClick={
-                                                            handleCancelEdit
-                                                        }
-                                                        disabled={isLoading}
-                                                        aria-label={
-                                                            t.inlineEdit.cancel
-                                                        }
-                                                    >
-                                                        <X
-                                                            size={14}
-                                                            strokeWidth={2}
-                                                        />
-                                                        {t.inlineEdit.cancel}
-                                                    </Button>
-                                                </>
-                                            ) : (
-                                                <>
-                                                    {/* Edit button */}
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        onClick={
-                                                            handlers.onEdit
-                                                        }
-                                                        aria-label={
-                                                            translation.device
-                                                                .editDevice
-                                                        }
-                                                    >
-                                                        <Pencil />
-                                                    </Button>
-                                                    {/* Delete button */}
-                                                    <Button
-                                                        variant="danger"
-                                                        size="sm"
-                                                        onClick={
-                                                            handlers.onDelete
-                                                        }
-                                                        aria-label={
-                                                            translation.device
-                                                                .deleteDevice
-                                                        }
-                                                    >
-                                                        <Trash />
-                                                    </Button>
-                                                </>
-                                            )}
-                                        </div>
-                                    </td>
-                                </tr>
+                                    locale={locale}
+                                    device={device}
+                                    status={status}
+                                    editingId={editingId}
+                                    handlers={rowHandlersById.get(device.id)}
+                                    editName={editName}
+                                    editType={editType}
+                                    editError={editError}
+                                    namePlaceholder={formStrings.namePlaceholder}
+                                    onEditNameChange={onEditNameChange}
+                                    onEditTypeChange={onEditTypeChange}
+                                    onCancelEdit={handleCancelEdit}
+                                    isLoading={isLoading}
+                                    labels={t}
+                                    deviceStrings={translation.device}
+                                />
                             );
                         })}
                     </DataTable>
