@@ -54,9 +54,12 @@ export const en = {
                 title: 'Delete user',
                 warning:
                     'This will permanently delete the user "{name}" and any access they had to devices. This action cannot be undone.',
+                typeNameLabel: 'Type the user name to confirm',
+                typeNamePlaceholder: 'User name',
                 confirm: 'Delete user',
                 deleting: 'Deleting...',
                 cancel: 'Cancel',
+                mismatch: 'The name must match the user exactly.',
                 deleteFailed: 'Could not delete the user. Try again.',
             },
         },

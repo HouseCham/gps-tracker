@@ -1,6 +1,7 @@
 import '@/styles/components/mobile-cards.css';
 //-- React
 import type { JSX } from 'react/jsx-runtime';
+import type { ChangeEvent } from 'react';
 import {
     lazy,
     Suspense,
@@ -15,18 +16,17 @@ import type { Language } from '@/types';
 import type { Translation } from '@/i18n';
 //-- Components
 import { DataTable, TableStatus } from '@/components/ui/DataTable';
-import { Badge, Button } from '@/components/ui';
+import { Button, Input } from '@/components/ui';
 import {
     MobileCardList,
     UserMobileCard,
 } from '@/components/react/shared';
+import { UserTableRow } from '@/components/react/table';
 //-- Icons
 import { Plus } from 'lucide-react';
 //-- Utils
-import { formatDate, getUserTableColumns } from '@/lib';
+import { getUserTableColumns } from '@/lib';
 import { asApiError } from '@/lib/api/api-utils';
-//-- Constants
-import { USER_ROLE_BADGE_VARIANT, USER_ROLE_LABEL_KEY } from '@/constants/components/admin';
 //-- Services
 import { useUserService } from '@/lib/api/services';
 //-- Lazy components
@@ -73,14 +73,8 @@ export function UserTable({
 
     // ─── Delete modal state ──────────────────────────────────────────
     const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
+    const [deleteConfirmName, setDeleteConfirmName] = useState('');
     const [deleteError, setDeleteError] = useState<string | null>(null);
-
-    /**
-     * Fetches all users on mount.
-     */
-    useEffect(() => {
-        getAllUsers();
-    }, []);
 
     /**
      * Submits the create-user payload and closes the modal on success.
@@ -100,20 +94,32 @@ export function UserTable({
      */
     const handleStartDelete = useCallback((user: User): void => {
         setDeleteTarget(user);
+        setDeleteConfirmName('');
         setDeleteError(null);
     }, []);
-
+    /**
+     * Cancels the deletion of the targeted user.
+     * @Returns {void}
+     */
     const handleCancelDelete = useCallback((): void => {
         setDeleteTarget(null);
+        setDeleteConfirmName('');
         setDeleteError(null);
     }, []);
 
     /**
-     * Confirms the deletion of the targeted user. Backend soft-deletes
-     * (`204 No Content`); the service filters the row out of state.
+     * Confirms the deletion of the targeted user. Delete is only enabled
+     * in the UI when the typed full name matches exactly, so this is a
+     * final guard, not the primary check. Backend soft-deletes (`204 No
+     * Content`); the service filters the row out of state.
      */
     const handleConfirmDelete = useCallback(async (): Promise<void> => {
         if (!deleteTarget) return;
+        const targetFullName = `${deleteTarget.name} ${deleteTarget.lastname}`;
+        if (deleteConfirmName.trim() !== targetFullName) {
+            setDeleteError(t.deleteConfirm.mismatch);
+            return;
+        }
         try {
             await deleteUser(deleteTarget.id);
             handleCancelDelete();
@@ -123,20 +129,24 @@ export function UserTable({
                 apiErr.message ?? t.deleteConfirm.deleteFailed
             );
         }
-    }, [deleteTarget, deleteUser, handleCancelDelete, t.deleteConfirm]);
+    }, [
+        deleteTarget,
+        deleteConfirmName,
+        deleteUser,
+        handleCancelDelete,
+        t.deleteConfirm,
+    ]);
 
-    // Esc cancels whichever modal is open (only one at a time).
-    useEffect(() => {
-        const hasOpen = deleteTarget !== null;
-        if (!hasOpen) return;
-        const onKey = (e: KeyboardEvent): void => {
-            if (e.key === 'Escape') {
-                handleCancelDelete();
-            }
-        };
-        document.addEventListener('keydown', onKey);
-        return (): void => document.removeEventListener('keydown', onKey);
-    }, [deleteTarget, handleCancelDelete]);
+    /**
+     * Stable onChange handler for the delete-confirmation input.
+     */
+    const onDeleteNameChange = useCallback(
+        (e: ChangeEvent<HTMLInputElement>): void => {
+            setDeleteConfirmName(e.target.value);
+            setDeleteError(null);
+        },
+        []
+    );
 
     /**
      * Per-user click callbacks for the row actions. Same shape as
@@ -154,6 +164,26 @@ export function UserTable({
         return map;
     }, [users, handleStartDelete]);
 
+    /**
+     * Fetches all users on mount.
+     */
+    useEffect(() => {
+        getAllUsers();
+    }, []);
+
+    // Esc cancels whichever modal is open (only one at a time).
+    useEffect(() => {
+        const hasOpen = deleteTarget !== null;
+        if (!hasOpen) return;
+        const onKey = (e: KeyboardEvent): void => {
+            if (e.key === 'Escape') {
+                handleCancelDelete();
+            }
+        };
+        document.addEventListener('keydown', onKey);
+        return (): void => document.removeEventListener('keydown', onKey);
+    }, [deleteTarget, handleCancelDelete]);
+
     // ---- Return early if loading or user list is empty (with or without error) ----
     if (isLoading && users.length === 0)
         return <TableStatus mode="loading" className={className} />;
@@ -169,6 +199,13 @@ export function UserTable({
             />
         );
     }
+
+    const deleteTargetFullName = deleteTarget
+        ? `${deleteTarget.name} ${deleteTarget.lastname}`
+        : '';
+    const canDelete =
+        deleteTarget !== null &&
+        deleteConfirmName.trim() === deleteTargetFullName;
 
     return (
         <>
@@ -189,67 +226,14 @@ export function UserTable({
                     const handlers = rowHandlersById.get(user.id);
                     if (!handlers) return null;
                     return (
-                        <tr
+                        <UserTableRow
                             key={user.id}
-                            className="data-table__row user-table__row"
-                        >
-                            <td className="data-table__cell">
-                                <span className="user-table__name">
-                                    {user.name}
-                                </span>
-                            </td>
-                            <td className="data-table__cell user-table__email">
-                                {user.email}
-                            </td>
-                            <td className="data-table__cell">
-                                <Badge
-                                    variant={USER_ROLE_BADGE_VARIANT[user.role]}
-                                    size="sm"
-                                    label={
-                                        translation.admin.roles[
-                                            USER_ROLE_LABEL_KEY[user.role]
-                                        ]
-                                    }
-                                />
-                            </td>
-                            <td className="data-table__cell">
-                                <Badge
-                                    variant={
-                                        user.email_verified ? 'success' : 'warning'
-                                    }
-                                    size="sm"
-                                    label={
-                                        user.email_verified
-                                            ? t.verified
-                                            : t.unverified
-                                    }
-                                />
-                            </td>
-                            <td
-                                className="data-table__cell user-table__time is-align-center"
-                                data-align="center"
-                            >
-                                {formatDate(locale, user.created_at)}
-                            </td>
-                            <td
-                                className="data-table__cell is-align-center"
-                                data-align="center"
-                            >
-                                {0}
-                            </td>
-                            <td className="data-table__cell" data-align="center">
-                                <div className="user-table__actions">
-                                    <Button
-                                        variant="danger"
-                                        size="sm"
-                                        onClick={handlers.onDelete}
-                                        aria-label={t.deleteUser}
-                                    >
-                                        {t.deleteUser}
-                                    </Button>
-                                </div>
-                            </td>
-                        </tr>
+                            user={user}
+                            locale={locale}
+                            labels={t}
+                            roles={translation.admin.roles}
+                            onDelete={handlers.onDelete}
+                        />
                     );
                 })}
             </DataTable>
@@ -306,9 +290,9 @@ export function UserTable({
                             <Button
                                 variant="danger"
                                 size="sm"
-                                onClick={() => void handleConfirmDelete()}
-                                loading={isLoading}
-                                disabled={isLoading}
+                                onClick={handleConfirmDelete}
+                                disabled={!canDelete || isLoading}
+                                loading={isLoading && canDelete}
                             >
                                 {t.deleteConfirm.confirm}
                             </Button>
@@ -322,9 +306,22 @@ export function UserTable({
                         >
                             {t.deleteConfirm.warning.replace(
                                 '{name}',
-                                deleteTarget?.name ?? ''
+                                deleteTargetFullName
                             )}
                         </p>
+                        <Input
+                            name="delete-confirm-name"
+                            label={t.deleteConfirm.typeNameLabel}
+                            placeholder={
+                                deleteTarget
+                                    ? deleteTargetFullName
+                                    : t.deleteConfirm.typeNamePlaceholder
+                            }
+                            value={deleteConfirmName}
+                            onChange={onDeleteNameChange}
+                            disabled={isLoading}
+                            autocomplete="off"
+                        />
                         {deleteError && (
                             <p
                                 className="user-delete-confirm__error"

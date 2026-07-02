@@ -544,6 +544,7 @@ export function DeviceTable({
                 </>
             )}
 
+            {/* Create device modal */}
             <Modal
                 open={createOpen}
                 onClose={handleCloseCreate}
@@ -572,7 +573,7 @@ export function DeviceTable({
                 />
             </Modal>
 
-            {/* Delete modal */}
+            {/* Delete device modal */}
             <Modal
                 open={deleteTarget !== null}
                 onClose={handleCloseDeleteModal}

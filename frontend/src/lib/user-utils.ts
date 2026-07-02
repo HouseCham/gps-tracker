@@ -39,8 +39,8 @@ export function getUserTableColumns(t: Translation['admin']['userTable']): DataT
         { key: 'email', label: t.email },
         { key: 'role', label: t.role },
         { key: 'status', label: t.status },
-        { key: 'created', label: t.created },
+        { key: 'created', label: t.created, align: 'center' },
         { key: 'devices', label: t.devices, align: 'center' },
-        { key: 'actions', label: t.actions, align: 'right' },
+        { key: 'actions', label: t.actions, align: 'center' },
     ];
 };
