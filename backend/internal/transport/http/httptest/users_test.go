@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/HouseCham/gps-tracker/backend/internal/domain"
+	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/dto"
 )
 
 func TestUsersList(t *testing.T) {
@@ -563,6 +564,84 @@ func TestUsersMe(t *testing.T) {
 		ta := NewTestApp()
 
 		resp, err := ta.Request("GET", "/api/auth/me", "", nil)
+		if err != nil {
+			t.Fatalf("request error: %v", err)
+		}
+
+		if resp.StatusCode != http.StatusUnauthorized {
+			t.Errorf("expected status 401, got %d", resp.StatusCode)
+		}
+	})
+}
+
+
+func TestUsersGetMe(t *testing.T) {
+	t.Run("200 - returns full local projection", func(t *testing.T) {
+		ta := NewTestApp()
+
+		_ = ta.SetupUser("token-me", "authula-me", "me@test.com", "Me", domain.UserRoleUser)
+
+		resp, err := ta.Request("GET", "/api/v1/users/me", "token-me", nil)
+		if err != nil {
+			t.Fatalf("request error: %v", err)
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			t.Fatalf("expected status 200, got %d", resp.StatusCode)
+		}
+
+		data, err := ParseResponseData[dto.UserResponse](resp)
+		if err != nil {
+			t.Fatalf("parse: %v", err)
+		}
+		if data == nil {
+			t.Fatalf("expected non-nil data")
+		}
+
+		if data.Email != "me@test.com" {
+			t.Errorf("email: want %q, got %q", "me@test.com", data.Email)
+		}
+		if data.Name != "Me" {
+			t.Errorf("name: want %q, got %q", "Me", data.Name)
+		}
+		if data.Role != "user" {
+			t.Errorf("role: want %q, got %q", "user", data.Role)
+		}
+		if data.CreatedAt.IsZero() {
+			t.Errorf("created_at must be present")
+		}
+	})
+
+	t.Run("200 - super_admin sees their own role", func(t *testing.T) {
+		ta := NewTestApp()
+
+		_ = ta.SetupUser("token-admin", "authula-admin", "admin@test.com", "Admin", domain.UserRoleSuperAdmin)
+
+		resp, err := ta.Request("GET", "/api/v1/users/me", "token-admin", nil)
+		if err != nil {
+			t.Fatalf("request error: %v", err)
+		}
+
+		if resp.StatusCode != http.StatusOK {
+			t.Fatalf("expected status 200, got %d", resp.StatusCode)
+		}
+
+		data, err := ParseResponseData[dto.UserResponse](resp)
+		if err != nil {
+			t.Fatalf("parse: %v", err)
+		}
+		if data == nil {
+			t.Fatalf("expected non-nil data")
+		}
+		if data.Role != "super_admin" {
+			t.Errorf("role: want %q, got %q", "super_admin", data.Role)
+		}
+	})
+
+	t.Run("401 - no authorization header", func(t *testing.T) {
+		ta := NewTestApp()
+
+		resp, err := ta.Request("GET", "/api/v1/users/me", "", nil)
 		if err != nil {
 			t.Fatalf("request error: %v", err)
 		}

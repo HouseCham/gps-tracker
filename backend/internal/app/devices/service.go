@@ -33,6 +33,13 @@ func (s *Service) ListForUserPaginated(ctx context.Context, userID uuid.UUID, pa
 	return s.repo.ListForUserPaginated(ctx, userID, pageSize, offset)
 }
 
+// CountMine returns how many devices the user has access to. Cheap —
+// single COUNT(*) — and reusable by sections that only need the total
+// (e.g. the profile page, future dashboard counters).
+func (s *Service) CountMine(ctx context.Context, userID uuid.UUID) (int, error) {
+	return s.repo.CountForUser(ctx, userID)
+}
+
 // GetByID returns a single device if the given user has access to it.
 // Returns domain.ErrNotFound if the device does not exist OR the user has
 // no access (the repository collapses both into "no rows").

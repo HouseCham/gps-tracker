@@ -45,6 +45,14 @@ type DeviceListResponse struct {
 	Pagination PaginationMeta             `json:"pagination"`
 }
 
+// DeviceCountResponse is the body of GET /api/v1/devices/count.
+// Carries only the total count of devices the caller has access to so
+// callers that don't need the full list (e.g. the profile page) avoid
+// fetching every row + their access role.
+type DeviceCountResponse struct {
+	Total int `json:"total"`
+}
+
 // DeviceFromDomain converts a *domain.Device to a DeviceResponse
 func DeviceFromDomain(d *domain.Device) DeviceResponse {
 	return DeviceResponse{

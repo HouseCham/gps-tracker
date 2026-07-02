@@ -14,6 +14,7 @@ type mockRepo struct {
 	listForUserFn                    func(ctx context.Context, userID uuid.UUID) ([]domain.DeviceWithAccess, error)
 	listForUserWithAccessPaginatedFn func(ctx context.Context, userID uuid.UUID, limit, offset int) ([]domain.DeviceWithAccess, int, error)
 	listForUserPaginatedFn           func(ctx context.Context, userID uuid.UUID, limit, offset int) ([]domain.Device, int, error)
+	countForUserFn                   func(ctx context.Context, userID uuid.UUID) (int, error)
 	getByIDForUserFn                 func(ctx context.Context, userID, deviceID uuid.UUID) (*domain.DeviceWithAccess, error)
 	createFn                         func(ctx context.Context, input CreateInput) (*domain.Device, error)
 	updateFn                         func(ctx context.Context, deviceID uuid.UUID, input UpdateInput) (*domain.Device, error)
@@ -28,6 +29,9 @@ func (m *mockRepo) ListForUserWithAccessPaginated(ctx context.Context, userID uu
 }
 func (m *mockRepo) ListForUserPaginated(ctx context.Context, userID uuid.UUID, limit, offset int) ([]domain.Device, int, error) {
 	return m.listForUserPaginatedFn(ctx, userID, limit, offset)
+}
+func (m *mockRepo) CountForUser(ctx context.Context, userID uuid.UUID) (int, error) {
+	return m.countForUserFn(ctx, userID)
 }
 func (m *mockRepo) GetByIDForUser(ctx context.Context, userID, deviceID uuid.UUID) (*domain.DeviceWithAccess, error) {
 	return m.getByIDForUserFn(ctx, userID, deviceID)
