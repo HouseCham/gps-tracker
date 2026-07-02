@@ -33,12 +33,7 @@ export function StatusIndicator({
     const textLabel = label ?? STATUS_INDICATOR_DEFAULT_LABEL[status];
     const dotColor = STATUS_INDICATOR_DOT_COLOR[status];
 
-    const dotClasses = [
-        'status-indicator__dot',
-        'status-dot',
-        dotColor,
-        status === 'online' && 'pulse',
-    ]
+    const dotClasses = ['status-indicator__dot', dotColor]
         .filter(Boolean)
         .join(' ');
 

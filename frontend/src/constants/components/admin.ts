@@ -13,6 +13,7 @@ export const DEMO_USER: User = {
     role: 'super_admin',
     created_at: '2022-01-01T00:00:00.000Z',
     email_verified: true,
+    image: null,
     must_change_password: false,
 };
 /**

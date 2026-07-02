@@ -124,6 +124,8 @@ export const es: Translation = {
         memberSince: 'Miembro desde',
         save: 'Guardar cambios',
         saving: 'Guardando...',
+        loadFailed: 'No se pudo cargar el perfil',
+        retry: 'Reintentar',
     },
     page: {
         devices: {

@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"strconv"
-
 	"github.com/Authula/authula/models"
 
 	"github.com/gofiber/fiber/v3"
@@ -79,25 +77,7 @@ func (h *UsersHandler) GetByID(c fiber.Ctx) error {
 		return middleware.BadRequestResponse(c, "invalid user id")
 	}
 
-	page := 1
-	if p := c.Query("page"); p != "" {
-		if parsed, err := strconv.Atoi(p); err == nil {
-			page = parsed
-		}
-	}
-	if page < 1 {
-		page = 1
-	}
-
-	pageSize := 10
-	if ps := c.Query("page_size"); ps != "" {
-		if parsed, err := strconv.Atoi(ps); err == nil {
-			pageSize = parsed
-		}
-	}
-	if pageSize < 1 || pageSize > 100 {
-		pageSize = 10
-	}
+	page, pageSize := parsePagination(c, 10)
 
 	targetUser, err := h.usersService.GetByID(c.Context(), requestingUser.ID, targetUserID)
 	if err != nil {
@@ -299,6 +279,36 @@ func (h *UsersHandler) Me(c fiber.Ctx) error {
 			"email": user.Email,
 			"name":  user.Name,
 		},
+	})
+}
+
+// GetMe handles GET /api/v1/users/me.
+// Returns the local projection (role, lastname, image, created_at, etc.)
+// for the currently authenticated user, projected via dto.UserResponse.
+// Distinct from /api/auth/me (the minimal Authula projection consumed by
+// authService.getSession on the client); the local projection carries
+// every field the profile page needs beyond the AuthUser shape.
+//
+// Reads the *domain.User already populated by AuthSession from Fiber
+// locals — no extra DB call.
+func (h *UsersHandler) GetMe(c fiber.Ctx) error {
+	const operation = "UsersHandler:GetMe"
+	log.Debug(operation, "request received")
+
+	user, ok := middleware.GetRequestUser(c)
+	if !ok || user == nil {
+		log.Error(operation, "err", fiber.ErrUnauthorized, "reason", "missing local user")
+		return c.Status(fiber.StatusUnauthorized).JSON(response.HTTPResponse[bool]{
+			StatusCode: fiber.StatusUnauthorized,
+			Message:    "unauthorized",
+		})
+	}
+
+	log.Debug(operation, "session resolved", "localUserID", user.ID)
+	return c.Status(fiber.StatusOK).JSON(response.HTTPResponse[dto.UserResponse]{
+		StatusCode: fiber.StatusOK,
+		Message:    "user retrieved",
+		Data:       dto.UserFromDomain(user),
 	})
 }
 

@@ -99,6 +99,20 @@ func (a *DevicesAdapter) ListForUserPaginated(ctx context.Context, userID uuid.U
 	return result, int(count), nil
 }
 
+// CountForUser returns the number of devices the user has access to.
+// Soft-deleted devices and soft-deleted access grants are filtered out.
+// Reuses the sqlc-generated CountDevicesForUser query that the paginated
+// list endpoints already call, so the count is always consistent with
+// pagination metadata.
+func (a *DevicesAdapter) CountForUser(ctx context.Context, userID uuid.UUID) (int, error) {
+	queries := New(a.pool)
+	count, err := queries.CountDevicesForUser(ctx, pgtypeUUID(userID))
+	if err != nil {
+		return 0, wrapPgError(err)
+	}
+	return int(count), nil
+}
+
 // GetByIDForUser returns the device only if the user has access (any role).
 // Returns domain.ErrNotFound (via wrapPgError) when the device does not
 // exist OR the user has no access — both cases collapse to 404.
@@ -124,6 +138,11 @@ func (a *DevicesAdapter) Create(ctx context.Context, input devices.CreateInput) 
 	if err != nil {
 		return nil, fmt.Errorf("begin tx: %w", err)
 	}
+	// Rollback is a no-op once Commit has succeeded (it would surface
+	// as ErrTxClosed, the expected outcome). If Commit errors out the
+	// failure is returned by the explicit path below and the rollback
+	// here releases the connection. Either way the rollback's own error
+	// is not actionable in the function's return value — discard it.
 	defer func() { _ = tx.Rollback(ctx) }()
 
 	queries := New(tx)
@@ -162,6 +181,11 @@ func (a *DevicesAdapter) Update(ctx context.Context, deviceID uuid.UUID, input d
 	if err != nil {
 		return nil, fmt.Errorf("begin tx: %w", err)
 	}
+	// Rollback is a no-op once Commit has succeeded (it would surface
+	// as ErrTxClosed, the expected outcome). If Commit errors out the
+	// failure is returned by the explicit path below and the rollback
+	// here releases the connection. Either way the rollback's own error
+	// is not actionable in the function's return value — discard it.
 	defer func() { _ = tx.Rollback(ctx) }()
 
 	queries := New(tx)

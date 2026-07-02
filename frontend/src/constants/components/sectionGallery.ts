@@ -1,7 +1,4 @@
-import type {
-    ActivityItem,
-    DeviceTableItem,
-} from '@/types/components';
+import type { ActivityItem, DeviceTableItem } from '@/types/components';
 /**
  * @constant SECTION_GALLERY_DEMO_ACTIVITIES
  * @description Demo activities for the section gallery

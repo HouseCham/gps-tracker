@@ -7,7 +7,6 @@ import type { Language } from '@/types';
 //-- Components
 import MainLayout from '@/components/astro/layout/MainLayout.astro';
 import { DeviceDetail } from '@/components/react/device';
-import { DEMO_USER } from '@/constants/components';
 /**
  * @type {GetStaticPaths}
  */
@@ -24,7 +23,6 @@ const translation = getTranslation(locale);
 <MainLayout
     locale={locale}
     translation={translation}
-    user={DEMO_USER}
     active="devices"
     showAdmin={true}
     title={`${translation.page.deviceDetail.title} · GPS Tracker`}

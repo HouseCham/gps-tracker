@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"strconv"
-
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/log"
 
@@ -37,31 +35,7 @@ func (h *DevicesHandler) List(c fiber.Ctx) error {
 		return middleware.UnauthorizedResponse(c)
 	}
 
-	page := 1
-	if p := c.Query("page"); p != "" {
-		parsed, err := strconv.Atoi(p)
-		if err != nil {
-			log.Warn(operation, "invalid page, defaulting to 1", "value", p, "err", err)
-		} else {
-			page = parsed
-		}
-	}
-	if page < 1 {
-		page = 1
-	}
-
-	pageSize := 20
-	if ps := c.Query("page_size"); ps != "" {
-		parsed, err := strconv.Atoi(ps)
-		if err != nil {
-			log.Warn(operation, "invalid page_size, defaulting to 20", "value", ps, "err", err)
-		} else {
-			pageSize = parsed
-		}
-	}
-	if pageSize < 1 || pageSize > 100 {
-		pageSize = 20
-	}
+	page, pageSize := parsePagination(c, defaultPageSize)
 
 	log.Debug(operation, "executing use case", "userID", user.ID, "page", page, "pageSize", pageSize)
 	items, total, err := h.service.ListMinePaginated(c.Context(), user.ID, page, pageSize)
@@ -93,6 +67,35 @@ func (h *DevicesHandler) List(c fiber.Ctx) error {
 				TotalPages: totalPages,
 			},
 		},
+	})
+}
+
+// Count handles GET /api/devices/count.
+// Returns the number of devices the caller has access to without
+// materialising the list. Cheap (single COUNT(*)) and reusable by
+// sections that only need the total.
+func (h *DevicesHandler) Count(c fiber.Ctx) error {
+	const operation = "DevicesHandler:Count"
+	log.Debug(operation, "request received")
+
+	user, ok := middleware.GetRequestUser(c)
+	if !ok {
+		log.Error(operation, "err", fiber.ErrUnauthorized)
+		return middleware.UnauthorizedResponse(c)
+	}
+
+	log.Debug(operation, "executing use case", "userID", user.ID)
+	total, err := h.service.CountMine(c.Context(), user.ID)
+	if err != nil {
+		log.Error(operation, "err", err)
+		return err
+	}
+
+	log.Info(operation, "device count retrieved", "userID", user.ID, "total", total)
+	return c.Status(fiber.StatusOK).JSON(response.HTTPResponse[dto.DeviceCountResponse]{
+		StatusCode: fiber.StatusOK,
+		Message:    "device count retrieved",
+		Data:       dto.DeviceCountResponse{Total: total},
 	})
 }
 

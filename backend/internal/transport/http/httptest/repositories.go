@@ -61,6 +61,13 @@ func (m *MockDevicesRepository) ListForUserPaginated(ctx context.Context, userID
 	return result, len(result), nil
 }
 
+func (m *MockDevicesRepository) CountForUser(ctx context.Context, userID uuid.UUID) (int, error) {
+	if m.ListErr != nil {
+		return 0, m.ListErr
+	}
+	return len(m.DevicesWithAccess[userID]), nil
+}
+
 func (m *MockDevicesRepository) GetByIDForUser(ctx context.Context, userID, deviceID uuid.UUID) (*domain.DeviceWithAccess, error) {
 	if m.GetErr != nil {
 		return nil, m.GetErr

@@ -15,7 +15,7 @@ export const STATUS_INDICATOR_DEFAULT_LABEL: Record<StatusVariant, string> = {
  */
 export const STATUS_INDICATOR_DOT_COLOR: Record<StatusVariant, string> = {
     online: 'green',
-    offline: '',
+    offline: 'muted',
     'never-seen': 'amber',
-    unknown: '',
+    unknown: 'muted',
 };

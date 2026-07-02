@@ -122,6 +122,8 @@ export const en = {
         memberSince: 'Member since',
         save: 'Save Changes',
         saving: 'Saving...',
+        loadFailed: 'Could not load profile',
+        retry: 'Try again',
     },
     page: {
         devices: {

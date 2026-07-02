@@ -731,58 +731,6 @@ textarea.input {
 /* ============================================
    STATUS DOTS / INDICATORS
    ============================================ */
-.status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
-.status-dot.green {
-    background: var(--green);
-    box-shadow: 0 0 0 3px var(--green-soft);
-}
-
-.status-dot.amber {
-    background: var(--amber);
-    box-shadow: 0 0 0 3px var(--amber-soft);
-}
-
-.status-dot.red {
-    background: var(--red);
-    box-shadow: 0 0 0 3px var(--red-soft);
-}
-
-.status-dot.blue {
-    background: var(--blue);
-    box-shadow: 0 0 0 3px var(--blue-soft);
-}
-
-.status-dot.pulse {
-    position: relative;
-}
-
-.status-dot.pulse::after {
-    content: '';
-    position: absolute;
-    inset: -3px;
-    border-radius: 50%;
-    background: currentColor;
-    opacity: 0.4;
-    animation: pulse 2s ease-out infinite;
-}
-
-@keyframes pulse {
-    0% {
-        transform: scale(0.8);
-        opacity: 0.4;
-    }
-
-    100% {
-        transform: scale(2);
-        opacity: 0;
-    }
-}
 
 .status-pill {
     display: inline-flex;
