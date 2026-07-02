@@ -1,5 +1,7 @@
 //-- React
-import { useEffect, useRef, type JSX } from 'react';
+import type { JSX } from 'react';
+//-- Hooks
+import { useHydrateOnce } from '@/lib/hooks/useHydrateOnce';
 //-- Styles
 import '@/styles/components/profile-view.css';
 //-- Types
@@ -41,13 +43,7 @@ export function ProfileView({
     const { isLoading, error, profile, deviceCount, refresh } =
         useProfileService();
 
-    // ponytail: hydrate once on mount, ignore StrictMode double-fire.
-    const hydrated = useRef(false);
-    useEffect(() => {
-        if (hydrated.current) return;
-        hydrated.current = true;
-        void refresh();
-    }, [refresh]);
+    useHydrateOnce(refresh);
 
     const wrapperClass = `profile-body ${className ?? ''}`.trim();
     const t = translation.profile;

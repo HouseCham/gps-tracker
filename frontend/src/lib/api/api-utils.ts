@@ -2,16 +2,16 @@ import type { ApiError } from '@/types/api';
 import { BetterFetchError } from '@better-fetch/fetch';
 /**
  * Checks if the provided value is an ApiError object.
+ * Validates the field types so the guard narrows to the full `ApiError`
+ * shape (status: number, message: string); callers that need to store
+ * the value in `ApiError`-typed state don't need a follow-up cast.
  * @param {unknown} error - The value to check.
  * @returns {boolean} True if the value is an ApiError object, false otherwise.
  */
-export function isApiError(error: unknown): error is Partial<ApiError> {
-    return (
-        typeof error === 'object' &&
-        error !== null &&
-        'status' in error &&
-        'message' in error
-    );
+export function isApiError(error: unknown): error is ApiError {
+    if (typeof error !== 'object' || error === null) return false;
+    const e = error as Record<string, unknown>;
+    return typeof e.status === 'number' && typeof e.message === 'string';
 }
 /**
  * Handles errors thrown by the API.

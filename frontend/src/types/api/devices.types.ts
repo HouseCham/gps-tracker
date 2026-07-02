@@ -41,6 +41,19 @@ export interface DeviceListResponse {
     pagination: PaginationMeta;
 }
 
+/**
+ * Response shape returned by GET /api/v1/devices/count. Carries only
+ * the total count of devices the caller has access to, so callers that
+ * don't need the full list (e.g. the profile page) avoid fetching
+ * every row + their access role.
+ * @interface DeviceCountResponse
+ * @property {number} total - The number of devices the authenticated
+ *   user has access to (soft-deleted devices and grants excluded).
+ */
+export interface DeviceCountResponse {
+    total: number;
+}
+
 export interface CreateDeviceDto {
     uuid_firmware: string;
     name: string;
