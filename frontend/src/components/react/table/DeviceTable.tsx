@@ -21,6 +21,10 @@ import {
     DeviceTypeIcon,
     VehicleTypeSelector,
 } from '@/components/react/device';
+import {
+    DeviceMobileCard,
+    MobileCardList,
+} from '@/components/react/shared';
 import Modal from '@/components/react/ui/Modal';
 //-- Icons
 import { Check, Inbox, Pencil, Plus, Trash, X } from 'lucide-react';
@@ -29,6 +33,7 @@ import { formatDate } from '@/lib';
 import { getDeviceTableColumns } from '@/lib/device-utils';
 //-- Services
 import { useDeviceService } from '@/lib/api/services';
+import { asApiError } from '@/lib/api/api-utils';
 
 /**
  * The window after which a device is considered offline. Anything newer
@@ -47,22 +52,6 @@ function statusFromLastSeen(lastSeenAt: string | null): 'online' | 'offline' {
     const last = new Date(lastSeenAt).getTime();
     if (Number.isNaN(last)) return 'offline';
     return Date.now() - last <= ONLINE_THRESHOLD_MS ? 'online' : 'offline';
-}
-
-/**
- * Narrows an unknown thrown value (typically from `handleApiError`) into a
- * partial {@link ApiError} shape so we can pluck its `message` for inline UI.
- * @param {unknown} err - Whatever the rejected promise gave us.
- * @returns {{ message?: string }} A safe subset of fields for rendering.
- */
-function asApiError(err: unknown): { message?: string } {
-    if (typeof err === 'object' && err !== null) {
-        // ponytail: at this point `err` is `object & not null`. The narrowed
-        //   shape is consumed defensively (only `?.message` is read) so a
-        //   stray `message` field is the worst-case we accept.
-        return err as { message?: string };
-    }
-    return {};
 }
 
 /**
@@ -530,195 +519,28 @@ export function DeviceTable({
                         })}
                     </DataTable>
                     {/* Mobile cards (≤ 767.98px) — mirrors the table rows above. */}
-                    <ul
-                        className="mobile-cards device-cards"
-                        aria-label={t.name}
-                    >
-                        {devices.map((device: DeviceWithAccess) => {
-                            const status = statusFromLastSeen(
-                                device.last_seen_at
-                            );
-                            // ponytail: API serializes vehicle_type as a generic string;
-                            //   the lookup table only covers the known
-                            //   DeviceVehicleType union, so the fallback
-                            //   (`?? device.vehicle_type`) handles unknown values safely.
-                            const vtLabel =
-                                t.vehicleTypes[
-                                    device.vehicle_type as DeviceVehicleType
-                                ] ?? device.vehicle_type;
-                            const isEditing = editingId === device.id;
-                            const handlers = rowHandlersById.get(device.id);
-                            if (!handlers) return null;
-                            return (
-                                <li
-                                    key={device.id}
-                                    className={`device-card ${
-                                        isEditing ? 'is-editing' : ''
-                                    }`}
-                                >
-                                    <header className="device-card__header">
-                                        <div className="device-card__identity">
-                                            <div
-                                                className="device-card__icon"
-                                                aria-hidden="true"
-                                            >
-                                                {isEditing ? null : (
-                                                    <DeviceTypeIcon
-                                                        type={
-                                                            device.vehicle_type
-                                                        }
-                                                    />
-                                                )}
-                                            </div>
-                                            {isEditing ? (
-                                                <div className="device-table__inline-field">
-                                                    <Input
-                                                        name="edit-name-mobile"
-                                                        value={editName}
-                                                        onChange={
-                                                            onEditNameChange
-                                                        }
-                                                        placeholder={
-                                                            formStrings.namePlaceholder
-                                                        }
-                                                        disabled={isLoading}
-                                                    />
-                                                    {editError && (
-                                                        <p
-                                                            className="device-table__inline-error"
-                                                            role="alert"
-                                                        >
-                                                            {editError}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                            ) : (
-                                                <a
-                                                    href={`/${locale}/devices/detail?id=${device.id}`}
-                                                    className="device-card__name"
-                                                >
-                                                    {device.name}
-                                                </a>
-                                            )}
-                                        </div>
-                                        <Badge
-                                            variant={
-                                                status === 'online'
-                                                    ? 'success'
-                                                    : 'danger'
-                                            }
-                                            size="sm"
-                                            label={
-                                                status === 'online'
-                                                    ? translation.device.online
-                                                    : translation.device.offline
-                                            }
-                                        />
-                                    </header>
-                                    <dl className="device-card__meta">
-                                        <div className="device-card__meta-item">
-                                            <dt className="device-card__meta-label">
-                                                {t.vehicleType}
-                                            </dt>
-                                            <dd className="device-card__meta-value">
-                                                {isEditing ? (
-                                                    <VehicleTypeSelector
-                                                        value={editType}
-                                                        onChange={
-                                                            onEditTypeChange
-                                                        }
-                                                        vehicleTypes={
-                                                            t.vehicleTypes
-                                                        }
-                                                        label={t.vehicleType}
-                                                    />
-                                                ) : (
-                                                    vtLabel
-                                                )}
-                                            </dd>
-                                        </div>
-                                        <div className="device-card__meta-item">
-                                            <dt className="device-card__meta-label">
-                                                {t.lastSeen}
-                                            </dt>
-                                            <dd className="device-card__meta-value device-card__meta-value--mono device-card__meta-value--muted">
-                                                {device.last_seen_at
-                                                    ? formatDate(
-                                                          locale,
-                                                          device.last_seen_at
-                                                      )
-                                                    : translation.device
-                                                          .neverSeen}
-                                            </dd>
-                                        </div>
-                                    </dl>
-                                    <footer className="device-card__actions">
-                                        {isEditing ? (
-                                            <>
-                                                <Button
-                                                    variant="primary"
-                                                    size="sm"
-                                                    onClick={handlers.onSave}
-                                                    disabled={isLoading}
-                                                    aria-label={
-                                                        t.inlineEdit.save
-                                                    }
-                                                >
-                                                    <Check
-                                                        size={14}
-                                                        strokeWidth={2}
-                                                    />
-                                                    {t.inlineEdit.save}
-                                                </Button>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={handleCancelEdit}
-                                                    disabled={isLoading}
-                                                    aria-label={
-                                                        t.inlineEdit.cancel
-                                                    }
-                                                >
-                                                    <X
-                                                        size={14}
-                                                        strokeWidth={2}
-                                                    />
-                                                    {t.inlineEdit.cancel}
-                                                </Button>
-                                            </>
-                                        ) : (
-                                            <>
-                                                {/* Edit */}
-                                                <Button
-                                                    variant="ghost"
-                                                    size="sm"
-                                                    onClick={handlers.onEdit}
-                                                    aria-label={
-                                                        translation.device
-                                                            .editDevice
-                                                    }
-                                                >
-                                                    <Pencil />
-                                                </Button>
-                                                {/* Delete */}
-                                                <Button
-                                                    variant="danger"
-                                                    size="sm"
-                                                    onClick={handlers.onDelete}
-                                                    aria-label={
-                                                        translation.device
-                                                            .deleteDevice
-                                                    }
-                                                >
-                                                    <Trash />
-                                                </Button>
-                                            </>
-                                        )}
-                                    </footer>
-                                </li>
-                            );
-                        })}
-                    </ul>
+                    <MobileCardList variant="device" label={t.name}>
+                        {devices.map((device: DeviceWithAccess) => (
+                            <DeviceMobileCard
+                                key={device.id}
+                                locale={locale}
+                                device={device}
+                                labels={t}
+                                deviceStrings={translation.device}
+                                status={statusFromLastSeen(device.last_seen_at)}
+                                editingId={editingId}
+                                handlers={rowHandlersById.get(device.id)}
+                                editName={editName}
+                                editType={editType}
+                                editError={editError}
+                                namePlaceholder={formStrings.namePlaceholder}
+                                onEditNameChange={onEditNameChange}
+                                onEditTypeChange={onEditTypeChange}
+                                onCancelEdit={handleCancelEdit}
+                                isLoading={isLoading}
+                            />
+                        ))}
+                    </MobileCardList>
                 </>
             )}
 
@@ -750,6 +572,7 @@ export function DeviceTable({
                 />
             </Modal>
 
+            {/* Delete modal */}
             <Modal
                 open={deleteTarget !== null}
                 onClose={handleCloseDeleteModal}

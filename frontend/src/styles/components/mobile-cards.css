@@ -15,7 +15,7 @@
 
 /* ---- Card primitives ---- */
 .user-card,
-.device-card,
+.mobile-device-card,
 .access-card {
     background: var(--surface);
     border: 1px solid var(--border);
@@ -28,7 +28,7 @@
 }
 
 .user-card__header,
-.device-card__header,
+.mobile-device-card__header,
 .access-card__header {
     display: flex;
     align-items: center;
@@ -36,7 +36,7 @@
 }
 
 .user-card__identity,
-.device-card__identity,
+.mobile-device-card__identity,
 .access-card__identity {
     display: flex;
     align-items: center;
@@ -61,7 +61,7 @@
     letter-spacing: 0.02em;
 }
 
-.device-card__icon {
+.mobile-device-card__icon {
     width: 36px;
     height: 36px;
     border-radius: var(--radius);
@@ -83,7 +83,7 @@
 }
 
 .user-card__name,
-.device-card__name,
+.mobile-device-card__name,
 .access-card__name {
     font-size: 14px;
     font-weight: 600;
@@ -95,13 +95,13 @@
     white-space: nowrap;
 }
 
-.device-card__name {
+.mobile-device-card__name {
     color: var(--accent);
     text-decoration: none;
     cursor: pointer;
 }
 
-.device-card__name:hover {
+.mobile-device-card__name:hover {
     text-decoration: underline;
 }
 
@@ -123,7 +123,7 @@
 
 /* ---- Meta — horizontal label/value rows ---- */
 .user-card__meta,
-.device-card__meta,
+.mobile-device-card__meta,
 .access-card__meta {
     display: flex;
     flex-direction: column;
@@ -134,7 +134,7 @@
 }
 
 .user-card__meta-item,
-.device-card__meta-item,
+.mobile-device-card__meta-item,
 .access-card__meta-item {
     display: flex;
     align-items: baseline;
@@ -143,7 +143,7 @@
 }
 
 .user-card__meta-label,
-.device-card__meta-label,
+.mobile-device-card__meta-label,
 .access-card__meta-label {
     font-size: 11px;
     font-weight: 500;
@@ -155,7 +155,7 @@
 }
 
 .user-card__meta-value,
-.device-card__meta-value,
+.mobile-device-card__meta-value,
 .access-card__meta-value {
     font-size: 13px;
     font-weight: 500;
@@ -170,14 +170,14 @@
 }
 
 .user-card__meta-value--mono,
-.device-card__meta-value--mono,
+.mobile-device-card__meta-value--mono,
 .access-card__meta-value--mono {
     font-family: var(--mono);
     font-size: 12px;
 }
 
 .user-card__meta-value--muted,
-.device-card__meta-value--muted,
+.mobile-device-card__meta-value--muted,
 .access-card__meta-value--muted {
     color: var(--muted);
     font-weight: 400;
@@ -185,7 +185,7 @@
 
 /* ---- Card actions ---- */
 .user-card__actions,
-.device-card__actions,
+.mobile-device-card__actions,
 .access-card__actions {
     display: flex;
     justify-content: flex-end;
@@ -194,12 +194,12 @@
 }
 
 /* ---- Card edit state (used by inline-edit in DeviceTable) ---- */
-.device-card.is-editing {
+.mobile-device-card.is-editing {
     border-color: var(--accent);
     box-shadow: var(--shadow-md);
 }
 
-.device-card.is-editing .device-card__meta-value {
+.mobile-device-card.is-editing .mobile-device-card__meta-value {
     text-align: left;
     margin-left: 0;
     overflow: visible;

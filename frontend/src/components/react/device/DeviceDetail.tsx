@@ -1,28 +1,33 @@
 import '@/styles/components/device-detail.css';
 import '@/styles/components/mobile-cards.css';
 //-- React
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { ChangeEvent } from 'react';
 import type { JSX } from 'react/jsx-runtime';
 //-- Types
 import type { Language } from '@/types';
 import type { Translation } from '@/i18n';
 import type { DeviceAccessListItem, DeviceVehicleType } from '@/types/api';
 //-- Components
-import { Badge, Button } from '@/components/ui';
-import { DataTable, TableStatus } from '@/components/ui/DataTable';
+import { Badge, Button, Input } from '@/components/ui';
+import { TableStatus } from '@/components/ui/DataTable';
 import Modal from '@/components/react/ui/Modal';
 import { GrantAccessForm } from '@/components/react/form';
 import { NotFoundUI } from '@/components/react/ui';
+import {
+    AccessMobileCard,
+    MobileCardList,
+} from '@/components/react/shared';
 import DeviceMapLive from '@/components/react/map/DeviceMapLive';
 //-- Icons
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus } from 'lucide-react';
 //-- Utils
 import {
     formatDate,
     getDeviceAccessTableColumns,
-    getInitials,
     readDeviceIdFromUrl,
 } from '@/lib';
+import { asApiError } from '@/lib/api/api-utils';
 //-- Constants
 import {
     MAP_LIVE_DEMO_LOCATION,
@@ -30,6 +35,7 @@ import {
 } from '@/constants/components/map';
 //-- Services
 import { useDeviceService } from '@/lib/api/services';
+import { DeviceUserAccessTable } from './DeviceUserAccessTable';
 
 /**
  * Interface for the DeviceDetail island.
@@ -72,8 +78,13 @@ export function DeviceDetail({
     const mapStrings = translation.section.deviceDetail;
 
     const [grantOpen, setGrantOpen] = useState(false);
+
+    // ─── Revoke-confirmation modal state ────────────────────────────────────
     const [revokeTarget, setRevokeTarget] =
         useState<DeviceAccessListItem | null>(null);
+    const [revokeConfirmText, setRevokeConfirmText] = useState('');
+    const [revokeError, setRevokeError] = useState<string | null>(null);
+
     const wrapperClass = `device-detail ${className ?? ''}`;
 
     //*  note: The device id comes from the URL query string so the page
@@ -92,28 +103,81 @@ export function DeviceDetail({
      * Errors propagate so the form can display them inline.
      * @param {string} userId - The id typed into the form.
      */
-    async function handleGrant(userId: string): Promise<void> {
-        await grantAccess(deviceId ?? '', userId);
-        setGrantOpen(false);
-    }
+    const handleGrant = useCallback(
+        async (userId: string): Promise<void> => {
+            await grantAccess(deviceId ?? '', userId);
+            setGrantOpen(false);
+        },
+        [deviceId, grantAccess]
+    );
 
     /**
      * Opens the revoke-access confirmation modal for the given user.
      * @param {DeviceAccessListItem} user - The user pending revocation.
      */
-    function askRevoke(user: DeviceAccessListItem): void {
+    const askRevoke = useCallback((user: DeviceAccessListItem): void => {
         setRevokeTarget(user);
-    }
+        setRevokeConfirmText('');
+        setRevokeError(null);
+    }, []);
 
     /**
-     * Confirms the pending revocation, calls the service, then closes the modal.
+     * Closes the revoke-access modal and clears its state.
      */
-    async function confirmRevoke(): Promise<void> {
-        if (!revokeTarget) return;
-        const target = revokeTarget;
+    const handleCancelRevoke = useCallback((): void => {
         setRevokeTarget(null);
-        await revokeAccess(deviceId ?? '', target.user_id);
-    }
+        setRevokeConfirmText('');
+        setRevokeError(null);
+    }, []);
+
+    /**
+     * Stable change handler for the revoke-confirmation input.
+     */
+    const onRevokeConfirmChange = useCallback(
+        (e: ChangeEvent<HTMLInputElement>): void => {
+            setRevokeConfirmText(e.target.value);
+            setRevokeError(null);
+        },
+        []
+    );
+
+    /**
+     * Confirms the pending revocation. The button is only enabled when the
+     * typed word matches `t.accessTable.revokeConfirm.confirmPhrase`, so this
+     * is a final guard, not the primary check.
+     */
+    const confirmRevoke = useCallback(async (): Promise<void> => {
+        const strings = translation.device.detail.accessTable.revokeConfirm;
+        if (!revokeTarget) return;
+        if (revokeConfirmText.trim() !== strings.confirmPhrase) {
+            setRevokeError(strings.mismatch);
+            return;
+        }
+        try {
+            await revokeAccess(deviceId ?? '', revokeTarget.user_id);
+            handleCancelRevoke();
+        } catch (err) {
+            const apiErr = asApiError(err);
+            setRevokeError(apiErr.message ?? strings.revokeFailed);
+        }
+    }, [
+        revokeTarget,
+        revokeConfirmText,
+        revokeAccess,
+        deviceId,
+        handleCancelRevoke,
+        translation.device.detail.accessTable.revokeConfirm,
+    ]);
+
+    // Esc cancels the revoke modal (single-mode means at most one).
+    useEffect(() => {
+        if (revokeTarget === null) return;
+        const onKey = (e: KeyboardEvent): void => {
+            if (e.key === 'Escape') handleCancelRevoke();
+        };
+        document.addEventListener('keydown', onKey);
+        return (): void => document.removeEventListener('keydown', onKey);
+    }, [revokeTarget, handleCancelRevoke]);
 
     // Return loading UI
     if (isLoading && !device) {
@@ -174,6 +238,22 @@ export function DeviceDetail({
 
     const isOwner = device.access_role === 'owner';
     const users = device.users ?? [];
+
+    /**
+     * Per-user click callbacks for the access list. The mobile `.map`
+     * below reads from this Map instead of allocating inline arrows;
+     * entries stay stable until `users` (or `askRevoke`) changes.
+     */
+    const accessHandlersById = useMemo(() => {
+        const map = new Map<string, { onRevoke: () => void }>();
+        for (const user of users) {
+            map.set(user.user_id, {
+                onRevoke: (): void => askRevoke(user),
+            });
+        }
+        return map;
+    }, [users, askRevoke]);
+
     // ponytail: API serializes vehicle_type as a generic string; the
     //   lookup table only covers the known DeviceVehicleType union, so the
     //   fallback (`?? device.vehicle_type`) handles unknown values safely.
@@ -181,6 +261,11 @@ export function DeviceDetail({
         // device.vehicle_type arrives as string from the API, narrow for the label lookup
         vehicleLabels[device.vehicle_type as DeviceVehicleType] ??
         device.vehicle_type;
+
+    const revokeStrings = t.accessTable.revokeConfirm;
+    const canRevoke =
+        revokeTarget !== null &&
+        revokeConfirmText.trim() === revokeStrings.confirmPhrase;
 
     return (
         <section className={wrapperClass}>
@@ -288,120 +373,36 @@ export function DeviceDetail({
                                 </Button>
                             </div>
                             {/* Access Table */}
-                            <DataTable columns={columns}>
-                                {users.map(user => (
-                                    <tr
-                                        key={user.user_id}
-                                        className="data-table__row device-detail__access-row"
-                                    >
-                                        {/* Name */}
-                                        <td className="data-table__cell">
-                                            <span className="device-detail__access-name">
-                                                {user.name}
-                                            </span>
-                                        </td>
-                                        {/* Email */}
-                                        <td className="data-table__cell device-detail__access-email">
-                                            {user.email}
-                                        </td>
-                                        {/* Access Granted At */}
-                                        <td className="data-table__cell device-detail__access-granted">
-                                            {formatDate(
-                                                locale,
-                                                user.access_granted_at
-                                            )}
-                                        </td>
-                                        {/* Actions */}
-                                        <td
-                                            className="data-table__cell"
-                                            data-align="center"
-                                        >
-                                            <div className="device-detail__access-actions">
-                                                <Button
-                                                    variant="danger"
-                                                    size="sm"
-                                                    onClick={() =>
-                                                        askRevoke(user)
-                                                    }
-                                                    disabled={isLoading}
-                                                    aria-label={
-                                                        t.accessTable.remove
-                                                    }
-                                                >
-                                                    <Trash2
-                                                        size={14}
-                                                        strokeWidth={2}
-                                                        aria-hidden="true"
-                                                    />
-                                                    {t.accessTable.remove}
-                                                </Button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </DataTable>
-                            {/* Mobile cards (≤ 767.98px) — mirrors the access table rows above. */}
-                            <ul
-                                className="mobile-cards access-cards"
-                                aria-label={t.accessTable.name}
+                            <DeviceUserAccessTable 
+                                columns={columns}
+                                users={users}
+                                locale={locale}
+                                t={t.accessTable}
+                                isLoading={isLoading}
+                                onClickRemoveAccess={askRevoke}
+                            />
+                            {/* Mobile cards (≤ 767.98px) — mirrors the table rows above. */}
+                            <MobileCardList
+                                variant="access"
+                                label={t.accessTable.name}
                             >
-                                {users.map(user => (
-                                    <li
-                                        key={user.user_id}
-                                        className="access-card"
-                                    >
-                                        <header className="access-card__header">
-                                            <div className="access-card__identity">
-                                                <div
-                                                    className="access-card__avatar"
-                                                    aria-hidden="true"
-                                                >
-                                                    {getInitials(user.name)}
-                                                </div>
-                                                <div className="access-card__name-block">
-                                                    <div className="access-card__name">
-                                                        {user.name}
-                                                    </div>
-                                                    <div className="access-card__email">
-                                                        {user.email}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </header>
-                                        <dl className="access-card__meta">
-                                            <div className="access-card__meta-item">
-                                                <dt className="access-card__meta-label">
-                                                    {t.accessTable.accessGranted}
-                                                </dt>
-                                                <dd className="access-card__meta-value access-card__meta-value--mono access-card__meta-value--muted">
-                                                    {formatDate(
-                                                        locale,
-                                                        user.access_granted_at
-                                                    )}
-                                                </dd>
-                                            </div>
-                                        </dl>
-                                        <footer className="access-card__actions">
-                                            <Button
-                                                variant="danger"
-                                                size="sm"
-                                                onClick={() => askRevoke(user)}
-                                                disabled={isLoading}
-                                                aria-label={
-                                                    t.accessTable.remove
-                                                }
-                                            >
-                                                <Trash2
-                                                    size={14}
-                                                    strokeWidth={2}
-                                                    aria-hidden="true"
-                                                />
-                                                {t.accessTable.remove}
-                                            </Button>
-                                        </footer>
-                                    </li>
-                                ))}
-                            </ul>
+                                {users.map(user => {
+                                    const handlers = accessHandlersById.get(
+                                        user.user_id
+                                    );
+                                    if (!handlers) return null;
+                                    return (
+                                        <AccessMobileCard
+                                            key={user.user_id}
+                                            locale={locale}
+                                            user={user}
+                                            labels={t.accessTable}
+                                            onRevoke={handlers.onRevoke}
+                                            isLoading={isLoading}
+                                        />
+                                    );
+                                })}
+                            </MobileCardList>
                             {/* Empty state */}
                             {users.length === 0 && (
                                 <p className="device-detail__empty">
@@ -424,30 +425,71 @@ export function DeviceDetail({
                             {/* Revoke modal */}
                             <Modal
                                 open={revokeTarget !== null}
-                                onClose={() => setRevokeTarget(null)}
+                                onClose={handleCancelRevoke}
                                 title={t.accessTable.removeTitle}
+                                variant="danger"
+                                size="md"
+                                footer={
+                                    <>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={handleCancelRevoke}
+                                            disabled={isLoading}
+                                        >
+                                            {t.accessTable.revokeConfirm.cancel}
+                                        </Button>
+                                        <Button
+                                            variant="danger"
+                                            size="sm"
+                                            onClick={() => void confirmRevoke()}
+                                            disabled={
+                                                !canRevoke || isLoading
+                                            }
+                                            loading={isLoading && canRevoke}
+                                        >
+                                            {t.accessTable.revokeConfirm.confirm}
+                                        </Button>
+                                    </>
+                                }
                             >
-                                <p className="device-detail__modal-message">
-                                    {t.accessTable.removeConfirm}
-                                </p>
-                                <div className="device-detail__modal-actions">
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => setRevokeTarget(null)}
-                                        disabled={isLoading}
+                                {/* ponytail: reuses the device-delete-confirm
+                                     BEM block (visually identical destructive
+                                     dialog; same warning + typed-confirmation
+                                     pattern). Split if a third caller arrives. */}
+                                <div className="device-delete-confirm">
+                                    <p
+                                        className="device-delete-confirm__warning"
+                                        role="alert"
                                     >
-                                        {t.grantAccess.cancel}
-                                    </Button>
-                                    <Button
-                                        variant="danger"
-                                        size="sm"
-                                        onClick={confirmRevoke}
+                                        {t.accessTable.revokeConfirm.warning.replace(
+                                            '{name}',
+                                            revokeTarget?.name ?? ''
+                                        )}
+                                    </p>
+                                    <Input
+                                        name="revoke-confirm-phrase"
+                                        label={
+                                            t.accessTable.revokeConfirm
+                                                .typeConfirmLabel
+                                        }
+                                        placeholder={
+                                            t.accessTable.revokeConfirm
+                                                .typeConfirmPlaceholder
+                                        }
+                                        value={revokeConfirmText}
+                                        onChange={onRevokeConfirmChange}
                                         disabled={isLoading}
-                                        loading={isLoading}
-                                    >
-                                        {t.accessTable.remove}
-                                    </Button>
+                                        autocomplete="off"
+                                    />
+                                    {revokeError && (
+                                        <p
+                                            className="device-delete-confirm__error"
+                                            role="alert"
+                                        >
+                                            {revokeError}
+                                        </p>
+                                    )}
                                 </div>
                             </Modal>
                         </section>

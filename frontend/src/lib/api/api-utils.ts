@@ -14,6 +14,22 @@ export function isApiError(error: unknown): error is ApiError {
     return typeof e.status === 'number' && typeof e.message === 'string';
 }
 /**
+ * Narrows an unknown thrown value (typically from `handleApiError`) into a
+ * partial {@link ApiError} shape so callers can pluck `message` for inline
+ * UI without each component redefining its own guard.
+ * @param {unknown} err - Whatever the rejected promise gave us.
+ * @returns {{ message?: string }} A safe subset of fields for rendering.
+ */
+export function asApiError(err: unknown): { message?: string } {
+    if (typeof err === 'object' && err !== null) {
+        // ponytail: at this point `err` is `object & not null`. The narrowed
+        //   shape is consumed defensively (only `?.message` is read) so a
+        //   stray `message` field is the worst-case we accept.
+        return err as { message?: string };
+    }
+    return {};
+}
+/**
  * Handles errors thrown by the API.
  * @param {unknown} error - The error to handle.
  * @throws {ApiError} An object containing the error status, message, and code.
