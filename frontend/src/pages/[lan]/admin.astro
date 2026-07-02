@@ -18,7 +18,7 @@ export const getStaticPaths = (() => {
     return [{ params: { lan: 'en' } }, { params: { lan: 'es' } }];
 }) satisfies GetStaticPaths;
 
-// ponytail: getStaticPaths only emits the two supported locales,
+//* note: getStaticPaths only emits the two supported locales,
 //   so the cast is exhaustive by construction.
 const locale = Astro.params.lan as Language;
 const translation = getTranslation(locale);

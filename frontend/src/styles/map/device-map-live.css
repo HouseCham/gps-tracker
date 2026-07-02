@@ -24,7 +24,7 @@
 
 /* MapMarker positions itself; nothing to override here. */
 .device-map-live :global(.map-marker) {
-    /* ponytail: native browser focus ring on the button keeps a11y intact. */
+    /** note: native browser focus ring on the button keeps a11y intact. */
 }
 
 .device-map-live__empty {
@@ -52,7 +52,7 @@
     max-width: 32ch;
 }
 
-/* ponytail: CSS-filter dark mode is the lazy rung — drop it the day the
+/** note: CSS-filter dark mode is the lazy rung — drop it the day the
    PUBLIC_MAP_STYLE_URL is set to a dedicated dark style. */
 [data-theme='dark'] .device-map-live :global(.maplibregl-canvas) {
     filter: invert(0.92) hue-rotate(180deg) brightness(0.95);
