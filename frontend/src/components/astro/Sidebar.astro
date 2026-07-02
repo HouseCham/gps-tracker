@@ -3,76 +3,28 @@ import '@/styles/layout/sidebar.css';
 //-- Types
 import type { Translation } from '@/i18n';
 import type { Language } from '@/types';
-import type { SidebarNavItem, SidebarUser } from '@/types/layout';
+import type { SidebarNavItemType } from '@/types/layout';
+//-- Utils
+import { generateNavbarItems } from '@/lib';
 //-- Components
-import {
-    LayoutDashboard,
-    Cpu,
-    ShieldCheck,
-    User,
-    MapPin,
-} from '@lucide/astro';
-import LogoutButton from '@/components/react/auth/LogoutButton';
+import { MapPin } from '@lucide/astro';
+import { SidebarUserCard } from '@/components/react/layout';
 /**
  * @interface Props
  * @property {Language} locale - Current locale code ('en' | 'es').
  * @property {Translation} translation - Translation bundle (en/es) used for nav labels.
- * @property {SidebarNavItem} active - Active nav item, drives the .active highlight and aria-current.
- * @property {SidebarUser} [user] - Current user for the sidebar footer card.
+ * @property {SidebarNavItemType} active - Active nav item, drives the .active highlight and aria-current.
  * @property {boolean} [showAdmin] - Whether to surface the Admin nav item (super_admin only).
  */
 interface Props {
     locale: Language;
     translation: Translation;
-    active: SidebarNavItem;
-    user?: SidebarUser;
+    active: SidebarNavItemType;
     showAdmin?: boolean;
 }
 
-const { locale, translation, active, user, showAdmin = false } = Astro.props;
-
-const initials = user?.name
-    ? user.name
-          .split(/\s+/)
-          .map(part => part[0] ?? '')
-          .slice(0, 2)
-          .join('')
-          .toUpperCase()
-    : '?';
-
-const navItems: Array<{
-    key: SidebarNavItem;
-    href: string;
-    label: string;
-    Icon: typeof LayoutDashboard;
-}> = [
-    {
-        key: 'dashboard',
-        href: `/${locale}/`,
-        label: translation.nav.dashboard,
-        Icon: LayoutDashboard,
-    },
-    {
-        key: 'devices',
-        href: `/${locale}/devices/`,
-        label: translation.nav.devices,
-        Icon: Cpu,
-    },
-];
-if (showAdmin) {
-    navItems.push({
-        key: 'admin',
-        href: `/${locale}/admin/`,
-        label: translation.nav.admin,
-        Icon: ShieldCheck,
-    });
-}
-navItems.push({
-    key: 'profile',
-    href: `/${locale}/profile`,
-    label: translation.nav.profile,
-    Icon: User,
-});
+const { locale, translation, active, showAdmin = false } = Astro.props;
+const navItems = generateNavbarItems(locale, translation, showAdmin);
 ---
 
 <aside class="sidebar" aria-label={translation.layout.primaryNav}>
@@ -99,22 +51,10 @@ navItems.push({
     </nav>
 
     <div class="sidebar__user">
-        <a
-            href={`/${locale}/profile`}
-            class="sidebar__user-card"
-            aria-label={translation.layout.userMenu}
-        >
-            <span class="avatar sidebar__avatar" aria-hidden="true"
-                >{initials}</span
-            >
-            <span class="sidebar__user-meta">
-                <span class="sidebar__user-name">{user?.name ?? 'User'}</span>
-                <span class="sidebar__user-role">{user?.role ?? 'Member'}</span>
-            </span>
-        </a>
-        <LogoutButton
+        <SidebarUserCard
+            translation={translation}
+            locale={locale}
             client:load
-            ariaLabel={translation.nav.logout}
         />
     </div>
 </aside>

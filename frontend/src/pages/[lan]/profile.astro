@@ -4,11 +4,10 @@ import type { GetStaticPaths } from 'astro';
 import { getTranslation } from '@/i18n';
 //-- Types
 import type { Language } from '@/types';
-//-- Constants
-import { DEMO_USER } from '@/constants/components';
 //-- Components
 import MainLayout from '@/components/astro/layout/MainLayout.astro';
-import { StatusIndicator } from '@/components/ui';
+import PageHeader from '@/components/astro/layout/PageHeader.astro';
+import { ProfileView } from '@/components/react/profile';
 /**
  * @type {GetStaticPaths}
  */
@@ -16,6 +15,8 @@ export const getStaticPaths = (() => {
     return [{ params: { lan: 'en' } }, { params: { lan: 'es' } }];
 }) satisfies GetStaticPaths;
 
+// ponytail: getStaticPaths only emits the two supported locales,
+//   so the cast is exhaustive by construction.
 const locale = Astro.params.lan as Language;
 const translation = getTranslation(locale);
 ---
@@ -23,121 +24,18 @@ const translation = getTranslation(locale);
 <MainLayout
     locale={locale}
     translation={translation}
-    user={DEMO_USER}
     active="profile"
     showAdmin={true}
     title={`${translation.profile.title} · GPS Tracker`}
 >
-    <header class="page-header">
-        <div>
-            <p class="page-header__eyebrow">{translation.nav.profile}</p>
-            <h1 class="page-header__title">{translation.profile.title}</h1>
-        </div>
-    </header>
+    <PageHeader
+        eyebrow={translation.nav.profile}
+        title={translation.profile.title}
+    />
 
-    <div class="profile-body">
-        <section class="profile-card">
-            <h2 class="profile-card__title">{translation.profile.accountInfo}</h2>
-            <dl class="profile-grid">
-                <div class="profile-field">
-                    <dt class="profile-label">Email</dt>
-                    <dd class="profile-value">{DEMO_USER.email}</dd>
-                </div>
-                <div class="profile-field">
-                    <dt class="profile-label">{translation.device.status}</dt>
-                    <dd class="profile-value">
-                        <StatusIndicator status="online" label={translation.device.online} />
-                    </dd>
-                </div>
-                <div class="profile-field">
-                    <dt class="profile-label">{translation.admin.roles.superAdmin}</dt>
-                    <dd class="profile-value">{DEMO_USER.role}</dd>
-                </div>
-                <div class="profile-field">
-                    <dt class="profile-label">{translation.profile.deviceCount}</dt>
-                    <dd class="profile-value">24</dd>
-                </div>
-                <div class="profile-field">
-                    <dt class="profile-label">{translation.profile.memberSince}</dt>
-                    <dd class="profile-value profile-value--mono">2026-01-15</dd>
-                </div>
-            </dl>
-        </section>
-
-        <section class="profile-card">
-            <h2 class="profile-card__title">{translation.profile.personalInfo}</h2>
-            <dl class="profile-grid">
-                <div class="profile-field">
-                    <dt class="profile-label">{translation.auth.name}</dt>
-                    <dd class="profile-value">{DEMO_USER.name}</dd>
-                </div>
-            </dl>
-        </section>
-    </div>
+    <ProfileView
+        client:load
+        locale={locale}
+        translation={translation}
+    />
 </MainLayout>
-
-<style>
-    .page-header { margin-bottom: 24px; }
-    .page-header__eyebrow {
-        font-size: 12px; font-weight: 600; color: var(--muted);
-        text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px;
-    }
-    .page-header__title {
-        font-size: 24px; font-weight: 700; letter-spacing: -0.02em; color: var(--text);
-    }
-
-    .profile-body {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-        max-width: 560px;
-    }
-
-    .profile-card {
-        background: var(--surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 20px;
-    }
-
-    .profile-card__title {
-        margin: 0 0 16px;
-        font-size: 13px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        color: var(--muted);
-    }
-
-    .profile-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 16px;
-        margin: 0;
-    }
-
-    .profile-field {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-    }
-
-    .profile-label {
-        font-size: 11px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: var(--muted);
-    }
-
-    .profile-value {
-        margin: 0;
-        font-size: 14px;
-        color: var(--text);
-    }
-
-    .profile-value--mono {
-        font-family: var(--mono);
-        font-size: 13px;
-    }
-</style>
