@@ -41,6 +41,28 @@ export const es: Translation = {
             deleteUser: 'Eliminar',
             addUser: 'Crear usuario',
             failedToLoad: 'Error al cargar usuarios',
+            inlineEdit: {
+                title: 'Editar usuario',
+                nameLabel: 'Nombre',
+                namePlaceholder: 'Nombre',
+                lastnameLabel: 'Apellido',
+                lastnamePlaceholder: 'Apellido',
+                save: 'Guardar',
+                saving: 'Guardando...',
+                cancel: 'Cancelar',
+                updateFailed:
+                    'No se pudo actualizar el usuario. Inténtalo de nuevo.',
+            },
+            deleteConfirm: {
+                title: 'Eliminar usuario',
+                warning:
+                    'Esto eliminará permanentemente al usuario "{name}" y cualquier acceso que tenga a dispositivos. Esta acción no se puede deshacer.',
+                confirm: 'Eliminar usuario',
+                deleting: 'Eliminando...',
+                cancel: 'Cancelar',
+                deleteFailed:
+                    'No se pudo eliminar al usuario. Inténtalo de nuevo.',
+            },
         },
         createUser: {
             title: 'Crear nuevo usuario',
@@ -268,6 +290,21 @@ export const es: Translation = {
                 removeConfirm:
                     '¿Quitar el acceso de este usuario al dispositivo?',
                 failedToLoad: 'Error al cargar el dispositivo',
+                revokeConfirm: {
+                    warning:
+                        'Esto revocará permanentemente el acceso de "{name}" a este dispositivo. Ya no podrá ver su ubicación. Esta acción no se puede deshacer.',
+                    typeConfirmLabel:
+                        'Escribe "confirmar" para confirmar',
+                    typeConfirmPlaceholder: 'confirmar',
+                    confirmPhrase: 'confirmar',
+                    confirm: 'Quitar acceso',
+                    removing: 'Quitando...',
+                    cancel: 'Cancelar',
+                    mismatch:
+                        'Debes escribir "confirmar" exactamente para confirmar.',
+                    revokeFailed:
+                        'No se pudo revocar el acceso. Inténtalo de nuevo.',
+                },
             },
             grantAccess: {
                 title: 'Otorgar acceso al dispositivo',

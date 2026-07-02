@@ -3,3 +3,4 @@ export * from './statusIndicator';
 export * from './date';
 export * from './device';
 export * from './map';
+export * from './mobile';

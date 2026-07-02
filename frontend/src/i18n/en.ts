@@ -39,6 +39,26 @@ export const en = {
             deleteUser: 'Delete',
             addUser: 'Add user',
             failedToLoad: 'Failed to load users',
+            inlineEdit: {
+                title: 'Edit user',
+                nameLabel: 'Name',
+                namePlaceholder: 'First name',
+                lastnameLabel: 'Last name',
+                lastnamePlaceholder: 'Last name',
+                save: 'Save',
+                saving: 'Saving...',
+                cancel: 'Cancel',
+                updateFailed: 'Could not update the user. Try again.',
+            },
+            deleteConfirm: {
+                title: 'Delete user',
+                warning:
+                    'This will permanently delete the user "{name}" and any access they had to devices. This action cannot be undone.',
+                confirm: 'Delete user',
+                deleting: 'Deleting...',
+                cancel: 'Cancel',
+                deleteFailed: 'Could not delete the user. Try again.',
+            },
         },
         createUser: {
             title: 'Create new user',
@@ -262,6 +282,20 @@ export const en = {
                 removeTitle: 'Remove access',
                 removeConfirm: "Remove this user's access to the device?",
                 failedToLoad: 'Failed to load device',
+                revokeConfirm: {
+                    warning:
+                        'This will permanently revoke "{name}"\'s access to this device. They will no longer be able to view its location. This action cannot be undone.',
+                    typeConfirmLabel: 'Type "confirm" to confirm',
+                    typeConfirmPlaceholder: 'confirm',
+                    confirmPhrase: 'confirm',
+                    confirm: 'Remove access',
+                    removing: 'Removing...',
+                    cancel: 'Cancel',
+                    mismatch:
+                        'You must type "confirm" exactly to confirm.',
+                    revokeFailed:
+                        'Could not revoke access. Try again.',
+                },
             },
             grantAccess: {
                 title: 'Grant device access',
