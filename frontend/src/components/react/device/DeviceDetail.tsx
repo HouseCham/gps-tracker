@@ -1,4 +1,5 @@
 import '@/styles/components/device-detail.css';
+import '@/styles/components/mobile-cards.css';
 //-- React
 import { useEffect, useState } from 'react';
 import type { JSX } from 'react/jsx-runtime';
@@ -19,6 +20,7 @@ import { Plus, Trash2 } from 'lucide-react';
 import {
     formatDate,
     getDeviceAccessTableColumns,
+    getInitials,
     readDeviceIdFromUrl,
 } from '@/lib';
 //-- Constants
@@ -338,6 +340,68 @@ export function DeviceDetail({
                                     </tr>
                                 ))}
                             </DataTable>
+                            {/* Mobile cards (≤ 767.98px) — mirrors the access table rows above. */}
+                            <ul
+                                className="mobile-cards access-cards"
+                                aria-label={t.accessTable.name}
+                            >
+                                {users.map(user => (
+                                    <li
+                                        key={user.user_id}
+                                        className="access-card"
+                                    >
+                                        <header className="access-card__header">
+                                            <div className="access-card__identity">
+                                                <div
+                                                    className="access-card__avatar"
+                                                    aria-hidden="true"
+                                                >
+                                                    {getInitials(user.name)}
+                                                </div>
+                                                <div className="access-card__name-block">
+                                                    <div className="access-card__name">
+                                                        {user.name}
+                                                    </div>
+                                                    <div className="access-card__email">
+                                                        {user.email}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </header>
+                                        <dl className="access-card__meta">
+                                            <div className="access-card__meta-item">
+                                                <dt className="access-card__meta-label">
+                                                    {t.accessTable.accessGranted}
+                                                </dt>
+                                                <dd className="access-card__meta-value access-card__meta-value--mono access-card__meta-value--muted">
+                                                    {formatDate(
+                                                        locale,
+                                                        user.access_granted_at
+                                                    )}
+                                                </dd>
+                                            </div>
+                                        </dl>
+                                        <footer className="access-card__actions">
+                                            <Button
+                                                variant="danger"
+                                                size="sm"
+                                                onClick={() => askRevoke(user)}
+                                                disabled={isLoading}
+                                                aria-label={
+                                                    t.accessTable.remove
+                                                }
+                                            >
+                                                <Trash2
+                                                    size={14}
+                                                    strokeWidth={2}
+                                                    aria-hidden="true"
+                                                />
+                                                {t.accessTable.remove}
+                                            </Button>
+                                        </footer>
+                                    </li>
+                                ))}
+                            </ul>
                             {/* Empty state */}
                             {users.length === 0 && (
                                 <p className="device-detail__empty">

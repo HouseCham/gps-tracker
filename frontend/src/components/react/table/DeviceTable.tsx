@@ -1,9 +1,14 @@
 import '@/styles/components/table.css';
+import '@/styles/components/mobile-cards.css';
 //-- React
 import { useEffect, useState } from 'react';
 import type { JSX } from 'react/jsx-runtime';
 //-- Types
-import type { CreateDeviceDto, DeviceWithAccess } from '@/types/api';
+import type {
+    CreateDeviceDto,
+    DeviceVehicleType,
+    DeviceWithAccess,
+} from '@/types/api';
 import type { Language } from '@/types';
 import type { DataTableColumn } from '@/types/components/ui';
 import type { Translation } from '@/i18n';
@@ -13,7 +18,7 @@ import { Badge, Button } from '@/components/ui';
 import { DeviceTypeIcon, DeviceForm } from '@/components/react/device';
 import Modal from '@/components/react/ui/Modal';
 //-- Icons
-import { Pencil, Plus, Trash } from 'lucide-react';
+import { Inbox, Pencil, Plus, Trash } from 'lucide-react';
 //-- Utils
 import { formatDate } from '@/lib';
 import { getDeviceTableColumns } from '@/lib/device-utils';
@@ -122,76 +127,180 @@ export function DeviceTable({
             </div>
 
             {devices.length === 0 ? (
-                <TableStatus
-                    mode="empty"
-                    className={className}
-                    title={translation.device.noDevices}
-                    message={translation.device.noDevicesMessage}
-                />
+                <>
+                    <TableStatus
+                        mode="empty"
+                        className={className}
+                        title={translation.device.noDevices}
+                        message={translation.device.noDevicesMessage}
+                    />
+                    {/* Mobile empty state (≤ 767.98px) — mirrors the
+                        TableStatus above; CSS shows the right one. */}
+                    <div className="mobile-empty">
+                        <div className="mobile-empty__icon" aria-hidden="true">
+                            <Inbox />
+                        </div>
+                        <h3 className="mobile-empty__title">
+                            {translation.device.noDevices}
+                        </h3>
+                        <p className="mobile-empty__message">
+                            {translation.device.noDevicesMessage}
+                        </p>
+                    </div>
+                </>
             ) : (
-                <DataTable columns={columns} className={className}>
-                    {devices.map((device: DeviceWithAccess) => {
-                        const status = statusFromLastSeen(device.last_seen_at);
-                        return (
-                            <tr
-                                key={device.id}
-                                className="data-table__row device-table__row"
-                            >
-                                {/* Device name */}
-                                <td className="data-table__cell">
-                                    <a
-                                        href={`/${locale}/devices/detail?id=${device.id}`}
-                                        className="device-table__name"
-                                    >
-                                        {device.name}
-                                    </a>
-                                </td>
-                                {/* Device type */}
-                                <td className="data-table__cell">
-                                    <DeviceTypeIcon
-                                        type={device.vehicle_type}
-                                    />
-                                </td>
-                                {/* Device status */}
-                                <td className="data-table__cell">
-                                    <Badge
-                                        variant={
-                                            status === 'online'
-                                                ? 'success'
-                                                : 'danger'
-                                        }
-                                        size="sm"
-                                        label={
-                                            status === 'online'
-                                                ? translation.device.online
-                                                : translation.device.offline
-                                        }
-                                    />
-                                </td>
-                                {/* Device last seen */}
-                                <td className="data-table__cell device-table__time">
-                                    {device.last_seen_at
-                                        ? formatDate(
-                                              locale,
-                                              device.last_seen_at
-                                          )
-                                        : translation.device.neverSeen}
-                                </td>
-                                {/* Actions */}
-                                <td className="data-table__cell is-align-right">
-                                    <div className="device-table__actions">
+                <>
+                    <DataTable columns={columns} className={className}>
+                        {devices.map((device: DeviceWithAccess) => {
+                            const status =
+                                statusFromLastSeen(device.last_seen_at);
+                            return (
+                                <tr
+                                    key={device.id}
+                                    className="data-table__row device-table__row"
+                                >
+                                    {/* Device name */}
+                                    <td className="data-table__cell">
+                                        <a
+                                            href={`/${locale}/devices/detail?id=${device.id}`}
+                                            className="device-table__name"
+                                        >
+                                            {device.name}
+                                        </a>
+                                    </td>
+                                    {/* Device type */}
+                                    <td className="data-table__cell">
+                                        <DeviceTypeIcon
+                                            type={device.vehicle_type}
+                                        />
+                                    </td>
+                                    {/* Device status */}
+                                    <td className="data-table__cell">
+                                        <Badge
+                                            variant={
+                                                status === 'online'
+                                                    ? 'success'
+                                                    : 'danger'
+                                            }
+                                            size="sm"
+                                            label={
+                                                status === 'online'
+                                                    ? translation.device
+                                                          .online
+                                                    : translation.device
+                                                          .offline
+                                            }
+                                        />
+                                    </td>
+                                    {/* Device last seen */}
+                                    <td className="data-table__cell device-table__time">
+                                        {device.last_seen_at
+                                            ? formatDate(
+                                                  locale,
+                                                  device.last_seen_at
+                                              )
+                                            : translation.device.neverSeen}
+                                    </td>
+                                    {/* Actions */}
+                                    <td className="data-table__cell is-align-right">
+                                        <div className="device-table__actions">
+                                            <Button variant="ghost" size="sm">
+                                                <Pencil />
+                                            </Button>
+                                            <Button variant="danger" size="sm">
+                                                <Trash />
+                                            </Button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </DataTable>
+                    {/* Mobile cards (≤ 767.98px) — mirrors the table rows above. */}
+                    <ul
+                        className="mobile-cards device-cards"
+                        aria-label={t.name}
+                    >
+                        {devices.map((device: DeviceWithAccess) => {
+                            const status =
+                                statusFromLastSeen(device.last_seen_at);
+                            // ponytail: API serializes vehicle_type as a generic string;
+                            //   the lookup table only covers the known
+                            //   DeviceVehicleType union, so the fallback
+                            //   (`?? device.vehicle_type`) handles unknown values safely.
+                            const vtLabel =
+                                t.vehicleTypes[
+                                    device.vehicle_type as DeviceVehicleType
+                                ] ?? device.vehicle_type;
+                            return (
+                                <li key={device.id} className="device-card">
+                                    <header className="device-card__header">
+                                        <div className="device-card__identity">
+                                            <div
+                                                className="device-card__icon"
+                                                aria-hidden="true"
+                                            >
+                                                <DeviceTypeIcon
+                                                    type={device.vehicle_type}
+                                                />
+                                            </div>
+                                            <a
+                                                href={`/${locale}/devices/detail?id=${device.id}`}
+                                                className="device-card__name"
+                                            >
+                                                {device.name}
+                                            </a>
+                                        </div>
+                                        <Badge
+                                            variant={
+                                                status === 'online'
+                                                    ? 'success'
+                                                    : 'danger'
+                                            }
+                                            size="sm"
+                                            label={
+                                                status === 'online'
+                                                    ? translation.device.online
+                                                    : translation.device.offline
+                                            }
+                                        />
+                                    </header>
+                                    <dl className="device-card__meta">
+                                        <div className="device-card__meta-item">
+                                            <dt className="device-card__meta-label">
+                                                {t.vehicleType}
+                                            </dt>
+                                            <dd className="device-card__meta-value">
+                                                {vtLabel}
+                                            </dd>
+                                        </div>
+                                        <div className="device-card__meta-item">
+                                            <dt className="device-card__meta-label">
+                                                {t.lastSeen}
+                                            </dt>
+                                            <dd className="device-card__meta-value device-card__meta-value--mono device-card__meta-value--muted">
+                                                {device.last_seen_at
+                                                    ? formatDate(
+                                                          locale,
+                                                          device.last_seen_at
+                                                      )
+                                                    : translation.device.neverSeen}
+                                            </dd>
+                                        </div>
+                                    </dl>
+                                    <footer className="device-card__actions">
                                         <Button variant="ghost" size="sm">
                                             <Pencil />
                                         </Button>
                                         <Button variant="danger" size="sm">
                                             <Trash />
                                         </Button>
-                                    </div>
-                                </td>
-                            </tr>
-                        );
-                    })}
-                </DataTable>
+                                    </footer>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                </>
             )}
 
             <Modal

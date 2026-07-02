@@ -1,3 +1,4 @@
+import '@/styles/components/mobile-cards.css';
 //-- React
 import type { JSX } from 'react/jsx-runtime';
 import { useEffect, useState } from 'react';
@@ -14,7 +15,7 @@ import { CreateUserForm } from '@/components/react/form';
 //-- Icons
 import { Plus } from 'lucide-react';
 //-- Utils
-import { formatDate } from '@/lib';
+import { formatDate, getInitials } from '@/lib';
 //-- Services
 import { useUserService } from '@/lib/api/services';
 /**
@@ -189,6 +190,88 @@ export function UserTable({
                     </tr>
                 ))}
             </DataTable>
+            {/* Mobile cards (≤ 767.98px) — mirrors the table rows above. */}
+            <ul className="mobile-cards user-cards" aria-label={t.name}>
+                {users.map(user => (
+                    <li key={user.id} className="user-card">
+                        <header className="user-card__header">
+                            <div className="user-card__identity">
+                                <div
+                                    className="user-card__avatar"
+                                    aria-hidden="true"
+                                >
+                                    {getInitials(user.name)}
+                                </div>
+                                <div className="user-card__name-block">
+                                    <div className="user-card__name">
+                                        {user.name}
+                                    </div>
+                                    <div className="user-card__chips">
+                                        <Badge
+                                            variant={
+                                                roleVariant[user.role] ??
+                                                'default'
+                                            }
+                                            size="sm"
+                                            label={
+                                                roleLabel[user.role] ??
+                                                user.role
+                                            }
+                                        />
+                                        <Badge
+                                            variant={
+                                                user.email_verified
+                                                    ? 'success'
+                                                    : 'warning'
+                                            }
+                                            size="sm"
+                                            label={
+                                                user.email_verified
+                                                    ? t.verified
+                                                    : t.unverified
+                                            }
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </header>
+                        <dl className="user-card__meta">
+                            <div className="user-card__meta-item">
+                                <dt className="user-card__meta-label">
+                                    {t.email}
+                                </dt>
+                                <dd className="user-card__meta-value">
+                                    {user.email}
+                                </dd>
+                            </div>
+                            <div className="user-card__meta-item">
+                                <dt className="user-card__meta-label">
+                                    {t.created}
+                                </dt>
+                                <dd className="user-card__meta-value user-card__meta-value--mono">
+                                    {formatDate(locale, user.created_at)}
+                                </dd>
+                            </div>
+                            <div className="user-card__meta-item">
+                                <dt className="user-card__meta-label">
+                                    {t.devices}
+                                </dt>
+                                <dd className="user-card__meta-value">
+                                    {0}
+                                </dd>
+                            </div>
+                        </dl>
+                        <footer className="user-card__actions">
+                            <Button variant="ghost" size="sm">
+                                {t.editUser}
+                            </Button>
+                            <Button variant="danger" size="sm">
+                                {t.deleteUser}
+                            </Button>
+                        </footer>
+                    </li>
+                ))}
+            </ul>
             {/* Create User Modal */}
             <Modal
                 open={createOpen}
