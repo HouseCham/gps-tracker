@@ -82,11 +82,7 @@ export function GrantAccessForm({
     }
 
     return (
-        <form
-            className="create-user-form"
-            onSubmit={handleSubmit}
-            noValidate
-        >
+        <form className="create-user-form" onSubmit={handleSubmit} noValidate>
             {submitError && (
                 <p className="create-user-form__banner" role="alert">
                     {submitError}
