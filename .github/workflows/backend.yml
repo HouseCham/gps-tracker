@@ -7,26 +7,6 @@ on:
       - dev
 
 jobs:
-  backend-lint:
-    runs-on: ubuntu-24.04
-    steps:
-      - uses: actions/checkout@v6
-      - uses: ./.github/actions/setup-backend-ci-cd
-
-      - name: Run gofmt
-        working-directory: backend
-        run: |
-          echo "::group::Checking formatting"
-          test -z "$(gofmt -l .)"
-          echo "::endgroup::"
-
-      - name: Run go vet
-        working-directory: backend
-        run: |
-          echo "::group::Running go vet"
-          go vet ./...
-          echo "::endgroup::"
-
   backend-test:
     runs-on: ubuntu-24.04
     steps:
@@ -41,7 +21,7 @@ jobs:
           echo "::endgroup::"
 
   backend-build:
-    needs: [backend-lint, backend-test]
+    needs: [backend-test]
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6

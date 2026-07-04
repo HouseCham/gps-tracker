@@ -36,7 +36,7 @@ jobs:
         working-directory: frontend
         run: |
           echo "::group::Testing frontend"
-          pnpm test --if-present
+          pnpm test
           echo "::endgroup::"
 
   frontend-build:
