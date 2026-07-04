@@ -21,6 +21,7 @@ type Grant struct {
 // the role each user holds and when the grant was created.
 type UserWithAccessOnDevice struct {
 	UserID          uuid.UUID
+	Name            string
 	Email           string
 	AccessRole      AccessRole
 	AccessGrantedAt time.Time

@@ -5,13 +5,13 @@ import type { DeviceFormValues } from '@/types/components';
 //-- Constants
 import { DEMO_DEVICE } from '@/constants/components';
 //-- Components
-import DeviceForm from './DeviceForm';
+import { DeviceForm } from './DeviceForm';
 /**
  * @function DeviceFormGallery
  * @description A gallery of DeviceForm components
  * @returns {JSX.Element} The rendered component
  */
-export default function DeviceFormGallery(): JSX.Element {
+export function DeviceFormGallery(): JSX.Element {
     const [mode, setMode] = useState<'create' | 'edit'>('create');
     const [saving, setSaving] = useState(false);
     const [submitted, setSubmitted] = useState<DeviceFormValues | null>(null);

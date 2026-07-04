@@ -107,6 +107,8 @@ func (ta *TestApp) registerRoutes() {
 
 	apiV1 := ta.App.Group("/api/v1")
 
+	apiV1.Get("/devices/count", authSession, requirePasswordChanged, ta.getDevicesHandler().Count)
+
 	devicesGroup := apiV1.Group("/devices")
 	devicesGroup.Get("/", authSession, requirePasswordChanged, ta.getDevicesHandler().List)
 	devicesGroup.Get("/:id", authSession, requirePasswordChanged, ta.getDevicesHandler().Get)
@@ -156,6 +158,9 @@ func (ta *TestApp) registerRoutes() {
 		middleware.RequireUserRole(domain.UserRoleSuperAdmin),
 		ta.getUsersHandler().List,
 	)
+	// /api/v1/users/me mirrors the same Fiber v3 routing constraint as
+	// /devices/count above.
+	apiV1.Get("/users/me", authSession, requirePasswordChanged, ta.getUsersHandler().GetMe)
 	usersGroup.Get("/:id", authSession, requirePasswordChanged, ta.getUsersHandler().GetByID)
 	usersGroup.Post("/",
 		authSession,
@@ -182,7 +187,7 @@ func (ta *TestApp) registerRoutes() {
 
 func (ta *TestApp) getDevicesHandler() *handlers.DevicesHandler {
 	if ta.DevicesHandler == nil {
-		ta.DevicesHandler = handlers.NewDevicesHandler(ta.DevicesService)
+		ta.DevicesHandler = handlers.NewDevicesHandler(ta.DevicesService, ta.AccessService)
 	}
 	return ta.DevicesHandler
 }

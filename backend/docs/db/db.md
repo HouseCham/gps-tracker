@@ -1,6 +1,6 @@
 # Database Overview
 
-PostgreSQL database for the GPS Tracker API. Managed via [golang-migrate](https://github.com/golang-migrate/migrate) with 10 migration files.
+PostgreSQL database for the GPS Tracker API. Managed via [golang-migrate](https://github.com/golang-migrate/migrate) with 13 migration files.
 
 ## Entity Relationship
 
@@ -11,12 +11,12 @@ PostgreSQL database for the GPS Tracker API. Managed via [golang-migrate](https:
 │ id (PK)      │◄───┼┤ user_id (PK, FK)    │◄────┤ id (PK)         │
 │ email        │     │ device_id (PK, FK)   ├─────│ uuid_firmware   │
 │ name         │     │ role                 │     │ name            │
-│ lastname     │     │ created_at           │     │ created_at      │
-│ role (enum)  │     │ deleted_at           │     │ last_seen_at    │
-│ created_at   │     └──────────────────────┘     │ deleted_at      │
-│ updated_at   │                                  └────────┬────────┘
-│ deleted_at   │                                           │
-└──────────────┘                    ┌───────────────────────┼──────────┐
+│ lastname     │     │ created_at           │     │ vehicle_type    │
+│ role (enum)  │     │ deleted_at           │     │ created_at      │
+│ created_at   │     └──────────────────────┘     │ last_seen_at    │
+│ updated_at   │                                  │ deleted_at      │
+│ deleted_at   │                                  └────────┬────────┘
+└──────────────┘                                           │
                                     │                       │          │
                           ┌─────────▼──────────┐   ┌───────▼──────────┐
                           │     locations       │   │ device_api_keys  │
@@ -63,6 +63,7 @@ IoT devices registered in the system. Each device has a firmware-level UUID (`uu
 | id | `uuid` | `PK DEFAULT gen_random_uuid()` | Device identifier |
 | uuid_firmware | `varchar(36)` | `NOT NULL UNIQUE` | ESP32 firmware UUID (public) |
 | name | `varchar(255)` | `NOT NULL` | Human-readable device name |
+| vehicle_type | `device_vehicle_type` | `NOT NULL DEFAULT 'other'` | Vehicle category: `bicycle`, `motorcycle`, `car`, `truck`, `van`, `other` |
 | created_at | `timestamptz` | `NOT NULL DEFAULT NOW()` | Row creation timestamp |
 | last_seen_at | `timestamptz` | `NULL` | Last successful IoT ping |
 | deleted_at | `timestamptz` | `NULL` | Soft-delete timestamp |
@@ -155,3 +156,6 @@ The `locations` table is partitioned by `RANGE (recorded_at)` with monthly parti
 | 008 | `000008_create_device_api_keys` | Create `device_api_keys` |
 | 009 | `000009_create_user_triggers` | super_admin immutability triggers |
 | 010 | `000010_add_user_name_lastname` | Add name/lastname to users |
+| 011 | `000011_add_must_change_password` | Add must_change_password to users |
+| 012 | `000012_align_users_with_authula` | Add email_verified, image; widen name |
+| 013 | `000013_add_device_vehicle_type` | Add device_vehicle_type enum and vehicle_type column to devices |

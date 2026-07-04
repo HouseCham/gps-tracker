@@ -1,3 +1,4 @@
 export * from './bootstrap.service';
-export * from './devices.service';
-export * from './users.service';
+export * from './deviceService';
+export * from './profileService';
+export * from './userService';

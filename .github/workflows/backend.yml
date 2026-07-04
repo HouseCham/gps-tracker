@@ -1,0 +1,35 @@
+name: Backend CI/CD
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+  backend-test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup-backend-ci-cd
+
+      - name: Run tests
+        working-directory: backend
+        run: |
+          echo "::group::Testing backend"
+          go test ./internal/app/* -v
+          echo "::endgroup::"
+
+  backend-build:
+    needs: [backend-test]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup-backend-ci-cd
+
+      - name: Build project
+        working-directory: backend
+        run: |
+          echo "::group::Build backend"
+          go build ./cmd/api
+          echo "::endgroup::"

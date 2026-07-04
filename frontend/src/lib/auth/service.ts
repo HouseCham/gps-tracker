@@ -12,18 +12,11 @@ import type {
     SignUpCredentials,
 } from '@/types/api';
 //-- Utils
-import { handleApiError } from '@/lib/api/helpers/handle-api-error';
-import {
-    clearUser,
-    setAuthLoading,
-    setUser,
-} from '@/lib/stores/auth';
+import { handleApiError } from '@/lib/api/api-utils';
+import { clearUser, setAuthLoading, setUser } from '@/lib/stores/auth';
 import { redirectTo } from '@/lib';
 //-- Constants
-import {
-    REDIRECT_AFTER_AUTH,
-    REDIRECT_AFTER_SIGNOUT,
-} from '@/constants/auth';
+import { REDIRECT_AFTER_AUTH, REDIRECT_AFTER_SIGNOUT } from '@/constants/auth';
 
 /**
  * Path the browser lands on after the OAuth2 provider redirects back
@@ -40,14 +33,16 @@ const OAUTH_CALLBACK_PATH = '/callback/google';
  * @returns {Promise<AuthSession>} The session payload from the backend.
  * @throws {ApiError} When the backend rejects the credentials.
  */
-async function postSignIn(credentials: SignInCredentials): Promise<AuthSession> {
+async function postSignIn(
+    credentials: SignInCredentials
+): Promise<AuthSession> {
     try {
         const { data } = await authClient<AuthSession | null>(
             '/email-password/sign-in',
             {
                 method: 'POST',
                 body: credentials,
-            } as BetterFetchOption,
+            } as BetterFetchOption
         );
         if (!data) {
             handleApiError(new Error('sign-in returned an empty response'));
@@ -65,14 +60,16 @@ async function postSignIn(credentials: SignInCredentials): Promise<AuthSession> 
  * @returns {Promise<AuthSession>} The session payload from the backend.
  * @throws {ApiError} When the backend rejects the credentials.
  */
-async function postSignUp(credentials: SignUpCredentials): Promise<AuthSession> {
+async function postSignUp(
+    credentials: SignUpCredentials
+): Promise<AuthSession> {
     try {
         const { data } = await authClient<AuthSession | null>(
             '/email-password/sign-up',
             {
                 method: 'POST',
                 body: credentials,
-            } as BetterFetchOption,
+            } as BetterFetchOption
         );
         if (!data) {
             handleApiError(new Error('sign-up returned an empty response'));
@@ -92,17 +89,11 @@ async function postSignUp(credentials: SignUpCredentials): Promise<AuthSession> 
  */
 async function fetchMe(): Promise<AuthUser | null> {
     try {
-        const { data } = await authClient<MeResponse | null>(
-            '/me',
-            {
-                method: 'GET',
-            } as BetterFetchOption,
-        );
-        return data?.user ?? null;
-    } catch (error) {
-        console.warn('[auth] fetchMe failed; treating session as anonymous', {
-            reason: error instanceof Error ? error.message : String(error),
+        const { data } = await authClient<MeResponse | null>('/me', {
+            method: 'GET',
         });
+        return data?.user ?? null;
+    } catch {
         return null;
     }
 }
@@ -117,17 +108,19 @@ async function fetchMe(): Promise<AuthUser | null> {
  */
 async function fetchOAuthAuthorizeUrl(
     provider: OAuthProvider,
-    callbackUrl: string,
+    callbackUrl: string
 ): Promise<string> {
     try {
         const { data } = await authClient<OAuthAuthorizeResponse | null>(
             `/oauth2/authorize/${provider}?redirect_to=${encodeURIComponent(callbackUrl)}`,
             {
                 method: 'GET',
-            } as BetterFetchOption,
+            } as BetterFetchOption
         );
         if (!data?.authUrl) {
-            handleApiError(new Error('oauth authorize returned an empty response'));
+            handleApiError(
+                new Error('oauth authorize returned an empty response')
+            );
         }
         return data.authUrl;
     } catch (error) {

@@ -1,0 +1,38 @@
+---
+import type { GetStaticPaths } from 'astro';
+//-- Translations
+import { getTranslation } from '@/i18n';
+//-- Types
+import type { Language } from '@/types';
+//-- Styles — co-located with DeviceMapLive, only loaded on the detail route
+import 'maplibre-gl/dist/maplibre-gl.css';
+import '@/styles/map/device-map-live.css';
+//-- Components
+import MainLayout from '@/components/astro/layout/MainLayout.astro';
+import { DeviceDetail } from '@/components/react/device';
+/**
+ * @type {GetStaticPaths}
+ */
+export const getStaticPaths = (() => {
+    return [{ params: { lan: 'en' } }, { params: { lan: 'es' } }];
+}) satisfies GetStaticPaths;
+
+//* note: getStaticPaths only emits the two supported locales,
+//   so the cast is exhaustive by construction.
+const locale = Astro.params.lan as Language;
+const translation = getTranslation(locale);
+---
+
+<MainLayout
+    locale={locale}
+    translation={translation}
+    active="devices"
+    showAdmin={true}
+    title={`${translation.page.deviceDetail.title} · GPS Tracker`}
+>
+    <DeviceDetail
+        client:only="react"
+        locale={locale}
+        translation={translation}
+    />
+</MainLayout>

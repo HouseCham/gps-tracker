@@ -1,10 +1,6 @@
 //-- store
 import { useStore } from '@nanostores/react';
-import {
-    $isAuthenticated,
-    $isAuthLoading,
-    $user,
-} from '@/lib/stores/auth';
+import { $isAuthenticated, $isAuthLoading, $user } from '@/lib/stores/auth';
 //-- types
 import type { UseAuthResult } from '@/types/api';
 //-- services

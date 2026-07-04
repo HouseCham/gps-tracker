@@ -102,6 +102,13 @@ func NewRouter(deps RouterDeps) *fiber.App {
 	apiV1.Get("/system/bootstrap", deps.BootstrapHandler.Handle)
 
 	// === Devices routes ===
+	// /devices/count is registered on apiV1 directly (not on the group)
+	// so the static segment wins over the /:id route below — Fiber v3
+	// groups register routes into the same trie in registration order,
+	// and a /:id registered later still shadows a static /count when the
+	// group already has a parent node for the literal segment.
+	apiV1.Get("/devices/count", authSession, requirePasswordChanged, deps.DevicesHandler.Count)
+
 	devices := apiV1.Group("/devices")
 	devices.Get("/", authSession, requirePasswordChanged, deps.DevicesHandler.List)
 	devices.Get("/:id", authSession, requirePasswordChanged, deps.DevicesHandler.Get)
@@ -152,6 +159,10 @@ func NewRouter(deps RouterDeps) *fiber.App {
 		middleware.RequireUserRole(domain.UserRoleSuperAdmin),
 		deps.UsersHandler.List,
 	)
+	// /users/me is registered on apiV1 directly (not on the group) so
+	// the static segment wins over the /:id route below. Same Fiber v3
+	// routing constraint as /devices/count above.
+	apiV1.Get("/users/me", authSession, requirePasswordChanged, deps.UsersHandler.GetMe)
 	users.Get("/:id", authSession, requirePasswordChanged, deps.UsersHandler.GetByID)
 	users.Post("/",
 		authSession,

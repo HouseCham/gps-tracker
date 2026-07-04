@@ -68,6 +68,7 @@ Cookie: authula.session_token=<cookie>
         "id": "550e8400-e29b-41d4-a716-446655440000",
         "uuid_firmware": "esp32-001",
         "name": "Living Room GPS",
+        "vehicle_type": "car",
         "created_at": "2024-01-15T10:30:00Z",
         "last_seen_at": "2024-06-10T08:45:00Z",
         "access_role": "owner"
@@ -75,7 +76,8 @@ Cookie: authula.session_token=<cookie>
       {
         "id": "550e8400-e29b-41d4-a716-446655440001",
         "uuid_firmware": "esp32-002",
-        "name": "Car Tracker",
+        "name": "Bike Tracker",
+        "vehicle_type": "bicycle",
         "created_at": "2024-02-20T14:00:00Z",
         "last_seen_at": null,
         "access_role": "editor"
@@ -95,6 +97,7 @@ Cookie: authula.session_token=<cookie>
 - `id` — Device UUID
 - `uuid_firmware` — ESP32 firmware UUID (unique per device)
 - `name` — Human-readable device name
+- `vehicle_type` — Vehicle category: `bicycle`, `motorcycle`, `car`, `truck`, `van`, or `other`
 - `created_at` — ISO 8601 timestamp when device was registered
 - `last_seen_at` — ISO 8601 timestamp of last IoT ping (null if never seen)
 - `access_role` — User's role on this device: `owner`, `editor`, or `viewer`
@@ -109,7 +112,9 @@ Cookie: authula.session_token=<cookie>
 
 ### GET /api/v1/devices/:id
 
-Retrieves a single device by ID. Returns 404 if the device does not exist OR the user has no access to it (intentional security through obscurity — avoids revealing whether an ID exists).
+Retrieves a single device by ID, including the caller's access role and — for the device owner only — the full list of users that currently have access to it. Returns 404 if the device does not exist OR the user has no access to it (intentional security through obscurity — avoids revealing whether an ID exists).
+
+The `users` array lets the owner render the access-management panel without a second round-trip. Viewers and editors always receive `"users": []`: the underlying lookup is skipped, so non-owners are not even billed for the projection.
 
 **Authorization:** Any authenticated user with at least `viewer` access to the device.
 
@@ -120,7 +125,7 @@ GET /api/v1/devices/:id
 Cookie: authula.session_token=<cookie>
 ```
 
-**Response `200 OK`**
+**Response `200 OK` (caller is owner)**
 
 ```json
 {
@@ -130,11 +135,65 @@ Cookie: authula.session_token=<cookie>
     "id": "550e8400-e29b-41d4-a716-446655440000",
     "uuid_firmware": "esp32-001",
     "name": "Living Room GPS",
+    "vehicle_type": "car",
     "created_at": "2024-01-15T10:30:00Z",
-    "last_seen_at": "2024-06-10T08:45:00Z"
+    "last_seen_at": "2024-06-10T08:45:00Z",
+    "access_role": "owner",
+    "users": [
+      {
+        "user_id": "550e8400-e29b-41d4-a716-446655440000",
+        "name": "Olivia Owner",
+        "email": "owner@example.com",
+        "role": "owner",
+        "access_granted_at": "2026-06-10T08:00:00Z"
+      },
+      {
+        "user_id": "660e8400-e29b-41d4-a716-446655440001",
+        "name": "Victor Viewer",
+        "email": "viewer@example.com",
+        "role": "viewer",
+        "access_granted_at": "2026-06-14T12:00:00Z"
+      }
+    ]
   }
 }
 ```
+
+**Response `200 OK` (caller is viewer/editor)**
+
+```json
+{
+  "status_code": 200,
+  "message": "device retrieved",
+  "data": {
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "uuid_firmware": "esp32-001",
+    "name": "Living Room GPS",
+    "vehicle_type": "car",
+    "created_at": "2024-01-15T10:30:00Z",
+    "last_seen_at": "2024-06-10T08:45:00Z",
+    "access_role": "viewer",
+    "users": []
+  }
+}
+```
+
+**Fields (`data`):**
+- `id` — Device UUID
+- `uuid_firmware` — ESP32 firmware UUID (unique per device)
+- `name` — Human-readable device name
+- `vehicle_type` — Vehicle category: `bicycle`, `motorcycle`, `car`, `truck`, `van`, or `other`
+- `created_at` — ISO 8601 timestamp when device was registered
+- `last_seen_at` — ISO 8601 timestamp of last IoT ping (null if never seen)
+- `access_role` — Caller's role on this device: `owner`, `editor`, or `viewer`
+- `users` — Array of every user that has (non-deleted) access to the device; populated only when `access_role` is `owner`, always `[]` otherwise
+
+**Fields (`users[]` — owner response only):**
+- `user_id` — User UUID
+- `name` — User's display name
+- `email` — User's email
+- `role` — Role the user holds on the device: `owner`, `editor`, or `viewer`
+- `access_granted_at` — ISO 8601 timestamp when the grant was created
 
 **Error Responses**
 - `400` — Invalid device ID format
@@ -158,7 +217,8 @@ Content-Type: application/json
 
 {
   "uuid_firmware": "esp32-003",
-  "name": "Office Tracker"
+  "name": "Office Tracker",
+  "vehicle_type": "car"
 }
 ```
 
@@ -167,6 +227,7 @@ Content-Type: application/json
 |-------|------|----------|-------------|
 | `uuid_firmware` | string | Yes | Must be a valid UUID format |
 | `name` | string | Yes | Min 1 char, max 255 chars |
+| `vehicle_type` | string | Yes | One of: `bicycle`, `motorcycle`, `car`, `truck`, `van`, `other` |
 
 **Response `201 Created`**
 
@@ -178,6 +239,7 @@ Content-Type: application/json
     "id": "550e8400-e29b-41d4-a716-446655440002",
     "uuid_firmware": "esp32-003",
     "name": "Office Tracker",
+    "vehicle_type": "car",
     "created_at": "2024-06-14T12:00:00Z",
     "last_seen_at": null
   }
@@ -193,7 +255,7 @@ Content-Type: application/json
 
 ### PUT /api/v1/devices/:id
 
-Updates a device's display name.
+Updates a device's display name and/or vehicle type.
 
 **Authorization:** Requires `editor` or `owner` access role on the device.
 
@@ -205,7 +267,8 @@ Cookie: authula.session_token=<cookie>
 Content-Type: application/json
 
 {
-  "name": "New Device Name"
+  "name": "New Device Name",
+  "vehicle_type": "van"
 }
 ```
 
@@ -213,6 +276,7 @@ Content-Type: application/json
 | Field | Type | Required | Validation |
 |-------|------|----------|-------------|
 | `name` | string | Yes | Min 1 char, max 255 chars |
+| `vehicle_type` | string | No | One of: `bicycle`, `motorcycle`, `car`, `truck`, `van`, `other`. Omitting this field leaves the current value unchanged. |
 
 **Response `200 OK`**
 
@@ -224,6 +288,7 @@ Content-Type: application/json
     "id": "550e8400-e29b-41d4-a716-446655440000",
     "uuid_firmware": "esp32-001",
     "name": "New Device Name",
+    "vehicle_type": "van",
     "created_at": "2024-01-15T10:30:00Z",
     "last_seen_at": "2024-06-10T08:45:00Z"
   }
@@ -354,12 +419,14 @@ Cookie: authula.session_token=<owner-cookie>
   "data": [
     {
       "user_id": "550e8400-e29b-41d4-a716-446655440000",
+      "name": "Olivia Owner",
       "email": "owner@example.com",
       "role": "owner",
       "access_granted_at": "2026-06-10T08:00:00Z"
     },
     {
       "user_id": "660e8400-e29b-41d4-a716-446655440001",
+      "name": "Victor Viewer",
       "email": "viewer@example.com",
       "role": "viewer",
       "access_granted_at": "2026-06-14T12:00:00Z"

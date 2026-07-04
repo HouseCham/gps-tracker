@@ -18,9 +18,11 @@ type GrantAccessResponse struct {
 }
 
 // UserAccessOnDeviceResponse is one element of the response body of
-// GET /api/v1/devices/:id/access.
+// GET /api/v1/devices/:id/access and the embedded `users[]` of
+// GET /api/v1/devices/:id.
 type UserAccessOnDeviceResponse struct {
 	UserID          string    `json:"user_id"`
+	Name            string    `json:"name"`
 	Email           string    `json:"email"`
 	Role            string    `json:"role"`
 	AccessGrantedAt time.Time `json:"access_granted_at"`

@@ -3,7 +3,7 @@ import '@/styles/layout/tabbar.css';
 //-- Types
 import type { Translation } from '@/i18n';
 import type { Language } from '@/types';
-import type { SidebarNavItem } from '@/types/layout';
+import type { SidebarNavItemType } from '@/types/layout';
 //-- Components
 import { LayoutDashboard, Cpu, ShieldCheck, User } from '@lucide/astro';
 
@@ -11,19 +11,19 @@ import { LayoutDashboard, Cpu, ShieldCheck, User } from '@lucide/astro';
  * @interface Props
  * @property {Language} locale - Current locale code ('en' | 'es').
  * @property {Translation} translation - Translation bundle (en/es) used for nav labels.
- * @property {SidebarNavItem} active - Active nav item, drives the .active highlight and aria-current.
+ * @property {SidebarNavItemType} active - Active nav item, drives the .active highlight and aria-current.
  * @property {boolean} [showAdmin] - Whether to surface the Admin nav item (super_admin only).
  */
 interface Props {
     locale: Language;
     translation: Translation;
-    active: SidebarNavItem;
+    active: SidebarNavItemType;
     showAdmin?: boolean;
 }
 
 const { locale, translation, active, showAdmin = false } = Astro.props;
 const items: Array<{
-    key: SidebarNavItem;
+    key: SidebarNavItemType;
     href: string;
     label: string;
     Icon: typeof LayoutDashboard;

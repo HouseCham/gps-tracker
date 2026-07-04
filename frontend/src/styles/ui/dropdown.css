@@ -41,7 +41,10 @@
 }
 
 .dropdown-menu {
-    position: absolute;
+    /* position is set inline so the menu escapes ancestors with
+       `overflow: auto|hidden` (e.g. the table's scroll wrapper, the
+       mobile card's <dd> overflow:hidden). */
+    position: fixed;
     z-index: 150;
     min-width: 200px;
     max-width: 320px;
@@ -53,20 +56,12 @@
     animation: dropdown-in 140ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.dropdown[data-side='bottom'] .dropdown-menu {
-    top: calc(100% + 4px);
-}
-
-.dropdown[data-side='top'] .dropdown-menu {
-    bottom: calc(100% + 4px);
-}
-
 .dropdown-menu--align-start {
-    left: 0;
+    /* left is set inline */
 }
 
 .dropdown-menu--align-end {
-    right: 0;
+    /* left is set inline (right edge aligned to the trigger) */
 }
 
 @keyframes dropdown-in {
@@ -80,7 +75,7 @@
     }
 }
 
-.dropdown[data-side='top'] .dropdown-menu {
+.dropdown-menu[data-side='top'] {
     animation-name: dropdown-in-up;
 }
 
@@ -166,4 +161,20 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+/* ─── Vehicle type selector trigger ─────────────────────────────────────────
+   Wraps the icon + label rendered inside a Dropdown trigger so the spacing
+   between the vehicle icon and the label matches Dropdown's internal gap. */
+
+.vehicle-type-selector__current {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text);
+}
+
+.vehicle-type-selector__current-label {
+    font-size: 13px;
+    font-weight: 500;
 }

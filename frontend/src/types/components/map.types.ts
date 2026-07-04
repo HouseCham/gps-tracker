@@ -29,6 +29,19 @@ export interface DeviceMapRoutePoint {
     lng: number;
 }
 /**
+ * @interface DeviceLocationPoint
+ * @param {number} lat - Latitude in decimal degrees.
+ * @param {number} lng - Longitude in decimal degrees.
+ * @param {string} recordedAt - ISO timestamp of the reading.
+ * @param {number} [speed] - Ground speed in km/h (when provided).
+ */
+export interface DeviceLocationPoint {
+    lat: number;
+    lng: number;
+    recordedAt: string;
+    speed?: number;
+}
+/**
  * @type MarkerStatus
  * @description The status of the device.
  */

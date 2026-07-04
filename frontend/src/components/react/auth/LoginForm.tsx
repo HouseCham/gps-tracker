@@ -25,9 +25,7 @@ interface LoginFormProps {
  * @param {LoginFormProps} props - The props for the component.
  * @returns {ReactElement} The rendered component.
  */
-export function LoginForm({
-    strings: s,
-}: LoginFormProps): ReactElement {
+export function LoginForm({ strings: s }: LoginFormProps): ReactElement {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [errors, setErrors] = useState<{ email?: string; password?: string }>(
@@ -66,7 +64,9 @@ export function LoginForm({
         try {
             await authService.signIn({ email: email.trim(), password });
         } catch (err) {
-            const apiError = isApiError(err) ? err : { message: 'Sign-in failed' };
+            const apiError = isApiError(err)
+                ? err
+                : { message: 'Sign-in failed' };
             setAuthError(apiError.message);
             setLoading(false);
         }

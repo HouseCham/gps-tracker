@@ -26,12 +26,14 @@ export class BootstrapService {
                 '/system/bootstrap',
                 {
                     method: 'GET',
-                } as BetterFetchOption,
+                } as BetterFetchOption
             );
             // generic HTTP client returns unknown; trusted backend response shape
-            return { needsSetup: (data as unknown as BootstrapResponseEnvelope).data };
+            return {
+                needsSetup: (data as unknown as BootstrapResponseEnvelope).data,
+            };
         } catch (error) {
-            console.error("Error fetching bootstrap status:", error);
+            console.error('Error fetching bootstrap status:', error);
             handleApiError(error);
         }
     }

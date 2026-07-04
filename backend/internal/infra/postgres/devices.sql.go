@@ -30,24 +30,40 @@ func (q *Queries) CountDevicesForUser(ctx context.Context, userID pgtype.UUID) (
 }
 
 const createDevice = `-- name: CreateDevice :one
-INSERT INTO devices (uuid_firmware, name)
-VALUES ($1, $2)
-RETURNING id, uuid_firmware, name, created_at, last_seen_at, deleted_at
+INSERT INTO devices (uuid_firmware, name, vehicle_type)
+VALUES (
+  $1,
+  $2,
+  $3::device_vehicle_type
+)
+RETURNING id, uuid_firmware, name, vehicle_type, created_at, last_seen_at, deleted_at
 `
 
 type CreateDeviceParams struct {
 	UuidFirmware string
 	Name         string
+	VehicleType  DeviceVehicleType
+}
+
+type CreateDeviceRow struct {
+	ID           pgtype.UUID
+	UuidFirmware string
+	Name         string
+	VehicleType  DeviceVehicleType
+	CreatedAt    pgtype.Timestamptz
+	LastSeenAt   pgtype.Timestamptz
+	DeletedAt    pgtype.Timestamptz
 }
 
 // Creates a new device. uuid_firmware must be globally unique (DB-enforced).
-func (q *Queries) CreateDevice(ctx context.Context, arg CreateDeviceParams) (Device, error) {
-	row := q.db.QueryRow(ctx, createDevice, arg.UuidFirmware, arg.Name)
-	var i Device
+func (q *Queries) CreateDevice(ctx context.Context, arg CreateDeviceParams) (CreateDeviceRow, error) {
+	row := q.db.QueryRow(ctx, createDevice, arg.UuidFirmware, arg.Name, arg.VehicleType)
+	var i CreateDeviceRow
 	err := row.Scan(
 		&i.ID,
 		&i.UuidFirmware,
 		&i.Name,
+		&i.VehicleType,
 		&i.CreatedAt,
 		&i.LastSeenAt,
 		&i.DeletedAt,
@@ -56,19 +72,30 @@ func (q *Queries) CreateDevice(ctx context.Context, arg CreateDeviceParams) (Dev
 }
 
 const getDeviceByID = `-- name: GetDeviceByID :one
-SELECT id, uuid_firmware, name, created_at, last_seen_at, deleted_at
+SELECT id, uuid_firmware, name, vehicle_type, created_at, last_seen_at, deleted_at
 FROM devices
 WHERE id = $1 AND deleted_at IS NULL
 `
 
+type GetDeviceByIDRow struct {
+	ID           pgtype.UUID
+	UuidFirmware string
+	Name         string
+	VehicleType  DeviceVehicleType
+	CreatedAt    pgtype.Timestamptz
+	LastSeenAt   pgtype.Timestamptz
+	DeletedAt    pgtype.Timestamptz
+}
+
 // Standard lookup by primary key. Filters out soft-deleted devices.
-func (q *Queries) GetDeviceByID(ctx context.Context, id pgtype.UUID) (Device, error) {
+func (q *Queries) GetDeviceByID(ctx context.Context, id pgtype.UUID) (GetDeviceByIDRow, error) {
 	row := q.db.QueryRow(ctx, getDeviceByID, id)
-	var i Device
+	var i GetDeviceByIDRow
 	err := row.Scan(
 		&i.ID,
 		&i.UuidFirmware,
 		&i.Name,
+		&i.VehicleType,
 		&i.CreatedAt,
 		&i.LastSeenAt,
 		&i.DeletedAt,
@@ -81,6 +108,7 @@ SELECT
   d.id,
   d.uuid_firmware,
   d.name,
+  d.vehicle_type,
   d.created_at,
   d.last_seen_at,
   uda.role AS access_role
@@ -101,6 +129,7 @@ type GetDeviceByIDForUserRow struct {
 	ID           pgtype.UUID
 	UuidFirmware string
 	Name         string
+	VehicleType  DeviceVehicleType
 	CreatedAt    pgtype.Timestamptz
 	LastSeenAt   pgtype.Timestamptz
 	AccessRole   string
@@ -116,6 +145,7 @@ func (q *Queries) GetDeviceByIDForUser(ctx context.Context, arg GetDeviceByIDFor
 		&i.ID,
 		&i.UuidFirmware,
 		&i.Name,
+		&i.VehicleType,
 		&i.CreatedAt,
 		&i.LastSeenAt,
 		&i.AccessRole,
@@ -124,20 +154,31 @@ func (q *Queries) GetDeviceByIDForUser(ctx context.Context, arg GetDeviceByIDFor
 }
 
 const getDeviceByUUIDFirmware = `-- name: GetDeviceByUUIDFirmware :one
-SELECT id, uuid_firmware, name, created_at, last_seen_at, deleted_at
+SELECT id, uuid_firmware, name, vehicle_type, created_at, last_seen_at, deleted_at
 FROM devices
 WHERE uuid_firmware = $1 AND deleted_at IS NULL
 `
 
+type GetDeviceByUUIDFirmwareRow struct {
+	ID           pgtype.UUID
+	UuidFirmware string
+	Name         string
+	VehicleType  DeviceVehicleType
+	CreatedAt    pgtype.Timestamptz
+	LastSeenAt   pgtype.Timestamptz
+	DeletedAt    pgtype.Timestamptz
+}
+
 // Hot auth path for the IoT device authentication flow.
 // The ESP32 sends its uuid_firmware, the backend resolves it to a device row.
-func (q *Queries) GetDeviceByUUIDFirmware(ctx context.Context, uuidFirmware string) (Device, error) {
+func (q *Queries) GetDeviceByUUIDFirmware(ctx context.Context, uuidFirmware string) (GetDeviceByUUIDFirmwareRow, error) {
 	row := q.db.QueryRow(ctx, getDeviceByUUIDFirmware, uuidFirmware)
-	var i Device
+	var i GetDeviceByUUIDFirmwareRow
 	err := row.Scan(
 		&i.ID,
 		&i.UuidFirmware,
 		&i.Name,
+		&i.VehicleType,
 		&i.CreatedAt,
 		&i.LastSeenAt,
 		&i.DeletedAt,
@@ -150,6 +191,7 @@ SELECT
   d.id,
   d.uuid_firmware,
   d.name,
+  d.vehicle_type,
   d.created_at,
   d.last_seen_at,
   uda.role AS access_role
@@ -165,6 +207,7 @@ type ListDevicesForUserRow struct {
 	ID           pgtype.UUID
 	UuidFirmware string
 	Name         string
+	VehicleType  DeviceVehicleType
 	CreatedAt    pgtype.Timestamptz
 	LastSeenAt   pgtype.Timestamptz
 	AccessRole   string
@@ -186,6 +229,7 @@ func (q *Queries) ListDevicesForUser(ctx context.Context, userID pgtype.UUID) ([
 			&i.ID,
 			&i.UuidFirmware,
 			&i.Name,
+			&i.VehicleType,
 			&i.CreatedAt,
 			&i.LastSeenAt,
 			&i.AccessRole,
@@ -201,7 +245,7 @@ func (q *Queries) ListDevicesForUser(ctx context.Context, userID pgtype.UUID) ([
 }
 
 const listDevicesForUserPaginated = `-- name: ListDevicesForUserPaginated :many
-SELECT d.id, d.uuid_firmware, d.name, d.created_at, d.last_seen_at
+SELECT d.id, d.uuid_firmware, d.name, d.vehicle_type, d.created_at, d.last_seen_at
 FROM devices d
 INNER JOIN user_device_access uda
   ON d.id = uda.device_id AND uda.deleted_at IS NULL
@@ -221,6 +265,7 @@ type ListDevicesForUserPaginatedRow struct {
 	ID           pgtype.UUID
 	UuidFirmware string
 	Name         string
+	VehicleType  DeviceVehicleType
 	CreatedAt    pgtype.Timestamptz
 	LastSeenAt   pgtype.Timestamptz
 }
@@ -240,6 +285,7 @@ func (q *Queries) ListDevicesForUserPaginated(ctx context.Context, arg ListDevic
 			&i.ID,
 			&i.UuidFirmware,
 			&i.Name,
+			&i.VehicleType,
 			&i.CreatedAt,
 			&i.LastSeenAt,
 		); err != nil {
@@ -258,6 +304,7 @@ SELECT
   d.id,
   d.uuid_firmware,
   d.name,
+  d.vehicle_type,
   d.created_at,
   d.last_seen_at,
   uda.role AS access_role
@@ -280,6 +327,7 @@ type ListDevicesForUserWithAccessPaginatedRow struct {
 	ID           pgtype.UUID
 	UuidFirmware string
 	Name         string
+	VehicleType  DeviceVehicleType
 	CreatedAt    pgtype.Timestamptz
 	LastSeenAt   pgtype.Timestamptz
 	AccessRole   string
@@ -300,6 +348,7 @@ func (q *Queries) ListDevicesForUserWithAccessPaginated(ctx context.Context, arg
 			&i.ID,
 			&i.UuidFirmware,
 			&i.Name,
+			&i.VehicleType,
 			&i.CreatedAt,
 			&i.LastSeenAt,
 			&i.AccessRole,
@@ -344,7 +393,7 @@ const updateDeviceName = `-- name: UpdateDeviceName :one
 UPDATE devices
 SET name = $2
 WHERE id = $1 AND deleted_at IS NULL
-RETURNING id, uuid_firmware, name, created_at, last_seen_at, deleted_at
+RETURNING id, uuid_firmware, name, vehicle_type, created_at, last_seen_at, deleted_at
 `
 
 type UpdateDeviceNameParams struct {
@@ -352,15 +401,65 @@ type UpdateDeviceNameParams struct {
 	Name string
 }
 
+type UpdateDeviceNameRow struct {
+	ID           pgtype.UUID
+	UuidFirmware string
+	Name         string
+	VehicleType  DeviceVehicleType
+	CreatedAt    pgtype.Timestamptz
+	LastSeenAt   pgtype.Timestamptz
+	DeletedAt    pgtype.Timestamptz
+}
+
 // Updates the display name. Returns the updated row, or sql.ErrNoRows
 // if the device does not exist or is soft-deleted.
-func (q *Queries) UpdateDeviceName(ctx context.Context, arg UpdateDeviceNameParams) (Device, error) {
+func (q *Queries) UpdateDeviceName(ctx context.Context, arg UpdateDeviceNameParams) (UpdateDeviceNameRow, error) {
 	row := q.db.QueryRow(ctx, updateDeviceName, arg.ID, arg.Name)
-	var i Device
+	var i UpdateDeviceNameRow
 	err := row.Scan(
 		&i.ID,
 		&i.UuidFirmware,
 		&i.Name,
+		&i.VehicleType,
+		&i.CreatedAt,
+		&i.LastSeenAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
+const updateDeviceVehicleType = `-- name: UpdateDeviceVehicleType :one
+UPDATE devices
+SET vehicle_type = $1::device_vehicle_type
+WHERE id = $2 AND deleted_at IS NULL
+RETURNING id, uuid_firmware, name, vehicle_type, created_at, last_seen_at, deleted_at
+`
+
+type UpdateDeviceVehicleTypeParams struct {
+	VehicleType DeviceVehicleType
+	ID          pgtype.UUID
+}
+
+type UpdateDeviceVehicleTypeRow struct {
+	ID           pgtype.UUID
+	UuidFirmware string
+	Name         string
+	VehicleType  DeviceVehicleType
+	CreatedAt    pgtype.Timestamptz
+	LastSeenAt   pgtype.Timestamptz
+	DeletedAt    pgtype.Timestamptz
+}
+
+// Updates the vehicle type. Returns the updated row, or sql.ErrNoRows
+// if the device does not exist or is soft-deleted.
+func (q *Queries) UpdateDeviceVehicleType(ctx context.Context, arg UpdateDeviceVehicleTypeParams) (UpdateDeviceVehicleTypeRow, error) {
+	row := q.db.QueryRow(ctx, updateDeviceVehicleType, arg.VehicleType, arg.ID)
+	var i UpdateDeviceVehicleTypeRow
+	err := row.Scan(
+		&i.ID,
+		&i.UuidFirmware,
+		&i.Name,
+		&i.VehicleType,
 		&i.CreatedAt,
 		&i.LastSeenAt,
 		&i.DeletedAt,

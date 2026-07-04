@@ -1,0 +1,57 @@
+name: Frontend CI/CD
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+
+jobs:
+  frontend-lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup-pnpm-ci-cd
+        with:
+          node-version: '22'
+          working-directory: frontend
+
+      - name: Run linter
+        working-directory: frontend
+        run: |
+          echo "::group::Linting frontend"
+          pnpm lint
+          echo "::endgroup::"
+
+  frontend-test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup-pnpm-ci-cd
+        with:
+          node-version: '22'
+          working-directory: frontend
+
+      - name: Run tests
+        working-directory: frontend
+        run: |
+          echo "::group::Testing frontend"
+          pnpm test
+          echo "::endgroup::"
+
+  frontend-build:
+    needs: [frontend-lint, frontend-test]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup-pnpm-ci-cd
+        with:
+          node-version: '22'
+          working-directory: frontend
+
+      - name: Build project
+        working-directory: frontend
+        run: |
+          echo "::group::Build frontend"
+          pnpm build
+          echo "::endgroup::"

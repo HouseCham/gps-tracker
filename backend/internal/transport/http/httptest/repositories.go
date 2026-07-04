@@ -61,6 +61,13 @@ func (m *MockDevicesRepository) ListForUserPaginated(ctx context.Context, userID
 	return result, len(result), nil
 }
 
+func (m *MockDevicesRepository) CountForUser(ctx context.Context, userID uuid.UUID) (int, error) {
+	if m.ListErr != nil {
+		return 0, m.ListErr
+	}
+	return len(m.DevicesWithAccess[userID]), nil
+}
+
 func (m *MockDevicesRepository) GetByIDForUser(ctx context.Context, userID, deviceID uuid.UUID) (*domain.DeviceWithAccess, error) {
 	if m.GetErr != nil {
 		return nil, m.GetErr
@@ -81,13 +88,14 @@ func (m *MockDevicesRepository) Create(ctx context.Context, input devices.Create
 		ID:           uuid.New(),
 		UuidFirmware: input.UuidFirmware,
 		Name:         input.Name,
+		VehicleType:  input.VehicleType,
 		CreatedAt:    time.Now(),
 	}
 	m.Devices[device.ID] = device
 	return device, nil
 }
 
-func (m *MockDevicesRepository) UpdateName(ctx context.Context, deviceID uuid.UUID, name string) (*domain.Device, error) {
+func (m *MockDevicesRepository) Update(ctx context.Context, deviceID uuid.UUID, input devices.UpdateInput) (*domain.Device, error) {
 	if m.UpdateErr != nil {
 		return nil, m.UpdateErr
 	}
@@ -95,7 +103,10 @@ func (m *MockDevicesRepository) UpdateName(ctx context.Context, deviceID uuid.UU
 	if !ok {
 		return nil, domain.ErrNotFound
 	}
-	device.Name = name
+	device.Name = input.Name
+	if input.VehicleType != nil {
+		device.VehicleType = *input.VehicleType
+	}
 	return device, nil
 }
 

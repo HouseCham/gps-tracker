@@ -1,9 +1,6 @@
 import type { User } from '@/types/api';
-import type {
-    AdminStatItem,
-    DataTableColumn,
-    UserTableItem,
-} from '@/types/components';
+import type { Translation } from '@/i18n';
+import type { AdminStatItem, DataTableColumn } from '@/types/components';
 /**
  * @constant DEMO_USER
  * @description Demo user for the admin gallery
@@ -16,6 +13,9 @@ export const DEMO_USER: User = {
     lastname: 'Doe',
     role: 'super_admin',
     created_at: '2022-01-01T00:00:00.000Z',
+    email_verified: true,
+    image: null,
+    must_change_password: false,
 };
 /**
  * @constant USER_TABLE_COLUMNS
@@ -27,9 +27,9 @@ export const USER_TABLE_COLUMNS: DataTableColumn[] = [
     { key: 'email', label: 'Email' },
     { key: 'role', label: 'Role' },
     { key: 'status', label: 'Status' },
-    { key: 'created', label: 'Created' },
+    { key: 'created', label: 'Created', align: 'center' },
     { key: 'devices', label: 'Devices', align: 'center' },
-    { key: 'actions', label: 'Actions', align: 'right' },
+    { key: 'actions', label: 'Actions', align: 'center' },
 ];
 /**
  * @constant USER_ROLE_VARIANT
@@ -48,6 +48,33 @@ export const USER_ROLE_VARIANT: Record<string, 'accent' | 'default'> = {
 export const USER_ROLE_LABEL: Record<string, string> = {
     super_admin: 'Super Admin',
     user: 'User',
+};
+/**
+ * @constant USER_ROLE_BADGE_VARIANT
+ * @description Maps the {@link User.role} enum to the BEM variant used by the
+ *   role badge. Shared by `UserTable.tsx` and `UserMobileCard.tsx`.
+ * @type {Record<User['role'], 'accent' | 'default'>}
+ */
+export const USER_ROLE_BADGE_VARIANT: Record<
+    User['role'],
+    'accent' | 'default'
+> = {
+    super_admin: 'accent',
+    user: 'default',
+};
+/**
+ * @constant USER_ROLE_LABEL_KEY
+ * @description Maps the {@link User.role} enum to the localized role label key.
+ *   Necessary because the translation keys are camelCase (`superAdmin`,
+ *   `user`) while the API role enum is snake_case (`super_admin`, `user`).
+ * @type {Record<User['role'], keyof Translation['admin']['roles']>}
+ */
+export const USER_ROLE_LABEL_KEY: Record<
+    User['role'],
+    keyof Translation['admin']['roles']
+> = {
+    super_admin: 'superAdmin',
+    user: 'user',
 };
 /**
  * @constant ADMIN_GALLERY_DEMO_STATS
@@ -86,66 +113,5 @@ export const ADMIN_GALLERY_DEMO_STATS: Array<AdminStatItem> = [
         trend: 'down' as const,
         trendValue: '-2 vs yesterday',
         variant: 'warning' as const,
-    },
-];
-/**
- * @constant ADMIN_GALLERY_DEMO_USERS
- * @description Demo users for the admin gallery
- * @type {UserTableItem[]}
- */
-export const ADMIN_GALLERY_DEMO_USERS: Array<UserTableItem> = [
-    {
-        id: 'U-001',
-        name: 'Alex Chen',
-        email: 'alex@meridian.io',
-        role: 'super_admin',
-        active: true,
-        createdAt: '2026-01-15',
-        deviceCount: 12,
-    },
-    {
-        id: 'U-002',
-        name: 'Maya Okafor',
-        email: 'm.okafor@meridian.io',
-        role: 'user',
-        active: true,
-        createdAt: '2026-02-03',
-        deviceCount: 8,
-    },
-    {
-        id: 'U-003',
-        name: 'Diego Ruiz',
-        email: 'd.ruiz@meridian.io',
-        role: 'user',
-        active: false,
-        createdAt: '2026-03-20',
-        deviceCount: 4,
-    },
-    {
-        id: 'U-004',
-        name: 'Sarah Kim',
-        email: 's.kim@meridian.io',
-        role: 'user',
-        active: true,
-        createdAt: '2026-04-11',
-        deviceCount: 15,
-    },
-    {
-        id: 'U-005',
-        name: 'James Wilson',
-        email: 'j.wilson@meridian.io',
-        role: 'user',
-        active: true,
-        createdAt: '2026-05-08',
-        deviceCount: 6,
-    },
-    {
-        id: 'U-006',
-        name: 'Elena Vasquez',
-        email: 'e.vasquez@meridian.io',
-        role: 'super_admin',
-        active: true,
-        createdAt: '2026-01-02',
-        deviceCount: 22,
     },
 ];
