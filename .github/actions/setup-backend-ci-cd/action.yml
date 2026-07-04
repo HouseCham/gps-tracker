@@ -1,0 +1,16 @@
+name: Setup Go for backend CI/CD
+description: Go toolchain setup with module cache for the backend.
+
+inputs:
+  go-version:
+    description: 'Go version (matches backend/go.mod)'
+    required: false
+    default: '1.26.4'
+
+runs:
+  using: 'composite'
+  steps:
+    - uses: actions/setup-go@v6
+      with:
+        go-version: ${{ inputs.go-version }}
+        cache-dependency-path: backend/go.sum
