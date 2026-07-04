@@ -21,7 +21,9 @@ import {
 import { useDeviceService } from '@/lib/api/services';
 import { AdminDeviceDetail } from './AdminDeviceDetail';
 //-- Lazy components
-const DeviceMapLive = lazy(() => import('@/components/react/map/DeviceMapLive'));
+const DeviceMapLive = lazy(
+    () => import('@/components/react/map/DeviceMapLive')
+);
 
 /**
  * Interface for the DeviceDetail island.
@@ -197,9 +199,9 @@ export function DeviceDetail({
                                 <dd className="device-detail__value device-detail__value--mono">
                                     {device.last_seen_at
                                         ? formatDate(
-                                            locale,
-                                            device.last_seen_at
-                                        )
+                                              locale,
+                                              device.last_seen_at
+                                          )
                                         : t.notAvailable}
                                 </dd>
                             </div>
@@ -221,12 +223,8 @@ export function DeviceDetail({
                             locale={locale}
                             translation={translation}
                             isLoading={isLoading}
-                            onGrant={(userId) =>
-                                grantAccess(deviceId, userId)
-                            }
-                            onRevoke={(userId) =>
-                                revokeAccess(deviceId, userId)
-                            }
+                            onGrant={userId => grantAccess(deviceId, userId)}
+                            onRevoke={userId => revokeAccess(deviceId, userId)}
                         />
                     )}
                 </div>

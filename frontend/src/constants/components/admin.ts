@@ -55,7 +55,10 @@ export const USER_ROLE_LABEL: Record<string, string> = {
  *   role badge. Shared by `UserTable.tsx` and `UserMobileCard.tsx`.
  * @type {Record<User['role'], 'accent' | 'default'>}
  */
-export const USER_ROLE_BADGE_VARIANT: Record<User['role'], 'accent' | 'default'> = {
+export const USER_ROLE_BADGE_VARIANT: Record<
+    User['role'],
+    'accent' | 'default'
+> = {
     super_admin: 'accent',
     user: 'default',
 };
@@ -66,7 +69,10 @@ export const USER_ROLE_BADGE_VARIANT: Record<User['role'], 'accent' | 'default'>
  *   `user`) while the API role enum is snake_case (`super_admin`, `user`).
  * @type {Record<User['role'], keyof Translation['admin']['roles']>}
  */
-export const USER_ROLE_LABEL_KEY: Record<User['role'], keyof Translation['admin']['roles']> = {
+export const USER_ROLE_LABEL_KEY: Record<
+    User['role'],
+    keyof Translation['admin']['roles']
+> = {
     super_admin: 'superAdmin',
     user: 'user',
 };

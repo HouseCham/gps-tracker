@@ -1,4 +1,4 @@
-import type { JSX } from "react/jsx-runtime";
+import type { JSX } from 'react/jsx-runtime';
 /**
  * Interface for the ProfileSkeleton component.
  * @interface ProfileSkeletonProps
@@ -12,7 +12,9 @@ interface ProfileSkeletonProps {
  * @param {ProfileSkeletonProps} props - The component props.
  * @returns {JSX.Element} The rendered skeleton.
  */
-export function ProfileSkeleton({ className }: ProfileSkeletonProps): JSX.Element {
+export function ProfileSkeleton({
+    className,
+}: ProfileSkeletonProps): JSX.Element {
     const wrapperClass = className ?? 'profile-body';
     return (
         <div className={wrapperClass} aria-busy="true" aria-live="polite">

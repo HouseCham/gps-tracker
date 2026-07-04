@@ -57,13 +57,13 @@ export const es: Translation = {
                 title: 'Eliminar usuario',
                 warning:
                     'Esto eliminará permanentemente al usuario "{name}" y cualquier acceso que tenga a dispositivos. Esta acción no se puede deshacer.',
-                typeNameLabel:
-                    'Escribe el nombre del usuario para confirmar',
+                typeNameLabel: 'Escribe el nombre del usuario para confirmar',
                 typeNamePlaceholder: 'Nombre del usuario',
                 confirm: 'Eliminar usuario',
                 deleting: 'Eliminando...',
                 cancel: 'Cancelar',
-                mismatch: 'El nombre debe coincidir exactamente con el del usuario.',
+                mismatch:
+                    'El nombre debe coincidir exactamente con el del usuario.',
                 deleteFailed:
                     'No se pudo eliminar al usuario. Inténtalo de nuevo.',
             },
@@ -297,8 +297,7 @@ export const es: Translation = {
                 revokeConfirm: {
                     warning:
                         'Esto revocará permanentemente el acceso de "{name}" a este dispositivo. Ya no podrá ver su ubicación. Esta acción no se puede deshacer.',
-                    typeConfirmLabel:
-                        'Escribe "confirmar" para confirmar',
+                    typeConfirmLabel: 'Escribe "confirmar" para confirmar',
                     typeConfirmPlaceholder: 'confirmar',
                     confirmPhrase: 'confirmar',
                     confirm: 'Quitar acceso',

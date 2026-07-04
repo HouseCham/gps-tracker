@@ -1,5 +1,5 @@
-import type { Translation } from "@/i18n";
-import type { DataTableColumn } from "@/types/components";
+import type { Translation } from '@/i18n';
+import type { DataTableColumn } from '@/types/components';
 
 /**
  * Two-letter initials from a display name for the avatar fallback.
@@ -33,7 +33,9 @@ export function getFirstNameWithInitial(name: string): string {
  * @param {Translation['admin']['userTable']} t - The translation object.
  * @returns {DataTableColumn[]} The columns for the user table.
  */
-export function getUserTableColumns(t: Translation['admin']['userTable']): DataTableColumn[] {
+export function getUserTableColumns(
+    t: Translation['admin']['userTable']
+): DataTableColumn[] {
     return [
         { key: 'name', label: t.name, sortable: true },
         { key: 'email', label: t.email },
@@ -43,4 +45,4 @@ export function getUserTableColumns(t: Translation['admin']['userTable']): DataT
         { key: 'devices', label: t.devices, align: 'center' },
         { key: 'actions', label: t.actions, align: 'center' },
     ];
-};
+}

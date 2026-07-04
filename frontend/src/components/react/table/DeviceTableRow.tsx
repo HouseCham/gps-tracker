@@ -2,17 +2,11 @@
 import type { ChangeEvent, JSX } from 'react';
 //-- Types
 import type { Language } from '@/types';
-import type {
-    DeviceVehicleType,
-    DeviceWithAccess,
-} from '@/types/api';
+import type { DeviceVehicleType, DeviceWithAccess } from '@/types/api';
 import type { Translation } from '@/i18n';
 //-- Components
 import { Badge, Button, Input } from '@/components/ui';
-import {
-    DeviceTypeIcon,
-    VehicleTypeSelector,
-} from '@/components/react/device';
+import { DeviceTypeIcon, VehicleTypeSelector } from '@/components/react/device';
 //-- Icons
 import { Check, Pencil, Trash, X } from 'lucide-react';
 //-- Utils

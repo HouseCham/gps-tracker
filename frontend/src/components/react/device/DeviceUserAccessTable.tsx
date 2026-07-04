@@ -1,17 +1,17 @@
 //-- React
 //-- Types
-import type { JSX } from "react/jsx-runtime";
-import type { Language } from "@/types";
-import type { DeviceAccessListItem } from "@/types/api";
-import type { DeviceUserAccessTableStrings } from "@/types/components";
-import type { DataTableColumn } from "@/types/components/ui";
+import type { JSX } from 'react/jsx-runtime';
+import type { Language } from '@/types';
+import type { DeviceAccessListItem } from '@/types/api';
+import type { DeviceUserAccessTableStrings } from '@/types/components';
+import type { DataTableColumn } from '@/types/components/ui';
 //-- Components
-import { Button } from "@/components/ui";
-import { DataTable } from "@/components/ui/DataTable";
+import { Button } from '@/components/ui';
+import { DataTable } from '@/components/ui/DataTable';
 //-- Icons
-import { Trash2 } from "lucide-react";
+import { Trash2 } from 'lucide-react';
 //-- Utils
-import { formatDate } from "@/lib";
+import { formatDate } from '@/lib';
 /**
  * Interface for DeviceUserAccessTable component
  * @interface DeviceUserAccessTableProps
@@ -30,14 +30,21 @@ interface DeviceUserAccessTableProps {
     t: DeviceUserAccessTableStrings;
     isLoading?: boolean;
     onClickRemoveAccess: (user: DeviceAccessListItem) => void;
-};
+}
 /**
  * @function DeviceUserAccessTable
  * @param {DeviceUserAccessTableProps} props - The props for the component.
  * @returns {JSX.Element} The rendered component.
  * @description Renders a table of users with access to a device, including their name, email, and the date access was granted. Each row includes a button to remove access for that user.
  */
-export function DeviceUserAccessTable({ columns, users, locale, t, isLoading = false, onClickRemoveAccess }: DeviceUserAccessTableProps): JSX.Element {
+export function DeviceUserAccessTable({
+    columns,
+    users,
+    locale,
+    t,
+    isLoading = false,
+    onClickRemoveAccess,
+}: DeviceUserAccessTableProps): JSX.Element {
     const rowHandlersById = new Map<string, { onRemove: () => void }>();
     for (const user of users) {
         rowHandlersById.set(user.user_id, {
@@ -51,43 +58,34 @@ export function DeviceUserAccessTable({ columns, users, locale, t, isLoading = f
                 const handlers = rowHandlersById.get(user.user_id);
                 if (!handlers) return null;
                 return (
-                <tr
-                    key={user.user_id}
-                    className="data-table__row device-detail__access-row"
-                >
-                    {/* Name */}
-                    <td className="data-table__cell">
-                        <span className="device-detail__access-name">
-                            {user.name}
-                        </span>
-                    </td>
-                    {/* Email */}
-                    <td className="data-table__cell device-detail__access-email">
-                        {user.email}
-                    </td>
-                    {/* Access Granted At */}
-                    <td className="data-table__cell device-detail__access-granted">
-                        {formatDate(
-                            locale,
-                            user.access_granted_at
-                        )}
-                    </td>
-                    {/* Actions */}
-                    <td
-                        className="data-table__cell"
-                        data-align="center"
+                    <tr
+                        key={user.user_id}
+                        className="data-table__row device-detail__access-row"
                     >
-                        <div className="device-detail__access-actions">
-                            {
-                                user.role !== 'owner' && (
+                        {/* Name */}
+                        <td className="data-table__cell">
+                            <span className="device-detail__access-name">
+                                {user.name}
+                            </span>
+                        </td>
+                        {/* Email */}
+                        <td className="data-table__cell device-detail__access-email">
+                            {user.email}
+                        </td>
+                        {/* Access Granted At */}
+                        <td className="data-table__cell device-detail__access-granted">
+                            {formatDate(locale, user.access_granted_at)}
+                        </td>
+                        {/* Actions */}
+                        <td className="data-table__cell" data-align="center">
+                            <div className="device-detail__access-actions">
+                                {user.role !== 'owner' && (
                                     <Button
                                         variant="danger"
                                         size="sm"
                                         onClick={handlers.onRemove}
                                         disabled={isLoading}
-                                        aria-label={
-                                            t.remove
-                                        }
+                                        aria-label={t.remove}
                                     >
                                         <Trash2
                                             size={14}
@@ -96,13 +94,12 @@ export function DeviceUserAccessTable({ columns, users, locale, t, isLoading = f
                                         />
                                         {t.remove}
                                     </Button>
-                                )
-                            }
-                        </div>
-                    </td>
-                </tr>
+                                )}
+                            </div>
+                        </td>
+                    </tr>
                 );
             })}
         </DataTable>
-    )
-};
+    );
+}

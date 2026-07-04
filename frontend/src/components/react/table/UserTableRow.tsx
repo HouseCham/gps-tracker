@@ -8,7 +8,10 @@ import type { Translation } from '@/i18n';
 import { Badge, Button } from '@/components/ui';
 //-- Utils
 import { formatDate } from '@/lib';
-import { USER_ROLE_BADGE_VARIANT, USER_ROLE_LABEL_KEY } from '@/constants/components/admin';
+import {
+    USER_ROLE_BADGE_VARIANT,
+    USER_ROLE_LABEL_KEY,
+} from '@/constants/components/admin';
 
 /**
  * Interface for the UserTableRow component.
@@ -45,9 +48,7 @@ export function UserTableRow({
             <td className="data-table__cell">
                 <span className="user-table__name">{user.name}</span>
             </td>
-            <td className="data-table__cell user-table__email">
-                {user.email}
-            </td>
+            <td className="data-table__cell user-table__email">{user.email}</td>
             <td className="data-table__cell">
                 <Badge
                     variant={USER_ROLE_BADGE_VARIANT[user.role]}
@@ -59,7 +60,11 @@ export function UserTableRow({
                 <Badge
                     variant={user.email_verified ? 'success' : 'warning'}
                     size="sm"
-                    label={user.email_verified ? labels.verified : labels.unverified}
+                    label={
+                        user.email_verified
+                            ? labels.verified
+                            : labels.unverified
+                    }
                 />
             </td>
             <td className="data-table__cell user-table__time is-align-center">

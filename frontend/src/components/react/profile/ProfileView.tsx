@@ -163,4 +163,4 @@ export function ProfileView({
             </section>
         </div>
     );
-};
+}

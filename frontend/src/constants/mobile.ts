@@ -1,12 +1,15 @@
 //-- Types
-import type { MobileCardVariant } from "@/types/components";
+import type { MobileCardVariant } from '@/types/components';
 
 /**
  * @constant MOBILE_CARD_LIST_MODIFIER_CLASS
  * @description Maps MobileCardVariant to the corresponding BEM modifier class for the wrapping `<ul>`.
  * @type {Record<MobileCardVariant, string>}
  */
-export const MOBILE_CARD_LIST_MODIFIER_CLASS: Record<MobileCardVariant, string> = {
+export const MOBILE_CARD_LIST_MODIFIER_CLASS: Record<
+    MobileCardVariant,
+    string
+> = {
     user: 'user-cards',
     device: 'device-cards',
     access: 'access-cards',

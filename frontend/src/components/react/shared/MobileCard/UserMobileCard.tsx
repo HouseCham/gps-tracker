@@ -11,7 +11,10 @@ import { MobileCardMetaItem } from '@/components/react/shared/MobileCard/MobileC
 import { Trash } from 'lucide-react';
 //-- Utils
 import { formatDate, getInitials } from '@/lib';
-import { USER_ROLE_BADGE_VARIANT, USER_ROLE_LABEL_KEY } from '@/constants/components/admin';
+import {
+    USER_ROLE_BADGE_VARIANT,
+    USER_ROLE_LABEL_KEY,
+} from '@/constants/components/admin';
 
 /**
  * Interface for the UserMobileCard component.

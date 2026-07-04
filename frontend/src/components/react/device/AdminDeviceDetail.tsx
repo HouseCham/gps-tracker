@@ -12,10 +12,7 @@ import type { DeviceAccessListItem } from '@/types/api';
 import { Button, Input } from '@/components/ui';
 import Modal from '@/components/react/ui/Modal';
 import { GrantAccessForm } from '@/components/react/form';
-import {
-    AccessMobileCard,
-    MobileCardList,
-} from '@/components/react/shared';
+import { AccessMobileCard, MobileCardList } from '@/components/react/shared';
 //-- Icons
 import { Plus } from 'lucide-react';
 //-- Utils
@@ -75,7 +72,7 @@ export function AdminDeviceDetail({
     async function handleGrant(userId: string): Promise<void> {
         await onGrant(userId);
         setGrantOpen(false);
-    };
+    }
 
     /**
      * Opens the revoke-access confirmation modal for the given user.
@@ -85,7 +82,7 @@ export function AdminDeviceDetail({
         setRevokeTarget(user);
         setRevokeConfirmText('');
         setRevokeError(null);
-    };
+    }
 
     /**
      * Closes the revoke-access modal and clears its state.
@@ -94,7 +91,7 @@ export function AdminDeviceDetail({
         setRevokeTarget(null);
         setRevokeConfirmText('');
         setRevokeError(null);
-    };
+    }
 
     /**
      * Stable change handler for the revoke-confirmation input.
@@ -103,7 +100,7 @@ export function AdminDeviceDetail({
     function onRevokeConfirmChange(e: ChangeEvent<HTMLInputElement>): void {
         setRevokeConfirmText(e.target.value);
         setRevokeError(null);
-    };
+    }
 
     /**
      * Confirms the pending revocation.
@@ -122,7 +119,7 @@ export function AdminDeviceDetail({
             const apiErr = asApiError(err);
             setRevokeError(apiErr.message ?? revokeStrings.revokeFailed);
         }
-    };
+    }
 
     // Esc cancels the revoke modal (single-mode means at most one).
     useEffect(() => {
@@ -164,11 +161,7 @@ export function AdminDeviceDetail({
                     size="sm"
                     onClick={() => setGrantOpen(true)}
                 >
-                    <Plus
-                        size={14}
-                        strokeWidth={2}
-                        aria-hidden="true"
-                    />
+                    <Plus size={14} strokeWidth={2} aria-hidden="true" />
                     {t.accessTable.addUser}
                 </Button>
             </div>
@@ -182,10 +175,7 @@ export function AdminDeviceDetail({
                 onClickRemoveAccess={askRevoke}
             />
             {/* Mobile cards (≤ 767.98px) — mirrors the table rows above. */}
-            <MobileCardList
-                variant="access"
-                label={t.accessTable.name}
-            >
+            <MobileCardList variant="access" label={t.accessTable.name}>
                 {users.map(user => {
                     const handlers = accessHandlersById.get(user.user_id);
                     if (!handlers) return null;
@@ -203,9 +193,7 @@ export function AdminDeviceDetail({
             </MobileCardList>
             {/* Empty state */}
             {users.length === 0 && (
-                <p className="device-detail__empty">
-                    {t.accessTable.noUsers}
-                </p>
+                <p className="device-detail__empty">{t.accessTable.noUsers}</p>
             )}
             {/* Grant modal */}
             <Modal
@@ -250,10 +238,7 @@ export function AdminDeviceDetail({
                 }
             >
                 <div className="device-delete-confirm">
-                    <p
-                        className="device-delete-confirm__warning"
-                        role="alert"
-                    >
+                    <p className="device-delete-confirm__warning" role="alert">
                         {t.accessTable.revokeConfirm.warning.replace(
                             '{name}',
                             revokeTarget?.name ?? ''
@@ -261,9 +246,7 @@ export function AdminDeviceDetail({
                     </p>
                     <Input
                         name="revoke-confirm-phrase"
-                        label={
-                            t.accessTable.revokeConfirm.typeConfirmLabel
-                        }
+                        label={t.accessTable.revokeConfirm.typeConfirmLabel}
                         placeholder={
                             t.accessTable.revokeConfirm.typeConfirmPlaceholder
                         }

@@ -2,10 +2,7 @@
 import type { ChangeEvent, JSX } from 'react';
 //-- Types
 import type { Language } from '@/types';
-import type {
-    DeviceVehicleType,
-    DeviceWithAccess,
-} from '@/types/api';
+import type { DeviceVehicleType, DeviceWithAccess } from '@/types/api';
 import type { Translation } from '@/i18n';
 //-- Components
 import { Badge, Button, Input } from '@/components/ui';
@@ -118,9 +115,7 @@ export function DeviceMobileCard({
         device.vehicle_type;
 
     return (
-        <li
-            className={`mobile-device-card ${isEditing ? 'is-editing' : ''}`}
-        >
+        <li className={`mobile-device-card ${isEditing ? 'is-editing' : ''}`}>
             <header className="mobile-device-card__header">
                 <div className="mobile-device-card__identity">
                     <div

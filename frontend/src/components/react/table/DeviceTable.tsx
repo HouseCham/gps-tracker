@@ -18,10 +18,7 @@ import { DataTable, TableStatus } from '@/components/ui/DataTable';
 import { Button, Input } from '@/components/ui';
 import { DeviceForm } from '@/components/react/device';
 import { DeviceTableRow } from '@/components/react/table';
-import {
-    DeviceMobileCard,
-    MobileCardList,
-} from '@/components/react/shared';
+import { DeviceMobileCard, MobileCardList } from '@/components/react/shared';
 import Modal from '@/components/react/ui/Modal';
 //-- Icons
 import { Inbox, Plus } from 'lucide-react';
@@ -366,7 +363,9 @@ export function DeviceTable({
                                     editName={editName}
                                     editType={editType}
                                     editError={editError}
-                                    namePlaceholder={formStrings.namePlaceholder}
+                                    namePlaceholder={
+                                        formStrings.namePlaceholder
+                                    }
                                     onEditNameChange={onEditNameChange}
                                     onEditTypeChange={onEditTypeChange}
                                     onCancelEdit={handleCancelEdit}

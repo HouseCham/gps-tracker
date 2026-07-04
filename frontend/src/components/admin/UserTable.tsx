@@ -17,10 +17,7 @@ import type { Translation } from '@/i18n';
 //-- Components
 import { DataTable, TableStatus } from '@/components/ui/DataTable';
 import { Button, Input } from '@/components/ui';
-import {
-    MobileCardList,
-    UserMobileCard,
-} from '@/components/react/shared';
+import { MobileCardList, UserMobileCard } from '@/components/react/shared';
 import { UserTableRow } from '@/components/react/table';
 //-- Icons
 import { Plus } from 'lucide-react';
@@ -31,7 +28,11 @@ import { asApiError } from '@/lib/api/api-utils';
 import { useUserService } from '@/lib/api/services';
 //-- Lazy components
 const Modal = lazy(() => import('@/components/react/ui/Modal'));
-const CreateUserForm = lazy(() => import('@/components/react/form/CreateUserForm').then((m) => ({ default: m.CreateUserForm })));
+const CreateUserForm = lazy(() =>
+    import('@/components/react/form/CreateUserForm').then(m => ({
+        default: m.CreateUserForm,
+    }))
+);
 /**
  * Interface for UserTable component
  * @interface UserTableProps
@@ -125,9 +126,7 @@ export function UserTable({
             handleCancelDelete();
         } catch (err) {
             const apiErr = asApiError(err);
-            setDeleteError(
-                apiErr.message ?? t.deleteConfirm.deleteFailed
-            );
+            setDeleteError(apiErr.message ?? t.deleteConfirm.deleteFailed);
         }
     }, [
         deleteTarget,

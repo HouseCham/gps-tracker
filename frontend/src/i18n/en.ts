@@ -294,10 +294,8 @@ export const en = {
                     confirm: 'Remove access',
                     removing: 'Removing...',
                     cancel: 'Cancel',
-                    mismatch:
-                        'You must type "confirm" exactly to confirm.',
-                    revokeFailed:
-                        'Could not revoke access. Try again.',
+                    mismatch: 'You must type "confirm" exactly to confirm.',
+                    revokeFailed: 'Could not revoke access. Try again.',
                 },
             },
             grantAccess: {
