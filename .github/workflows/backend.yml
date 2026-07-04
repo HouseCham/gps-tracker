@@ -32,4 +32,4 @@ jobs:
         run: |
           echo "::group::Build backend"
           go build ./cmd/api
-          echo "::endgroup::
+          echo "::endgroup::"
