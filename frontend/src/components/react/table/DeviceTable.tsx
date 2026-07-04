@@ -1,7 +1,7 @@
 import '@/styles/components/table.css';
 import '@/styles/components/mobile-cards.css';
 //-- React
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { ChangeEvent, JSX } from 'react';
 //-- Types
 import type {
@@ -27,6 +27,8 @@ import { getDeviceTableColumns } from '@/lib/device-utils';
 //-- Services
 import { useDeviceService } from '@/lib/api/services';
 import { asApiError } from '@/lib/api/api-utils';
+//-- Toast bus
+import { toastBus } from '@/lib/stores/toast.store';
 
 /**
  * The window after which a device is considered offline. Anything newer
@@ -84,6 +86,7 @@ export function DeviceTable({
     } = useDeviceService();
     const t = translation.device.table;
     const formStrings = translation.device.form;
+    const toastStrings = translation.toast;
     const columns: DataTableColumn[] = getDeviceTableColumns(translation);
 
     const [createOpen, setCreateOpen] = useState(false);
@@ -112,34 +115,36 @@ export function DeviceTable({
      * Submits the create-device payload and closes the modal on success.
      * @param {CreateDeviceDto} dto - The device payload from the form.
      */
-    const handleCreateDevice = useCallback(
-        async (dto: CreateDeviceDto): Promise<void> => {
-            await createDevice(dto);
-            setCreateOpen(false);
-        },
-        [createDevice]
-    );
+    async function handleCreateDevice(dto: CreateDeviceDto): Promise<void> {
+        await createDevice(dto);
+        toastBus.push({
+            variant: 'success',
+            title: toastStrings.deviceCreated.title,
+            message: toastStrings.deviceCreated.message,
+        });
+        setCreateOpen(false);
+    }
 
     /**
      * Enters inline-edit mode for the given device.
      * @param {DeviceWithAccess} device - Device being edited.
      */
-    const handleStartEdit = useCallback((device: DeviceWithAccess): void => {
+    function handleStartEdit(device: DeviceWithAccess): void {
         setEditingId(device.id);
         setEditName(device.name);
         setEditType(device.vehicle_type);
         setEditError(null);
-    }, []);
+    }
 
     /**
      * Exits inline-edit mode without persisting changes.
      */
-    const handleCancelEdit = useCallback((): void => {
+    function handleCancelEdit(): void {
         setEditingId(null);
         setEditName('');
         setEditType('other');
         setEditError(null);
-    }, []);
+    }
 
     /**
      * Esc cancels the inline edit (single-row mode means at most one).
@@ -157,54 +162,56 @@ export function DeviceTable({
      * Validates the inline-edit payload and persists it via the service.
      * @param {DeviceWithAccess} device - Device being saved.
      */
-    const handleSaveEdit = useCallback(
-        async (device: DeviceWithAccess): Promise<void> => {
-            const trimmed = editName.trim();
-            if (!trimmed) {
-                setEditError(t.inlineEdit.nameRequired);
-                return;
-            }
-            const payload: UpdateDeviceDto =
-                trimmed === device.name && editType === device.vehicle_type
-                    ? { name: trimmed }
-                    : { name: trimmed, vehicle_type: editType };
-            try {
-                await updateDevice(device.id, payload);
-                setEditingId(null);
-                setEditError(null);
-            } catch (err) {
-                const apiErr = asApiError(err);
-                setEditError(apiErr.message ?? t.inlineEdit.updateFailed);
-            }
-        },
-        [editName, editType, t.inlineEdit, updateDevice]
-    );
+    async function handleSaveEdit(device: DeviceWithAccess): Promise<void> {
+        const trimmed = editName.trim();
+        if (!trimmed) {
+            setEditError(t.inlineEdit.nameRequired);
+            return;
+        }
+        const payload: UpdateDeviceDto =
+            trimmed === device.name && editType === device.vehicle_type
+                ? { name: trimmed }
+                : { name: trimmed, vehicle_type: editType };
+        try {
+            await updateDevice(device.id, payload);
+            toastBus.push({
+                variant: 'success',
+                title: toastStrings.deviceUpdated.title,
+                message: toastStrings.deviceUpdated.message,
+            });
+            setEditingId(null);
+            setEditError(null);
+        } catch (err) {
+            const apiErr = asApiError(err);
+            setEditError(apiErr.message ?? t.inlineEdit.updateFailed);
+        }
+    }
 
     /**
      * Opens the delete-confirmation modal for the given device.
      * @param {DeviceWithAccess} device - Device targeted for deletion.
      */
-    const handleStartDelete = useCallback((device: DeviceWithAccess): void => {
+    function handleStartDelete(device: DeviceWithAccess): void {
         setDeleteTarget(device);
         setDeleteConfirmName('');
         setDeleteError(null);
-    }, []);
+    }
 
     /**
      * Closes the delete-confirmation modal and clears its state.
      */
-    const handleCloseDeleteModal = useCallback((): void => {
+    function handleCloseDeleteModal(): void {
         setDeleteTarget(null);
         setDeleteConfirmName('');
         setDeleteError(null);
-    }, []);
+    }
 
     /**
      * Confirms the deletion of the targeted device. Delete is only enabled in
      * the UI when the typed name matches exactly, so this is a final guard,
      * not the primary check.
      */
-    const handleConfirmDelete = useCallback(async (): Promise<void> => {
+    async function handleConfirmDelete(): Promise<void> {
         if (!deleteTarget) return;
         if (deleteConfirmName.trim() !== deleteTarget.name) {
             setDeleteError(t.deleteConfirm.mismatch);
@@ -212,73 +219,67 @@ export function DeviceTable({
         }
         try {
             await deleteDevice(deleteTarget.id);
+            toastBus.push({
+                variant: 'success',
+                title: toastStrings.deviceDeleted.title,
+                message: toastStrings.deviceDeleted.message,
+            });
             handleCloseDeleteModal();
         } catch (err) {
             const apiErr = asApiError(err);
             setDeleteError(apiErr.message ?? t.deleteConfirm.deleteFailed);
         }
-    }, [
-        deleteTarget,
-        deleteConfirmName,
-        t.deleteConfirm,
-        deleteDevice,
-        handleCloseDeleteModal,
-    ]);
+    }
 
     /**
      * Stable onChange handler for the row's edit-name input. Edit state is
      * shared across the list, so a single callback is reused by every row
      * — no inline arrow inside the `.map` is needed.
      */
-    const onEditNameChange = useCallback(
-        (e: ChangeEvent<HTMLInputElement>): void => {
-            setEditName(e.target.value);
-            setEditError(null);
-        },
-        []
-    );
+    function onEditNameChange(e: ChangeEvent<HTMLInputElement>): void {
+        setEditName(e.target.value);
+        setEditError(null);
+    }
 
     /**
      * Stable change handler for the row's vehicle-type selector. See
      * {@link onEditNameChange} for the rationale on sharing one callback.
      */
-    const onEditTypeChange = useCallback((next: DeviceVehicleType): void => {
+    function onEditTypeChange(next: DeviceVehicleType): void {
         setEditType(next);
         setEditError(null);
-    }, []);
+    }
 
     /**
      * Stable onChange handler for the delete-confirmation input.
      */
-    const onDeleteNameChange = useCallback(
-        (e: ChangeEvent<HTMLInputElement>): void => {
-            setDeleteConfirmName(e.target.value);
-            setDeleteError(null);
-        },
-        []
-    );
+    function onDeleteNameChange(e: ChangeEvent<HTMLInputElement>): void {
+        setDeleteConfirmName(e.target.value);
+        setDeleteError(null);
+    }
 
     /**
      * Stable handler for the create-device modal's close button.
      */
-    const handleCloseCreate = useCallback((): void => {
+    function handleCloseCreate(): void {
         setCreateOpen(false);
-    }, []);
+    }
 
     /**
      * Stable handler for the toolbar's add-device button.
      */
-    const handleOpenCreate = useCallback((): void => {
+    function handleOpenCreate(): void {
         setCreateOpen(true);
-    }, []);
+    }
 
     /**
      * Per-device click callbacks for the row actions. The `.map` below reads
-     * from this Map instead of allocating inline arrows; the entries are
-     * referentially stable until `devices` (or one of the underlying
-     * handlers) changes.
+     * from this Map instead of allocating inline arrows.
      */
-    const rowHandlersById = useMemo(() => {
+    const rowHandlersById = ((): Map<
+        string,
+        { onEdit: () => void; onSave: () => void; onDelete: () => void }
+    > => {
         const map = new Map<
             string,
             { onEdit: () => void; onSave: () => void; onDelete: () => void }
@@ -293,7 +294,7 @@ export function DeviceTable({
             });
         }
         return map;
-    }, [devices, handleStartEdit, handleSaveEdit, handleStartDelete]);
+    })();
 
     // -- Loading state: built-in DataTable skeleton
     if (isLoading && devices.length === 0)

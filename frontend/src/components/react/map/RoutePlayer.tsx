@@ -1,6 +1,6 @@
 import '@/styles/map/route-player.css';
 //-- React
-import { useCallback, type JSX } from 'react';
+import { type JSX } from 'react';
 //-- Icons
 import { Pause, Play, Rewind, FastForward } from 'lucide-react';
 //-- Types
@@ -56,31 +56,22 @@ export default function RoutePlayer({
     /**
      * Handles scrubbing through the route.
      * @param {React.ChangeEvent<HTMLInputElement>} e
-     * React 19 Compiler: manual callback is needed because this is passed
-     * as an `onChange` prop to an `<input type="range">` which fires on
-     * every drag frame; a stable reference avoids unbind/rebind overhead.
      */
-    const handleScrub = useCallback(
-        (e: React.ChangeEvent<HTMLInputElement>): void => {
-            onSeek?.(Number(e.target.value) / 1000);
-        },
-        [onSeek]
-    );
+    function handleScrub(e: React.ChangeEvent<HTMLInputElement>): void {
+        onSeek?.(Number(e.target.value) / 1000);
+    }
     /**
      * Handles changing the speed.
      * @param {React.MouseEvent<HTMLButtonElement>} e
-     * React 19 Compiler: manual callback is needed because this is used
-     * as an `onClick` handler inside a `.map()` render of speed buttons;
-     * a single stable reference avoids creating a new closure per option
-     * on every render.
      */
-    const handleSpeedClick = useCallback(
-        (e: React.MouseEvent<HTMLButtonElement>): void => {
-            const speed = Number(e.currentTarget.dataset.speed) as RouteSpeed;
-            onSpeedChange?.(speed);
-        },
-        [onSpeedChange]
-    );
+    function handleSpeedClick(e: React.MouseEvent<HTMLButtonElement>): void {
+        // ponytail: `data-speed` is set from MAP_SPEED_OPTIONS (typed RouteSpeed)
+        // at the call site below, so the runtime value is always 1 | 2 | 4 even
+        // though `dataset.speed` widens to `string | undefined`. The cast narrows
+        // the result of `Number(...)` to the RouteSpeed literal union.
+        const speed = Number(e.currentTarget.dataset.speed) as RouteSpeed;
+        onSpeedChange?.(speed);
+    }
     return (
         <div
             className={`route-player ${disabled ? 'is-disabled' : ''}`}

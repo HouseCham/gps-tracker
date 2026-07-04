@@ -10,6 +10,7 @@ import Sidebar from '@/components/astro/Sidebar.astro';
 import TabBar from '@/components/astro/TabBar.astro';
 import Toolbar from '@/components/astro/Toolbar.astro';
 import { AuthProvider, ProtectedRoute } from '@/components/react/auth';
+import ToastProvider from '@/components/react/ui/ToastProvider';
 
 /**
  * @interface Props
@@ -78,6 +79,7 @@ const {
                 </div>
             </ProtectedRoute>
         </AuthProvider>
+        <ToastProvider client:load />
         <script is:inline>
             (function () {
                 var stored = localStorage.getItem('theme');

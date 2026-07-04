@@ -20,6 +20,8 @@ import {
 //-- Services
 import { useDeviceService } from '@/lib/api/services';
 import { AdminDeviceDetail } from './AdminDeviceDetail';
+//-- Toast bus
+import { toastBus } from '@/lib/stores/toast.store';
 //-- Lazy components
 const DeviceMapLive = lazy(
     () => import('@/components/react/map/DeviceMapLive')
@@ -63,6 +65,7 @@ export function DeviceDetail({
     const fields = t.fields;
     const vehicleLabels = t.vehicleTypes;
     const mapStrings = translation.section.deviceDetail;
+    const toastStrings = translation.toast;
 
     const wrapperClass = `device-detail ${className ?? ''}`;
 
@@ -78,7 +81,7 @@ export function DeviceDetail({
     }, [deviceId, getDeviceById]);
 
     // Return loading UI
-    if (isLoading && !device) {
+    if (isLoading) {
         return (
             <section className={wrapperClass}>
                 <TableStatus mode="loading" />
@@ -117,7 +120,7 @@ export function DeviceDetail({
                     backHref={`/${locale}/devices`}
                     backLabel={t.backToList}
                 />
-            </section>
+            </section>  
         );
     }
 
@@ -223,8 +226,22 @@ export function DeviceDetail({
                             locale={locale}
                             translation={translation}
                             isLoading={isLoading}
-                            onGrant={userId => grantAccess(deviceId, userId)}
-                            onRevoke={userId => revokeAccess(deviceId, userId)}
+                            onGrant={async userId => {
+                                await grantAccess(deviceId, userId);
+                                toastBus.push({
+                                    variant: 'success',
+                                    title: toastStrings.accessGranted.title,
+                                    message: toastStrings.accessGranted.message,
+                                });
+                            }}
+                            onRevoke={async userId => {
+                                await revokeAccess(deviceId, userId);
+                                toastBus.push({
+                                    variant: 'success',
+                                    title: toastStrings.accessRevoked.title,
+                                    message: toastStrings.accessRevoked.message,
+                                });
+                            }}
                         />
                     )}
                 </div>
