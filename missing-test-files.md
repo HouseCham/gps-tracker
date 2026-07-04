@@ -13,14 +13,14 @@ checkbox when a test file ships.
 
 ## P1 — DOM-dependent utils + stores
 
-- [ ] `src/lib/device-utils.ts` — `getDeviceTableColumns`, `getDemoKpiItems`, `getDeviceAccessTableColumns`
-- [ ] `src/lib/router-utils.ts` — `generateNavbarItems` (pure) + `redirectTo` (mock `navigator`/`window.location`)
-- [ ] `src/lib/http-utils.ts` — `readDeviceIdFromUrl`
-- [ ] `src/lib/stores/auth.ts` — atom transitions, `$isAuthenticated` computed
+- [x] `src/lib/device-utils.ts` — `getDeviceTableColumns`, `getDemoKpiItems`, `getDeviceAccessTableColumns`
+- [x] `src/lib/router-utils.ts` — `generateNavbarItems` (pure) + `redirectTo` (mock `navigator`/`window.location`)
+- [x] `src/lib/http-utils.ts` — `readDeviceIdFromUrl`
+- [x] `src/lib/stores/auth.ts` — atom transitions, `$isAuthenticated` computed
 
 ## P2 — React hook without network
 
-- [ ] `src/lib/hooks/useHydrateOnce.ts` — ref-gate, StrictMode double-mount
+- [x] `src/lib/hooks/useHydrateOnce.ts` — ref-gate, StrictMode double-mount
 
 ## P3 — Network-touching React services
 
