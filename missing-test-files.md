@@ -24,12 +24,12 @@ checkbox when a test file ships.
 
 ## P3 — Network-touching React services
 
-- [ ] `src/lib/auth/service.ts` — signIn / signUp / signInOAuth / signOut / getSession
-- [ ] `src/lib/hooks/useAuth.ts` — store-binding snapshot
-- [ ] `src/lib/api/services/bootstrap.service.ts` — happy + error paths
-- [ ] `src/lib/api/services/userService.ts` — CRUD via `vi.mock('apiClient')`
-- [ ] `src/lib/api/services/deviceService.ts` — CRUD + optimistic add + access grants/revokes
-- [ ] `src/lib/api/services/profileService.ts` — captures errors into state instead of re-throwing
+- [x] `src/lib/auth/service.ts` — signIn / signUp / signInOAuth / signOut / getSession
+- [x] `src/lib/hooks/useAuth.ts` — store-binding snapshot
+- [x] `src/lib/api/services/bootstrap.service.ts` — happy + error paths
+- [x] `src/lib/api/services/userService.ts` — CRUD via `vi.mock('apiClient')`
+- [x] `src/lib/api/services/deviceService.ts` — CRUD + optimistic add + access grants/revokes
+- [x] `src/lib/api/services/profileService.ts` — captures errors into state instead of re-throwing
 
 ## Out of scope (YAGNI)
 

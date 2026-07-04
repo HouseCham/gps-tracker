@@ -3,7 +3,7 @@ import { renderHook } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { useHydrateOnce } from './useHydrateOnce';
 
-function Strict({ children }: { children: ReactNode }) {
+function Strict({ children }: { children: ReactNode }): JSX.Element {
     return <StrictMode>{children}</StrictMode>;
 }
 
