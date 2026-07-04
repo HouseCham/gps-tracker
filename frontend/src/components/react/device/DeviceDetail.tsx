@@ -1,26 +1,17 @@
 import '@/styles/components/device-detail.css';
 //-- React
-import { useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import type { JSX } from 'react/jsx-runtime';
 //-- Types
 import type { Language } from '@/types';
 import type { Translation } from '@/i18n';
-import type { DeviceAccessListItem, DeviceVehicleType } from '@/types/api';
+import type { DeviceVehicleType } from '@/types/api';
 //-- Components
 import { Badge, Button } from '@/components/ui';
-import { DataTable, TableStatus } from '@/components/ui/DataTable';
-import Modal from '@/components/react/ui/Modal';
-import { GrantAccessForm } from '@/components/react/form';
+import { TableStatus } from '@/components/ui/DataTable';
 import { NotFoundUI } from '@/components/react/ui';
-import DeviceMapLive from '@/components/react/map/DeviceMapLive';
-//-- Icons
-import { Plus, Trash2 } from 'lucide-react';
 //-- Utils
-import {
-    formatDate,
-    getDeviceAccessTableColumns,
-    readDeviceIdFromUrl,
-} from '@/lib';
+import { formatDate, readDeviceIdFromUrl } from '@/lib';
 //-- Constants
 import {
     MAP_LIVE_DEMO_LOCATION,
@@ -28,6 +19,11 @@ import {
 } from '@/constants/components/map';
 //-- Services
 import { useDeviceService } from '@/lib/api/services';
+import { AdminDeviceDetail } from './AdminDeviceDetail';
+//-- Lazy components
+const DeviceMapLive = lazy(
+    () => import('@/components/react/map/DeviceMapLive')
+);
 
 /**
  * Interface for the DeviceDetail island.
@@ -65,13 +61,9 @@ export function DeviceDetail({
 
     const t = translation.device.detail;
     const fields = t.fields;
-    const columns = getDeviceAccessTableColumns(t.accessTable);
     const vehicleLabels = t.vehicleTypes;
     const mapStrings = translation.section.deviceDetail;
 
-    const [grantOpen, setGrantOpen] = useState(false);
-    const [revokeTarget, setRevokeTarget] =
-        useState<DeviceAccessListItem | null>(null);
     const wrapperClass = `device-detail ${className ?? ''}`;
 
     //*  note: The device id comes from the URL query string so the page
@@ -83,35 +75,7 @@ export function DeviceDetail({
      */
     useEffect(() => {
         if (deviceId) getDeviceById(deviceId);
-    }, [deviceId]);
-
-    /**
-     * Submits the grant-access form and closes the modal on success.
-     * Errors propagate so the form can display them inline.
-     * @param {string} userId - The id typed into the form.
-     */
-    async function handleGrant(userId: string): Promise<void> {
-        await grantAccess(deviceId ?? '', userId);
-        setGrantOpen(false);
-    }
-
-    /**
-     * Opens the revoke-access confirmation modal for the given user.
-     * @param {DeviceAccessListItem} user - The user pending revocation.
-     */
-    function askRevoke(user: DeviceAccessListItem): void {
-        setRevokeTarget(user);
-    }
-
-    /**
-     * Confirms the pending revocation, calls the service, then closes the modal.
-     */
-    async function confirmRevoke(): Promise<void> {
-        if (!revokeTarget) return;
-        const target = revokeTarget;
-        setRevokeTarget(null);
-        await revokeAccess(deviceId ?? '', target.user_id);
-    }
+    }, [deviceId, getDeviceById]);
 
     // Return loading UI
     if (isLoading && !device) {
@@ -156,23 +120,11 @@ export function DeviceDetail({
             </section>
         );
     }
-    // Return not found UI
-    if (!device && !isLoading && !error) {
-        return (
-            <section className={wrapperClass}>
-                <NotFoundUI
-                    title={t.notFound}
-                    message={t.notFoundMessage}
-                    backHref={`/${locale}/devices`}
-                    backLabel={t.backToList}
-                />
-            </section>
-        );
-    }
 
     const isOwner = device.access_role === 'owner';
     const users = device.users ?? [];
-    // ponytail: API serializes vehicle_type as a generic string; the
+
+    //* note: API serializes vehicle_type as a generic string; the
     //   lookup table only covers the known DeviceVehicleType union, so the
     //   fallback (`?? device.vehicle_type`) handles unknown values safely.
     const vtLabel =
@@ -264,129 +216,16 @@ export function DeviceDetail({
                             </div>
                         </dl>
                     </section>
-
+                    {/* Access Section | Admin only */}
                     {isOwner && (
-                        <section className="device-detail__card device-detail__access">
-                            {/* Access Section & Add User Button */}
-                            <div className="device-detail__access-head">
-                                <h2 className="device-detail__card-title">
-                                    {t.sections.access}
-                                </h2>
-                                <Button
-                                    variant="primary"
-                                    size="sm"
-                                    onClick={() => setGrantOpen(true)}
-                                >
-                                    <Plus
-                                        size={14}
-                                        strokeWidth={2}
-                                        aria-hidden="true"
-                                    />
-                                    {t.accessTable.addUser}
-                                </Button>
-                            </div>
-                            {/* Access Table */}
-                            <DataTable columns={columns}>
-                                {users.map(user => (
-                                    <tr
-                                        key={user.user_id}
-                                        className="data-table__row device-detail__access-row"
-                                    >
-                                        {/* Name */}
-                                        <td className="data-table__cell">
-                                            <span className="device-detail__access-name">
-                                                {user.name}
-                                            </span>
-                                        </td>
-                                        {/* Email */}
-                                        <td className="data-table__cell device-detail__access-email">
-                                            {user.email}
-                                        </td>
-                                        {/* Access Granted At */}
-                                        <td className="data-table__cell device-detail__access-granted">
-                                            {formatDate(
-                                                locale,
-                                                user.access_granted_at
-                                            )}
-                                        </td>
-                                        {/* Actions */}
-                                        <td
-                                            className="data-table__cell"
-                                            data-align="center"
-                                        >
-                                            <div className="device-detail__access-actions">
-                                                <Button
-                                                    variant="danger"
-                                                    size="sm"
-                                                    onClick={() =>
-                                                        askRevoke(user)
-                                                    }
-                                                    disabled={isLoading}
-                                                    aria-label={
-                                                        t.accessTable.remove
-                                                    }
-                                                >
-                                                    <Trash2
-                                                        size={14}
-                                                        strokeWidth={2}
-                                                        aria-hidden="true"
-                                                    />
-                                                    {t.accessTable.remove}
-                                                </Button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </DataTable>
-                            {/* Empty state */}
-                            {users.length === 0 && (
-                                <p className="device-detail__empty">
-                                    {t.accessTable.noUsers}
-                                </p>
-                            )}
-                            {/* Grant modal */}
-                            <Modal
-                                open={grantOpen}
-                                onClose={() => setGrantOpen(false)}
-                                title={t.grantAccess.title}
-                            >
-                                <GrantAccessForm
-                                    strings={t.grantAccess}
-                                    onSubmit={handleGrant}
-                                    onCancel={() => setGrantOpen(false)}
-                                    saving={isLoading}
-                                />
-                            </Modal>
-                            {/* Revoke modal */}
-                            <Modal
-                                open={revokeTarget !== null}
-                                onClose={() => setRevokeTarget(null)}
-                                title={t.accessTable.removeTitle}
-                            >
-                                <p className="device-detail__modal-message">
-                                    {t.accessTable.removeConfirm}
-                                </p>
-                                <div className="device-detail__modal-actions">
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => setRevokeTarget(null)}
-                                        disabled={isLoading}
-                                    >
-                                        {t.grantAccess.cancel}
-                                    </Button>
-                                    <Button
-                                        variant="danger"
-                                        size="sm"
-                                        onClick={confirmRevoke}
-                                        disabled={isLoading}
-                                        loading={isLoading}
-                                    >
-                                        {t.accessTable.remove}
-                                    </Button>
-                                </div>
-                            </Modal>
-                        </section>
+                        <AdminDeviceDetail
+                            users={users}
+                            locale={locale}
+                            translation={translation}
+                            isLoading={isLoading}
+                            onGrant={userId => grantAccess(deviceId, userId)}
+                            onRevoke={userId => revokeAccess(deviceId, userId)}
+                        />
                     )}
                 </div>
                 {/* Map Section */}
@@ -394,11 +233,13 @@ export function DeviceDetail({
                     className="device-detail__map"
                     aria-label={mapStrings.map}
                 >
-                    <DeviceMapLive
-                        location={MAP_LIVE_DEMO_LOCATION}
-                        route={MAP_LIVE_DEMO_ROUTE}
-                        deviceName={device.name}
-                    />
+                    <Suspense fallback={null}>
+                        <DeviceMapLive
+                            location={MAP_LIVE_DEMO_LOCATION}
+                            route={MAP_LIVE_DEMO_ROUTE}
+                            deviceName={device.name}
+                        />
+                    </Suspense>
                 </aside>
             </div>
         </section>

@@ -5,3 +5,4 @@ export * from './admin.types';
 export * from './section.types';
 export * from './auth.types';
 export * from './theme.types';
+export * from './mobile.types';

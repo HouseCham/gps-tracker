@@ -44,7 +44,7 @@ export function SidebarUserCard({
 
     useHydrateOnce(refresh);
 
-    // ponytail: deliberate fallbacks mirror the original hardcoded
+    //* note: deliberate fallbacks mirror the original hardcoded
     //   strings so the sidebar reads fine mid-fetch and on error.
     const userName = profile
         ? `${profile.name} ${profile.lastname}`.trim() || 'User'

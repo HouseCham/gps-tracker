@@ -1,4 +1,4 @@
-import type { LayoutDashboard } from "lucide-react";
+import type { LayoutDashboard } from 'lucide-react';
 
 /**
  * Allowed values for the `active` nav item prop on `Sidebar` /

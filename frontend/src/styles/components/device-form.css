@@ -68,6 +68,10 @@
     box-shadow: 0 0 0 3px var(--red-soft);
 }
 
+.device-form__field--error .dropdown-trigger {
+    border-color: var(--red);
+}
+
 .device-form__error {
     margin: 0;
     font-size: 12px;

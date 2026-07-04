@@ -1,7 +1,7 @@
-import type { Translation } from "@/i18n";
-import type { Language } from "@/types";
-import type { SidebarNavItem } from "@/types/layout";
-import { Cpu, LayoutDashboard, ShieldCheck, User } from "lucide-react";
+import type { Translation } from '@/i18n';
+import type { Language } from '@/types';
+import type { SidebarNavItem } from '@/types/layout';
+import { Cpu, LayoutDashboard, ShieldCheck, User } from 'lucide-react';
 
 /**
  * Redirects the user to a new page, preserving the current locale.
@@ -13,7 +13,7 @@ export function redirectTo(path: string): void {
     let lang = (navigator.language || 'en').split('-')[0];
     if (!supported.has(lang)) lang = 'en';
     window.location.replace('/' + lang + path);
-};
+}
 /**
  * Generates an array of navigation items for the sidebar.
  * @param {Language} locale - Current locale code ('en' | 'es').
@@ -21,7 +21,11 @@ export function redirectTo(path: string): void {
  * @param {boolean} showAdmin - Whether to surface the Admin nav item (super_admin only).
  * @returns {Array<SidebarNavItem>} An array of navigation items.
  */
-export function generateNavbarItems(locale: Language, translation: Translation, showAdmin: boolean): Array<SidebarNavItem> {
+export function generateNavbarItems(
+    locale: Language,
+    translation: Translation,
+    showAdmin: boolean
+): Array<SidebarNavItem> {
     const navItems: Array<SidebarNavItem> = [
         {
             key: 'dashboard',

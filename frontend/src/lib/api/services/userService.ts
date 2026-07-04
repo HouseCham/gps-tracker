@@ -1,6 +1,12 @@
 import { useState } from 'react';
 //-- Types
-import type { ApiError, CreateUserDto, Envelope, User } from '@/types/api';
+import type {
+    ApiError,
+    CreateUserDto,
+    Envelope,
+    UpdateUserDto,
+    User,
+} from '@/types/api';
 import type { BetterFetchOption } from '@better-fetch/fetch';
 //-- Utils
 import { handleApiError } from '@/lib/api/api-utils';
@@ -14,6 +20,8 @@ import { apiClient } from '@/lib/auth/client';
  * @property {User[]} users - The list of users.
  * @method getAllUsers - Retrieves a list of all users.
  * @method createUser - Creates a new user.
+ * @method updateUser - Updates an existing user's `name` / `lastname`.
+ * @method deleteUser - Soft-deletes a user (`204 No Content`).
  */
 interface IUserService {
     isLoading: boolean;
@@ -21,6 +29,8 @@ interface IUserService {
     users: User[];
     getAllUsers: () => Promise<void>;
     createUser: (payload: CreateUserDto) => Promise<void>;
+    updateUser: (id: string, payload: UpdateUserDto) => Promise<void>;
+    deleteUser: (id: string) => Promise<void>;
 }
 /**
  * The HTTP client used to interact with the users API.
@@ -50,6 +60,9 @@ export const useUserService = (): IUserService => {
                 '/users',
                 {
                     method: 'GET',
+                    // `method` is widened to `string` when the option object is
+                    // inferred as a fresh literal; cast to `BetterFetchOption` so
+                    // the discriminated `method` union narrows correctly.
                 } as BetterFetchOption
             );
             if (!response) {
@@ -78,7 +91,7 @@ export const useUserService = (): IUserService => {
     /**
      * Creates a new user.
      * @param {CreateUserDto} payload - The user data to create.
-     * @returns {Promise<User>} A promise that resolves to the created user object.
+     * @returns {Promise<void>} Resolves when the user is created.
      * @throws {ApiError} An error object containing the error status, message, and code.
      */
     async function createUser(payload: CreateUserDto): Promise<void> {
@@ -90,6 +103,9 @@ export const useUserService = (): IUserService => {
                 {
                     method: 'POST',
                     body: payload,
+                    // `method` is widened to `string` when the option object is
+                    // inferred as a fresh literal; cast to `BetterFetchOption` so
+                    // the discriminated `method` union narrows correctly.
                 } as BetterFetchOption
             );
             if (!response || !response.data) {
@@ -105,6 +121,69 @@ export const useUserService = (): IUserService => {
         }
     }
 
+    /**
+     * Updates an existing user's `name` and/or `lastname`.
+     * @param {string} id - The id of the user to update.
+     * @param {UpdateUserDto} payload - The user fields to change.
+     * @returns {Promise<void>} Resolves when the user is updated.
+     * @throws {ApiError} An error object containing the error status, message, and code.
+     */
+    async function updateUser(
+        id: string,
+        payload: UpdateUserDto
+    ): Promise<void> {
+        resetState();
+        setIsLoading(true);
+        try {
+            const { data: response } = await apiClient<Envelope<User> | null>(
+                `/users/${id}`,
+                {
+                    method: 'PUT',
+                    body: payload,
+                    // `method` is widened to `string` when the option object is
+                    // inferred as a fresh literal; cast to `BetterFetchOption` so
+                    // the discriminated `method` union narrows correctly.
+                } as BetterFetchOption
+            );
+            if (!response || !response.data) {
+                handleApiError(
+                    new Error('update user returned a null response')
+                );
+            }
+            const updated = response.data;
+            setUsers(prev => prev.map(u => (u.id === id ? updated : u)));
+        } catch (error) {
+            handleApiError(error);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
+    /**
+     * Soft-deletes a user. Backend returns `204 No Content`, so the
+     * local state is updated by id without parsing a body.
+     * @param {string} id - The id of the user to delete.
+     * @returns {Promise<void>} Resolves when the user is deleted.
+     * @throws {ApiError} An error object containing the error status, message, and code.
+     */
+    async function deleteUser(id: string): Promise<void> {
+        resetState();
+        setIsLoading(true);
+        try {
+            await apiClient(`/users/${id}`, {
+                method: 'DELETE',
+                // `method` is widened to `string` when the option object is
+                // inferred as a fresh literal; cast to `BetterFetchOption` so
+                // the discriminated `method` union narrows correctly.
+            } as BetterFetchOption);
+            setUsers(prev => prev.filter(u => u.id !== id));
+        } catch (error) {
+            handleApiError(error);
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
     return {
         isLoading,
         error,
@@ -112,5 +191,7 @@ export const useUserService = (): IUserService => {
         //-- actions
         getAllUsers,
         createUser,
+        updateUser,
+        deleteUser,
     };
 };

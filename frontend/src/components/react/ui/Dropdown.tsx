@@ -4,6 +4,7 @@ import {
     useCallback,
     useEffect,
     useId,
+    useLayoutEffect,
     useRef,
     useState,
     type ReactNode,
@@ -37,6 +38,15 @@ export interface DropdownProps {
     closeOnSelect?: boolean;
     ariaLabel?: string;
 }
+
+/**
+ * Vertical clearance reserved for the open menu. Used only when the menu has
+ * not yet been measured (first paint) so the auto-side flip can still decide
+ * whether to open upward.
+ * @constant MENU_HEIGHT_ESTIMATE
+ */
+const MENU_HEIGHT_ESTIMATE = 240;
+
 /**
  * Dropdown component.
  * @param {DropdownProps} props
@@ -62,6 +72,21 @@ export default function Dropdown({
     const menuId = useId();
     const rootRef = useRef<HTMLDivElement>(null);
     const triggerRef = useRef<HTMLButtonElement>(null);
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    /**
+     * Menu placement: viewport-space `top` / `left` and which side of the
+     * trigger the menu opens on. Null while the menu is closed (or
+     * immediately after close, before the next open).
+     * @interface MenuPos
+     */
+    interface MenuPos {
+        top: number;
+        left: number;
+        minWidth: number;
+        side: 'bottom' | 'top';
+    }
+    const [menuPos, setMenuPos] = useState<MenuPos | null>(null);
 
     const setOpen = useCallback(
         (next: boolean): void => {
@@ -74,12 +99,13 @@ export default function Dropdown({
     useEffect(() => {
         if (!open) return;
         const onPointer = (e: MouseEvent): void => {
-            if (
-                rootRef.current &&
-                !rootRef.current.contains(e.target as Node)
-            ) {
-                setOpen(false);
-            }
+            const root = rootRef.current;
+            const menu = menuRef.current;
+            const target = e.target as Node | null;
+            if (!target) return;
+            if (root && root.contains(target)) return;
+            if (menu && menu.contains(target)) return;
+            setOpen(false);
         };
         const onKey = (e: KeyboardEvent): void => {
             if (e.key === 'Escape') {
@@ -95,7 +121,56 @@ export default function Dropdown({
         };
     }, [open, setOpen]);
 
-    const resolvedSide = useResolvedSide(side, open);
+    /**
+     * Computes the menu's viewport position from the trigger's bounding rect.
+     * Uses the actually-measured menu height when available so the auto-flip
+     * accounts for the real menu size.
+     */
+    const computeMenuPos = useCallback((): void => {
+        const trigger = triggerRef.current;
+        if (!trigger) return;
+        const rect = trigger.getBoundingClientRect();
+        const menuHeight =
+            menuRef.current?.offsetHeight ?? MENU_HEIGHT_ESTIMATE;
+        const flipUp =
+            side === 'top' ||
+            (side === 'auto' &&
+                window.innerHeight - rect.bottom < menuHeight + 8);
+        const top = flipUp ? rect.top - menuHeight - 4 : rect.bottom + 4;
+        const minWidth = rect.width;
+        let left = rect.left;
+        if (align === 'end') {
+            const menuWidth = menuRef.current?.offsetWidth ?? minWidth;
+            left = rect.right - menuWidth;
+            if (left < 4) left = 4;
+        }
+        setMenuPos({ top, left, minWidth, side: flipUp ? 'top' : 'bottom' });
+    }, [align, side]);
+
+    // Recompute position on open + on viewport changes while open. Scroll is
+    // captured so ancestor scrolls (e.g. the table's overflow:auto wrapper)
+    // also reposition the menu.
+    useEffect(() => {
+        if (!open) {
+            setMenuPos(null);
+            return;
+        }
+        computeMenuPos();
+        const onChange = (): void => computeMenuPos();
+        window.addEventListener('resize', onChange);
+        window.addEventListener('scroll', onChange, true);
+        return (): void => {
+            window.removeEventListener('resize', onChange);
+            window.removeEventListener('scroll', onChange, true);
+        };
+    }, [open, computeMenuPos]);
+
+    // After the menu mounts, recompute so we can use its real height/width
+    // (the first paint uses an estimate).
+    useLayoutEffect(() => {
+        if (open) computeMenuPos();
+    }, [open, items, sections, computeMenuPos]);
+
     const handleTrigger = (): void => setOpen(!open);
 
     const handleItem = (item: DropdownItem): void => {
@@ -135,7 +210,7 @@ export default function Dropdown({
         <div
             ref={rootRef}
             className={`dropdown ${open ? 'is-open' : ''}`}
-            data-side={resolvedSide}
+            data-side={menuPos?.side ?? 'bottom'}
         >
             <button
                 ref={triggerRef}
@@ -153,12 +228,20 @@ export default function Dropdown({
                     className="dropdown-trigger__caret"
                 />
             </button>
-            {open && (
+            {open && menuPos && (
                 <div
+                    ref={menuRef}
                     id={menuId}
                     role="menu"
                     aria-label={ariaLabel}
                     className={`dropdown-menu dropdown-menu--align-${align}`}
+                    style={{
+                        position: 'fixed',
+                        top: menuPos.top,
+                        left: menuPos.left,
+                        minWidth: menuPos.minWidth,
+                    }}
+                    data-side={menuPos.side}
                 >
                     {(items ?? []).length > 0 && (
                         <div className="dropdown-section" role="none">
@@ -184,33 +267,4 @@ export default function Dropdown({
             )}
         </div>
     );
-}
-/**
- * Hook to resolve the side of the dropdown.
- * @param {string} side - The side of the dropdown.
- * @param {boolean} open - Whether the dropdown is open.
- * @returns {string} The resolved side of the dropdown.
- */
-function useResolvedSide(
-    side: 'bottom' | 'top' | 'auto',
-    open: boolean
-): 'bottom' | 'top' {
-    const [resolved, setResolved] = useState<'bottom' | 'top'>('bottom');
-    useEffect((): void => {
-        if (!open || side !== 'auto') {
-            setResolved(side === 'top' ? 'top' : 'bottom');
-            return;
-        }
-        const el = document.activeElement as HTMLElement | null;
-        if (!el) {
-            setResolved('bottom');
-            return;
-        }
-        setResolved(
-            window.innerHeight - el.getBoundingClientRect().bottom < 220
-                ? 'top'
-                : 'bottom'
-        );
-    }, [open, side]);
-    return resolved;
 }

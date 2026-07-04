@@ -21,7 +21,7 @@ export function getDeviceTableColumns(t: Translation): DataTableColumn[] {
  * @returns {AdminStatItem[]} The demo KPI items for the admin dashboard.
  */
 export function getDemoKpiItems(t: Translation): Array<AdminStatItem> {
-    // ponytail: narrow literals for AdminStatItem discriminated union
+    //* note: narrow literals for AdminStatItem discriminated union
     return [
         {
             label: t.admin.totalDevices,

@@ -117,3 +117,28 @@ export interface GrantAccessFormStrings {
     granting: string;
     cancel: string;
 }
+/**
+ * @interface DeviceUserAccessTableStrings
+ * @param {string} name - The label for the name column.
+ * @param {string} email - The label for the email column.
+ * @param {string} accessGranted - The label for the access granted column.
+ * @param {string} actions - The label for the actions column.
+ * @param {string} addUser - The label for the add user button.
+ * @param {string} noUsers - The message to display when there are no users.
+ * @param {string} remove - The label for the remove button.
+ * @param {string} removeTitle - The title for the remove confirmation dialog.
+ * @param {string} removeConfirm - The confirmation message for removing a user.
+ * @param {string} failedToLoad - The message to display when failing to load users.
+ */
+export interface DeviceUserAccessTableStrings {
+    name: string;
+    email: string;
+    accessGranted: string;
+    actions: string;
+    addUser: string;
+    noUsers: string;
+    remove: string;
+    removeTitle: string;
+    removeConfirm: string;
+    failedToLoad: string;
+}

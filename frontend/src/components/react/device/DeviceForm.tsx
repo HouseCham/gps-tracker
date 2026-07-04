@@ -6,7 +6,9 @@ import type { ReactElement, SyntheticEvent } from 'react';
 import type { DeviceFormStrings, DeviceFormValues } from '@/types/components';
 import type { DeviceVehicleType } from '@/types/api';
 //-- Constants
-import { UUID_REGEX, VEHICLE_TYPE_OPTIONS } from '@/constants';
+import { UUID_REGEX } from '@/constants';
+//-- Components
+import { VehicleTypeSelector } from './VehicleTypeSelector';
 /**
  * @interface DeviceFormProps
  * @param {DeviceFormValues} device - The device to edit.
@@ -47,7 +49,6 @@ export function DeviceForm({
 }: DeviceFormProps): ReactElement {
     const nameId = useId();
     const uuidId = useId();
-    const vehicleTypeId = useId();
     const isEdit = !!device;
 
     const [name, setName] = useState(device?.name ?? '');
@@ -187,46 +188,24 @@ export function DeviceForm({
                     </p>
                 )}
             </div>
-
+            {/* Selector */}
             <div
                 className={`device-form__field ${errors.vehicleType ? 'device-form__field--error' : ''}`}
             >
-                <label className="device-form__label" htmlFor={vehicleTypeId}>
+                <label className="device-form__label">
                     {s.vehicleTypeLabel}
                 </label>
-                <select
-                    id={vehicleTypeId}
-                    className="device-form__input"
+                <VehicleTypeSelector
                     value={vehicleType}
-                    onChange={e => {
-                        const value = e.target.value;
-                        if (
-                            (
-                                VEHICLE_TYPE_OPTIONS as readonly string[]
-                            ).includes(value)
-                        ) {
-                            setVehicleType(value as DeviceVehicleType);
-                        }
+                    onChange={next => {
+                        setVehicleType(next);
                         setErrors(p => ({ ...p, vehicleType: undefined }));
                     }}
-                    disabled={saving}
-                    aria-invalid={!!errors.vehicleType}
-                    aria-describedby={
-                        errors.vehicleType ? `${vehicleTypeId}-err` : undefined
-                    }
-                >
-                    {VEHICLE_TYPE_OPTIONS.map(vt => (
-                        <option key={vt} value={vt}>
-                            {vtLabels[vt]}
-                        </option>
-                    ))}
-                </select>
+                    vehicleTypes={vtLabels}
+                    label={s.vehicleTypeLabel}
+                />
                 {errors.vehicleType && (
-                    <p
-                        id={`${vehicleTypeId}-err`}
-                        className="device-form__error"
-                        role="alert"
-                    >
+                    <p className="device-form__error" role="alert">
                         {errors.vehicleType}
                     </p>
                 )}

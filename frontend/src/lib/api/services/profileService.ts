@@ -7,7 +7,7 @@ import type {
     ProfileResponse,
 } from '@/types/api';
 //-- Utils
-import { isApiError } from '@/lib/api/api-utils';
+import { isApiError, toApiError } from '@/lib/api/api-utils';
 //-- Http Client
 import { apiClient } from '@/lib/auth/client';
 
@@ -75,23 +75,13 @@ export const useProfileService = (): IProfileService => {
                 setDeviceCount(countRes.data.data.total);
             }
         } catch (error) {
-            // ponytail: existing services re-throw via handleApiError so
+            //* note: existing services re-throw via handleApiError so
             //   the React error boundary catches them; the profile page
             //   needs an inline retry instead, so we capture the
             //   ApiError-shaped object into state. No cast needed —
             //   isApiError narrows straight to ApiError via its typed
             //   field checks.
-            setError(
-                isApiError(error)
-                    ? error
-                    : {
-                          status: 0,
-                          message:
-                              error instanceof Error
-                                  ? error.message
-                                  : 'Network error',
-                      }
-            );
+            setError(isApiError(error) ? error : toApiError(error));
         } finally {
             setIsLoading(false);
         }

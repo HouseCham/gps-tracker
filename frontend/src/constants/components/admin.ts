@@ -1,4 +1,5 @@
 import type { User } from '@/types/api';
+import type { Translation } from '@/i18n';
 import type { AdminStatItem, DataTableColumn } from '@/types/components';
 /**
  * @constant DEMO_USER
@@ -47,6 +48,33 @@ export const USER_ROLE_VARIANT: Record<string, 'accent' | 'default'> = {
 export const USER_ROLE_LABEL: Record<string, string> = {
     super_admin: 'Super Admin',
     user: 'User',
+};
+/**
+ * @constant USER_ROLE_BADGE_VARIANT
+ * @description Maps the {@link User.role} enum to the BEM variant used by the
+ *   role badge. Shared by `UserTable.tsx` and `UserMobileCard.tsx`.
+ * @type {Record<User['role'], 'accent' | 'default'>}
+ */
+export const USER_ROLE_BADGE_VARIANT: Record<
+    User['role'],
+    'accent' | 'default'
+> = {
+    super_admin: 'accent',
+    user: 'default',
+};
+/**
+ * @constant USER_ROLE_LABEL_KEY
+ * @description Maps the {@link User.role} enum to the localized role label key.
+ *   Necessary because the translation keys are camelCase (`superAdmin`,
+ *   `user`) while the API role enum is snake_case (`super_admin`, `user`).
+ * @type {Record<User['role'], keyof Translation['admin']['roles']>}
+ */
+export const USER_ROLE_LABEL_KEY: Record<
+    User['role'],
+    keyof Translation['admin']['roles']
+> = {
+    super_admin: 'superAdmin',
+    user: 'user',
 };
 /**
  * @constant ADMIN_GALLERY_DEMO_STATS

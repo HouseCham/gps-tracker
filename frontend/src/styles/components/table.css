@@ -312,6 +312,57 @@
     margin-bottom: 16px;
 }
 
+/* ─── Inline edit + delete-confirm ────────────────────────────────────────── */
+
+.device-table__inline-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.device-table__inline-field .input {
+    font-size: 13px;
+    padding: 6px 10px;
+}
+
+.device-table__inline-error {
+    margin: 0;
+    font-size: 12px;
+    color: var(--red);
+    font-weight: 500;
+}
+
+.device-table__row.is-editing td {
+    background: var(--bg);
+}
+
+/* ─── Delete confirmation modal ──────────────────────────────────────────── */
+
+.device-delete-confirm {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.device-delete-confirm__warning {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+    padding: 12px 14px;
+    background: var(--red-soft);
+    border: 1px solid var(--red);
+    border-radius: var(--radius-sm);
+}
+
+.device-delete-confirm__error {
+    margin: 0;
+    font-size: 12px;
+    color: var(--red);
+    font-weight: 500;
+}
+
 /* ─── User table ───────────────────────────────────────────────────────────── */
 
 .user-table__row td {
@@ -344,6 +395,57 @@
     display: flex;
     justify-content: flex-end;
     margin-bottom: 16px;
+}
+
+/* ─── User edit modal form ─────────────────────────────────────────────────── */
+
+.user-edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.user-edit-form__banner {
+    margin: 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--red);
+    background: var(--red-soft);
+    border-radius: var(--radius-sm);
+    font-weight: 500;
+}
+
+.user-edit-form__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding-top: 4px;
+}
+
+/* ─── User delete confirmation modal ──────────────────────────────────────── */
+
+.user-delete-confirm {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.user-delete-confirm__warning {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+    padding: 12px 14px;
+    background: var(--red-soft);
+    border: 1px solid var(--red);
+    border-radius: var(--radius-sm);
+}
+
+.user-delete-confirm__error {
+    margin: 0;
+    font-size: 12px;
+    color: var(--red);
+    font-weight: 500;
 }
 
 /* ─── Responsive ────────────────────────────────────────────────────────────── */

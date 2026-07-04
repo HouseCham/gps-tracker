@@ -1,4 +1,4 @@
-/* ponytail: shared chrome for /_gallery/* pages. Selectors are scoped
+/** note: shared chrome for /_gallery/* pages. Selectors are scoped
    under .gallery so the bare h1/section rules don't escape into
    MainLayout's header/footer. */
 .gallery > h1 {
