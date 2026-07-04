@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 //-- Types
 import type {
     ApiError,
@@ -53,7 +53,7 @@ export const useProfileService = (): IProfileService => {
      * `profile` / `deviceCount` untouched so the page keeps its last
      * known state instead of blanking out.
      */
-    const refresh = useCallback(async (): Promise<void> => {
+    async function refresh(): Promise<void> {
         setIsLoading(true);
         setError(null);
         try {
@@ -85,7 +85,7 @@ export const useProfileService = (): IProfileService => {
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }
 
     return {
         isLoading,
