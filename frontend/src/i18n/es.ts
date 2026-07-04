@@ -321,4 +321,34 @@ export const es: Translation = {
             },
         },
     },
+    toast: {
+        deviceCreated: {
+            title: 'Creado',
+            message: 'El dispositivo se ha añadido.',
+        },
+        deviceUpdated: {
+            title: 'Guardado',
+            message: 'Cambios guardados.',
+        },
+        deviceDeleted: {
+            title: 'Eliminado',
+            message: 'El dispositivo se ha eliminado.',
+        },
+        accessGranted: {
+            title: 'Acceso otorgado',
+            message: 'El usuario ya tiene acceso de visualización.',
+        },
+        accessRevoked: {
+            title: 'Acceso revocado',
+            message: 'Se ha eliminado el acceso del usuario.',
+        },
+        userCreated: {
+            title: 'Usuario creado',
+            message: 'El usuario se ha añadido.',
+        },
+        userDeleted: {
+            title: 'Usuario eliminado',
+            message: 'El usuario se ha eliminado.',
+        },
+    },
 };
