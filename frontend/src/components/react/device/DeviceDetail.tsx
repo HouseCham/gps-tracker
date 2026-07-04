@@ -1,7 +1,7 @@
 import '@/styles/components/device-detail.css';
 import '@/styles/components/mobile-cards.css';
 //-- React
-import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
 import type { ChangeEvent } from 'react';
 import type { JSX } from 'react/jsx-runtime';
 //-- Types
@@ -85,7 +85,7 @@ export function DeviceDetail({
         useState<DeviceAccessListItem | null>(null);
     const [revokeConfirmText, setRevokeConfirmText] = useState('');
     const [revokeError, setRevokeError] = useState<string | null>(null);
-
+    
     const wrapperClass = `device-detail ${className ?? ''}`;
 
     //*  note: The device id comes from the URL query string so the page
@@ -104,50 +104,46 @@ export function DeviceDetail({
      * Errors propagate so the form can display them inline.
      * @param {string} userId - The id typed into the form.
      */
-    const handleGrant = useCallback(
-        async (userId: string): Promise<void> => {
-            await grantAccess(deviceId ?? '', userId);
-            setGrantOpen(false);
-        },
-        [deviceId, grantAccess]
-    );
+    async function handleGrant(userId: string): Promise<void> {
+        await grantAccess(deviceId ?? '', userId);
+        setGrantOpen(false);
+    }
 
     /**
      * Opens the revoke-access confirmation modal for the given user.
      * @param {DeviceAccessListItem} user - The user pending revocation.
      */
-    const askRevoke = useCallback((user: DeviceAccessListItem): void => {
+    function askRevoke(user: DeviceAccessListItem): void {
         setRevokeTarget(user);
         setRevokeConfirmText('');
         setRevokeError(null);
-    }, []);
+    };
 
     /**
      * Closes the revoke-access modal and clears its state.
+     * @returns {void}
      */
-    const handleCancelRevoke = useCallback((): void => {
+    function handleCancelRevoke(): void {
         setRevokeTarget(null);
         setRevokeConfirmText('');
         setRevokeError(null);
-    }, []);
+    };
 
     /**
      * Stable change handler for the revoke-confirmation input.
+     * @param {ChangeEvent<HTMLInputElement>} e - The change event.
+     * @returns {void}
      */
-    const onRevokeConfirmChange = useCallback(
-        (e: ChangeEvent<HTMLInputElement>): void => {
-            setRevokeConfirmText(e.target.value);
-            setRevokeError(null);
-        },
-        []
-    );
+    function onRevokeConfirmChange(e: ChangeEvent<HTMLInputElement>): void {
+        setRevokeConfirmText(e.target.value);
+        setRevokeError(null);
+    };
 
     /**
-     * Confirms the pending revocation. The button is only enabled when the
-     * typed word matches `t.accessTable.revokeConfirm.confirmPhrase`, so this
-     * is a final guard, not the primary check.
+     * Confirms the pending revocation.
+     * @returns {Promise<void>}
      */
-    const confirmRevoke = useCallback(async (): Promise<void> => {
+    async function confirmRevoke(): Promise<void> {
         const strings = translation.device.detail.accessTable.revokeConfirm;
         if (!revokeTarget) return;
         if (revokeConfirmText.trim() !== strings.confirmPhrase) {
@@ -161,24 +157,21 @@ export function DeviceDetail({
             const apiErr = asApiError(err);
             setRevokeError(apiErr.message ?? strings.revokeFailed);
         }
-    }, [
-        revokeTarget,
-        revokeConfirmText,
-        revokeAccess,
-        deviceId,
-        handleCancelRevoke,
-        translation.device.detail.accessTable.revokeConfirm,
-    ]);
+    };
 
     // Esc cancels the revoke modal (single-mode means at most one).
     useEffect(() => {
         if (revokeTarget === null) return;
         const onKey = (e: KeyboardEvent): void => {
-            if (e.key === 'Escape') handleCancelRevoke();
+            if (e.key === 'Escape') {
+                setRevokeTarget(null);
+                setRevokeConfirmText('');
+                setRevokeError(null);
+            }
         };
         document.addEventListener('keydown', onKey);
         return (): void => document.removeEventListener('keydown', onKey);
-    }, [revokeTarget, handleCancelRevoke]);
+    }, [revokeTarget]);
 
     // Return loading UI
     if (isLoading && !device) {
@@ -223,19 +216,6 @@ export function DeviceDetail({
             </section>
         );
     }
-    // Return not found UI
-    if (!device && !isLoading && !error) {
-        return (
-            <section className={wrapperClass}>
-                <NotFoundUI
-                    title={t.notFound}
-                    message={t.notFoundMessage}
-                    backHref={`/${locale}/devices`}
-                    backLabel={t.backToList}
-                />
-            </section>
-        );
-    }
 
     const isOwner = device.access_role === 'owner';
     const users = device.users ?? [];
@@ -245,15 +225,12 @@ export function DeviceDetail({
      * below reads from this Map instead of allocating inline arrows;
      * entries stay stable until `users` (or `askRevoke`) changes.
      */
-    const accessHandlersById = useMemo(() => {
-        const map = new Map<string, { onRevoke: () => void }>();
-        for (const user of users) {
-            map.set(user.user_id, {
-                onRevoke: (): void => askRevoke(user),
-            });
-        }
-        return map;
-    }, [users, askRevoke]);
+    const accessHandlersById = new Map<string, { onRevoke: () => void }>();
+    for (const user of users) {
+        accessHandlersById.set(user.user_id, {
+            onRevoke: (): void => askRevoke(user),
+        });
+    }
 
     //* note: API serializes vehicle_type as a generic string; the
     //   lookup table only covers the known DeviceVehicleType union, so the
@@ -335,9 +312,9 @@ export function DeviceDetail({
                                 <dd className="device-detail__value device-detail__value--mono">
                                     {device.last_seen_at
                                         ? formatDate(
-                                              locale,
-                                              device.last_seen_at
-                                          )
+                                            locale,
+                                            device.last_seen_at
+                                        )
                                         : t.notAvailable}
                                 </dd>
                             </div>
@@ -352,7 +329,7 @@ export function DeviceDetail({
                             </div>
                         </dl>
                     </section>
-
+                    {/* Access Section | Admin only */}
                     {isOwner && (
                         <section className="device-detail__card device-detail__access">
                             {/* Access Section & Add User Button */}
@@ -374,7 +351,7 @@ export function DeviceDetail({
                                 </Button>
                             </div>
                             {/* Access Table */}
-                            <DeviceUserAccessTable 
+                            <DeviceUserAccessTable
                                 columns={columns}
                                 users={users}
                                 locale={locale}

@@ -28,7 +28,6 @@ interface AccessMobileCardProps {
     onRevoke: () => void;
     isLoading?: boolean;
 }
-
 /**
  * Mobile (≤ 767.98px) row for a single {@link DeviceAccessListItem}.
  * Mirrors the access table row rendered by `DeviceUserAccessTable.tsx`.
@@ -64,18 +63,22 @@ export function AccessMobileCard({
                     value={formatDate(locale, user.access_granted_at)}
                 />
             </dl>
-            <footer className="access-card__actions">
-                <Button
-                    variant="danger"
-                    size="sm"
-                    onClick={onRevoke}
-                    disabled={isLoading}
-                    aria-label={labels.remove}
-                >
-                    <Trash2 size={14} strokeWidth={2} aria-hidden="true" />
-                    {labels.remove}
-                </Button>
-            </footer>
+            {
+                user.role !== 'owner' && (
+                    <footer className="access-card__actions">
+                        <Button
+                            variant="danger"
+                            size="sm"
+                            onClick={onRevoke}
+                            disabled={isLoading}
+                            aria-label={labels.remove}
+                        >
+                            <Trash2 size={14} strokeWidth={2} aria-hidden="true" />
+                            {labels.remove}
+                        </Button>
+                    </footer>
+                )
+            }
         </li>
     );
 }

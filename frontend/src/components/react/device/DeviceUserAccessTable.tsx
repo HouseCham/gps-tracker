@@ -1,5 +1,4 @@
 //-- React
-import { useMemo } from "react";
 //-- Types
 import type { JSX } from "react/jsx-runtime";
 import type { Language } from "@/types";
@@ -39,18 +38,12 @@ interface DeviceUserAccessTableProps {
  * @description Renders a table of users with access to a device, including their name, email, and the date access was granted. Each row includes a button to remove access for that user.
  */
 export function DeviceUserAccessTable({ columns, users, locale, t, isLoading = false, onClickRemoveAccess }: DeviceUserAccessTableProps): JSX.Element {
-    //* note: same shape as DeviceTable.rowHandlersById — reads from a
-    //   stable Map inside the `.map` below instead of allocating inline
-    //   arrows on every render.
-    const rowHandlersById = useMemo(() => {
-        const map = new Map<string, { onRemove: () => void }>();
-        for (const user of users) {
-            map.set(user.user_id, {
-                onRemove: (): void => onClickRemoveAccess(user),
-            });
-        }
-        return map;
-    }, [users, onClickRemoveAccess]);
+    const rowHandlersById = new Map<string, { onRemove: () => void }>();
+    for (const user of users) {
+        rowHandlersById.set(user.user_id, {
+            onRemove: (): void => onClickRemoveAccess(user),
+        });
+    }
 
     return (
         <DataTable columns={columns}>
@@ -85,22 +78,26 @@ export function DeviceUserAccessTable({ columns, users, locale, t, isLoading = f
                         data-align="center"
                     >
                         <div className="device-detail__access-actions">
-                            <Button
-                                variant="danger"
-                                size="sm"
-                                onClick={handlers.onRemove}
-                                disabled={isLoading}
-                                aria-label={
-                                    t.remove
-                                }
-                            >
-                                <Trash2
-                                    size={14}
-                                    strokeWidth={2}
-                                    aria-hidden="true"
-                                />
-                                {t.remove}
-                            </Button>
+                            {
+                                user.role !== 'owner' && (
+                                    <Button
+                                        variant="danger"
+                                        size="sm"
+                                        onClick={handlers.onRemove}
+                                        disabled={isLoading}
+                                        aria-label={
+                                            t.remove
+                                        }
+                                    >
+                                        <Trash2
+                                            size={14}
+                                            strokeWidth={2}
+                                            aria-hidden="true"
+                                        />
+                                        {t.remove}
+                                    </Button>
+                                )
+                            }
                         </div>
                     </td>
                 </tr>
