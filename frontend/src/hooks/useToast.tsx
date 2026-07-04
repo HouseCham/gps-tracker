@@ -1,49 +1,25 @@
-import {
-    ToastContainer,
-    type ToastContainerProps,
-} from '@/components/react/ui';
-import type { ToastHandle, ToastItem } from '@/types/components';
-import { useState, useRef, useCallback, type ReactElement } from 'react';
+import { useStore } from '@nanostores/react';
+import { $toasts, toastBus } from '@/lib/stores/toast.store';
+import type { ToastHandle } from '@/types/components';
+
 /**
- * @interface UseToastOptions
- * @param {string} [position='bottom-right'] - The position of the toasts.
- * @returns {ToastHandle}
+ * Read the current toast stack and expose the bus actions. Components
+ * that only need to `push` (and re-render on push) should prefer this
+ * hook over the lower-level store import.
+ *
+ * The `<Container />` from the previous implementation is gone — the
+ * `<ToastProvider />` island owns the single global container. The
+ * `dismiss` and `clear` handles are kept for API parity.
+ *
+ * @returns {ToastHandle} Snapshot of the toast stack + push/dismiss/clear.
  */
-interface UseToastOptions {
-    position?: ToastContainerProps['position'];
-}
-/**
- * Use the toast hook.
- * @param {UseToastOptions} options - The options of the toast hook.
- * @returns {ToastHandle} The toast handle.
- */
-export function useToast(options: UseToastOptions = {}): ToastHandle {
-    const [toasts, setToasts] = useState<ToastItem[]>([]);
-    const counter = useRef(0);
+export function useToast(): ToastHandle {
+    const toasts = useStore($toasts);
 
-    const push = useCallback((item: Omit<ToastItem, 'id'>): string => {
-        counter.current += 1;
-        const id = `t-${Date.now()}-${counter.current}`;
-        setToasts((prev): ToastItem[] => [...prev, { ...item, id }].slice(-5));
-        return id;
-    }, []);
-
-    const dismiss = useCallback((id: string): void => {
-        setToasts((prev): ToastItem[] => prev.filter(t => t.id !== id));
-    }, []);
-
-    const clear = useCallback((): void => setToasts([]), []);
-
-    const Container = useCallback(
-        (): ReactElement => (
-            <ToastContainer
-                toasts={toasts}
-                onClose={dismiss}
-                position={options.position}
-            />
-        ),
-        [toasts, dismiss, options.position]
-    );
-
-    return { toasts, push, dismiss, clear, Container };
+    return {
+        toasts,
+        push: toastBus.push,
+        dismiss: toastBus.dismiss,
+        clear: toastBus.clear,
+    };
 }

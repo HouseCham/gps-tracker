@@ -310,6 +310,36 @@ export const en = {
             },
         },
     },
+    toast: {
+        deviceCreated: {
+            title: 'Created',
+            message: 'Device has been added.',
+        },
+        deviceUpdated: {
+            title: 'Saved',
+            message: 'Changes saved.',
+        },
+        deviceDeleted: {
+            title: 'Deleted',
+            message: 'Device has been removed.',
+        },
+        accessGranted: {
+            title: 'Access granted',
+            message: 'User now has viewer access.',
+        },
+        accessRevoked: {
+            title: 'Access revoked',
+            message: "User's access has been removed.",
+        },
+        userCreated: {
+            title: 'User created',
+            message: 'User has been added.',
+        },
+        userDeleted: {
+            title: 'User deleted',
+            message: 'User has been removed.',
+        },
+    },
 };
 
 /** Derived type used to enforce structural parity across all locales. */

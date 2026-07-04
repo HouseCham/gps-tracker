@@ -1,7 +1,7 @@
 import '@/styles/map/device-map.css';
 //-- React
 import type { JSX, ReactNode } from 'react';
-import { useCallback, useMemo, useState } from 'react';
+import { useState } from 'react';
 //-- Types
 import type {
     DeviceMapPin,
@@ -78,61 +78,41 @@ export default function DeviceMap({
     /**
      * Handles the selection of a pin.
      * @param {string} id - The ID of the pin to select.
-     * React 19 Compiler: manual callback is needed because this is passed
-     * as an `onClick` prop to child MapMarker components inside `.map()`,
-     * and referential stability prevents unnecessary re-renders of the
-     * entire pin set.
      */
-    const handleSelect = useCallback(
-        (id: string): void => {
-            if (!isControlled) setInternalSelectedId(id);
-            onSelect?.(id);
-        },
-        [isControlled, onSelect]
-    );
+    function handleSelect(id: string): void {
+        if (!isControlled) setInternalSelectedId(id);
+        onSelect?.(id);
+    }
     /**
      * Handles the closing of the popover.
      * @returns {void}
-     * React 19 Compiler: manual callback is needed because this is passed
-     * as an `onClose` prop to MapPopover, which the compiler cannot
-     * guarantee referential stability for across renders.
      */
-    const handleClose = useCallback((): void => {
+    function handleClose(): void {
         if (!isControlled) setInternalSelectedId(null);
-    }, [isControlled]);
+    }
     /**
      * Current pin selected.
      * @returns {DeviceMapPin | null} The selected pin.
-     * React 19 Compiler: manual memo is needed because `pins` is an
-     * array prop from Astro that changes reference on every render;
-     * without memoization `pins.find()` would re-run needlessly.
      */
-    const selectedPin = useMemo(
-        () => pins.find(p => p.id === selectedId) ?? null,
-        [pins, selectedId]
-    );
+    const selectedPin = pins.find(p => p.id === selectedId) ?? null;
     /**
      * Array of projected coordinates.
      * @returns {Array} An array of coordinates pins.
-     * React 19 Compiler: manual memo is needed because `pins` is an
-     * array prop from Astro that changes reference on every render;
-     * `projectCoordinate()` is a pure math transform that would
-     * recompute all pins on every render without this guard.
      */
-    const pinsProjected = useMemo(
-        () =>
-            pins.map(pin => ({ pin, ...projectCoordinate(pin.lat, pin.lng) })),
-        [pins]
-    );
+    const pinsProjected: Array<{
+        pin: DeviceMapPin;
+        x: number;
+        y: number;
+        label?: string;
+    }> = pins.map((pin) => ({
+        pin,
+        ...projectCoordinate(pin.lat, pin.lng),
+    }));
     /**
      * Center of the map.
      * @returns {{ lat: number; lng: number; text: string }} The center of the map.
-     * React 19 Compiler: manual memo is needed because `pins` is an
-     * array prop from Astro — the `pins[0]` fallback lookup inside
-     * would re-run on every render, and `formatCoords()` is a pure
-     * computation that should be skipped when inputs are unchanged.
      */
-    const coords = useMemo(() => {
+    const coords = ((): { lat: number; lng: number; text: string; label?: string } | null => {
         const c =
             center ??
             (selectedPin
@@ -145,22 +125,13 @@ export default function DeviceMap({
             ...c,
             text: formatCoords(c.lat, c.lng),
         };
-    }, [center, selectedPin, pins]);
+    })();
     /**
      * Route path of the map.
      * @returns {string} The route path.
-     * React 19 Compiler: manual memo is needed because `route` is an
-     * array prop from Astro that changes reference every render;
-     * `getPathFromRoute()` computes an SVG path (heavy string building)
-     * that would be wasted work on every unrelated state update.
      */
-    const routePath = useMemo(
-        () =>
-            showRoute && route && route.length > 1
-                ? getPathFromRoute(route)
-                : '',
-        [route, showRoute]
-    );
+    const routePath =
+        showRoute && route && route.length > 1 ? getPathFromRoute(route) : '';
     /**
      * Popover device information.
      * @returns {MapPopoverDevice | null} The popover device.

@@ -7,9 +7,10 @@ import type {
     UpdateUserDto,
     User,
 } from '@/types/api';
-import type { BetterFetchOption } from '@better-fetch/fetch';
+
 //-- Utils
-import { handleApiError } from '@/lib/api/api-utils';
+import { handleApiError, withApiErrorToast } from '@/lib/api/api-utils';
+import { toastBus } from '@/lib/stores/toast.store';
 //-- Http Client
 import { apiClient } from '@/lib/auth/client';
 /**
@@ -56,23 +57,22 @@ export const useUserService = (): IUserService => {
         setIsLoading(true);
         setUsers([]);
         try {
-            const { data: response } = await apiClient<Envelope<User[]> | null>(
-                '/users',
-                {
+            const { data: response } = await withApiErrorToast(() =>
+                apiClient<Envelope<User[]> | null>('/users', {
                     method: 'GET',
-                    // `method` is widened to `string` when the option object is
-                    // inferred as a fresh literal; cast to `BetterFetchOption` so
-                    // the discriminated `method` union narrows correctly.
-                } as BetterFetchOption
+                })
             );
             if (!response) {
+                toastBus.push({
+                    variant: 'error',
+                    title: 'Error',
+                    message: 'get all users returned a null response',
+                });
                 handleApiError(
                     new Error('get all users returned a null response')
                 );
             }
             setUsers(response.data);
-        } catch (error) {
-            handleApiError(error);
         } finally {
             setIsLoading(false);
         }
@@ -98,24 +98,23 @@ export const useUserService = (): IUserService => {
         resetState();
         setIsLoading(true);
         try {
-            const { data: response } = await apiClient<Envelope<User> | null>(
-                '/users',
-                {
+            const { data: response } = await withApiErrorToast(() =>
+                apiClient<Envelope<User> | null>('/users', {
                     method: 'POST',
                     body: payload,
-                    // `method` is widened to `string` when the option object is
-                    // inferred as a fresh literal; cast to `BetterFetchOption` so
-                    // the discriminated `method` union narrows correctly.
-                } as BetterFetchOption
+                })
             );
             if (!response || !response.data) {
+                toastBus.push({
+                    variant: 'error',
+                    title: 'Error',
+                    message: 'create user returned a null response',
+                });
                 handleApiError(
                     new Error('create user returned a null response')
                 );
             }
             setUsers([...users, response.data]);
-        } catch (error) {
-            handleApiError(error);
         } finally {
             setIsLoading(false);
         }
@@ -135,25 +134,24 @@ export const useUserService = (): IUserService => {
         resetState();
         setIsLoading(true);
         try {
-            const { data: response } = await apiClient<Envelope<User> | null>(
-                `/users/${id}`,
-                {
+            const { data: response } = await withApiErrorToast(() =>
+                apiClient<Envelope<User> | null>(`/users/${id}`, {
                     method: 'PUT',
                     body: payload,
-                    // `method` is widened to `string` when the option object is
-                    // inferred as a fresh literal; cast to `BetterFetchOption` so
-                    // the discriminated `method` union narrows correctly.
-                } as BetterFetchOption
+                })
             );
             if (!response || !response.data) {
+                toastBus.push({
+                    variant: 'error',
+                    title: 'Error',
+                    message: 'update user returned a null response',
+                });
                 handleApiError(
                     new Error('update user returned a null response')
                 );
             }
             const updated = response.data;
             setUsers(prev => prev.map(u => (u.id === id ? updated : u)));
-        } catch (error) {
-            handleApiError(error);
         } finally {
             setIsLoading(false);
         }
@@ -170,15 +168,12 @@ export const useUserService = (): IUserService => {
         resetState();
         setIsLoading(true);
         try {
-            await apiClient(`/users/${id}`, {
-                method: 'DELETE',
-                // `method` is widened to `string` when the option object is
-                // inferred as a fresh literal; cast to `BetterFetchOption` so
-                // the discriminated `method` union narrows correctly.
-            } as BetterFetchOption);
+            await withApiErrorToast(() =>
+                apiClient(`/users/${id}`, {
+                    method: 'DELETE',
+                })
+            );
             setUsers(prev => prev.filter(u => u.id !== id));
-        } catch (error) {
-            handleApiError(error);
         } finally {
             setIsLoading(false);
         }

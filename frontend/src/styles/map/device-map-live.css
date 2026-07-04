@@ -16,6 +16,12 @@
     background: var(--surface);
 }
 
+/** note: the react-map-gl root container fills the .device-map-live wrapper. */
+.device-map-live :global(.maplibregl-map) {
+    width: 100%;
+    height: 100%;
+}
+
 /* Google-Maps-style control chrome: rounded, soft shadow. */
 .device-map-live :global(.maplibregl-ctrl-group) {
     border-radius: 8px;

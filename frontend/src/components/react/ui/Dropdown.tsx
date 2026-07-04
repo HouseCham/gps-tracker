@@ -1,7 +1,6 @@
 import '@/styles/ui/dropdown.css';
 //-- React
 import {
-    useCallback,
     useEffect,
     useId,
     useLayoutEffect,
@@ -88,13 +87,10 @@ export default function Dropdown({
     }
     const [menuPos, setMenuPos] = useState<MenuPos | null>(null);
 
-    const setOpen = useCallback(
-        (next: boolean): void => {
-            if (!isControlled) setUncontrolledOpen(next);
-            onOpenChange?.(next);
-        },
-        [isControlled, onOpenChange]
-    );
+    const setOpen = (next: boolean): void => {
+        if (!isControlled) setUncontrolledOpen(next);
+        onOpenChange?.(next);
+    };
 
     useEffect(() => {
         if (!open) return;
@@ -126,7 +122,7 @@ export default function Dropdown({
      * Uses the actually-measured menu height when available so the auto-flip
      * accounts for the real menu size.
      */
-    const computeMenuPos = useCallback((): void => {
+    const computeMenuPos = (): void => {
         const trigger = triggerRef.current;
         if (!trigger) return;
         const rect = trigger.getBoundingClientRect();
@@ -145,7 +141,7 @@ export default function Dropdown({
             if (left < 4) left = 4;
         }
         setMenuPos({ top, left, minWidth, side: flipUp ? 'top' : 'bottom' });
-    }, [align, side]);
+    };
 
     // Recompute position on open + on viewport changes while open. Scroll is
     // captured so ancestor scrolls (e.g. the table's overflow:auto wrapper)

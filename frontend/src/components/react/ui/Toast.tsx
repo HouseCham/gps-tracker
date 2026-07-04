@@ -1,4 +1,4 @@
-import '@/styles/ui//toast.css';
+import '@/styles/ui/toast.css';
 //-- React
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';

@@ -45,21 +45,35 @@ export function toApiError(error: unknown): ApiError {
 }
 
 /**
+ * Converts a `BetterFetchError` into an {@link ApiError}. The cause is the
+ * parsed JSON body shape (undefined when the response had no/empty body),
+ * so the cast below is defensive: we only read `message`/`code` off it and
+ * fall back to defaults if either is absent or the body is missing.
+ * @param {BetterFetchError} error - The error thrown by `better-fetch`.
+ * @returns {ApiError} The normalized error.
+ */
+export function betterFetchErrorToApi(error: BetterFetchError): ApiError {
+    const body = error.cause as
+        | { message?: string; code?: string }
+        | undefined;
+    return {
+        status: error.status,
+        message: body?.message || 'An unexpected error occurred',
+        code: body?.code,
+    };
+}
+
+/**
  * Handles errors thrown by the API.
  * @param {unknown} error - The error to handle.
  * @throws {ApiError} An object containing the error status, message, and code.
  */
 export function handleApiError(error: unknown): never {
     if (error instanceof BetterFetchError) {
-        const body = error.cause as
-            | { message?: string; code?: string }
-            | undefined;
-        throw {
-            status: error.status,
-            message: body?.message || 'An unexpected error occurred',
-            code: body?.code,
-        } satisfies ApiError;
+        throw betterFetchErrorToApi(error);
     }
 
     throw toApiError(error);
 }
+
+export { withApiErrorToast } from './helpers/with-api-error-toast';

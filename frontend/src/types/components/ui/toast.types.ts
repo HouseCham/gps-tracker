@@ -1,5 +1,3 @@
-import type { ReactElement } from 'react';
-
 export type ToastVariant = 'success' | 'error' | 'warning' | 'info';
 /**
  * @interface ToastItem
@@ -24,12 +22,13 @@ export interface ToastItem {
  * @property {function} push - The function to push a toast.
  * @property {function} dismiss - The function to dismiss a toast.
  * @property {function} clear - The function to clear all toasts.
- * @property {function} Container - The function to render the toast container.
+ *
+ * Note: there is no `Container` field — a single `<ToastProvider />`
+ * island is mounted at the app root and reads the bus directly.
  */
 export interface ToastHandle {
     toasts: ToastItem[];
     push: (item: Omit<ToastItem, 'id'>) => string;
     dismiss: (id: string) => void;
     clear: () => void;
-    Container: () => ReactElement;
 }

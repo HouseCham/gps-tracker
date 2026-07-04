@@ -5,9 +5,7 @@ import type { ChangeEvent } from 'react';
 import {
     lazy,
     Suspense,
-    useCallback,
     useEffect,
-    useMemo,
     useState,
 } from 'react';
 //-- Types
@@ -26,6 +24,8 @@ import { getUserTableColumns } from '@/lib';
 import { asApiError } from '@/lib/api/api-utils';
 //-- Services
 import { useUserService } from '@/lib/api/services';
+//-- Toast bus
+import { toastBus } from '@/lib/stores/toast.store';
 //-- Lazy components
 const Modal = lazy(() => import('@/components/react/ui/Modal'));
 const CreateUserForm = lazy(() =>
@@ -68,6 +68,7 @@ export function UserTable({
     } = useUserService();
     const t = translation.admin.userTable;
     const createStrings = translation.admin.createUser;
+    const toastStrings = translation.toast;
 
     const columns = getUserTableColumns(t);
     const [createOpen, setCreateOpen] = useState(false);
@@ -82,31 +83,33 @@ export function UserTable({
      * Errors propagate so the form can display the API message.
      * @param {CreateUserDto} dto - The user payload from the form.
      */
-    const handleCreateUser = useCallback(
-        async (dto: CreateUserDto): Promise<void> => {
-            await createUser(dto);
-            setCreateOpen(false);
-        },
-        [createUser]
-    );
+    async function handleCreateUser(dto: CreateUserDto): Promise<void> {
+        await createUser(dto);
+        toastBus.push({
+            variant: 'success',
+            title: toastStrings.userCreated.title,
+            message: toastStrings.userCreated.message,
+        });
+        setCreateOpen(false);
+    }
     /**
      * Opens the delete-confirmation modal for the given user.
      * @param {User} user - User targeted for deletion.
      */
-    const handleStartDelete = useCallback((user: User): void => {
+    function handleStartDelete(user: User): void {
         setDeleteTarget(user);
         setDeleteConfirmName('');
         setDeleteError(null);
-    }, []);
+    }
     /**
      * Cancels the deletion of the targeted user.
      * @Returns {void}
      */
-    const handleCancelDelete = useCallback((): void => {
+    function handleCancelDelete(): void {
         setDeleteTarget(null);
         setDeleteConfirmName('');
         setDeleteError(null);
-    }, []);
+    }
 
     /**
      * Confirms the deletion of the targeted user. Delete is only enabled
@@ -114,7 +117,7 @@ export function UserTable({
      * final guard, not the primary check. Backend soft-deletes (`204 No
      * Content`); the service filters the row out of state.
      */
-    const handleConfirmDelete = useCallback(async (): Promise<void> => {
+    async function handleConfirmDelete(): Promise<void> {
         if (!deleteTarget) return;
         const targetFullName = `${deleteTarget.name} ${deleteTarget.lastname}`;
         if (deleteConfirmName.trim() !== targetFullName) {
@@ -123,37 +126,32 @@ export function UserTable({
         }
         try {
             await deleteUser(deleteTarget.id);
+            toastBus.push({
+                variant: 'success',
+                title: toastStrings.userDeleted.title,
+                message: toastStrings.userDeleted.message,
+            });
             handleCancelDelete();
         } catch (err) {
             const apiErr = asApiError(err);
             setDeleteError(apiErr.message ?? t.deleteConfirm.deleteFailed);
         }
-    }, [
-        deleteTarget,
-        deleteConfirmName,
-        deleteUser,
-        handleCancelDelete,
-        t.deleteConfirm,
-    ]);
+    }
 
     /**
      * Stable onChange handler for the delete-confirmation input.
      */
-    const onDeleteNameChange = useCallback(
-        (e: ChangeEvent<HTMLInputElement>): void => {
-            setDeleteConfirmName(e.target.value);
-            setDeleteError(null);
-        },
-        []
-    );
+    function onDeleteNameChange(e: ChangeEvent<HTMLInputElement>): void {
+        setDeleteConfirmName(e.target.value);
+        setDeleteError(null);
+    }
 
     /**
      * Per-user click callbacks for the row actions. Same shape as
      * {@link DeviceTable.rowHandlersById} — the `.map` below reads from
-     * this Map instead of allocating inline arrows; entries stay stable
-     * until `users` (or the underlying handlers) change.
+     * this Map instead of allocating inline arrows.
      */
-    const rowHandlersById = useMemo(() => {
+    const rowHandlersById = ((): Map<string, { onDelete: () => void }> => {
         const map = new Map<string, { onDelete: () => void }>();
         for (const user of users) {
             map.set(user.id, {
@@ -161,7 +159,7 @@ export function UserTable({
             });
         }
         return map;
-    }, [users, handleStartDelete]);
+    })();
 
     /**
      * Fetches all users on mount.
