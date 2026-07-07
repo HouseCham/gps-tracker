@@ -11,6 +11,7 @@ import (
 	"github.com/HouseCham/gps-tracker/backend/internal/app/users"
 	"github.com/HouseCham/gps-tracker/backend/internal/auth"
 	"github.com/HouseCham/gps-tracker/backend/internal/domain"
+	"github.com/HouseCham/gps-tracker/backend/internal/infra/postgres"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/dto"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/handlers"
 	"github.com/HouseCham/gps-tracker/backend/internal/transport/http/middleware"
@@ -22,9 +23,12 @@ type RouterDeps struct {
 	DevicesHandler   *handlers.DevicesHandler
 	UsersHandler     *handlers.UsersHandler
 	AccessHandler    *handlers.AccessHandler
+	APIKeysHandler   *handlers.APIKeysHandler
+	LocationsHandler *handlers.LocationsHandler
 	BootstrapHandler *handlers.BootstrapHandler
 	AccessService    *access.AccessService
 	UsersService     *users.UserService
+	Queries          *postgres.Queries
 	AuthHandler      http.Handler
 	SessionCookieName string
 	AuthSession      ports.SessionAuthenticator
@@ -149,6 +153,45 @@ func NewRouter(deps RouterDeps) *fiber.App {
 		requirePasswordChanged,
 		middleware.RequireDeviceRole(domain.AccessRoleOwner, deps.AccessService),
 		deps.AccessHandler.Revoke,
+	)
+
+	// === Device API keys (owner-only) ===
+	// Issue / list / revoke the IoT lookup token the firmware ships.
+	// The plain token is returned by POST only — GET / DELETE never
+	// surface it.
+	devices.Post("/:id/api-keys",
+		authSession,
+		requirePasswordChanged,
+		middleware.RequireDeviceRole(domain.AccessRoleOwner, deps.AccessService),
+		deps.APIKeysHandler.Create,
+	)
+	devices.Get("/:id/api-keys",
+		authSession,
+		requirePasswordChanged,
+		middleware.RequireDeviceRole(domain.AccessRoleOwner, deps.AccessService),
+		deps.APIKeysHandler.List,
+	)
+	devices.Delete("/:id/api-keys/:keyId",
+		authSession,
+		requirePasswordChanged,
+		middleware.RequireDeviceRole(domain.AccessRoleOwner, deps.AccessService),
+		deps.APIKeysHandler.Revoke,
+	)
+
+	// === IoT ingest ===
+	// Public to devices (no session cookie). Auth is X-Device-API-Key
+	// resolved against the :uuid_firmware in the URL. Registered on
+	// `app` (not the devices group) because the devices group is
+	// gated by authSession — devices use a different auth path.
+	//
+	// Fiber v3 group caveat: a /:uuid_firmware route registered here
+	// shadows any /:id sibling on the same prefix, so the literal
+	// path "/locations" lives on this group instead of the devices
+	// session group.
+	apiV1.Post("/devices/:uuid_firmware/locations",
+		middleware.RequireDeviceAPIKey(deps.Queries),
+		middleware.ValidateRequestBody[dto.IngestLocationRequest](),
+		deps.LocationsHandler.Ingest,
 	)
 
 	// === Users routes ===
