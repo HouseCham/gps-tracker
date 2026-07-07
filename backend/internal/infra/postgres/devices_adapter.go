@@ -49,7 +49,7 @@ func (a *DevicesAdapter) ListForUserWithAccessPaginated(ctx context.Context, use
 
 	count, err := queries.CountDevicesForUser(ctx, PgtypeUUID(userID))
 	if err != nil {
-		return nil, 0, wrapPgError(err)
+		return nil, 0, WrapPgError(err)
 	}
 
 	rows, err := queries.ListDevicesForUserWithAccessPaginated(ctx, ListDevicesForUserWithAccessPaginatedParams{
@@ -58,7 +58,7 @@ func (a *DevicesAdapter) ListForUserWithAccessPaginated(ctx context.Context, use
 		Offset: int32(offset),
 	})
 	if err != nil {
-		return nil, 0, wrapPgError(err)
+		return nil, 0, WrapPgError(err)
 	}
 
 	result := make([]domain.DeviceWithAccess, 0, len(rows))
@@ -78,7 +78,7 @@ func (a *DevicesAdapter) ListForUserPaginated(ctx context.Context, userID uuid.U
 
 	count, err := queries.CountDevicesForUser(ctx, PgtypeUUID(userID))
 	if err != nil {
-		return nil, 0, wrapPgError(err)
+		return nil, 0, WrapPgError(err)
 	}
 
 	rows, err := queries.ListDevicesForUserPaginated(ctx, ListDevicesForUserPaginatedParams{
@@ -87,7 +87,7 @@ func (a *DevicesAdapter) ListForUserPaginated(ctx context.Context, userID uuid.U
 		Offset: int32(offset),
 	})
 	if err != nil {
-		return nil, 0, wrapPgError(err)
+		return nil, 0, WrapPgError(err)
 	}
 
 	result := make([]domain.Device, 0, len(rows))
@@ -108,13 +108,13 @@ func (a *DevicesAdapter) CountForUser(ctx context.Context, userID uuid.UUID) (in
 	queries := New(a.pool)
 	count, err := queries.CountDevicesForUser(ctx, PgtypeUUID(userID))
 	if err != nil {
-		return 0, wrapPgError(err)
+		return 0, WrapPgError(err)
 	}
 	return int(count), nil
 }
 
 // GetByIDForUser returns the device only if the user has access (any role).
-// Returns domain.ErrNotFound (via wrapPgError) when the device does not
+// Returns domain.ErrNotFound (via WrapPgError) when the device does not
 // exist OR the user has no access — both cases collapse to 404.
 func (a *DevicesAdapter) GetByIDForUser(ctx context.Context, userID, deviceID uuid.UUID) (*domain.DeviceWithAccess, error) {
 	queries := New(a.pool)
@@ -123,7 +123,7 @@ func (a *DevicesAdapter) GetByIDForUser(ctx context.Context, userID, deviceID uu
 		UserID: PgtypeUUID(userID),
 	})
 	if err != nil {
-		return nil, wrapPgError(err)
+		return nil, WrapPgError(err)
 	}
 	return &domain.DeviceWithAccess{
 		Device: *toDomainDevice(row.ID, row.UuidFirmware, row.Name, row.VehicleType, row.CreatedAt, row.LastSeenAt),
@@ -153,7 +153,7 @@ func (a *DevicesAdapter) Create(ctx context.Context, input devices.CreateInput) 
 		VehicleType:  DeviceVehicleType(input.VehicleType),
 	})
 	if err != nil {
-		return nil, wrapPgError(err)
+		return nil, WrapPgError(err)
 	}
 
 	_, err = queries.GrantDeviceAccess(ctx, GrantDeviceAccessParams{
@@ -195,7 +195,7 @@ func (a *DevicesAdapter) Update(ctx context.Context, deviceID uuid.UUID, input d
 		Name: input.Name,
 	})
 	if err != nil {
-		return nil, wrapPgError(err)
+		return nil, WrapPgError(err)
 	}
 
 	if input.VehicleType == nil {
@@ -210,7 +210,7 @@ func (a *DevicesAdapter) Update(ctx context.Context, deviceID uuid.UUID, input d
 		VehicleType: DeviceVehicleType(*input.VehicleType),
 	})
 	if err != nil {
-		return nil, wrapPgError(err)
+		return nil, WrapPgError(err)
 	}
 
 	if err := tx.Commit(ctx); err != nil {
@@ -228,8 +228,8 @@ func (a *DevicesAdapter) SoftDelete(ctx context.Context, deviceID uuid.UUID) err
 	return queries.SoftDeleteDevice(ctx, PgtypeUUID(deviceID))
 }
 
-// wrapPgError translates pgx errors into domain errors when possible.
-func wrapPgError(err error) error {
+// WrapPgError translates pgx errors into domain errors when possible.
+func WrapPgError(err error) error {
 	if err == nil {
 		return nil
 	}

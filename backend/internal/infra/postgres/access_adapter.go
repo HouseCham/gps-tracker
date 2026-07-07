@@ -28,7 +28,7 @@ func (a *AccessAdapter) GetRole(ctx context.Context, userID, deviceID uuid.UUID)
 		DeviceID: PgtypeUUID(deviceID),
 	})
 	if err != nil {
-		return "", wrapPgError(err)
+		return "", WrapPgError(err)
 	}
 	return domain.AccessRole(row.Role), nil
 }
@@ -44,7 +44,7 @@ func (a *AccessAdapter) Grant(ctx context.Context, userID, deviceID uuid.UUID, r
 		Role:     string(role),
 	})
 	if err != nil {
-		return domain.Grant{}, wrapPgError(err)
+		return domain.Grant{}, WrapPgError(err)
 	}
 	return domain.Grant{
 		UserID:    UuidFromPgtype(row.UserID),

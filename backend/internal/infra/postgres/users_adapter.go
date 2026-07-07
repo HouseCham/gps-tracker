@@ -20,9 +20,9 @@ func NewUsersAdapter(pool *pgxpool.Pool) *UsersAdapter {
 
 func (a *UsersAdapter) ListUsers(ctx context.Context, excludeUserID uuid.UUID) ([]domain.User, error) {
 	queries := New(a.pool)
-	rows, err := queries.GetUserList(ctx, pgtypeUUID(excludeUserID))
+	rows, err := queries.GetUserList(ctx, PgtypeUUID(excludeUserID))
 	if err != nil {
-		return nil, wrapPgError(err)
+		return nil, WrapPgError(err)
 	}
 	result := make([]domain.User, 0, len(rows))
 	for _, r := range rows {
@@ -33,9 +33,9 @@ func (a *UsersAdapter) ListUsers(ctx context.Context, excludeUserID uuid.UUID) (
 
 func (a *UsersAdapter) GetByID(ctx context.Context, userID uuid.UUID) (*domain.User, error) {
 	queries := New(a.pool)
-	row, err := queries.GetUserByID(ctx, pgtypeUUID(userID))
+	row, err := queries.GetUserByID(ctx, PgtypeUUID(userID))
 	if err != nil {
-		return nil, wrapPgError(err)
+		return nil, WrapPgError(err)
 	}
 	return rowToDomainPtr(row), nil
 }
@@ -44,7 +44,7 @@ func (a *UsersAdapter) GetByEmail(ctx context.Context, email string) (*domain.Us
 	queries := New(a.pool)
 	row, err := queries.GetUserByEmail(ctx, email)
 	if err != nil {
-		return nil, wrapPgError(err)
+		return nil, WrapPgError(err)
 	}
 	return rowToDomainPtr(row), nil
 }
@@ -59,7 +59,7 @@ func (a *UsersAdapter) CreateUser(ctx context.Context, email, name, lastname str
 		MustChangePassword: mustChangePassword,
 	})
 	if err != nil {
-		return nil, wrapPgError(err)
+		return nil, WrapPgError(err)
 	}
 	return rowToDomainPtr(row), nil
 }
@@ -76,12 +76,12 @@ func (a *UsersAdapter) CountUsers(ctx context.Context) (int, error) {
 func (a *UsersAdapter) UpdateUser(ctx context.Context, userID uuid.UUID, name, lastname string) (*domain.User, error) {
 	queries := New(a.pool)
 	row, err := queries.UpdateUser(ctx, UpdateUserParams{
-		ID:       pgtypeUUID(userID),
+		ID:       PgtypeUUID(userID),
 		Name:     name,
 		Lastname: lastname,
 	})
 	if err != nil {
-		return nil, wrapPgError(err)
+		return nil, WrapPgError(err)
 	}
 	return rowToDomainPtr(row), nil
 }
@@ -89,14 +89,14 @@ func (a *UsersAdapter) UpdateUser(ctx context.Context, userID uuid.UUID, name, l
 func (a *UsersAdapter) SetMustChangePassword(ctx context.Context, userID uuid.UUID, mustChange bool) error {
 	queries := New(a.pool)
 	return queries.SetUserMustChangePassword(ctx, SetUserMustChangePasswordParams{
-		ID:                 pgtypeUUID(userID),
+		ID:                 PgtypeUUID(userID),
 		MustChangePassword: mustChange,
 	})
 }
 
 func (a *UsersAdapter) SoftDeleteUser(ctx context.Context, userID uuid.UUID) error {
 	queries := New(a.pool)
-	return wrapPgError(queries.SoftDeleteUser(ctx, pgtypeUUID(userID)))
+	return WrapPgError(queries.SoftDeleteUser(ctx, PgtypeUUID(userID)))
 }
 
 // rowToDomain maps any sqlc-generated user row (Get/List/Create/Update
@@ -133,7 +133,7 @@ func newDomainUser(
 	createdAt, updatedAt pgtype.Timestamptz,
 ) domain.User {
 	return domain.User{
-		ID:                 uuidFromPgtype(id),
+		ID:                 UuidFromPgtype(id),
 		Email:              email,
 		EmailVerified:      emailVerified,
 		Image:              image,
