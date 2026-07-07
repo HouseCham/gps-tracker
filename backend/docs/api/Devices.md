@@ -465,3 +465,116 @@ No response body is returned.
 - `401` — Unauthorized
 - `403` — Caller is not the device owner, or target is another owner
 - `404` — Target `userId` has no active access grant to the device
+
+---
+
+## Device API Keys
+
+IoT devices authenticate to the API not with a session cookie but with a per-device opaque lookup token carried in the `X-Device-API-Key` header. The owner of a device issues the token through these endpoints and flashes it onto the device firmware.
+
+A device has **at most one active key at any time**. Creating a new key soft-deletes the prior active key so the firmware update path stays a single-value lookup and a stolen firmware blob can be revoked by rotation alone.
+
+The plain token is returned **only at creation time**. `GET` and `DELETE` never surface it; the backend has no copy outside the response payload.
+
+### POST /api/v1/devices/:id/api-keys
+
+Issues a fresh key for the device. Revokes any prior active key in the same transaction so the single-active invariant always holds.
+
+**Authorization:** Requires `owner` access role on the device.
+
+**Request**
+
+```
+POST /api/v1/devices/550e8400-e29b-41d4-a716-446655440000/api-keys
+Cookie: authula.session_token=<owner-cookie>
+```
+
+No request body.
+
+**Response `201 Created`**
+
+```json
+{
+  "status_code": 201,
+  "message": "api key issued",
+  "data": {
+    "id": "ae0a8d4f-d0f9-4fd0-ad7d-4f40d87c098f",
+    "created_at": "2026-07-07T15:32:08Z",
+    "plain_key": "50I_rlGuoF9EONVelnUahPqKr1vDy6H1hZ0BrXFVldQ"
+  }
+}
+```
+
+**Fields (`data`):**
+- `id` — UUID of the new key row
+- `created_at` — ISO 8601 timestamp
+- `plain_key` — The lookup token to flash onto the device. **Returned exactly once.** Store it in the firmware's secure storage (NVS / Preferences) and never log it.
+
+**Error Responses**
+- `400` — Invalid device id
+- `401` — Unauthorized
+- `403` — Caller is not the device owner
+- `404` — Device does not exist or caller has no access
+
+---
+
+### GET /api/v1/devices/:id/api-keys
+
+Lists every active key for the device. Returns metadata only — no token, no hash.
+
+**Authorization:** Requires `owner` access role on the device.
+
+**Request**
+
+```
+GET /api/v1/devices/550e8400-e29b-41d4-a716-446655440000/api-keys
+Cookie: authula.session_token=<owner-cookie>
+```
+
+**Response `200 OK`**
+
+```json
+{
+  "status_code": 200,
+  "message": "api keys listed",
+  "data": [
+    {
+      "id": "ae0a8d4f-d0f9-4fd0-ad7d-4f40d87c098f",
+      "created_at": "2026-07-07T15:32:08Z",
+      "last_used_at": null,
+      "expires_at": null
+    }
+  ]
+}
+```
+
+**Error Responses**
+- `400` — Invalid device id
+- `401` — Unauthorized
+- `403` — Caller is not the device owner
+- `404` — Device does not exist or caller has no access
+
+---
+
+### DELETE /api/v1/devices/:id/api-keys/:keyId
+
+Soft-deletes a single key. Idempotent — revoking an already-revoked or unknown key returns `204`.
+
+**Authorization:** Requires `owner` access role on the device.
+
+**Request**
+
+```
+DELETE /api/v1/devices/550e8400-e29b-41d4-a716-446655440000/api-keys/ae0a8d4f-d0f9-4fd0-ad7d-4f40d87c098f
+Cookie: authula.session_token=<owner-cookie>
+```
+
+**Response `204 No Content`**
+
+No response body is returned.
+
+**Error Responses**
+- `400` — Invalid device id or `keyId`
+- `401` — Unauthorized
+- `403` — Caller is not the device owner
+- `404` — Device does not exist or caller has no access

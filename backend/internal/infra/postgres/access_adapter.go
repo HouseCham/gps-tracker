@@ -24,8 +24,8 @@ func NewAccessAdapter(pool *pgxpool.Pool) *AccessAdapter {
 func (a *AccessAdapter) GetRole(ctx context.Context, userID, deviceID uuid.UUID) (domain.AccessRole, error) {
 	queries := New(a.pool)
 	row, err := queries.GetDeviceAccess(ctx, GetDeviceAccessParams{
-		UserID:   pgtypeUUID(userID),
-		DeviceID: pgtypeUUID(deviceID),
+		UserID:   PgtypeUUID(userID),
+		DeviceID: PgtypeUUID(deviceID),
 	})
 	if err != nil {
 		return "", wrapPgError(err)
@@ -39,16 +39,16 @@ func (a *AccessAdapter) GetRole(ctx context.Context, userID, deviceID uuid.UUID)
 func (a *AccessAdapter) Grant(ctx context.Context, userID, deviceID uuid.UUID, role domain.AccessRole) (domain.Grant, error) {
 	queries := New(a.pool)
 	row, err := queries.GrantDeviceAccess(ctx, GrantDeviceAccessParams{
-		UserID:   pgtypeUUID(userID),
-		DeviceID: pgtypeUUID(deviceID),
+		UserID:   PgtypeUUID(userID),
+		DeviceID: PgtypeUUID(deviceID),
 		Role:     string(role),
 	})
 	if err != nil {
 		return domain.Grant{}, wrapPgError(err)
 	}
 	return domain.Grant{
-		UserID:    uuidFromPgtype(row.UserID),
-		DeviceID:  uuidFromPgtype(row.DeviceID),
+		UserID:    UuidFromPgtype(row.UserID),
+		DeviceID:  UuidFromPgtype(row.DeviceID),
 		Role:      domain.AccessRole(row.Role),
 		CreatedAt: row.CreatedAt.Time,
 	}, nil
@@ -60,8 +60,8 @@ func (a *AccessAdapter) Grant(ctx context.Context, userID, deviceID uuid.UUID, r
 func (a *AccessAdapter) Revoke(ctx context.Context, userID, deviceID uuid.UUID) error {
 	queries := New(a.pool)
 	return queries.RevokeDeviceAccess(ctx, RevokeDeviceAccessParams{
-		UserID:   pgtypeUUID(userID),
-		DeviceID: pgtypeUUID(deviceID),
+		UserID:   PgtypeUUID(userID),
+		DeviceID: PgtypeUUID(deviceID),
 	})
 }
 
@@ -69,14 +69,14 @@ func (a *AccessAdapter) Revoke(ctx context.Context, userID, deviceID uuid.UUID) 
 // the device, with their role and when the grant was created.
 func (a *AccessAdapter) ListUsersForDevice(ctx context.Context, deviceID uuid.UUID) ([]domain.UserWithAccessOnDevice, error) {
 	queries := New(a.pool)
-	rows, err := queries.ListUsersForDevice(ctx, pgtypeUUID(deviceID))
+	rows, err := queries.ListUsersForDevice(ctx, PgtypeUUID(deviceID))
 	if err != nil {
 		return nil, err
 	}
 	result := make([]domain.UserWithAccessOnDevice, 0, len(rows))
 	for _, r := range rows {
 		result = append(result, domain.UserWithAccessOnDevice{
-			UserID:          uuidFromPgtype(r.ID),
+			UserID:          UuidFromPgtype(r.ID),
 			Name:            r.Name,
 			Email:           r.Email,
 			AccessRole:      domain.AccessRole(r.AccessRole),

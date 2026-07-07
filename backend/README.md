@@ -117,13 +117,14 @@ the same `{ user: { id, email, name } }` shape the frontend expects.
 
 ## Database
 
-9 migration files covering: extensions (`pgcrypto`, `pg_partman`, `pg_cron`), users, devices, user-device access (role-based: owner/editor/viewer), location time-series (monthly range partitions via pg_partman), device API keys (bcrypt-hashed), and protection triggers.
+16 migration files covering: extensions (`pgcrypto`, `pg_partman`, `pg_cron`), users, devices, user-device access (role-based: owner, editor, viewer), location time-series (monthly range partitions via pg_partman, `battery_voltage` + `signal_strength` telemetry, no `satellites`), device API keys (`X-Device-API-Key` lookup tokens — opaque, not bcrypt), and protection triggers.
 
 Key decisions:
-- **Soft deletes** on users, devices, and API keys (`deleted_at`).
+- **Soft deletes** on users, devices, access grants and API keys (`deleted_at`).
 - **Append-only locations** — partitions dropped for retention, no deletes.
 - **RESTRICT foreign keys** — no CASCADE.
 - **Partial indexes** on hot query paths (`WHERE deleted_at IS NULL`).
+- **IoT auth** uses per-device opaque tokens carried in the `X-Device-API-Key` header. See `docs/api/Authentication.md` for the threat model and the rationale for storing tokens in cleartext (no bcrypt per verify).
 
 ## Docker
 

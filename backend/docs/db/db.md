@@ -1,6 +1,6 @@
 # Database Overview
 
-PostgreSQL database for the GPS Tracker API. Managed via [golang-migrate](https://github.com/golang-migrate/migrate) with 13 migration files.
+PostgreSQL database for the GPS Tracker API. Managed via [golang-migrate](https://github.com/golang-migrate/migrate) with 16 migration files.
 
 ## Entity Relationship
 
@@ -18,18 +18,19 @@ PostgreSQL database for the GPS Tracker API. Managed via [golang-migrate](https:
 │ deleted_at   │                                  └────────┬────────┘
 └──────────────┘                                           │
                                     │                       │          │
-                          ┌─────────▼──────────┐   ┌───────▼──────────┐
-                          │     locations       │   │ device_api_keys  │
-                          │────────────────────│   │──────────────────│
-                          │ device_id (PK, FK)  │   │ id (PK)          │
-                          │ recorded_at (PK)    │   │ device_id (FK)   │
-                          │ latitude            │   │ key_hash         │
-                          │ longitude           │   │ created_at       │
-                          │ altitude            │   │ expires_at       │
-                          │ speed               │   │ last_used_at     │
-                          │ accuracy            │   │ deleted_at       │
-                          │ satellites          │   └──────────────────┘
-                          └────────────────────┘
+                           ┌─────────▼──────────┐   ┌───────▼──────────┐
+                           │     locations       │   │ device_api_keys  │
+                           │────────────────────│   │──────────────────│
+                           │ device_id (PK, FK)  │   │ id (PK)          │
+                           │ recorded_at (PK)    │   │ device_id (FK)   │
+                           │ latitude            │   │ key_hash         │
+                           │ longitude           │   │ created_at       │
+                           │ altitude            │   │ expires_at       │
+                           │ speed               │   │ last_used_at     │
+                           │ accuracy            │   │ deleted_at       │
+                           │ battery_voltage     │   └──────────────────┘
+                           │ signal_strength     │
+                           └────────────────────┘
 ```
 
 ## Tables
@@ -98,30 +99,34 @@ Time-series GPS data. **Append-only** — partitioned by `RANGE(recorded_at)` wi
 | altitude | `double precision` | `NULL` | Altitude above sea level (meters) |
 | speed | `double precision` | `NULL` | Ground speed (m/s) |
 | accuracy | `double precision` | `NULL` | Position accuracy (meters) |
-| satellites | `integer` | `NULL` | Number of satellites used |
+| battery_voltage | `double precision` | `NULL` | Reported battery voltage (volts) |
+| signal_strength | `integer` | `NULL` | Cellular RSSI from AT+CSQ (`0`–`31`) |
 
 Design decisions:
 - Composite PK `(device_id, recorded_at)` satisfies the partitioned table requirement that every PK includes the partition key
 - `ON CONFLICT (device_id, recorded_at) DO NOTHING` on insert handles ESP32 retry logic idempotently
 - Old partitions are dropped (not deleted row-by-row) for instant retention cleanup
+- `satellites` was removed (migrations 14) because `accuracy` already encodes the information actionably. `battery_voltage` and `signal_strength` were added for device-health telemetry (migrations 15–16).
 
 ### device_api_keys
 
-Bcrypt-hashed API keys for IoT device authentication. ESP32 sends the plain key in `X-Device-Key` header; the backend hashes it and looks up by hash.
+Opaque lookup tokens for IoT device authentication. The device sends the token in the `X-Device-API-Key` header on every cycle; the backend looks it up by exact match (the column is named `key_hash` for legacy reasons but stores the token, not a bcrypt hash — bcrypt-per-verify would be 80 ms × ~2800 cycles/day and is impractical at IoT scale).
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
 | id | `uuid` | `PK DEFAULT gen_random_uuid()` | Key identifier |
 | device_id | `uuid` | `FK → devices(id) ON DELETE RESTRICT` | Parent device |
-| key_hash | `varchar(255)` | `NOT NULL` | bcrypt hash of the API key |
+| key_hash | `varchar(255)` | `NOT NULL` | Opaque lookup token (column name is legacy) |
 | created_at | `timestamptz` | `NOT NULL DEFAULT NOW()` | Key creation timestamp |
 | expires_at | `timestamptz` | `NULL` | Optional key expiration |
 | last_used_at | `timestamptz` | `NULL` | Last successful auth timestamp |
 | deleted_at | `timestamptz` | `NULL` | Soft-delete (revocation) timestamp |
 
 Design decisions:
-- Partial unique index on `key_hash WHERE deleted_at IS NULL` allows key rotation: a new key with the same hash can be created after revoking the old one
-- The plain key is returned only at creation time and never stored
+- Partial unique index on `key_hash WHERE deleted_at IS NULL` allows key rotation: a new key with the same token can be issued after the old one is revoked
+- The plain token is returned by `POST /api/v1/devices/:id/api-keys` exactly once and never stored
+- Tokens are 32-byte base64url-encoded random values (256 bits of entropy)
+- One active token per device at a time: creating a new key soft-deletes the prior one
 
 ## Foreign Key Rules
 
@@ -159,3 +164,6 @@ The `locations` table is partitioned by `RANGE (recorded_at)` with monthly parti
 | 011 | `000011_add_must_change_password` | Add must_change_password to users |
 | 012 | `000012_align_users_with_authula` | Add email_verified, image; widen name |
 | 013 | `000013_add_device_vehicle_type` | Add device_vehicle_type enum and vehicle_type column to devices |
+| 014 | `000014_drop_locations_satellites` | Remove redundant `satellites` column from `locations` |
+| 015 | `000015_add_locations_battery_voltage` | Add `battery_voltage` column for device-health telemetry |
+| 016 | `000016_add_locations_signal_strength` | Add `signal_strength` column for cellular RSSI telemetry |

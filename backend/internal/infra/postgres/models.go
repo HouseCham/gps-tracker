@@ -120,14 +120,15 @@ type DeviceApiKey struct {
 }
 
 type Location struct {
-	DeviceID   pgtype.UUID
-	RecordedAt pgtype.Timestamptz
-	Latitude   float64
-	Longitude  float64
-	Altitude   *float64
-	Speed      *float64
-	Accuracy   *float64
-	Satellites *int32
+	DeviceID       pgtype.UUID
+	RecordedAt     pgtype.Timestamptz
+	Latitude       float64
+	Longitude      float64
+	Altitude       *float64
+	Speed          *float64
+	Accuracy       *float64
+	BatteryVoltage *float64
+	SignalStrength *int32
 }
 
 type User struct {

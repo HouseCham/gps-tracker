@@ -27,7 +27,7 @@ func NewDevicesAdapter(pool *pgxpool.Pool) *DevicesAdapter {
 // Filters out soft-deleted devices and soft-deleted access grants.
 func (a *DevicesAdapter) ListForUser(ctx context.Context, userID uuid.UUID) ([]domain.DeviceWithAccess, error) {
 	queries := New(a.pool)
-	rows, err := queries.ListDevicesForUser(ctx, pgtypeUUID(userID))
+	rows, err := queries.ListDevicesForUser(ctx, PgtypeUUID(userID))
 	if err != nil {
 		return nil, err
 	}
@@ -47,13 +47,13 @@ func (a *DevicesAdapter) ListForUser(ctx context.Context, userID uuid.UUID) ([]d
 func (a *DevicesAdapter) ListForUserWithAccessPaginated(ctx context.Context, userID uuid.UUID, limit, offset int) ([]domain.DeviceWithAccess, int, error) {
 	queries := New(a.pool)
 
-	count, err := queries.CountDevicesForUser(ctx, pgtypeUUID(userID))
+	count, err := queries.CountDevicesForUser(ctx, PgtypeUUID(userID))
 	if err != nil {
 		return nil, 0, wrapPgError(err)
 	}
 
 	rows, err := queries.ListDevicesForUserWithAccessPaginated(ctx, ListDevicesForUserWithAccessPaginatedParams{
-		UserID: pgtypeUUID(userID),
+		UserID: PgtypeUUID(userID),
 		Limit:  int32(limit),
 		Offset: int32(offset),
 	})
@@ -76,13 +76,13 @@ func (a *DevicesAdapter) ListForUserWithAccessPaginated(ctx context.Context, use
 func (a *DevicesAdapter) ListForUserPaginated(ctx context.Context, userID uuid.UUID, limit, offset int) ([]domain.Device, int, error) {
 	queries := New(a.pool)
 
-	count, err := queries.CountDevicesForUser(ctx, pgtypeUUID(userID))
+	count, err := queries.CountDevicesForUser(ctx, PgtypeUUID(userID))
 	if err != nil {
 		return nil, 0, wrapPgError(err)
 	}
 
 	rows, err := queries.ListDevicesForUserPaginated(ctx, ListDevicesForUserPaginatedParams{
-		UserID: pgtypeUUID(userID),
+		UserID: PgtypeUUID(userID),
 		Limit:  int32(limit),
 		Offset: int32(offset),
 	})
@@ -106,7 +106,7 @@ func (a *DevicesAdapter) ListForUserPaginated(ctx context.Context, userID uuid.U
 // pagination metadata.
 func (a *DevicesAdapter) CountForUser(ctx context.Context, userID uuid.UUID) (int, error) {
 	queries := New(a.pool)
-	count, err := queries.CountDevicesForUser(ctx, pgtypeUUID(userID))
+	count, err := queries.CountDevicesForUser(ctx, PgtypeUUID(userID))
 	if err != nil {
 		return 0, wrapPgError(err)
 	}
@@ -119,8 +119,8 @@ func (a *DevicesAdapter) CountForUser(ctx context.Context, userID uuid.UUID) (in
 func (a *DevicesAdapter) GetByIDForUser(ctx context.Context, userID, deviceID uuid.UUID) (*domain.DeviceWithAccess, error) {
 	queries := New(a.pool)
 	row, err := queries.GetDeviceByIDForUser(ctx, GetDeviceByIDForUserParams{
-		ID:     pgtypeUUID(deviceID),
-		UserID: pgtypeUUID(userID),
+		ID:     PgtypeUUID(deviceID),
+		UserID: PgtypeUUID(userID),
 	})
 	if err != nil {
 		return nil, wrapPgError(err)
@@ -157,7 +157,7 @@ func (a *DevicesAdapter) Create(ctx context.Context, input devices.CreateInput) 
 	}
 
 	_, err = queries.GrantDeviceAccess(ctx, GrantDeviceAccessParams{
-		UserID:   pgtypeUUID(input.OwnerID),
+		UserID:   PgtypeUUID(input.OwnerID),
 		DeviceID: row.ID,
 		Role:     string(domain.AccessRoleOwner),
 	})
@@ -191,7 +191,7 @@ func (a *DevicesAdapter) Update(ctx context.Context, deviceID uuid.UUID, input d
 	queries := New(tx)
 
 	nameRow, err := queries.UpdateDeviceName(ctx, UpdateDeviceNameParams{
-		ID:   pgtypeUUID(deviceID),
+		ID:   PgtypeUUID(deviceID),
 		Name: input.Name,
 	})
 	if err != nil {
@@ -206,7 +206,7 @@ func (a *DevicesAdapter) Update(ctx context.Context, deviceID uuid.UUID, input d
 	}
 
 	vtRow, err := queries.UpdateDeviceVehicleType(ctx, UpdateDeviceVehicleTypeParams{
-		ID:          pgtypeUUID(deviceID),
+		ID:          PgtypeUUID(deviceID),
 		VehicleType: DeviceVehicleType(*input.VehicleType),
 	})
 	if err != nil {
@@ -225,7 +225,7 @@ func (a *DevicesAdapter) Update(ctx context.Context, deviceID uuid.UUID, input d
 // an already-deleted device is a no-op (the WHERE clause filters it out).
 func (a *DevicesAdapter) SoftDelete(ctx context.Context, deviceID uuid.UUID) error {
 	queries := New(a.pool)
-	return queries.SoftDeleteDevice(ctx, pgtypeUUID(deviceID))
+	return queries.SoftDeleteDevice(ctx, PgtypeUUID(deviceID))
 }
 
 // wrapPgError translates pgx errors into domain errors when possible.
