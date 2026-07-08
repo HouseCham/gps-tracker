@@ -1,7 +1,7 @@
 import type { Translation } from '@/i18n';
 import type { Language } from '@/types';
 import type { SidebarNavItem } from '@/types/layout';
-import { Cpu, LayoutDashboard, ShieldCheck, User } from 'lucide-react';
+import { Cpu, KeyRound, LayoutDashboard, ShieldCheck, User } from 'lucide-react';
 
 /**
  * Redirects the user to a new page, preserving the current locale.
@@ -38,6 +38,12 @@ export function generateNavbarItems(
             href: `/${locale}/devices/`,
             label: translation.nav.devices,
             Icon: Cpu,
+        },
+        {
+            key: 'api-keys',
+            href: `/${locale}/api-keys`,
+            label: translation.apiKeys.title,
+            Icon: KeyRound,
         },
     ];
     if (showAdmin) {
