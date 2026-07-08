@@ -130,6 +130,17 @@ type MockUsersRepository struct {
 	DeleteErr    error
 	ListErr      error
 	CountErr     error
+	// HasSuperAdminResult is read only when HasSuperAdminResultSet
+	// is true. When false, HasSuperAdmin returns true by default so
+	// that pre-loaded users retain the role SetupUser assigned them
+	// (the long-standing test assumption that the first-user rule
+	// has already been satisfied by some prior state).
+	HasSuperAdminResult    bool
+	HasSuperAdminResultSet bool
+	HasSuperAdminErr       error
+	// PromoteToSuperAdminErr is returned from PromoteToSuperAdmin
+	// when non-nil.
+	PromoteToSuperAdminErr error
 }
 
 func NewMockUsersRepository() *MockUsersRepository {
@@ -174,7 +185,7 @@ func (m *MockUsersRepository) GetByEmail(ctx context.Context, email string) (*do
 	return user, nil
 }
 
-func (m *MockUsersRepository) CreateUser(ctx context.Context, email, name, lastname string, role domain.UserRole, mustChangePassword bool) (*domain.User, error) {
+func (m *MockUsersRepository) CreateUser(ctx context.Context, email, name, lastname string, role domain.UserRole, mustChangePassword, emailVerified bool) (*domain.User, error) {
 	if m.CreateErr != nil {
 		return nil, m.CreateErr
 	}
@@ -185,6 +196,7 @@ func (m *MockUsersRepository) CreateUser(ctx context.Context, email, name, lastn
 		Lastname:           lastname,
 		Role:               role,
 		MustChangePassword: mustChangePassword,
+		EmailVerified:      emailVerified,
 		CreatedAt:          time.Now(),
 	}
 	m.Users[user.ID] = user
@@ -231,6 +243,40 @@ func (m *MockUsersRepository) CountUsers(ctx context.Context) (int, error) {
 		return 0, m.CountErr
 	}
 	return m.Count, nil
+}
+
+func (m *MockUsersRepository) HasSuperAdmin(ctx context.Context) (bool, error) {
+	if m.HasSuperAdminErr != nil {
+		return false, m.HasSuperAdminErr
+	}
+	// Manual override takes precedence (used by tests that want to
+	// exercise the first-user promotion path).
+	if m.HasSuperAdminResultSet {
+		return m.HasSuperAdminResult, nil
+	}
+	// Default: there is always a super_admin in the test fixture, so
+	// the first-user promotion never fires. This matches the long-
+	// standing test assumption that pre-loaded users retain whatever
+	// role SetupUser assigned them.
+	for _, u := range m.Users {
+		if u.Role == domain.UserRoleSuperAdmin {
+			return true, nil
+		}
+	}
+	return true, nil
+}
+
+func (m *MockUsersRepository) PromoteToSuperAdmin(ctx context.Context, userID uuid.UUID) (*domain.User, error) {
+	if m.PromoteToSuperAdminErr != nil {
+		return nil, m.PromoteToSuperAdminErr
+	}
+	user, ok := m.Users[userID]
+	if !ok {
+		return nil, domain.ErrNotFound
+	}
+	user.Role = domain.UserRoleSuperAdmin
+	user.MustChangePassword = false
+	return user, nil
 }
 
 type MockAccessRepository struct {
