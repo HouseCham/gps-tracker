@@ -1,0 +1,1 @@
+lilygo-t-sim7080g-*.md notes

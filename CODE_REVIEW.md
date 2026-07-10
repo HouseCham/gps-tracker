@@ -6,6 +6,7 @@
 
 - Frontend Repo details: `frontend/AGENTS.md`
 - Backend Repo details: `backend/AGENTS.md`
+- IoT Repo details: `iot/AGENTS.md`
 
 ---
 
@@ -247,11 +248,110 @@ PREFER:
 ## Skill Index
 
 | Trigger (file pattern)        | Skill        | Location                      |
-|-------------------------------|--------------|-------------------------------|
+|-------------------------------|--------------|---------------------------------|
 | `*.go`                        | Go           | `docs/skills/go.md`           |
 | `*_test.go`                   | Testing      | `docs/skills/testing.md`      |
 | `Dockerfile`, `*.yml`         | Infra        | `docs/skills/infra.md`        |
 | `go.mod`, `go.sum`            | Dependencies | `docs/skills/deps.md`         |
+
+---
+
+## C++ — Memory Management (Arduino / IoT)
+
+REJECT if:
+
+- Arduino `String` class used for concatenation/manipulation in loops, ISRs, or on every iteration of `loop()` → use fixed-size `char[]` buffers instead (heap fragmentation risk on constrained MCUs)
+- `new`/`delete` or `malloc`/`free` used outside a one-time `setup()`/init path
+- Recursive functions without a fixed, documented depth bound
+- Large arrays/buffers declared on the stack inside frequently-called functions → risk of stack overflow
+- `sprintf` / `strcpy` / `strcat` used without bounds checking → use `snprintf` / `strlcpy` / `strlcat`
+
+REQUIRE:
+
+- String literals used only for output/logging (`Serial.print`, etc.) wrapped in the `F()` macro or declared `PROGMEM` to keep them out of RAM
+- Fixed-width integer types (`uint8_t`, `uint16_t`, `int32_t`, from `<stdint.h>`) for register values, buffer sizes, and protocol/wire-format fields
+- Buffer sizes and array bounds defined as named `constexpr` constants, never magic numbers
+
+PREFER:
+
+- Static/global allocation with compile-time-bounded containers over dynamic allocation
+- `constexpr` over `#define` for typed constants
+- Passing large objects/buffers by reference or pointer, not by value
+
+---
+
+## C++ — Interrupts & Timing
+
+REJECT if:
+
+- Blocking calls (`delay()`, `Serial.print()`, dynamic allocation, long loops) inside an ISR
+- Variables shared between an ISR and the main loop not declared `volatile`
+- `delay()` used in `loop()` where a non-blocking `millis()`-based state machine is required for concurrent timing
+- Interrupts disabled (`noInterrupts()`) for longer than the minimum critical section, or without a matching `interrupts()` restore
+
+REQUIRE:
+
+- ISRs kept minimal — set a flag or copy data, defer heavier processing to `loop()`
+- `millis()`/`micros()` overflow handled via subtraction (`if (millis() - lastRun >= interval)`), never direct comparison
+- Time- or state-based debounce logic on any digital input read from a switch/button
+
+PREFER:
+
+- Non-blocking state machines over sequential `delay()` chains
+- Hardware timers/RTOS tasks over busy-wait loops for periodic work
+
+---
+
+## C++ — Hardware & I/O
+
+REJECT if:
+
+- Pin numbers hardcoded as bare integers in logic → use named `constexpr`/`const uint8_t` pin constants
+- Return values of hardware calls ignored (`Wire.endTransmission()`, `sensor.begin()`, `SD.begin()`, etc.) with no fallback/retry/error path
+- Floating-point arithmetic used in tight loops on FPU-less MCUs (e.g. AVR) where fixed-point/integer math would suffice
+- Global mutable state shared across files without a clear owning module/class
+
+REQUIRE:
+
+- Every sensor/peripheral `begin()`/`init()` call checked for a success return value before proceeding
+- Watchdog timer (or platform equivalent) enabled and fed for any long-running or network-dependent loop
+- Network/connection code (WiFi, MQTT, HTTP) checks connection state before publish/read and implements a reconnect-with-backoff strategy
+
+PREFER:
+
+- Hardware abstraction behind small interfaces/classes so peripherals can be mocked/stubbed in tests
+- Scoped enums or `as const`-style constants over loose `#define` flags for modes/states
+
+---
+
+## C++ — Style & Structure
+
+REJECT if:
+
+- `using namespace std;` (or similar) at global/header scope
+- Header files missing include guards or `#pragma once`
+- Function/class definitions duplicated across multiple `.cpp` translation units instead of shared via a header
+- Empty or comment-only error branches on hardware/communication failures (same as ALL FILES rule, called out explicitly here since silent sensor/network failures are a common IoT bug source)
+
+REQUIRE:
+
+- `camelCase` for functions/variables, `PascalCase` for classes, `UPPER_SNAKE_CASE` for true constants
+- Secrets (WiFi SSID/password, API keys, device certs) loaded from a git-ignored config header or secure storage partition, never committed hardcoded
+
+PREFER:
+
+- Composition of small single-responsibility classes (e.g. `SensorReader`, `MqttPublisher`) over one large monolithic sketch file
+- `const`/`constexpr` correctness on methods and parameters that don't mutate state
+
+---
+
+## Skill Index
+
+| Trigger (file pattern)         | Skill               | Location                      |
+|---------------------------------|---------------------|-------------------------------|
+| `*.cpp`, `*.h`, `*.hpp`         | C++ (Arduino/IoT)   | `docs/skills/cpp-arduino.md`  |
+| `*.ino`                          | Arduino Sketch      | `docs/skills/cpp-arduino.md`  |
+| `platformio.ini`                | IoT Build Config    | `docs/skills/iot-build.md`    |
 
 ---
 
