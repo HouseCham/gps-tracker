@@ -47,7 +47,7 @@ describe('authService.signIn', () => {
             expect.objectContaining({
                 method: 'POST',
                 body: { email: 'a@b.com', password: 'pw' },
-            }),
+            })
         );
         expect($user.get()).toEqual(user);
         expect(redirectTo).toHaveBeenCalledWith('/');
@@ -58,7 +58,7 @@ describe('authService.signIn', () => {
         authClient.mockRejectedValue(new Error('bad creds'));
 
         await expect(
-            authService.signIn({ email: 'a@b.com', password: 'pw' }),
+            authService.signIn({ email: 'a@b.com', password: 'pw' })
         ).rejects.toEqual({ status: 0, message: 'bad creds' });
 
         expect($user.get()).toBeNull();
@@ -70,7 +70,7 @@ describe('authService.signIn', () => {
         authClient.mockResolvedValue({ data: null });
 
         await expect(
-            authService.signIn({ email: 'a@b.com', password: 'pw' }),
+            authService.signIn({ email: 'a@b.com', password: 'pw' })
         ).rejects.toEqual({
             status: 0,
             message: 'sign-in returned an empty response',
@@ -91,7 +91,7 @@ describe('authService.signUp', () => {
 
         expect(authClient).toHaveBeenCalledWith(
             '/email-password/sign-up',
-            expect.objectContaining({ method: 'POST' }),
+            expect.objectContaining({ method: 'POST' })
         );
         expect($user.get()).toEqual(user);
         expect(redirectTo).toHaveBeenCalledWith('/');
@@ -131,9 +131,9 @@ describe('authService.signInOAuth', () => {
         await authService.signInOAuth('google');
 
         const calledPath = (authClient.mock.calls[0]?.[0] as string) ?? '';
-        expect(calledPath.startsWith('/oauth2/authorize/google?redirect_to=')).toBe(
-            true,
-        );
+        expect(
+            calledPath.startsWith('/oauth2/authorize/google?redirect_to=')
+        ).toBe(true);
         expect(hrefSpy).toHaveBeenCalledWith('https://provider.example/auth');
         // Note: the happy path does NOT clear `$isAuthLoading` — the page
         // navigates away, making the flag moot in production. The catch
@@ -160,7 +160,7 @@ describe('authService.signOut', () => {
 
         expect(authClient).toHaveBeenCalledWith(
             '/sign-out',
-            expect.objectContaining({ method: 'POST' }),
+            expect.objectContaining({ method: 'POST' })
         );
         expect($user.get()).toBeNull();
         expect(redirectTo).toHaveBeenCalledWith('/login');

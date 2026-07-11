@@ -106,9 +106,7 @@ async function fetchOAuthAuthorizeUrl(
         )
     );
     if (!data?.authUrl) {
-        handleApiError(
-            new Error('oauth authorize returned an empty response')
-        );
+        handleApiError(new Error('oauth authorize returned an empty response'));
     }
     return data.authUrl;
 }

@@ -136,7 +136,7 @@ export const es: Translation = {
         loginTitle: 'Bienvenido de nuevo',
         loginSubtitle: 'Inicia sesión en tu cuenta GPS Tracker',
         signupTitle: 'Crear una cuenta',
-        signupSubtitle: 'Empieza a rastrear tu flota en minutos',
+        signupSubtitle: 'Empieza a rastrear tus dispositivos en minutos',
         logoutConfirm: '¿Estás seguro de cerrar sesión?',
         signInWithGoogle: 'Iniciar sesión con Google',
         signUpWithGoogle: 'Registrarse con Google',
@@ -194,6 +194,7 @@ export const es: Translation = {
             nameRequired: 'El nombre es obligatorio',
             uuidRequired: 'El UUID es obligatorio',
             uuidInvalid: 'Formato de UUID inválido',
+            generateUuid: 'Generar',
             save: 'Guardar',
             saving: 'Guardando...',
             cancel: 'Cancelar',
@@ -320,6 +321,10 @@ export const es: Translation = {
                 cancel: 'Cancelar',
             },
         },
+    },
+    user: {
+        noUsersTitle: 'Sin usuarios',
+        noUsersMessage: 'Añade tu primer usuario para empezar.',
     },
     toast: {
         deviceCreated: {

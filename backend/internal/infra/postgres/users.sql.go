@@ -28,8 +28,8 @@ func (q *Queries) CountUsers(ctx context.Context) (int64, error) {
 }
 
 const createUser = `-- name: CreateUser :one
-INSERT INTO users (email, name, lastname, role, must_change_password)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO users (email, name, lastname, role, must_change_password, email_verified)
+VALUES ($1, $2, $3, $4, $5, $6)
 RETURNING id, email, email_verified, image, name, lastname, role, must_change_password, created_at, updated_at, deleted_at
 `
 
@@ -39,6 +39,7 @@ type CreateUserParams struct {
 	Lastname           string
 	Role               UserRole
 	MustChangePassword bool
+	EmailVerified      bool
 }
 
 type CreateUserRow struct {
@@ -55,12 +56,16 @@ type CreateUserRow struct {
 	DeletedAt          pgtype.Timestamptz
 }
 
-// Creates a new user. Callers must pass must_change_password
-// explicitly: true for admin-created users (they get a temporary
-// password and must change it on first login), false for self-service
-// signups (the user picks their own password).
-// image and email_verified are not set by the app; email_verified
-// defaults to false and image is nullable.
+// Creates a new user. Callers must pass must_change_password and
+// email_verified explicitly:
+//   - must_change_password: true for admin-created users (temporary
+//     password, must change on first login), false for self-service
+//     signups (user picks their own password).
+//   - email_verified: true ONLY for the very first registered user
+//     (becomes super_admin). Every subsequent user — including those
+//     created via the admin endpoint — must pass false.
+//
+// image is not set by the app (nullable column).
 // Returns the created user.
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateUserRow, error) {
 	row := q.db.QueryRow(ctx, createUser,
@@ -69,6 +74,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (CreateU
 		arg.Lastname,
 		arg.Role,
 		arg.MustChangePassword,
+		arg.EmailVerified,
 	)
 	var i CreateUserRow
 	err := row.Scan(
@@ -221,6 +227,77 @@ func (q *Queries) GetUserList(ctx context.Context, id pgtype.UUID) ([]GetUserLis
 		return nil, err
 	}
 	return items, nil
+}
+
+const hasSuperAdmin = `-- name: HasSuperAdmin :one
+SELECT EXISTS (
+  SELECT 1
+  FROM users
+  WHERE role = 'super_admin' AND deleted_at IS NULL
+) AS "hasSuperAdmin"
+`
+
+// Returns true if any active user in the system has the super_admin
+// role. Used by GetOrCreate to decide whether the user being looked
+// up (or created) is the very first user and must be promoted to
+// super_admin. Faster and more semantically precise than counting
+// total users: the partial unique index on role='super_admin' makes
+// this a constant-time lookup in practice.
+func (q *Queries) HasSuperAdmin(ctx context.Context) (bool, error) {
+	row := q.db.QueryRow(ctx, hasSuperAdmin)
+	var hasSuperAdmin bool
+	err := row.Scan(&hasSuperAdmin)
+	return hasSuperAdmin, err
+}
+
+const promoteToSuperAdmin = `-- name: PromoteToSuperAdmin :one
+UPDATE users
+SET role                = 'super_admin',
+    must_change_password = FALSE,
+    updated_at           = NOW()
+WHERE id = $1 AND deleted_at IS NULL
+RETURNING id, email, email_verified, image, name, lastname, role, must_change_password, created_at, updated_at, deleted_at
+`
+
+type PromoteToSuperAdminRow struct {
+	ID                 pgtype.UUID
+	Email              string
+	EmailVerified      bool
+	Image              *string
+	Name               string
+	Lastname           string
+	Role               UserRole
+	MustChangePassword bool
+	CreatedAt          pgtype.Timestamptz
+	UpdatedAt          pgtype.Timestamptz
+	DeletedAt          pgtype.Timestamptz
+}
+
+// Promotes an existing user to the super_admin role and clears the
+// must_change_password flag. Used by GetOrCreate when the looked-up
+// user is the only one in the system (HasSuperAdmin returned false)
+// — typically because Authula's email-password signup created the
+// row with role='user' (the SQL DEFAULT) before our hook fires.
+// The partial unique index idx_users_one_super_admin guarantees at
+// most one such row, so the WHERE clause does not need an extra
+// role guard.
+func (q *Queries) PromoteToSuperAdmin(ctx context.Context, id pgtype.UUID) (PromoteToSuperAdminRow, error) {
+	row := q.db.QueryRow(ctx, promoteToSuperAdmin, id)
+	var i PromoteToSuperAdminRow
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.EmailVerified,
+		&i.Image,
+		&i.Name,
+		&i.Lastname,
+		&i.Role,
+		&i.MustChangePassword,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.DeletedAt,
+	)
+	return i, err
 }
 
 const setUserMustChangePassword = `-- name: SetUserMustChangePassword :exec

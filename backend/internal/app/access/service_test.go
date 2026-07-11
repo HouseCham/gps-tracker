@@ -67,7 +67,7 @@ func (m *mockUsersRepo) ListUsers(_ context.Context, _ uuid.UUID) ([]domain.User
 func (m *mockUsersRepo) GetByEmail(_ context.Context, _ string) (*domain.User, error) {
 	return nil, errors.New("mockUsersRepo.GetByEmail: not configured")
 }
-func (m *mockUsersRepo) CreateUser(_ context.Context, _, _, _ string, _ domain.UserRole, _ bool) (*domain.User, error) {
+func (m *mockUsersRepo) CreateUser(_ context.Context, _, _, _ string, _ domain.UserRole, _, _ bool) (*domain.User, error) {
 	return nil, errors.New("mockUsersRepo.CreateUser: not configured")
 }
 func (m *mockUsersRepo) UpdateUser(_ context.Context, _ uuid.UUID, _, _ string) (*domain.User, error) {
@@ -81,6 +81,12 @@ func (m *mockUsersRepo) SetMustChangePassword(_ context.Context, _ uuid.UUID, _ 
 }
 func (m *mockUsersRepo) CountUsers(_ context.Context) (int, error) {
 	return 0, errors.New("mockUsersRepo.CountUsers: not configured")
+}
+func (m *mockUsersRepo) HasSuperAdmin(_ context.Context) (bool, error) {
+	return false, errors.New("mockUsersRepo.HasSuperAdmin: not configured")
+}
+func (m *mockUsersRepo) PromoteToSuperAdmin(_ context.Context, _ uuid.UUID) (*domain.User, error) {
+	return nil, errors.New("mockUsersRepo.PromoteToSuperAdmin: not configured")
 }
 
 func TestRoleSatisfies(t *testing.T) {

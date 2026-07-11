@@ -8,6 +8,7 @@ import type { DeviceVehicleType } from '@/types/api';
 //-- Constants
 import { UUID_REGEX } from '@/constants';
 //-- Components
+import { Button } from '@/components/ui';
 import { VehicleTypeSelector } from './VehicleTypeSelector';
 /**
  * @interface DeviceFormProps
@@ -74,6 +75,7 @@ export function DeviceForm({
         nameRequired: 'Name is required',
         uuidRequired: 'UUID is required',
         uuidInvalid: 'UUID is invalid',
+        generateUuid: 'Generate',
         save: 'Save',
         saving: 'Saving',
         cancel: 'Cancel',
@@ -127,6 +129,7 @@ export function DeviceForm({
 
     return (
         <form className="device-form" onSubmit={handleSubmit} noValidate>
+            {/* Name field */}
             <div
                 className={`device-form__field ${errors.name ? 'device-form__field--error' : ''}`}
             >
@@ -157,12 +160,23 @@ export function DeviceForm({
                     </p>
                 )}
             </div>
-
+            {/* UUID field */}
             <div
                 className={`device-form__field ${errors.uuid ? 'device-form__field--error' : ''}`}
             >
                 <label className="device-form__label" htmlFor={uuidId}>
                     {s.uuidLabel}
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                            setUuid(crypto.randomUUID());
+                            setErrors(p => ({ ...p, uuid: undefined }));
+                        }}
+                        disabled={saving}
+                    >
+                        {s.generateUuid}
+                    </Button>
                 </label>
                 <input
                     id={uuidId}
@@ -188,7 +202,7 @@ export function DeviceForm({
                     </p>
                 )}
             </div>
-            {/* Selector */}
+            {/* Vehicle Type Selector */}
             <div
                 className={`device-form__field ${errors.vehicleType ? 'device-form__field--error' : ''}`}
             >
@@ -212,33 +226,34 @@ export function DeviceForm({
             </div>
 
             <div className="device-form__actions">
-                <button
+                <Button
                     type="submit"
-                    className="device-form__btn device-form__btn--primary"
+                    variant="primary"
                     disabled={saving}
+                    loading={saving}
                 >
-                    {saving ? s.saving : s.save}
-                </button>
-                <button
+                    {s.save}
+                </Button>
+                <Button
                     type="button"
-                    className="device-form__btn device-form__btn--secondary"
+                    variant="secondary"
                     onClick={onCancel}
                     disabled={saving}
                 >
                     {s.cancel}
-                </button>
+                </Button>
             </div>
 
             {isEdit && onDelete && (
                 <div className="device-form__danger">
-                    <button
+                    <Button
                         type="button"
-                        className="device-form__btn device-form__btn--danger"
+                        variant="danger"
                         onClick={handleDelete}
                         disabled={saving}
                     >
                         {deleteConfirm ? s.deleteConfirm : s.deleteDevice}
-                    </button>
+                    </Button>
                 </div>
             )}
         </form>

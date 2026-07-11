@@ -42,15 +42,11 @@ describe('projectCoordinate', () => {
 
 describe('formatCoords', () => {
     it('uses N/E for positive lat/lng', () => {
-        expect(formatCoords(40.7128, -74.006)).toBe(
-            '40.7128° N, 74.0060° W'
-        );
+        expect(formatCoords(40.7128, -74.006)).toBe('40.7128° N, 74.0060° W');
     });
 
     it('uses S/W for negative lat/lng', () => {
-        expect(formatCoords(-33.8688, -70.5)).toBe(
-            '33.8688° S, 70.5000° W'
-        );
+        expect(formatCoords(-33.8688, -70.5)).toBe('33.8688° S, 70.5000° W');
     });
 
     it('treats zero as N/E (>=0 branch)', () => {
@@ -107,8 +103,11 @@ describe('getMapStatusLabels', () => {
 
     it('covers exactly the four MarkerStatus keys', () => {
         const labels = getMapStatusLabels(en);
-        expect(Object.keys(labels).sort()).toEqual(
-            ['never-seen', 'offline', 'online', 'unknown']
-        );
+        expect(Object.keys(labels).sort()).toEqual([
+            'never-seen',
+            'offline',
+            'online',
+            'unknown',
+        ]);
     });
 });

@@ -19,6 +19,7 @@ import { RouteFallback } from './RouteFallback';
 interface PublicOnlyRouteProps {
     children: ReactNode;
     fallback?: ReactNode;
+    isLoginPage?: boolean;
 }
 
 /**
@@ -50,15 +51,16 @@ interface PublicOnlyRouteProps {
 export function PublicOnlyRoute({
     children,
     fallback,
+    isLoginPage = false,
 }: PublicOnlyRouteProps): React.JSX.Element {
     const { isAuthenticated, isAuthLoading } = useAuth();
 
     useEffect(() => {
         if (isAuthLoading) return;
-        if (isAuthenticated) {
+        if (isAuthenticated || isLoginPage) {
             redirectTo(DASHBOARD_PATH);
         }
-    }, [isAuthLoading, isAuthenticated]);
+    }, [isAuthLoading, isAuthenticated, isLoginPage]);
 
     if (isAuthLoading) {
         return <>{fallback ?? <RouteFallback />}</>;

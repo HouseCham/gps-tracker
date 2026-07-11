@@ -89,7 +89,7 @@ func main() {
 	}
 
 	userCreator := authInstance.NewUserCreator()
-	usersService := users.NewUserService(usersRepo, userCreator)
+	usersService := users.NewService(usersRepo, userCreator)
 
 	// After-signup sync: Authula owns credentials, we own the
 	// application-level projection (role, must_change_password, FKs).

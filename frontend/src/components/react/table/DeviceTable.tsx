@@ -21,7 +21,7 @@ import { DeviceTableRow } from '@/components/react/table';
 import { DeviceMobileCard, MobileCardList } from '@/components/react/shared';
 import Modal from '@/components/react/ui/Modal';
 //-- Icons
-import { Inbox, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 //-- Utils
 import { getDeviceTableColumns } from '@/lib/device-utils';
 //-- Services
@@ -29,6 +29,7 @@ import { useDeviceService } from '@/lib/api/services';
 import { asApiError } from '@/lib/api/api-utils';
 //-- Toast bus
 import { toastBus } from '@/lib/stores/toast.store';
+import { EmptyTable } from './EmptyTable';
 
 /**
  * The window after which a device is considered offline. Anything newer
@@ -325,27 +326,11 @@ export function DeviceTable({
             </div>
 
             {devices.length === 0 ? (
-                <>
-                    <TableStatus
-                        mode="empty"
-                        className={className}
-                        title={translation.device.noDevices}
-                        message={translation.device.noDevicesMessage}
-                    />
-                    {/* Mobile empty state (≤ 767.98px) — mirrors the
-                        TableStatus above; CSS shows the right one. */}
-                    <div className="mobile-empty">
-                        <div className="mobile-empty__icon" aria-hidden="true">
-                            <Inbox />
-                        </div>
-                        <h3 className="mobile-empty__title">
-                            {translation.device.noDevices}
-                        </h3>
-                        <p className="mobile-empty__message">
-                            {translation.device.noDevicesMessage}
-                        </p>
-                    </div>
-                </>
+                <EmptyTable
+                    columns={columns}
+                    emptyTitle={translation.device.noDevices}
+                    emptyMessage={translation.device.noDevicesMessage}
+                />
             ) : (
                 <>
                     <DataTable columns={columns} className={className}>
@@ -421,6 +406,7 @@ export function DeviceTable({
                         nameRequired: formStrings.nameRequired,
                         uuidRequired: formStrings.uuidRequired,
                         uuidInvalid: formStrings.uuidInvalid,
+                        generateUuid: formStrings.generateUuid,
                         save: formStrings.save,
                         saving: formStrings.saving,
                         cancel: formStrings.cancel,
