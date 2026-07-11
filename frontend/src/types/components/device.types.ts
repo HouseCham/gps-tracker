@@ -78,6 +78,7 @@ export interface DeviceData {
  * @param {string} cancel - The label for the cancel button.
  * @param {string} deleteConfirm - The confirmation message for the delete button.
  * @param {string} deleteDevice - The label for the delete button.
+ * @param {string} generateUuid - The label for the generate-UUID button.
  */
 export interface DeviceFormStrings {
     title?: string;
@@ -95,6 +96,7 @@ export interface DeviceFormStrings {
     cancel?: string;
     deleteConfirm?: string;
     deleteDevice?: string;
+    generateUuid?: string;
 }
 /**
  * @interface GrantAccessFormStrings

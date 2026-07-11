@@ -194,6 +194,7 @@ export const es: Translation = {
             nameRequired: 'El nombre es obligatorio',
             uuidRequired: 'El UUID es obligatorio',
             uuidInvalid: 'Formato de UUID inválido',
+            generateUuid: 'Generar',
             save: 'Guardar',
             saving: 'Guardando...',
             cancel: 'Cancelar',

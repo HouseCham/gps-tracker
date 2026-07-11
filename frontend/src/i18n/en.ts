@@ -189,6 +189,7 @@ export const en = {
             nameRequired: 'Device name is required',
             uuidRequired: 'Firmware UUID is required',
             uuidInvalid: 'Invalid UUID format',
+            generateUuid: 'Generate',
             save: 'Save',
             saving: 'Saving...',
             cancel: 'Cancel',

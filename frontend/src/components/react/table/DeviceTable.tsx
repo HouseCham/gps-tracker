@@ -421,6 +421,7 @@ export function DeviceTable({
                         nameRequired: formStrings.nameRequired,
                         uuidRequired: formStrings.uuidRequired,
                         uuidInvalid: formStrings.uuidInvalid,
+                        generateUuid: formStrings.generateUuid,
                         save: formStrings.save,
                         saving: formStrings.saving,
                         cancel: formStrings.cancel,
