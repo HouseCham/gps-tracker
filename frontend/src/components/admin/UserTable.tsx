@@ -2,12 +2,7 @@ import '@/styles/components/mobile-cards.css';
 //-- React
 import type { JSX } from 'react/jsx-runtime';
 import type { ChangeEvent } from 'react';
-import {
-    lazy,
-    Suspense,
-    useEffect,
-    useState,
-} from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 //-- Types
 import type { CreateUserDto, User } from '@/types/api';
 import type { Language } from '@/types';
@@ -251,53 +246,51 @@ export function UserTable({
                 </Button>
             </div>
             {/* Users Table */}
-            {
-                users.length === 0 ? (
-                    <Suspense fallback={null}>
-                        <EmptyTable
-                            columns={columns}
-                            emptyTitle={translation.user.noUsersTitle}
-                            emptyMessage={translation.user.noUsersMessage}
-                        />
-                    </Suspense>
-                ) : (
-                    <Suspense fallback={null}>
-                        <DataTable columns={columns} className={className}>
-                            {users.map(user => {
-                                const handlers = rowHandlersById.get(user.id);
-                                if (!handlers) return null;
-                                return (
-                                    <UserTableRow
-                                        key={user.id}
-                                        user={user}
-                                        locale={locale}
-                                        labels={t}
-                                        roles={translation.admin.roles}
-                                        onDelete={handlers.onDelete}
-                                    />
-                                );
-                            })}
-                        </DataTable>
-                        {/* Mobile cards (≤ 767.98px) — mirrors the table rows above. */}
-                        <MobileCardList variant="user" label={t.name}>
-                            {users.map(user => {
-                                const handlers = rowHandlersById.get(user.id);
-                                if (!handlers) return null;
-                                return (
-                                    <UserMobileCard
-                                        key={user.id}
-                                        locale={locale}
-                                        user={user}
-                                        labels={t}
-                                        roles={translation.admin.roles}
-                                        onDelete={handlers.onDelete}
-                                    />
-                                );
-                            })}
-                        </MobileCardList>
-                    </Suspense>
-                )
-            }
+            {users.length === 0 ? (
+                <Suspense fallback={null}>
+                    <EmptyTable
+                        columns={columns}
+                        emptyTitle={translation.user.noUsersTitle}
+                        emptyMessage={translation.user.noUsersMessage}
+                    />
+                </Suspense>
+            ) : (
+                <Suspense fallback={null}>
+                    <DataTable columns={columns} className={className}>
+                        {users.map(user => {
+                            const handlers = rowHandlersById.get(user.id);
+                            if (!handlers) return null;
+                            return (
+                                <UserTableRow
+                                    key={user.id}
+                                    user={user}
+                                    locale={locale}
+                                    labels={t}
+                                    roles={translation.admin.roles}
+                                    onDelete={handlers.onDelete}
+                                />
+                            );
+                        })}
+                    </DataTable>
+                    {/* Mobile cards (≤ 767.98px) — mirrors the table rows above. */}
+                    <MobileCardList variant="user" label={t.name}>
+                        {users.map(user => {
+                            const handlers = rowHandlersById.get(user.id);
+                            if (!handlers) return null;
+                            return (
+                                <UserMobileCard
+                                    key={user.id}
+                                    locale={locale}
+                                    user={user}
+                                    labels={t}
+                                    roles={translation.admin.roles}
+                                    onDelete={handlers.onDelete}
+                                />
+                            );
+                        })}
+                    </MobileCardList>
+                </Suspense>
+            )}
             {/* Create User Modal */}
             <Suspense fallback={null}>
                 <Modal

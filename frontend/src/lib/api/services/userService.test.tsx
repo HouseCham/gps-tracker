@@ -53,7 +53,7 @@ describe('useUserService', () => {
         expect(result.current.isLoading).toBe(false);
         expect(apiClient).toHaveBeenCalledWith(
             '/users',
-            expect.objectContaining({ method: 'GET' }),
+            expect.objectContaining({ method: 'GET' })
         );
     });
 
@@ -82,7 +82,7 @@ describe('useUserService', () => {
         expect(result.current.users.map(u => u.id)).toEqual(['u1', 'u3']);
         expect(apiClient).toHaveBeenLastCalledWith(
             '/users',
-            expect.objectContaining({ method: 'POST', body: dto }),
+            expect.objectContaining({ method: 'POST', body: dto })
         );
     });
 

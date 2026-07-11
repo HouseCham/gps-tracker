@@ -12,7 +12,7 @@ describe('BootstrapService.getStatus', () => {
         await expect(svc.getStatus()).resolves.toEqual({ needsSetup: true });
         expect(http).toHaveBeenCalledWith(
             '/system/bootstrap',
-            expect.objectContaining({ method: 'GET' }),
+            expect.objectContaining({ method: 'GET' })
         );
     });
 

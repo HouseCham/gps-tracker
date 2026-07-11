@@ -105,34 +105,31 @@ export const useDeviceService = (): IDeviceService => {
      * @param {string} id - The ID of the device to retrieve.
      * @returns {Promise<void>} Resolves when the device is fetched and state is updated.
      */
-    const getDeviceById = useCallback(
-        async (id: string): Promise<void> => {
-            resetState();
-            setIsLoading(true);
-            setDevice(null);
-            try {
-                const { data: response } = await withApiErrorToast(() =>
-                    apiClient<Envelope<DeviceDetail> | null>(`/devices/${id}`, {
-                        method: 'GET',
-                    })
+    const getDeviceById = useCallback(async (id: string): Promise<void> => {
+        resetState();
+        setIsLoading(true);
+        setDevice(null);
+        try {
+            const { data: response } = await withApiErrorToast(() =>
+                apiClient<Envelope<DeviceDetail> | null>(`/devices/${id}`, {
+                    method: 'GET',
+                })
+            );
+            if (!response) {
+                toastBus.push({
+                    variant: 'error',
+                    title: 'Error',
+                    message: 'get device returned a null response',
+                });
+                handleApiError(
+                    new Error('get device returned a null response')
                 );
-                if (!response) {
-                    toastBus.push({
-                        variant: 'error',
-                        title: 'Error',
-                        message: 'get device returned a null response',
-                    });
-                    handleApiError(
-                        new Error('get device returned a null response')
-                    );
-                }
-                setDevice(response!.data);
-            } finally {
-                setIsLoading(false);
             }
-        },
-        []
-    );
+            setDevice(response!.data);
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
 
     /**
      * Creates a new device and grants the authenticated user owner access to it.

@@ -1,4 +1,9 @@
-import { useEffect, useState, type PropsWithChildren, type ReactNode } from 'react';
+import {
+    useEffect,
+    useState,
+    type PropsWithChildren,
+    type ReactNode,
+} from 'react';
 //-- Hooks
 import { useAuth } from '@/lib/hooks/useAuth';
 //-- Constants
@@ -51,10 +56,12 @@ export function ProtectedRoute({
     fallback,
 }: ProtectedRouteProps): React.JSX.Element {
     const { isAuthenticated, isAuthLoading } = useAuth();
-    const [bootstrapStatus, setBootstrapStatus] = useState<BootstrapStatus | null>(null);
+    const [bootstrapStatus, setBootstrapStatus] =
+        useState<BootstrapStatus | null>(null);
 
     useEffect(() => {
-        if (isAuthLoading || isAuthenticated || bootstrapStatus !== null) return;
+        if (isAuthLoading || isAuthenticated || bootstrapStatus !== null)
+            return;
         bootstrapService
             .getStatus()
             .then(status => setBootstrapStatus(status))

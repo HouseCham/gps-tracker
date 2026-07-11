@@ -104,7 +104,7 @@ export default function DeviceMap({
         x: number;
         y: number;
         label?: string;
-    }> = pins.map((pin) => ({
+    }> = pins.map(pin => ({
         pin,
         ...projectCoordinate(pin.lat, pin.lng),
     }));
@@ -112,7 +112,12 @@ export default function DeviceMap({
      * Center of the map.
      * @returns {{ lat: number; lng: number; text: string }} The center of the map.
      */
-    const coords = ((): { lat: number; lng: number; text: string; label?: string } | null => {
+    const coords = ((): {
+        lat: number;
+        lng: number;
+        text: string;
+        label?: string;
+    } | null => {
         const c =
             center ??
             (selectedPin

@@ -120,7 +120,7 @@ export function DeviceDetail({
                     backHref={`/${locale}/devices`}
                     backLabel={t.backToList}
                 />
-            </section>  
+            </section>
         );
     }
 

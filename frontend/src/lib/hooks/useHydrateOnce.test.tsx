@@ -24,10 +24,9 @@ describe('useHydrateOnce', () => {
 
     it('does NOT re-invoke refresh when its identity changes (ref-gate, not the deps array)', () => {
         const first = vi.fn();
-        const { rerender } = renderHook(
-            ({ fn }) => useHydrateOnce(fn),
-            { initialProps: { fn: first as () => void } },
-        );
+        const { rerender } = renderHook(({ fn }) => useHydrateOnce(fn), {
+            initialProps: { fn: first as () => void },
+        });
         const second = vi.fn();
         rerender({ fn: second });
         expect(first).toHaveBeenCalledTimes(1);
