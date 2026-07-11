@@ -322,6 +322,10 @@ export const es: Translation = {
             },
         },
     },
+    user: {
+        noUsersTitle: 'Sin usuarios',
+        noUsersMessage: 'Añade tu primer usuario para empezar.',
+    },
     toast: {
         deviceCreated: {
             title: 'Creado',

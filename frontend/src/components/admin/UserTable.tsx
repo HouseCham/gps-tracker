@@ -13,10 +13,8 @@ import type { CreateUserDto, User } from '@/types/api';
 import type { Language } from '@/types';
 import type { Translation } from '@/i18n';
 //-- Components
-import { DataTable, TableStatus } from '@/components/ui/DataTable';
+import { TableStatus } from '@/components/ui/DataTable';
 import { Button, Input } from '@/components/ui';
-import { MobileCardList, UserMobileCard } from '@/components/react/shared';
-import { UserTableRow } from '@/components/react/table';
 //-- Icons
 import { Plus } from 'lucide-react';
 //-- Utils
@@ -31,6 +29,31 @@ const Modal = lazy(() => import('@/components/react/ui/Modal'));
 const CreateUserForm = lazy(() =>
     import('@/components/react/form/CreateUserForm').then(m => ({
         default: m.CreateUserForm,
+    }))
+);
+const EmptyTable = lazy(() =>
+    import('@/components/react/table/EmptyTable').then(m => ({
+        default: m.EmptyTable,
+    }))
+);
+const DataTable = lazy(() =>
+    import('@/components/ui/DataTable').then(m => ({
+        default: m.DataTable,
+    }))
+);
+const UserTableRow = lazy(() =>
+    import('@/components/react/table/UserTableRow').then(m => ({
+        default: m.UserTableRow,
+    }))
+);
+const MobileCardList = lazy(() =>
+    import('@/components/react/shared/MobileCard/MobileCardList').then(m => ({
+        default: m.MobileCardList,
+    }))
+);
+const UserMobileCard = lazy(() =>
+    import('@/components/react/shared/MobileCard/UserMobileCard').then(m => ({
+        default: m.UserMobileCard,
     }))
 );
 /**
@@ -84,13 +107,23 @@ export function UserTable({
      * @param {CreateUserDto} dto - The user payload from the form.
      */
     async function handleCreateUser(dto: CreateUserDto): Promise<void> {
-        await createUser(dto);
-        toastBus.push({
-            variant: 'success',
-            title: toastStrings.userCreated.title,
-            message: toastStrings.userCreated.message,
-        });
-        setCreateOpen(false);
+        try {
+            await createUser(dto);
+            toastBus.push({
+                variant: 'success',
+                title: toastStrings.userCreated.title,
+                message: toastStrings.userCreated.message,
+            });
+            setCreateOpen(false);
+        } catch (err) {
+            const apiErr = asApiError(err);
+            toastBus.push({
+                variant: 'error',
+                title: 'Error',
+                message: apiErr.message ?? 'Could not create the user.',
+            });
+            throw err;
+        }
     }
     /**
      * Opens the delete-confirmation modal for the given user.
@@ -218,39 +251,53 @@ export function UserTable({
                 </Button>
             </div>
             {/* Users Table */}
-            <DataTable columns={columns} className={className}>
-                {users.map(user => {
-                    const handlers = rowHandlersById.get(user.id);
-                    if (!handlers) return null;
-                    return (
-                        <UserTableRow
-                            key={user.id}
-                            user={user}
-                            locale={locale}
-                            labels={t}
-                            roles={translation.admin.roles}
-                            onDelete={handlers.onDelete}
+            {
+                users.length === 0 ? (
+                    <Suspense fallback={null}>
+                        <EmptyTable
+                            columns={columns}
+                            emptyTitle={translation.user.noUsersTitle}
+                            emptyMessage={translation.user.noUsersMessage}
                         />
-                    );
-                })}
-            </DataTable>
-            {/* Mobile cards (≤ 767.98px) — mirrors the table rows above. */}
-            <MobileCardList variant="user" label={t.name}>
-                {users.map(user => {
-                    const handlers = rowHandlersById.get(user.id);
-                    if (!handlers) return null;
-                    return (
-                        <UserMobileCard
-                            key={user.id}
-                            locale={locale}
-                            user={user}
-                            labels={t}
-                            roles={translation.admin.roles}
-                            onDelete={handlers.onDelete}
-                        />
-                    );
-                })}
-            </MobileCardList>
+                    </Suspense>
+                ) : (
+                    <Suspense fallback={null}>
+                        <DataTable columns={columns} className={className}>
+                            {users.map(user => {
+                                const handlers = rowHandlersById.get(user.id);
+                                if (!handlers) return null;
+                                return (
+                                    <UserTableRow
+                                        key={user.id}
+                                        user={user}
+                                        locale={locale}
+                                        labels={t}
+                                        roles={translation.admin.roles}
+                                        onDelete={handlers.onDelete}
+                                    />
+                                );
+                            })}
+                        </DataTable>
+                        {/* Mobile cards (≤ 767.98px) — mirrors the table rows above. */}
+                        <MobileCardList variant="user" label={t.name}>
+                            {users.map(user => {
+                                const handlers = rowHandlersById.get(user.id);
+                                if (!handlers) return null;
+                                return (
+                                    <UserMobileCard
+                                        key={user.id}
+                                        locale={locale}
+                                        user={user}
+                                        labels={t}
+                                        roles={translation.admin.roles}
+                                        onDelete={handlers.onDelete}
+                                    />
+                                );
+                            })}
+                        </MobileCardList>
+                    </Suspense>
+                )
+            }
             {/* Create User Modal */}
             <Suspense fallback={null}>
                 <Modal

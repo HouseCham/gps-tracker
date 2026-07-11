@@ -311,6 +311,10 @@ export const en = {
             },
         },
     },
+    user: {
+        noUsersTitle: 'No users yet',
+        noUsersMessage: 'Add your first user to get started.',
+    },
     toast: {
         deviceCreated: {
             title: 'Created',
