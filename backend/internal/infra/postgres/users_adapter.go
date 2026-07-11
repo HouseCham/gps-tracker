@@ -49,7 +49,7 @@ func (a *UsersAdapter) GetByEmail(ctx context.Context, email string) (*domain.Us
 	return rowToDomainPtr(row), nil
 }
 
-func (a *UsersAdapter) CreateUser(ctx context.Context, email, name, lastname string, role domain.UserRole, mustChangePassword bool) (*domain.User, error) {
+func (a *UsersAdapter) CreateUser(ctx context.Context, email, name, lastname string, role domain.UserRole, mustChangePassword, emailVerified bool) (*domain.User, error) {
 	queries := New(a.pool)
 	row, err := queries.CreateUser(ctx, CreateUserParams{
 		Email:              email,
@@ -57,6 +57,7 @@ func (a *UsersAdapter) CreateUser(ctx context.Context, email, name, lastname str
 		Lastname:           lastname,
 		Role:               UserRole(role),
 		MustChangePassword: mustChangePassword,
+		EmailVerified:      emailVerified,
 	})
 	if err != nil {
 		return nil, wrapPgError(err)
@@ -99,6 +100,20 @@ func (a *UsersAdapter) SoftDeleteUser(ctx context.Context, userID uuid.UUID) err
 	return wrapPgError(queries.SoftDeleteUser(ctx, pgtypeUUID(userID)))
 }
 
+func (a *UsersAdapter) HasSuperAdmin(ctx context.Context) (bool, error) {
+	queries := New(a.pool)
+	return queries.HasSuperAdmin(ctx)
+}
+
+func (a *UsersAdapter) PromoteToSuperAdmin(ctx context.Context, userID uuid.UUID) (*domain.User, error) {
+	queries := New(a.pool)
+	row, err := queries.PromoteToSuperAdmin(ctx, pgtypeUUID(userID))
+	if err != nil {
+		return nil, wrapPgError(err)
+	}
+	return rowToDomainPtr(row), nil
+}
+
 // rowToDomain maps any sqlc-generated user row (Get/List/Create/Update
 // all share the same column shape) to a value-typed domain.User.
 func rowToDomain(r any) domain.User {
@@ -112,6 +127,8 @@ func rowToDomain(r any) domain.User {
 	case CreateUserRow:
 		return newDomainUser(v.ID, v.Email, v.EmailVerified, v.Image, v.Name, v.Lastname, v.Role, v.MustChangePassword, v.CreatedAt, v.UpdatedAt)
 	case UpdateUserRow:
+		return newDomainUser(v.ID, v.Email, v.EmailVerified, v.Image, v.Name, v.Lastname, v.Role, v.MustChangePassword, v.CreatedAt, v.UpdatedAt)
+	case PromoteToSuperAdminRow:
 		return newDomainUser(v.ID, v.Email, v.EmailVerified, v.Image, v.Name, v.Lastname, v.Role, v.MustChangePassword, v.CreatedAt, v.UpdatedAt)
 	}
 	return domain.User{}

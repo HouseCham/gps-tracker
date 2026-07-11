@@ -53,9 +53,7 @@ export function toApiError(error: unknown): ApiError {
  * @returns {ApiError} The normalized error.
  */
 export function betterFetchErrorToApi(error: BetterFetchError): ApiError {
-    const body = error.cause as
-        | { message?: string; code?: string }
-        | undefined;
+    const body = error.cause as { message?: string; code?: string } | undefined;
     return {
         status: error.status,
         message: body?.message || 'An unexpected error occurred',

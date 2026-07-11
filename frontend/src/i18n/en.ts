@@ -131,7 +131,7 @@ export const en = {
         loginTitle: 'Welcome back',
         loginSubtitle: 'Sign in to your GPS Tracker account',
         signupTitle: 'Create an account',
-        signupSubtitle: 'Start tracking your fleet in minutes',
+        signupSubtitle: 'Start tracking your devices in minutes',
         logoutConfirm: 'Are you sure you want to log out?',
         signInWithGoogle: 'Sign in with Google',
         signUpWithGoogle: 'Sign up with Google',
@@ -189,6 +189,7 @@ export const en = {
             nameRequired: 'Device name is required',
             uuidRequired: 'Firmware UUID is required',
             uuidInvalid: 'Invalid UUID format',
+            generateUuid: 'Generate',
             save: 'Save',
             saving: 'Saving...',
             cancel: 'Cancel',
@@ -309,6 +310,10 @@ export const en = {
                 cancel: 'Cancel',
             },
         },
+    },
+    user: {
+        noUsersTitle: 'No users yet',
+        noUsersMessage: 'Add your first user to get started.',
     },
     toast: {
         deviceCreated: {

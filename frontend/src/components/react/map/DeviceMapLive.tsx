@@ -65,23 +65,24 @@ export default function DeviceMapLive({
 
     const markerStatus = statusFromRecordedAt(location?.recordedAt);
 
-    const routeGeoJson: GeoJSON.FeatureCollection | null = ((): GeoJSON.FeatureCollection | null => {
-        const points = route ?? [];
-        if (points.length < 2) return null;
-        return {
-            type: 'FeatureCollection',
-            features: [
-                {
-                    type: 'Feature',
-                    geometry: {
-                        type: 'LineString',
-                        coordinates: points.map(p => [p.lng, p.lat]),
+    const routeGeoJson: GeoJSON.FeatureCollection | null =
+        ((): GeoJSON.FeatureCollection | null => {
+            const points = route ?? [];
+            if (points.length < 2) return null;
+            return {
+                type: 'FeatureCollection',
+                features: [
+                    {
+                        type: 'Feature',
+                        geometry: {
+                            type: 'LineString',
+                            coordinates: points.map(p => [p.lng, p.lat]),
+                        },
+                        properties: {},
                     },
-                    properties: {},
-                },
-            ],
-        };
-    })();
+                ],
+            };
+        })();
 
     const wrapperClass = ['device-map-live', className]
         .filter(Boolean)

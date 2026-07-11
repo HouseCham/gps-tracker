@@ -5,7 +5,11 @@ import { generateNavbarItems, redirectTo } from './router-utils';
 describe('generateNavbarItems', () => {
     it('returns dashboard + devices + profile when showAdmin is false', () => {
         const items = generateNavbarItems('en', en, false);
-        expect(items.map(i => i.key)).toEqual(['dashboard', 'devices', 'profile']);
+        expect(items.map(i => i.key)).toEqual([
+            'dashboard',
+            'devices',
+            'profile',
+        ]);
     });
 
     it('inserts admin before profile when showAdmin is true', () => {
@@ -27,10 +31,16 @@ describe('generateNavbarItems', () => {
 
     it('uses nav translation keys as labels and assigns an Icon per item', () => {
         const items = generateNavbarItems('en', en, true);
-        expect(items.find(i => i.key === 'dashboard')?.label).toBe(en.nav.dashboard);
-        expect(items.find(i => i.key === 'devices')?.label).toBe(en.nav.devices);
+        expect(items.find(i => i.key === 'dashboard')?.label).toBe(
+            en.nav.dashboard
+        );
+        expect(items.find(i => i.key === 'devices')?.label).toBe(
+            en.nav.devices
+        );
         expect(items.find(i => i.key === 'admin')?.label).toBe(en.nav.admin);
-        expect(items.find(i => i.key === 'profile')?.label).toBe(en.nav.profile);
+        expect(items.find(i => i.key === 'profile')?.label).toBe(
+            en.nav.profile
+        );
         for (const item of items) {
             expect(item.Icon).toBeDefined();
         }

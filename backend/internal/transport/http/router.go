@@ -24,7 +24,7 @@ type RouterDeps struct {
 	AccessHandler    *handlers.AccessHandler
 	BootstrapHandler *handlers.BootstrapHandler
 	AccessService    *access.AccessService
-	UsersService     *users.UserService
+	UsersService     *users.Service
 	AuthHandler      http.Handler
 	SessionCookieName string
 	AuthSession      ports.SessionAuthenticator
@@ -100,6 +100,13 @@ func NewRouter(deps RouterDeps) *fiber.App {
 	// auth middleware so the frontend can ask "is the app empty?"
 	// before the user has signed in.
 	apiV1.Get("/system/bootstrap", deps.BootstrapHandler.Handle)
+
+	// RequireInitialized is mounted on the group AFTER the bootstrap
+	// route, so Fiber v3 only applies it to routes registered below.
+	// It blocks every other /api/v1/* request until the first user
+	// exists. The Authula signup endpoint lives under /api/auth/*
+	// outside this group and is unaffected.
+	apiV1.Use(middleware.RequireInitialized(deps.UsersService))
 
 	// === Devices routes ===
 	// /devices/count is registered on apiV1 directly (not on the group)

@@ -13,11 +13,11 @@ import (
 // decide whether the visitor should be sent to the sign-up page
 // (first user becomes super_admin) or straight to the sign-in page.
 type BootstrapHandler struct {
-	usersService *users.UserService
+	usersService *users.Service
 }
 
 // NewBootstrapHandler wires the handler to the users service.
-func NewBootstrapHandler(usersService *users.UserService) *BootstrapHandler {
+func NewBootstrapHandler(usersService *users.Service) *BootstrapHandler {
 	return &BootstrapHandler{usersService: usersService}
 }
 
