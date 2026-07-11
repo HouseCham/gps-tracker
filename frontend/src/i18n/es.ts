@@ -136,7 +136,7 @@ export const es: Translation = {
         loginTitle: 'Bienvenido de nuevo',
         loginSubtitle: 'Inicia sesión en tu cuenta GPS Tracker',
         signupTitle: 'Crear una cuenta',
-        signupSubtitle: 'Empieza a rastrear tu flota en minutos',
+        signupSubtitle: 'Empieza a rastrear tus dispositivos en minutos',
         logoutConfirm: '¿Estás seguro de cerrar sesión?',
         signInWithGoogle: 'Iniciar sesión con Google',
         signUpWithGoogle: 'Registrarse con Google',

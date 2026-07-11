@@ -131,7 +131,7 @@ export const en = {
         loginTitle: 'Welcome back',
         loginSubtitle: 'Sign in to your GPS Tracker account',
         signupTitle: 'Create an account',
-        signupSubtitle: 'Start tracking your fleet in minutes',
+        signupSubtitle: 'Start tracking your devices in minutes',
         logoutConfirm: 'Are you sure you want to log out?',
         signInWithGoogle: 'Sign in with Google',
         signUpWithGoogle: 'Sign up with Google',

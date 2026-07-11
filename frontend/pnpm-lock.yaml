@@ -14,6 +14,12 @@ importers:
       '@better-fetch/fetch':
         specifier: ^1.3.0
         version: 1.3.0
+      '@fontsource/cal-sans':
+        specifier: ^5.2.3
+        version: 5.2.3
+      '@fontsource/inter':
+        specifier: ^5.2.8
+        version: 5.2.8
       '@lucide/astro':
         specifier: ^1.17.0
         version: 1.18.0(astro@6.4.6(@types/node@25.9.3)(rollup@4.61.1)(yaml@2.9.0))
@@ -586,6 +592,12 @@ packages:
   '@eslint/plugin-kit@0.7.2':
     resolution: {integrity: sha512-+CNAzxglkrpNf/kKywqQfk74QjtceuOE7Qm+AF8miRvPF/wmmK5+OJOgVh3AVTT3RP2mH3+FOaxlE5v72owk0A==}
     engines: {node: ^20.19.0 || ^22.13.0 || >=24}
+
+  '@fontsource/cal-sans@5.2.3':
+    resolution: {integrity: sha512-cY9d2LWfzzge3jSgh2IJmNEJdubuPnjfct/5Q/L/4Q5W9LlXRRZO403P0c3i1iPH4Y+IQ0gHgnJroPzL3KuxQQ==}
+
+  '@fontsource/inter@5.2.8':
+    resolution: {integrity: sha512-P6r5WnJoKiNVV+zvW2xM13gNdFhAEpQ9dQJHt3naLvfg+LkF2ldgSLiF4T41lf1SQCM9QmkqPTn4TH568IRagg==}
 
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
@@ -3498,6 +3510,10 @@ snapshots:
     dependencies:
       '@eslint/core': 1.2.1
       levn: 0.4.1
+
+  '@fontsource/cal-sans@5.2.3': {}
+
+  '@fontsource/inter@5.2.8': {}
 
   '@humanfs/core@0.19.2':
     dependencies:
