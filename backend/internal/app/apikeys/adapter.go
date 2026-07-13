@@ -3,7 +3,6 @@ package apikeys
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -17,47 +16,43 @@ import (
 // Adapter implements both Writer and Reader for device API keys.
 // The same sqlc-generated Queries back both interfaces.
 type Adapter struct {
-	pool *pgxpool.Pool
+	q *postgres.Queries
 }
 
 func NewAdapter(pool *pgxpool.Pool) *Adapter {
-	return &Adapter{pool: pool}
+	return &Adapter{q: postgres.New(pool)}
 }
 
 // Create inserts a fresh row. The `token` argument is the opaque
 // lookup token the device will send in the X-Device-API-Key header;
 // we store it as-is. The column name `key_hash` is legacy; see
 // apikeys/service.go for the rationale (no bcrypt per IoT verify).
+//
+// Errors are routed through postgres.WrapPgError so SQLSTATE 23505
+// (the new partial UNIQUE index on device_id) is translated to
+// domain.ErrConflict and surfaces as 409 Conflict to the admin UI.
 func (a *Adapter) Create(ctx context.Context, deviceID uuid.UUID, token string) (Key, error) {
-	queries := postgres.New(a.pool)
-	row, err := queries.CreateAPIKey(ctx, postgres.CreateAPIKeyParams{
+	row, err := a.q.CreateAPIKey(ctx, postgres.CreateAPIKeyParams{
 		DeviceID:  postgres.PgtypeUUID(deviceID),
 		KeyHash:   token,
 		ExpiresAt: pgtype.Timestamptz{}, // NULL — no expiration
 	})
 	if err != nil {
-		return Key{}, fmt.Errorf("Adapter.Create: %w", err)
+		return Key{}, postgres.WrapPgError(err)
 	}
 	return toDomainKey(row), nil
 }
 
-// Revoke soft-deletes a key by ID. The partial UNIQUE INDEX on
-// key_hash WHERE deleted_at IS NULL lets the admin rotate without a
-// hash conflict.
+// Revoke soft-deletes a key by ID. Idempotent.
 func (a *Adapter) Revoke(ctx context.Context, keyID uuid.UUID) error {
-	queries := postgres.New(a.pool)
-	if err := queries.RevokeAPIKey(ctx, postgres.PgtypeUUID(keyID)); err != nil {
-		return fmt.Errorf("Adapter.Revoke: %w", err)
-	}
-	return nil
+	return postgres.WrapPgError(a.q.RevokeAPIKey(ctx, postgres.PgtypeUUID(keyID)))
 }
 
 // GetActiveByToken is the IoT hot path. SQL filters out soft-deleted
 // and expired rows; the partial unique index keeps the lookup a single
 // index seek. Returns ErrNotFound when no row matches.
 func (a *Adapter) GetActiveByToken(ctx context.Context, token string) (Key, error) {
-	queries := postgres.New(a.pool)
-	row, err := queries.GetActiveKeyByHash(ctx, token)
+	row, err := a.q.GetActiveKeyByHash(ctx, token)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return Key{}, ErrNotFound
@@ -67,11 +62,28 @@ func (a *Adapter) GetActiveByToken(ctx context.Context, token string) (Key, erro
 	return toDomainKey(row), nil
 }
 
+// GetActiveByDeviceID is the friendly pre-check used by Service.Create
+// before issuing a new key. Returns ErrNotFound when the device has no
+// active key; the caller decides whether ErrNotFound is "ok, proceed"
+// or "real error". The DB-level partial UNIQUE index is the source of
+// truth — this query exists only to keep the common-case error path
+// out of SQLSTATE territory.
+func (a *Adapter) GetActiveByDeviceID(ctx context.Context, deviceID uuid.UUID) (KeyMetadata, error) {
+	row, err := a.q.GetActiveKeyByDeviceID(ctx, postgres.PgtypeUUID(deviceID))
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return KeyMetadata{}, ErrNotFound
+		}
+		return KeyMetadata{}, postgres.WrapPgError(err)
+	}
+	return toDomainKeyMetadata(row), nil
+}
+
 // ListForDevice returns metadata (no token) for every active key on a
-// device. Admin UI uses this for the keys panel.
+// device. Admin UI uses this for the keys panel. With the single-active-
+// key invariant enforced, this is always 0 or 1 row.
 func (a *Adapter) ListForDevice(ctx context.Context, deviceID uuid.UUID) ([]KeyMetadata, error) {
-	queries := postgres.New(a.pool)
-	rows, err := queries.ListAPIKeysForDevice(ctx, postgres.PgtypeUUID(deviceID))
+	rows, err := a.q.ListAPIKeysForDevice(ctx, postgres.PgtypeUUID(deviceID))
 	if err != nil {
 		return nil, postgres.WrapPgError(err)
 	}

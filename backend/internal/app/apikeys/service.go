@@ -4,21 +4,25 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
+	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
+
+	"github.com/HouseCham/gps-tracker/backend/internal/domain"
 )
 
 // Lookup-token size: 32 random bytes = 256 bits, encoded as base64url
 // (= 43 chars of [A-Za-z0-9_-]). Brute-forcing one token is impossible;
-// the rotation path (one active key per device) keeps the surface tiny.
+// the single-active-key invariant keeps the surface tiny.
 const lookupTokenBytes = 32
 
 // Service implements the application logic for device API keys.
 //
-// Single-active-key invariant: creating a new key revokes the device's
-// prior active key first, so at any time a device has at most one key
-// valid for auth. Matches [[decision-gps-tracker-payload-esquema]].
+// Single-active-key invariant: at most one non-revoked key per device,
+// enforced by a partial UNIQUE index on device_api_keys(device_id) WHERE
+// deleted_at IS NULL. Create() refuses to issue a second key for a device
+// that already has one — rotation must go through Revoke() first.
 type Service struct {
 	writer Writer
 	reader Reader
@@ -36,28 +40,25 @@ type CreatedKey struct {
 	Token string
 }
 
-// Create issues a new lookup token for `deviceID`. The prior active
-// token (if any) is soft-deleted in-place before the insert.
+// Create issues a new lookup token for `deviceID`. Refuses when the
+// device already has an active key — returns domain.ErrConflict which
+// the HTTP layer translates to 409 Conflict. To rotate, the caller
+// must Revoke the existing key first and then Create a new one.
 //
-// Concurrency: revoke-existing then insert-new are not in a
-// transaction. Under heavy concurrent Create() calls for the same
-// device you could end up with two active rows for a microsecond. The
-// auth path treats either as valid, so the second insert "wins" the
-// next request. If you need strict semantics, wrap Create in a tx.
+// The friendly pre-check below covers the common case; on a race
+// (two concurrent Create calls) the partial UNIQUE index catches it
+// and postgres.WrapPgError translates the 23505 to the same
+// domain.ErrConflict.
 func (s *Service) Create(ctx context.Context, deviceID uuid.UUID) (*CreatedKey, error) {
 	token, err := generateToken()
 	if err != nil {
 		return nil, fmt.Errorf("generate token: %w", err)
 	}
 
-	existing, err := s.reader.ListForDevice(ctx, deviceID)
-	if err != nil {
-		return nil, fmt.Errorf("Service.Create: list existing keys: %w", err)
-	}
-	for _, k := range existing {
-		if err := s.writer.Revoke(ctx, k.ID); err != nil {
-			return nil, fmt.Errorf("Service.Create: revoke prior key %s: %w", k.ID, err)
-		}
+	if _, err := s.reader.GetActiveByDeviceID(ctx, deviceID); err == nil {
+		return nil, fmt.Errorf("Service.Create: device already has an active api key: %w", domain.ErrConflict)
+	} else if !errors.Is(err, ErrNotFound) {
+		return nil, fmt.Errorf("Service.Create: pre-check: %w", err)
 	}
 
 	key, err := s.writer.Create(ctx, deviceID, token)

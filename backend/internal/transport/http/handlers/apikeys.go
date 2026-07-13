@@ -21,11 +21,15 @@ func NewAPIKeysHandler(svc *apikeys.Service) *APIKeysHandler {
 }
 
 // Create handles POST /api/v1/devices/:id/api-keys.
-// Issuing a new key rotates: the prior active key for the device is
-// soft-deleted in-place so the single-active-key invariant holds.
-// The response carries the plain token — this is the ONE place it ever
-// travels on the wire. The admin UI must display it and discard; the
-// service retains no copy.
+// Issues a new lookup token bound to the device. Refuses when the
+// device already has an active key — the service returns
+// domain.ErrConflict and the central httpErrorHandler maps it to
+// 409 Conflict. To rotate, the caller must DELETE the existing key
+// first.
+//
+// The response carries the plain token — this is the ONE place it
+// ever travels on the wire. The admin UI must display it and discard;
+// the service retains no copy.
 //
 // Access (owner only) is enforced by middleware.RequireDeviceRole.
 func (h *APIKeysHandler) Create(c fiber.Ctx) error {

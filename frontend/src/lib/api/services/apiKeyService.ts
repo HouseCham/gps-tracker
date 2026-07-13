@@ -8,7 +8,7 @@ import type {
     Envelope,
 } from '@/types/api';
 //-- Utils
-import { handleApiError, withApiErrorToast } from '@/lib/api/api-utils';
+import { handleApiError, isApiError, withApiErrorToast } from '@/lib/api/api-utils';
 import { toastBus } from '@/lib/stores/toast.store';
 //-- Http Client
 import { apiClient } from '@/lib/auth/client';
@@ -72,9 +72,10 @@ export const useApiKeyService = () => {
     }
 
     /**
-     * Issues a fresh API key for the device. The backend revokes any
-     * prior active key in the same transaction so the single-active
-     * invariant always holds.
+     * Issues a fresh API key for the device. The backend enforces
+     * "at most one active key per device" at the DB level; a second
+     * issue for a device that already has one returns 409 Conflict.
+     * On that path we push a dedicated toast and return `null`.
      *
      * The returned `plain_key` is the token to flash onto the device
      * firmware. It is returned **exactly once** by the backend; this
@@ -110,7 +111,7 @@ export const useApiKeyService = () => {
             }
             const created: CreateApiKeyResponse = response.data;
             // Optimistically prepend the new key to the cached list so the
-            // UI reflects rotation immediately, without a round-trip.
+            // UI reflects issue immediately, without a round-trip.
             const metadata: ApiKey = {
                 id: created.id,
                 created_at: created.created_at,
@@ -125,6 +126,21 @@ export const useApiKeyService = () => {
                     'The API key is shown only once. Copy it and flash it onto the device firmware — it cannot be retrieved later.',
             });
             return created;
+        } catch (err) {
+            // 409 Conflict: the device already has an active key. The
+            // generic error toast from withApiErrorToast has already fired;
+            // we add a more specific one and swallow the error so callers
+            // can branch on `null` instead of catching.
+            if (isApiError(err) && err.status === 409) {
+                toastBus.push({
+                    variant: 'error',
+                    title: 'Device already has a key',
+                    message:
+                        'This device already has an active API key. Revoke the existing one before issuing a new key.',
+                });
+                return null;
+            }
+            throw err;
         } finally {
             setIsLoading(false);
         }

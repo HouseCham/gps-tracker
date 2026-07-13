@@ -14,6 +14,10 @@ type Reader interface {
 	// soft-deleted and expired tokens in SQL. Returns ErrNotFound
 	// when no row matches.
 	GetActiveByToken(ctx context.Context, token string) (Key, error)
+	// GetActiveByDeviceID is the friendly pre-check used before
+	// issuing a new key. Returns ErrNotFound when the device has
+	// no active key.
+	GetActiveByDeviceID(ctx context.Context, deviceID uuid.UUID) (KeyMetadata, error)
 	// ListForDevice returns every non-revoked key for a device, for
 	// the admin UI. Returns metadata only (no token, no hash).
 	ListForDevice(ctx context.Context, deviceID uuid.UUID) ([]KeyMetadata, error)

@@ -1,4 +1,5 @@
 import { act, renderHook } from '@testing-library/react';
+import { BetterFetchError } from '@better-fetch/fetch';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('@/lib/auth/client', () => ({
@@ -100,8 +101,11 @@ describe('useApiKeyService', () => {
                 created_at: '2024-02-02T00:00:00Z',
                 plain_key: 'opaque-token-abc123',
             };
+            // Distinct device: under the single-active-key invariant, a
+            // second issue against the SAME device would 409 (covered in
+            // its own test below).
             apiClient
-                .mockResolvedValueOnce(listEnv([key('k-old')]))
+                .mockResolvedValueOnce(listEnv([key('k-other-device')]))
                 .mockResolvedValueOnce(issueEnv(created));
 
             const { result } = renderHook(() => useApiKeyService());
@@ -124,7 +128,7 @@ describe('useApiKeyService', () => {
             // The cached list now holds the new metadata, with no plain_key.
             expect(result.current.apiKeys.map(k => k.id)).toEqual([
                 'k-new',
-                'k-old',
+                'k-other-device',
             ]);
             expect(
                 result.current.apiKeys[0] as unknown as
@@ -159,6 +163,39 @@ describe('useApiKeyService', () => {
             expect(toasts).toHaveLength(1);
             expect(toasts[0]?.variant).toBe('warning');
             expect(toasts[0]?.message).toMatch(/only once/i);
+        });
+
+        it('returns null and pushes a dedicated toast on 409 (device already has a key)', async () => {
+            apiClient.mockRejectedValueOnce(
+                new BetterFetchError(409, 'Conflict', {
+                    status_code: 409,
+                    message: 'conflict',
+                    data: null,
+                })
+            );
+
+            const { result } = renderHook(() => useApiKeyService());
+
+            let returned: CreateApiKeyResponse | null | undefined;
+            await act(async () => {
+                returned = await result.current.issueApiKey('d1');
+            });
+
+            expect(returned).toBeNull();
+            const toasts = $toasts.get();
+            // Two toasts: the generic one from withApiErrorToast, plus the
+            // specific "already has a key" one. The dedicated one is what
+            // the user should see — the generic is a known double-toast
+            // follow-up.
+            const specific = toasts.find(
+                t =>
+                    typeof t.message === 'string' &&
+                    /already has an active api key/i.test(t.message)
+            );
+            expect(specific).toBeDefined();
+            expect(specific?.variant).toBe('error');
+            // The "save this key" warning must NOT fire on the failure path.
+            expect(toasts.find(t => t.variant === 'warning')).toBeUndefined();
         });
     });
 

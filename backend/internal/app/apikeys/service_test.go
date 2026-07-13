@@ -3,15 +3,22 @@ package apikeys
 import (
 	"context"
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
+
+	"github.com/HouseCham/gps-tracker/backend/internal/domain"
 )
 
 // fakeStore implements both Writer and Reader with an in-memory map
 // so the service can be exercised end-to-end without a DB. The same
 // values flow through Create → List → GetActive → Revoke.
+//
+// Enforces the same invariant as the real DB: a device can have at
+// most one active key. Create returns domain.ErrConflict (via Wrap) on
+// collision so the service tests exercise the same code path as prod.
 type fakeStore struct {
 	tokens map[string]Key      // token -> Key
 	keys   map[uuid.UUID]Key   // id   -> Key
@@ -22,6 +29,9 @@ func newFakeStore() *fakeStore {
 }
 
 func (s *fakeStore) Create(_ context.Context, deviceID uuid.UUID, token string) (Key, error) {
+	if _, ok := s.activeKeyForDevice(deviceID); ok {
+		return Key{}, fmt.Errorf("fake: %w", domain.ErrConflict)
+	}
 	id := uuid.New()
 	k := Key{ID: id, DeviceID: deviceID, CreatedAt: time.Now()}
 	s.tokens[token] = k
@@ -51,6 +61,14 @@ func (s *fakeStore) GetActiveByToken(_ context.Context, token string) (Key, erro
 	return k, nil
 }
 
+func (s *fakeStore) GetActiveByDeviceID(_ context.Context, deviceID uuid.UUID) (KeyMetadata, error) {
+	k, ok := s.activeKeyForDevice(deviceID)
+	if !ok {
+		return KeyMetadata{}, ErrNotFound
+	}
+	return KeyMetadata{ID: k.ID, CreatedAt: k.CreatedAt}, nil
+}
+
 func (s *fakeStore) ListForDevice(_ context.Context, deviceID uuid.UUID) ([]KeyMetadata, error) {
 	out := make([]KeyMetadata, 0)
 	for _, k := range s.keys {
@@ -62,16 +80,44 @@ func (s *fakeStore) ListForDevice(_ context.Context, deviceID uuid.UUID) ([]KeyM
 	return out, nil
 }
 
+// activeKeyForDevice mirrors the partial UNIQUE index invariant
+// (WHERE deleted_at IS NULL). Revoked keys are dropped from s.keys,
+// so a simple lookup already implements the soft-delete filter.
+func (s *fakeStore) activeKeyForDevice(deviceID uuid.UUID) (Key, bool) {
+	for _, k := range s.keys {
+		if k.DeviceID == deviceID {
+			return k, true
+		}
+	}
+	return Key{}, false
+}
+
+func TestCreate_FirstCreateSucceeds(t *testing.T) {
+	store := newFakeStore()
+	svc := New(store, store)
+
+	created, err := svc.Create(context.Background(), uuid.New())
+	if err != nil {
+		t.Fatalf("create: %v", err)
+	}
+	if created.Key.ID == uuid.Nil {
+		t.Errorf("created key has zero ID")
+	}
+	if created.Token == "" {
+		t.Errorf("created key has empty token")
+	}
+}
+
 func TestCreate_GeneratesUniqueTokens(t *testing.T) {
 	store := newFakeStore()
 	svc := New(store, store)
 
-	deviceID := uuid.New()
-	a, err := svc.Create(context.Background(), deviceID)
+	// Distinct devices per create — same-device now returns ErrConflict.
+	a, err := svc.Create(context.Background(), uuid.New())
 	if err != nil {
 		t.Fatalf("create A: %v", err)
 	}
-	b, err := svc.Create(context.Background(), deviceID)
+	b, err := svc.Create(context.Background(), uuid.New())
 	if err != nil {
 		t.Fatalf("create B: %v", err)
 	}
@@ -83,7 +129,7 @@ func TestCreate_GeneratesUniqueTokens(t *testing.T) {
 	}
 }
 
-func TestCreate_RotatesPriorActive(t *testing.T) {
+func TestCreate_RejectsWhenKeyAlreadyExists(t *testing.T) {
 	store := newFakeStore()
 	svc := New(store, store)
 
@@ -92,18 +138,15 @@ func TestCreate_RotatesPriorActive(t *testing.T) {
 	if err != nil {
 		t.Fatalf("first create: %v", err)
 	}
-	second, err := svc.Create(context.Background(), deviceID)
-	if err != nil {
-		t.Fatalf("second create: %v", err)
+	if _, err := svc.Create(context.Background(), deviceID); err == nil {
+		t.Fatalf("second create succeeded; want domain.ErrConflict")
+	} else if !errors.Is(err, domain.ErrConflict) {
+		t.Errorf("second create err = %v, want errors.Is(domain.ErrConflict)", err)
 	}
 
-	// The prior (first) token must no longer authenticate.
-	if _, err := svc.Authenticate(context.Background(), first.Token, deviceID); !errors.Is(err, ErrNotFound) {
-		t.Errorf("first token still authenticated after rotation: err=%v", err)
-	}
-	// The new token works.
-	if _, err := svc.Authenticate(context.Background(), second.Token, deviceID); err != nil {
-		t.Errorf("second token failed to authenticate: %v", err)
+	// The original token must still authenticate.
+	if _, err := svc.Authenticate(context.Background(), first.Token, deviceID); err != nil {
+		t.Errorf("first token failed to authenticate: %v", err)
 	}
 
 	// Exactly one active key remains for this device.
@@ -112,7 +155,22 @@ func TestCreate_RotatesPriorActive(t *testing.T) {
 		t.Fatalf("list: %v", err)
 	}
 	if len(list) != 1 {
-		t.Errorf("active keys = %d, want 1 (rotation invariant)", len(list))
+		t.Errorf("active keys = %d, want 1", len(list))
+	}
+	if list[0].ID != first.Key.ID {
+		t.Errorf("list returned %v, want first key %v", list[0].ID, first.Key.ID)
+	}
+
+	// After revoking the original, a new create must succeed.
+	if err := svc.Revoke(context.Background(), first.Key.ID); err != nil {
+		t.Fatalf("revoke: %v", err)
+	}
+	third, err := svc.Create(context.Background(), deviceID)
+	if err != nil {
+		t.Errorf("create after revoke failed: %v", err)
+	}
+	if third.Token == first.Token {
+		t.Errorf("new token matches revoked token")
 	}
 }
 
