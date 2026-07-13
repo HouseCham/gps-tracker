@@ -88,10 +88,12 @@ After `AuthSession` populates the locals, downstream middlewares can run:
 | `RequirePasswordChanged` | Blocks users with `must_change_password = true` from anything but changing their password. | 403 `must_change_password` |
 | `RequireUserRole(super_admin)` | Global role gate for admin endpoints. | 403 `forbidden` |
 | `RequireDeviceRole(role)` | Per-device role gate (`viewer`/`editor`/`owner`). | 403/404 |
+| `RequireDeviceAPIKey(queries)` | IoT auth: validates the `X-Device-API-Key` header against `:uuid_firmware` and stamps the resolved device id in locals. Used by IoT-only routes (e.g. `POST /locations`). | 401 / 404 |
 
 ```text
 c.Locals("claims") → *authula.Actor
 c.Locals("user")   → *domain.User
+c.Locals("device_id") → uuid.UUID   // set by RequireDeviceAPIKey
 ```
 
 ## Application-level auth endpoints
@@ -156,3 +158,52 @@ Invalidates the session in Authula's `sessions` table and clears the cookie. Ide
 | `APP_NAME` | No | `gps-tracker-api` | Display name in Authula logs and emails. |
 | `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | No | — | When both are set, the Google OAuth2 plugin is enabled and `/api/auth/oauth2/*` routes become live. |
 | `CORS_ALLOWED_ORIGINS` | No | empty | Comma-separated origins. When non-empty, the CORS middleware is enabled with `credentials: true`. Required when the frontend and API live on different origins. |
+
+---
+
+## IoT device auth (`X-Device-API-Key`)
+
+The IoT ingest route (`POST /api/v1/devices/:uuid_firmware/locations`) uses **per-device opaque lookup tokens** instead of session cookies. Devices cannot store cookies — they have no user agent, no persistent storage beyond a tiny flash partition, and run for weeks at a time on battery power without ever touching the dashboard. The token travels in a single header on every cycle.
+
+### Token shape
+
+- 32 random bytes (256 bits of entropy) base64url-encoded.
+- 43 characters of `[A-Za-z0-9_-]` — header-safe, no escaping required.
+- One active token per device at any time; creating a new one (via `POST /api/v1/devices/:id/api-keys`) soft-deletes the prior active token.
+
+### How it works
+
+1. The device owner calls `POST /api/v1/devices/:id/api-keys` (session auth + owner role) and receives a `plain_key` in the response. The backend does **not** retain the plain key beyond this response.
+2. The owner flashes the firmware with the token stored in NVS / Preferences (ideally encrypted at rest with the MCU's secure element).
+3. On every cycle, the device opens an HTTPS connection and sends:
+   ```
+   POST /api/v1/devices/<uuid_firmware>/locations
+   X-Device-API-Key: <token>
+   Content-Type: application/json
+   {...}
+   ```
+4. The backend middleware (`RequireDeviceAPIKey`) does the following:
+   - 401 if the header is missing.
+   - 404 if `:uuid_firmware` does not resolve to an active device.
+   - 401 if no row in `device_api_keys` matches the token (or the row is soft-deleted / expired).
+   - 401 if the matched key's `device_id` does not match the device id resolved from `:uuid_firmware`. **This prevents a token leaked from device A being used to write to device B's location history.**
+   - On success: stamps the resolved device id in `c.Locals("device_id")` and calls `c.Next()`.
+
+### Why not bcrypt?
+
+The original schema anticipated bcrypt-on-verify, but bcrypt at default cost (~80 ms) at IoT scale (one POST / 30 s × 2 880 cycles/day × 100 devices = ~7 hours of CPU/day just for auth) is impractical. The "hash" column name is now misleading — it stores the token directly. We rely on TLS to protect the token in transit, on the partial unique index to keep lookups a single seek, and on rotation to revoke compromised tokens.
+
+### Rotation
+
+Issuing a new key for a device soft-deletes the prior active key in the same transaction. The firmware update pushes the new key; from the moment the cell reconnects, only the new token authenticates. The old token is dead the instant `POST /api/v1/devices/:id/api-keys` returns.
+
+### Threat model
+
+| Concern | Mitigation |
+|---|---|
+| Token leaked over the wire | TLS terminates at nginx; the X-Device-API-Key is never logged in access logs. |
+| Token leaked from firmware flash | Rotate via `POST /api/v1/devices/:id/api-keys` and reflash. |
+| Token replayed against another device | Rejected by the key's `device_id` vs `:uuid_firmware` check. |
+| Rogue call to the endpoint with no token | `401 missing X-Device-API-Key header`. |
+| Brute-force guess of a 32-byte token | 256 bits of entropy — practically impossible. |
+| Database exfiltration | Token IS the lookup key (not a hash), so reading the DB is enough. Mitigation: row-level TLS at the DB layer; rotate every leaked device. |

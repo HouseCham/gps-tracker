@@ -186,6 +186,23 @@ func (q *Queries) GetDeviceByUUIDFirmware(ctx context.Context, uuidFirmware stri
 	return i, err
 }
 
+const getDeviceIDByUuidFirmware = `-- name: GetDeviceIDByUuidFirmware :one
+SELECT id FROM devices WHERE uuid_firmware = $1 AND deleted_at IS NULL
+`
+
+// Lightweight lookup that only returns the device id. Used by the IoT
+// location-ingest middleware after the API key has authenticated the
+// caller: we know the key's device_id, but we still want to confirm
+// the path's uuid_firmware maps to the same device row before we accept
+// the payload. Returns sql.ErrNoRows when the device does not exist OR
+// is soft-deleted; the middleware maps both to 404.
+func (q *Queries) GetDeviceIDByUuidFirmware(ctx context.Context, uuidFirmware string) (pgtype.UUID, error) {
+	row := q.db.QueryRow(ctx, getDeviceIDByUuidFirmware, uuidFirmware)
+	var id pgtype.UUID
+	err := row.Scan(&id)
+	return id, err
+}
+
 const listDevicesForUser = `-- name: ListDevicesForUser :many
 SELECT
   d.id,

@@ -1,8 +1,9 @@
 import '@/styles/components/table.css';
 import '@/styles/components/mobile-cards.css';
 //-- React
-import { useEffect, useState } from 'react';
-import type { ChangeEvent, JSX } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
+import type { ChangeEvent } from 'react';
+import type { JSX } from 'react/jsx-runtime';
 //-- Types
 import type {
     CreateDeviceDto,
@@ -14,12 +15,8 @@ import type { Language } from '@/types';
 import type { DataTableColumn } from '@/types/components/ui';
 import type { Translation } from '@/i18n';
 //-- Components
-import { DataTable, TableStatus } from '@/components/ui/DataTable';
-import { Button, Input } from '@/components/ui';
-import { DeviceForm } from '@/components/react/device';
-import { DeviceTableRow } from '@/components/react/table';
-import { DeviceMobileCard, MobileCardList } from '@/components/react/shared';
-import Modal from '@/components/react/ui/Modal';
+import { TableStatus } from '@/components/ui/DataTable';
+import { Button } from '@/components/ui';
 //-- Icons
 import { Plus } from 'lucide-react';
 //-- Utils
@@ -29,8 +26,43 @@ import { useDeviceService } from '@/lib/api/services';
 import { asApiError } from '@/lib/api/api-utils';
 //-- Toast bus
 import { toastBus } from '@/lib/stores/toast.store';
-import { EmptyTable } from './EmptyTable';
-
+//-- Lazy components
+const Modal = lazy(() => import('@/components/react/ui/Modal'));
+const ConfirmActionModal = lazy(() =>
+    import('@/components/react/shared/ConfirmActionModal').then(m => ({
+        default: m.ConfirmActionModal,
+    }))
+);
+const EmptyTable = lazy(() =>
+    import('@/components/react/table/EmptyTable').then(m => ({
+        default: m.EmptyTable,
+    }))
+);
+const DataTable = lazy(() =>
+    import('@/components/ui/DataTable').then(m => ({
+        default: m.DataTable,
+    }))
+);
+const MobileCardList = lazy(() =>
+    import('@/components/react/shared/MobileCard/MobileCardList').then(m => ({
+        default: m.MobileCardList,
+    }))
+);
+const DeviceMobileCard = lazy(() =>
+    import('@/components/react/shared/MobileCard/DeviceMobileCard').then(m => ({
+        default: m.DeviceMobileCard,
+    }))
+);
+const DeviceForm = lazy(() =>
+    import('@/components/react/device/DeviceForm').then(m => ({
+        default: m.DeviceForm,
+    }))
+);
+const DeviceTableRow = lazy(() =>
+    import('@/components/react/table/DeviceTableRow').then(m => ({
+        default: m.DeviceTableRow,
+    }))
+);
 /**
  * The window after which a device is considered offline. Anything newer
  * counts as online; anything older (or null) falls back to offline / never-seen.
@@ -313,26 +345,34 @@ export function DeviceTable({
         );
     }
 
-    const canDelete =
-        deleteTarget !== null && deleteConfirmName.trim() === deleteTarget.name;
-
     return (
         <>
+            {/* Add device button */}
             <div className="device-table__toolbar">
                 <Button variant="primary" size="sm" onClick={handleOpenCreate}>
                     <Plus size={14} strokeWidth={2} aria-hidden="true" />
                     {t.addDevice}
                 </Button>
             </div>
-
+            {/* Content */}
             {devices.length === 0 ? (
-                <EmptyTable
-                    columns={columns}
-                    emptyTitle={translation.device.noDevices}
-                    emptyMessage={translation.device.noDevicesMessage}
-                />
+                <Suspense
+                    fallback={
+                        <TableStatus mode="loading" className={className} />
+                    }
+                >
+                    <EmptyTable
+                        columns={columns}
+                        emptyTitle={translation.device.noDevices}
+                        emptyMessage={translation.device.noDevicesMessage}
+                    />
+                </Suspense>
             ) : (
-                <>
+                <Suspense
+                    fallback={
+                        <TableStatus mode="loading" className={className} />
+                    }
+                >
                     <DataTable columns={columns} className={className}>
                         {devices.map((device: DeviceWithAccess) => {
                             const status = statusFromLastSeen(
@@ -385,98 +425,73 @@ export function DeviceTable({
                             />
                         ))}
                     </MobileCardList>
-                </>
+                </Suspense>
             )}
 
             {/* Create device modal */}
-            <Modal
-                open={createOpen}
-                onClose={handleCloseCreate}
-                title={translation.device.addDevice}
-            >
-                <DeviceForm
-                    strings={{
-                        title: translation.device.addDevice,
-                        nameLabel: formStrings.nameLabel,
-                        namePlaceholder: formStrings.namePlaceholder,
-                        uuidLabel: formStrings.uuidLabel,
-                        uuidPlaceholder: formStrings.uuidPlaceholder,
-                        vehicleTypeLabel: formStrings.vehicleTypeLabel,
-                        vehicleTypeRequired: formStrings.vehicleTypeRequired,
-                        nameRequired: formStrings.nameRequired,
-                        uuidRequired: formStrings.uuidRequired,
-                        uuidInvalid: formStrings.uuidInvalid,
-                        generateUuid: formStrings.generateUuid,
-                        save: formStrings.save,
-                        saving: formStrings.saving,
-                        cancel: formStrings.cancel,
-                    }}
-                    vehicleTypes={t.vehicleTypes}
-                    onSubmit={handleCreateDevice}
-                    onCancel={handleCloseCreate}
-                    saving={isLoading}
-                />
-            </Modal>
+            <Suspense fallback={null}>
+                <Modal
+                    open={createOpen}
+                    onClose={handleCloseCreate}
+                    title={translation.device.addDevice}
+                >
+                    <DeviceForm
+                        strings={{
+                            title: translation.device.addDevice,
+                            nameLabel: formStrings.nameLabel,
+                            namePlaceholder: formStrings.namePlaceholder,
+                            uuidLabel: formStrings.uuidLabel,
+                            uuidPlaceholder: formStrings.uuidPlaceholder,
+                            vehicleTypeLabel: formStrings.vehicleTypeLabel,
+                            vehicleTypeRequired:
+                                formStrings.vehicleTypeRequired,
+                            nameRequired: formStrings.nameRequired,
+                            uuidRequired: formStrings.uuidRequired,
+                            uuidInvalid: formStrings.uuidInvalid,
+                            generateUuid: formStrings.generateUuid,
+                            save: formStrings.save,
+                            saving: formStrings.saving,
+                            cancel: formStrings.cancel,
+                        }}
+                        vehicleTypes={t.vehicleTypes}
+                        onSubmit={handleCreateDevice}
+                        onCancel={handleCloseCreate}
+                        saving={isLoading}
+                    />
+                </Modal>
+            </Suspense>
 
             {/* Delete device modal */}
-            <Modal
-                open={deleteTarget !== null}
-                onClose={handleCloseDeleteModal}
-                title={translation.device.deleteDevice}
-                variant="danger"
-                size="md"
-                footer={
-                    <>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleCloseDeleteModal}
-                            disabled={isLoading}
-                        >
-                            {t.deleteConfirm.cancel}
-                        </Button>
-                        <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={handleConfirmDelete}
-                            disabled={!canDelete || isLoading}
-                            loading={isLoading && canDelete}
-                        >
-                            {t.deleteConfirm.confirm}
-                        </Button>
-                    </>
-                }
-            >
-                <div className="device-delete-confirm">
-                    <p className="device-delete-confirm__warning" role="alert">
-                        {t.deleteConfirm.warning.replace(
-                            '{name}',
-                            deleteTarget?.name ?? ''
-                        )}
-                    </p>
-                    <Input
-                        name="delete-confirm-name"
-                        label={t.deleteConfirm.typeNameLabel}
-                        placeholder={
-                            deleteTarget
-                                ? deleteTarget.name
-                                : t.deleteConfirm.typeNamePlaceholder
-                        }
-                        value={deleteConfirmName}
-                        onChange={onDeleteNameChange}
-                        disabled={isLoading}
-                        autocomplete="off"
-                    />
-                    {deleteError && (
-                        <p
-                            className="device-delete-confirm__error"
-                            role="alert"
-                        >
-                            {deleteError}
-                        </p>
+            <Suspense fallback={null}>
+                <ConfirmActionModal
+                    open={deleteTarget !== null}
+                    onClose={handleCloseDeleteModal}
+                    title={translation.device.deleteDevice}
+                    warning={t.deleteConfirm.warning.replace(
+                        '{name}',
+                        deleteTarget?.name ?? ''
                     )}
-                </div>
-            </Modal>
+                    rootClassName="device-delete-confirm"
+                    warningClassName="device-delete-confirm__warning"
+                    errorClassName="device-delete-confirm__error"
+                    confirmLabel={t.deleteConfirm.confirm}
+                    cancelLabel={t.deleteConfirm.cancel}
+                    isLoading={isLoading}
+                    errorMessage={deleteError}
+                    onConfirm={(): void => {
+                        void handleConfirmDelete();
+                    }}
+                    confirmNameLabel={t.deleteConfirm.typeNameLabel}
+                    confirmNamePlaceholder={
+                        deleteTarget
+                            ? deleteTarget.name
+                            : t.deleteConfirm.typeNamePlaceholder
+                    }
+                    confirmName={deleteConfirmName}
+                    expectedName={deleteTarget?.name ?? ''}
+                    onConfirmNameChange={onDeleteNameChange}
+                />
+            </Suspense>
         </>
     );
 }

@@ -30,6 +30,15 @@ SELECT id, uuid_firmware, name, vehicle_type, created_at, last_seen_at, deleted_
 FROM devices
 WHERE uuid_firmware = $1 AND deleted_at IS NULL;
 
+-- name: GetDeviceIDByUuidFirmware :one
+-- Lightweight lookup that only returns the device id. Used by the IoT
+-- location-ingest middleware after the API key has authenticated the
+-- caller: we know the key's device_id, but we still want to confirm
+-- the path's uuid_firmware maps to the same device row before we accept
+-- the payload. Returns sql.ErrNoRows when the device does not exist OR
+-- is soft-deleted; the middleware maps both to 404.
+SELECT id FROM devices WHERE uuid_firmware = $1 AND deleted_at IS NULL;
+
 -- name: ListDevicesForUser :many
 -- Returns the devices the given user has access to, with the access role
 -- from user_device_access. Used by the dashboard "my devices" view.

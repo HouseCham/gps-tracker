@@ -13,7 +13,7 @@ import (
 
 const getLatestLocationForDevice = `-- name: GetLatestLocationForDevice :one
 SELECT device_id, recorded_at, latitude, longitude,
-       altitude, speed, accuracy, satellites
+       altitude, speed, accuracy, battery_voltage, signal_strength
 FROM locations
 WHERE device_id = $1
 ORDER BY recorded_at DESC
@@ -33,14 +33,15 @@ func (q *Queries) GetLatestLocationForDevice(ctx context.Context, deviceID pgtyp
 		&i.Altitude,
 		&i.Speed,
 		&i.Accuracy,
-		&i.Satellites,
+		&i.BatteryVoltage,
+		&i.SignalStrength,
 	)
 	return i, err
 }
 
 const getLocationsForDevice = `-- name: GetLocationsForDevice :many
 SELECT device_id, recorded_at, latitude, longitude,
-       altitude, speed, accuracy, satellites
+       altitude, speed, accuracy, battery_voltage, signal_strength
 FROM locations
 WHERE device_id = $1
   AND recorded_at >= $2
@@ -75,7 +76,8 @@ func (q *Queries) GetLocationsForDevice(ctx context.Context, arg GetLocationsFor
 			&i.Altitude,
 			&i.Speed,
 			&i.Accuracy,
-			&i.Satellites,
+			&i.BatteryVoltage,
+			&i.SignalStrength,
 		); err != nil {
 			return nil, err
 		}
@@ -96,7 +98,8 @@ SELECT
   l.altitude,
   l.speed,
   l.accuracy,
-  l.satellites
+  l.battery_voltage,
+  l.signal_strength
 FROM locations l
 INNER JOIN user_device_access uda
   ON l.device_id = uda.device_id AND uda.deleted_at IS NULL
@@ -132,7 +135,8 @@ func (q *Queries) GetLocationsForUser(ctx context.Context, arg GetLocationsForUs
 			&i.Altitude,
 			&i.Speed,
 			&i.Accuracy,
-			&i.Satellites,
+			&i.BatteryVoltage,
+			&i.SignalStrength,
 		); err != nil {
 			return nil, err
 		}
@@ -147,23 +151,24 @@ func (q *Queries) GetLocationsForUser(ctx context.Context, arg GetLocationsForUs
 const insertLocation = `-- name: InsertLocation :exec
 INSERT INTO locations (
   device_id, recorded_at, latitude, longitude,
-  altitude, speed, accuracy, satellites
+  altitude, speed, accuracy, battery_voltage, signal_strength
 ) VALUES (
   $1, $2, $3, $4,
-  $5, $6, $7, $8
+  $5, $6, $7, $8, $9
 )
 ON CONFLICT (device_id, recorded_at) DO NOTHING
 `
 
 type InsertLocationParams struct {
-	DeviceID   pgtype.UUID
-	RecordedAt pgtype.Timestamptz
-	Latitude   float64
-	Longitude  float64
-	Altitude   *float64
-	Speed      *float64
-	Accuracy   *float64
-	Satellites *int32
+	DeviceID       pgtype.UUID
+	RecordedAt     pgtype.Timestamptz
+	Latitude       float64
+	Longitude      float64
+	Altitude       *float64
+	Speed          *float64
+	Accuracy       *float64
+	BatteryVoltage *float64
+	SignalStrength *int32
 }
 
 // Idempotent insert for IoT location reports.
@@ -179,7 +184,8 @@ func (q *Queries) InsertLocation(ctx context.Context, arg InsertLocationParams) 
 		arg.Altitude,
 		arg.Speed,
 		arg.Accuracy,
-		arg.Satellites,
+		arg.BatteryVoltage,
+		arg.SignalStrength,
 	)
 	return err
 }

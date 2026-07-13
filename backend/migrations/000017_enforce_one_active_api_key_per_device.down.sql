@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS idx_device_api_keys_active_device;

@@ -13,6 +13,7 @@ export const MOBILE_CARD_LIST_MODIFIER_CLASS: Record<
     user: 'user-cards',
     device: 'device-cards',
     access: 'access-cards',
+    'api-key': 'api-key-cards',
 };
 
 /**
@@ -24,4 +25,5 @@ export const MOBILE_CARD_META_BLOCK_CLASS: Record<MobileCardVariant, string> = {
     user: 'user-card',
     device: 'mobile-device-card',
     access: 'access-card',
+    'api-key': 'api-key-card',
 };
