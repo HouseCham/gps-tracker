@@ -44,10 +44,7 @@ describe('toastBus.push', () => {
         // The two earliest toasts (t0, t1) were dropped; the rest survived
         // in insertion order.
         expect(stack.map(t => t.title)).toEqual(
-            Array.from(
-                { length: TOAST_STACK_MAX },
-                (_, i) => `t${i + 2}`
-            )
+            Array.from({ length: TOAST_STACK_MAX }, (_, i) => `t${i + 2}`)
         );
     });
 });

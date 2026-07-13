@@ -9,7 +9,7 @@ inputs:
   pnpm-version:
     description: 'The version of pnpm to use (e.g., 7, 8, 9, 10, 11).'
     required: false
-    default: '11'
+    default: '11.10.0'
   working-directory:
     description: 'Project subdir to install dependencies from. Leave empty to install from the repo root.'
     required: false

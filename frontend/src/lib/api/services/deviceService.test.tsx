@@ -34,7 +34,9 @@ function withAccess(id: string): DeviceWithAccess {
     return { ...device(id), access_role: 'owner' };
 }
 
-function listEnv(items: DeviceWithAccess[]): { data: Envelope<DeviceListResponse> } {
+function listEnv(items: DeviceWithAccess[]): {
+    data: Envelope<DeviceListResponse>;
+} {
     return {
         data: {
             status_code: 200,
@@ -79,7 +81,7 @@ describe('useDeviceService', () => {
                 expect.objectContaining({
                     method: 'GET',
                     query: { page: 1, page_size: 20 },
-                }),
+                })
             );
         });
 
@@ -94,7 +96,7 @@ describe('useDeviceService', () => {
 
             expect(apiClient).toHaveBeenCalledWith(
                 '/devices',
-                expect.objectContaining({ query: { page: 2, page_size: 5 } }),
+                expect.objectContaining({ query: { page: 2, page_size: 5 } })
             );
         });
     });
@@ -147,7 +149,9 @@ describe('useDeviceService', () => {
     describe('deleteDevice', () => {
         it('removes the device from the list', async () => {
             apiClient
-                .mockResolvedValueOnce(listEnv([withAccess('d1'), withAccess('d2')]))
+                .mockResolvedValueOnce(
+                    listEnv([withAccess('d1'), withAccess('d2')])
+                )
                 .mockResolvedValueOnce({ data: null });
 
             const { result } = renderHook(() => useDeviceService());
@@ -197,12 +201,12 @@ describe('useDeviceService', () => {
                 expect.objectContaining({
                     method: 'POST',
                     body: { user_id: 'u-x' },
-                }),
+                })
             );
             expect(apiClient).toHaveBeenNthCalledWith(
                 2,
                 '/devices/d1',
-                expect.objectContaining({ method: 'GET' }),
+                expect.objectContaining({ method: 'GET' })
             );
             expect(result.current.device?.users).toEqual(refreshed.users);
         });
@@ -225,12 +229,12 @@ describe('useDeviceService', () => {
             expect(apiClient).toHaveBeenNthCalledWith(
                 1,
                 '/devices/d1/access/u-x',
-                expect.objectContaining({ method: 'DELETE' }),
+                expect.objectContaining({ method: 'DELETE' })
             );
             expect(apiClient).toHaveBeenNthCalledWith(
                 2,
                 '/devices/d1',
-                expect.objectContaining({ method: 'GET' }),
+                expect.objectContaining({ method: 'GET' })
             );
             expect(result.current.device?.users).toEqual([]);
         });

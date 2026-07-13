@@ -30,7 +30,7 @@ type TestApp struct {
 	UsersRepo        *MockUsersRepository
 	AccessRepo       *MockAccessRepository
 	DevicesService   *devices.Service
-	UsersService     *users.UserService
+	UsersService     *users.Service
 	AccessService    *access.AccessService
 	DevicesHandler   *handlers.DevicesHandler
 	UsersHandler     *handlers.UsersHandler
@@ -50,7 +50,7 @@ func WithDevicesRepo(repo *MockDevicesRepository) TestAppOption {
 func WithUsersRepo(repo *MockUsersRepository) TestAppOption {
 	return func(ta *TestApp) {
 		ta.UsersRepo = repo
-		ta.UsersService = users.NewUserService(repo, &MockUserCreator{})
+		ta.UsersService = users.NewService(repo, &MockUserCreator{})
 	}
 }
 
@@ -76,7 +76,7 @@ func NewTestApp(opts ...TestAppOption) *TestApp {
 	}
 
 	ta.DevicesService = devices.New(ta.DevicesRepo)
-	ta.UsersService = users.NewUserService(ta.UsersRepo, &MockUserCreator{})
+		ta.UsersService = users.NewService(ta.UsersRepo, &MockUserCreator{})
 	ta.AccessService = access.NewAccessService(ta.AccessRepo, ta.UsersRepo)
 
 	for _, opt := range opts {

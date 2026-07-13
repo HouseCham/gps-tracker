@@ -15,7 +15,7 @@ import (
 // projection for role / FK relationships. Lazy lookup in the auth
 // middleware is the safety net if this hook ever fails, so failures
 // here are logged but do NOT roll back the signup.
-func SignupMirrorHook(a *Auth, usersSvc *users.UserService) models.Hook {
+func SignupMirrorHook(a *Auth, usersSvc *users.Service) models.Hook {
 	return models.Hook{
 		Stage: models.HookAfter,
 		Matcher: func(rc *models.RequestContext) bool {

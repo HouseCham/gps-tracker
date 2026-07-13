@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/HouseCham/gps-tracker/backend/internal/domain"
 	"github.com/go-playground/validator/v10"
@@ -16,6 +17,7 @@ func SetUpValidator() *validator.Validate {
 	v.RegisterValidation("uuid", validateUUID)
 	v.RegisterValidation("access_role", validateAccessRole)
 	v.RegisterValidation("user_role", validateUserRole)
+	v.RegisterValidation("rfc3339", validateRFC3339)
 	return v
 }
 
@@ -50,6 +52,8 @@ var errorMessages = map[string]string{
 	"len":         "The field %s must have exactly the specified length.",
 	"gte":         "The field %s must be greater than or equal to the specified value.",
 	"lte":         "The field %s must be less than or equal to the specified value.",
+	"rfc3339":     "The field %s must be a valid ISO 8601 / RFC 3339 timestamp.",
+	"datetime":    "The field %s must be a valid timestamp.",
 }
 
 // validationFields maps Go struct field names to their human-readable label
@@ -73,13 +77,14 @@ var validationFields = map[string]string{
 	"OwnerID":  "owner id",
 
 	/* ===== Location ===== */
-	"RecordedAt": "recorded at",
-	"Latitude":   "latitude",
-	"Longitude":  "longitude",
-	"Altitude":   "altitude",
-	"Speed":      "speed",
-	"Accuracy":   "accuracy",
-	"Satellites": "satellites",
+	"RecordedAt":     "recorded at",
+	"Latitude":       "latitude",
+	"Longitude":      "longitude",
+	"Altitude":       "altitude",
+	"Speed":          "speed",
+	"Accuracy":       "accuracy",
+	"BatteryVoltage": "battery voltage",
+	"SignalStrength": "signal strength",
 }
 
 // validateUUID checks that the field is a syntactically valid UUID.
@@ -119,4 +124,18 @@ func validateUserRole(fl validator.FieldLevel) bool {
 		return true
 	}
 	return false
+}
+
+// validateRFC3339 checks that the field is parseable as RFC 3339
+// (the ISO 8601 profile Go's time package accepts). Used on the
+// `recorded_at` field of the location-ingest DTO so the ESP32 can
+// send any well-formed UTC instant without us hard-coding a specific
+// format.
+func validateRFC3339(fl validator.FieldLevel) bool {
+	s := fl.Field().String()
+	if s == "" {
+		return true
+	}
+	_, err := time.Parse(time.RFC3339, s)
+	return err == nil
 }

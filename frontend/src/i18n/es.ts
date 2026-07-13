@@ -136,7 +136,7 @@ export const es: Translation = {
         loginTitle: 'Bienvenido de nuevo',
         loginSubtitle: 'Inicia sesión en tu cuenta GPS Tracker',
         signupTitle: 'Crear una cuenta',
-        signupSubtitle: 'Empieza a rastrear tu flota en minutos',
+        signupSubtitle: 'Empieza a rastrear tus dispositivos en minutos',
         logoutConfirm: '¿Estás seguro de cerrar sesión?',
         signInWithGoogle: 'Iniciar sesión con Google',
         signUpWithGoogle: 'Registrarse con Google',
@@ -194,6 +194,7 @@ export const es: Translation = {
             nameRequired: 'El nombre es obligatorio',
             uuidRequired: 'El UUID es obligatorio',
             uuidInvalid: 'Formato de UUID inválido',
+            generateUuid: 'Generar',
             save: 'Guardar',
             saving: 'Guardando...',
             cancel: 'Cancelar',
@@ -321,6 +322,10 @@ export const es: Translation = {
             },
         },
     },
+    user: {
+        noUsersTitle: 'Sin usuarios',
+        noUsersMessage: 'Añade tu primer usuario para empezar.',
+    },
     toast: {
         deviceCreated: {
             title: 'Creado',
@@ -349,6 +354,71 @@ export const es: Translation = {
         userDeleted: {
             title: 'Usuario eliminado',
             message: 'El usuario se ha eliminado.',
+        },
+        apiKeyCreated: {
+            title: 'Clave generada',
+            message: 'Guarda la clave en el firmware del dispositivo.',
+        },
+        apiKeyRevoked: {
+            title: 'Clave revocada',
+            message: 'La clave ya no es válida.',
+        },
+        apiKeyCopied: {
+            title: 'Copiado',
+            message: 'Clave de API copiada al portapapeles.',
+        },
+        copyFailed: {
+            title: 'Error al copiar',
+            message: 'No se pudo copiar al portapapeles.',
+        },
+    },
+    apiKeys: {
+        title: 'Claves de API',
+        subtitle: 'Gestiona los tokens IoT que autentican tus dispositivos',
+        newKey: 'Nueva clave de API',
+        noDevices: 'Aún no hay dispositivos',
+        noDevicesMessage:
+            'Necesitas crear un dispositivo antes de poder generar una clave de API.',
+        noKeys: 'No hay claves activas',
+        noKeysMessage:
+            'Genera una clave para empezar a recibir datos de ubicación desde tus dispositivos.',
+        failedToLoad: 'Error al cargar las claves de API',
+        createModal: {
+            title: 'Generar clave de API',
+            deviceLabel: 'Dispositivo',
+            devicePlaceholder: 'Selecciona un dispositivo',
+            deviceRequired: 'Elige un dispositivo',
+            generate: 'Generar clave',
+            generating: 'Generando…',
+            cancel: 'Cancelar',
+        },
+        reveal: {
+            title: 'Guarda esta clave de API',
+            warning:
+                'Esta es la única vez que se mostrará la clave. Cópiala y guárdala en un lugar seguro — no podrás volver a verla.',
+            copy: 'Copiar',
+            copied: '¡Copiado!',
+            done: 'Ya la guardé',
+        },
+        table: {
+            device: 'Dispositivo',
+            keyId: 'ID de clave',
+            created: 'Creada',
+            lastUsed: 'Último uso',
+            expires: 'Expira',
+            actions: 'Acciones',
+            neverUsed: 'Nunca',
+            noExpiry: 'Sin expiración',
+            revoke: 'Revocar',
+        },
+        revoke: {
+            title: 'Revocar clave de API',
+            warning:
+                'Esto revocará la clave de API de "{device}". Cualquier dispositivo que la use dejará de enviar datos de ubicación inmediatamente.',
+            confirm: 'Revocar clave',
+            revoking: 'Revocando…',
+            cancel: 'Cancelar',
+            revokeFailed: 'No se pudo revocar la clave. Inténtalo de nuevo.',
         },
     },
 };

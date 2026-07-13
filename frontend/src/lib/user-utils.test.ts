@@ -57,9 +57,7 @@ describe('getFirstNameWithInitial', () => {
     });
 
     it('keeps extra whitespace from collapsing to single tokens', () => {
-        expect(getFirstNameWithInitial('   Ada   Lovelace   ')).toBe(
-            'Ada L.'
-        );
+        expect(getFirstNameWithInitial('   Ada   Lovelace   ')).toBe('Ada L.');
     });
 });
 

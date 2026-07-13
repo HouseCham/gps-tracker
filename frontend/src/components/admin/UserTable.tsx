@@ -2,21 +2,14 @@ import '@/styles/components/mobile-cards.css';
 //-- React
 import type { JSX } from 'react/jsx-runtime';
 import type { ChangeEvent } from 'react';
-import {
-    lazy,
-    Suspense,
-    useEffect,
-    useState,
-} from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 //-- Types
 import type { CreateUserDto, User } from '@/types/api';
 import type { Language } from '@/types';
 import type { Translation } from '@/i18n';
 //-- Components
-import { DataTable, TableStatus } from '@/components/ui/DataTable';
-import { Button, Input } from '@/components/ui';
-import { MobileCardList, UserMobileCard } from '@/components/react/shared';
-import { UserTableRow } from '@/components/react/table';
+import { TableStatus } from '@/components/ui/DataTable';
+import { Button } from '@/components/ui';
 //-- Icons
 import { Plus } from 'lucide-react';
 //-- Utils
@@ -28,9 +21,39 @@ import { useUserService } from '@/lib/api/services';
 import { toastBus } from '@/lib/stores/toast.store';
 //-- Lazy components
 const Modal = lazy(() => import('@/components/react/ui/Modal'));
+const ConfirmActionModal = lazy(() =>
+    import('@/components/react/shared/ConfirmActionModal').then(m => ({
+        default: m.ConfirmActionModal,
+    }))
+);
 const CreateUserForm = lazy(() =>
     import('@/components/react/form/CreateUserForm').then(m => ({
         default: m.CreateUserForm,
+    }))
+);
+const EmptyTable = lazy(() =>
+    import('@/components/react/table/EmptyTable').then(m => ({
+        default: m.EmptyTable,
+    }))
+);
+const DataTable = lazy(() =>
+    import('@/components/ui/DataTable').then(m => ({
+        default: m.DataTable,
+    }))
+);
+const UserTableRow = lazy(() =>
+    import('@/components/react/table/UserTableRow').then(m => ({
+        default: m.UserTableRow,
+    }))
+);
+const MobileCardList = lazy(() =>
+    import('@/components/react/shared/MobileCard/MobileCardList').then(m => ({
+        default: m.MobileCardList,
+    }))
+);
+const UserMobileCard = lazy(() =>
+    import('@/components/react/shared/MobileCard/UserMobileCard').then(m => ({
+        default: m.UserMobileCard,
     }))
 );
 /**
@@ -84,13 +107,23 @@ export function UserTable({
      * @param {CreateUserDto} dto - The user payload from the form.
      */
     async function handleCreateUser(dto: CreateUserDto): Promise<void> {
-        await createUser(dto);
-        toastBus.push({
-            variant: 'success',
-            title: toastStrings.userCreated.title,
-            message: toastStrings.userCreated.message,
-        });
-        setCreateOpen(false);
+        try {
+            await createUser(dto);
+            toastBus.push({
+                variant: 'success',
+                title: toastStrings.userCreated.title,
+                message: toastStrings.userCreated.message,
+            });
+            setCreateOpen(false);
+        } catch (err) {
+            const apiErr = asApiError(err);
+            toastBus.push({
+                variant: 'error',
+                title: 'Error',
+                message: apiErr.message ?? 'Could not create the user.',
+            });
+            throw err;
+        }
     }
     /**
      * Opens the delete-confirmation modal for the given user.
@@ -168,19 +201,6 @@ export function UserTable({
         getAllUsers();
     }, []);
 
-    // Esc cancels whichever modal is open (only one at a time).
-    useEffect(() => {
-        const hasOpen = deleteTarget !== null;
-        if (!hasOpen) return;
-        const onKey = (e: KeyboardEvent): void => {
-            if (e.key === 'Escape') {
-                handleCancelDelete();
-            }
-        };
-        document.addEventListener('keydown', onKey);
-        return (): void => document.removeEventListener('keydown', onKey);
-    }, [deleteTarget, handleCancelDelete]);
-
     // ---- Return early if loading or user list is empty (with or without error) ----
     if (isLoading && users.length === 0)
         return <TableStatus mode="loading" className={className} />;
@@ -200,9 +220,6 @@ export function UserTable({
     const deleteTargetFullName = deleteTarget
         ? `${deleteTarget.name} ${deleteTarget.lastname}`
         : '';
-    const canDelete =
-        deleteTarget !== null &&
-        deleteConfirmName.trim() === deleteTargetFullName;
 
     return (
         <>
@@ -218,39 +235,59 @@ export function UserTable({
                 </Button>
             </div>
             {/* Users Table */}
-            <DataTable columns={columns} className={className}>
-                {users.map(user => {
-                    const handlers = rowHandlersById.get(user.id);
-                    if (!handlers) return null;
-                    return (
-                        <UserTableRow
-                            key={user.id}
-                            user={user}
-                            locale={locale}
-                            labels={t}
-                            roles={translation.admin.roles}
-                            onDelete={handlers.onDelete}
-                        />
-                    );
-                })}
-            </DataTable>
-            {/* Mobile cards (≤ 767.98px) — mirrors the table rows above. */}
-            <MobileCardList variant="user" label={t.name}>
-                {users.map(user => {
-                    const handlers = rowHandlersById.get(user.id);
-                    if (!handlers) return null;
-                    return (
-                        <UserMobileCard
-                            key={user.id}
-                            locale={locale}
-                            user={user}
-                            labels={t}
-                            roles={translation.admin.roles}
-                            onDelete={handlers.onDelete}
-                        />
-                    );
-                })}
-            </MobileCardList>
+            {users.length === 0 ? (
+                <Suspense
+                    fallback={
+                        <TableStatus mode="loading" className={className} />
+                    }
+                >
+                    <EmptyTable
+                        columns={columns}
+                        emptyTitle={translation.user.noUsersTitle}
+                        emptyMessage={translation.user.noUsersMessage}
+                    />
+                </Suspense>
+            ) : (
+                <Suspense
+                    fallback={
+                        <TableStatus mode="loading" className={className} />
+                    }
+                >
+                    <DataTable columns={columns} className={className}>
+                        {users.map(user => {
+                            const handlers = rowHandlersById.get(user.id);
+                            if (!handlers) return null;
+                            return (
+                                <UserTableRow
+                                    key={user.id}
+                                    user={user}
+                                    locale={locale}
+                                    labels={t}
+                                    roles={translation.admin.roles}
+                                    onDelete={handlers.onDelete}
+                                />
+                            );
+                        })}
+                    </DataTable>
+                    {/* Mobile cards (≤ 767.98px) — mirrors the table rows above. */}
+                    <MobileCardList variant="user" label={t.name}>
+                        {users.map(user => {
+                            const handlers = rowHandlersById.get(user.id);
+                            if (!handlers) return null;
+                            return (
+                                <UserMobileCard
+                                    key={user.id}
+                                    locale={locale}
+                                    user={user}
+                                    labels={t}
+                                    roles={translation.admin.roles}
+                                    onDelete={handlers.onDelete}
+                                />
+                            );
+                        })}
+                    </MobileCardList>
+                </Suspense>
+            )}
             {/* Create User Modal */}
             <Suspense fallback={null}>
                 <Modal
@@ -268,67 +305,34 @@ export function UserTable({
             </Suspense>
             {/* Delete User Confirmation Modal */}
             <Suspense fallback={null}>
-                <Modal
+                <ConfirmActionModal
                     open={deleteTarget !== null}
                     onClose={handleCancelDelete}
                     title={t.deleteConfirm.title}
-                    variant="danger"
-                    size="md"
-                    footer={
-                        <>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={handleCancelDelete}
-                                disabled={isLoading}
-                            >
-                                {t.deleteConfirm.cancel}
-                            </Button>
-                            <Button
-                                variant="danger"
-                                size="sm"
-                                onClick={handleConfirmDelete}
-                                disabled={!canDelete || isLoading}
-                                loading={isLoading && canDelete}
-                            >
-                                {t.deleteConfirm.confirm}
-                            </Button>
-                        </>
+                    warning={t.deleteConfirm.warning.replace(
+                        '{name}',
+                        deleteTargetFullName
+                    )}
+                    rootClassName="user-delete-confirm"
+                    warningClassName="user-delete-confirm__warning"
+                    errorClassName="user-delete-confirm__error"
+                    confirmLabel={t.deleteConfirm.confirm}
+                    cancelLabel={t.deleteConfirm.cancel}
+                    isLoading={isLoading}
+                    errorMessage={deleteError}
+                    onConfirm={(): void => {
+                        void handleConfirmDelete();
+                    }}
+                    confirmNameLabel={t.deleteConfirm.typeNameLabel}
+                    confirmNamePlaceholder={
+                        deleteTarget
+                            ? deleteTargetFullName
+                            : t.deleteConfirm.typeNamePlaceholder
                     }
-                >
-                    <div className="user-delete-confirm">
-                        <p
-                            className="user-delete-confirm__warning"
-                            role="alert"
-                        >
-                            {t.deleteConfirm.warning.replace(
-                                '{name}',
-                                deleteTargetFullName
-                            )}
-                        </p>
-                        <Input
-                            name="delete-confirm-name"
-                            label={t.deleteConfirm.typeNameLabel}
-                            placeholder={
-                                deleteTarget
-                                    ? deleteTargetFullName
-                                    : t.deleteConfirm.typeNamePlaceholder
-                            }
-                            value={deleteConfirmName}
-                            onChange={onDeleteNameChange}
-                            disabled={isLoading}
-                            autocomplete="off"
-                        />
-                        {deleteError && (
-                            <p
-                                className="user-delete-confirm__error"
-                                role="alert"
-                            >
-                                {deleteError}
-                            </p>
-                        )}
-                    </div>
-                </Modal>
+                    confirmName={deleteConfirmName}
+                    expectedName={deleteTargetFullName}
+                    onConfirmNameChange={onDeleteNameChange}
+                />
             </Suspense>
         </>
     );

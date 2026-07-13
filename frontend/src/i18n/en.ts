@@ -131,7 +131,7 @@ export const en = {
         loginTitle: 'Welcome back',
         loginSubtitle: 'Sign in to your GPS Tracker account',
         signupTitle: 'Create an account',
-        signupSubtitle: 'Start tracking your fleet in minutes',
+        signupSubtitle: 'Start tracking your devices in minutes',
         logoutConfirm: 'Are you sure you want to log out?',
         signInWithGoogle: 'Sign in with Google',
         signUpWithGoogle: 'Sign up with Google',
@@ -189,6 +189,7 @@ export const en = {
             nameRequired: 'Device name is required',
             uuidRequired: 'Firmware UUID is required',
             uuidInvalid: 'Invalid UUID format',
+            generateUuid: 'Generate',
             save: 'Save',
             saving: 'Saving...',
             cancel: 'Cancel',
@@ -310,6 +311,10 @@ export const en = {
             },
         },
     },
+    user: {
+        noUsersTitle: 'No users yet',
+        noUsersMessage: 'Add your first user to get started.',
+    },
     toast: {
         deviceCreated: {
             title: 'Created',
@@ -338,6 +343,71 @@ export const en = {
         userDeleted: {
             title: 'User deleted',
             message: 'User has been removed.',
+        },
+        apiKeyCreated: {
+            title: 'Key generated',
+            message: 'Store the key in your device firmware.',
+        },
+        apiKeyRevoked: {
+            title: 'Key revoked',
+            message: 'The key is no longer valid.',
+        },
+        apiKeyCopied: {
+            title: 'Copied',
+            message: 'API key copied to clipboard.',
+        },
+        copyFailed: {
+            title: 'Copy failed',
+            message: 'Could not copy to clipboard.',
+        },
+    },
+    apiKeys: {
+        title: 'API Keys',
+        subtitle: 'Manage the IoT tokens that authenticate your devices',
+        newKey: 'New API key',
+        noDevices: 'No devices yet',
+        noDevicesMessage:
+            'You need to create a device before you can issue an API key.',
+        noKeys: 'No active keys',
+        noKeysMessage:
+            'Issue a key to start receiving location pings from your devices.',
+        failedToLoad: 'Failed to load API keys',
+        createModal: {
+            title: 'Generate API key',
+            deviceLabel: 'Device',
+            devicePlaceholder: 'Select a device',
+            deviceRequired: 'Pick a device',
+            generate: 'Generate key',
+            generating: 'Generating…',
+            cancel: 'Cancel',
+        },
+        reveal: {
+            title: 'Save this API key',
+            warning:
+                'This is the only time the key will be displayed. Copy it and store it securely — you will not be able to see it again.',
+            copy: 'Copy',
+            copied: 'Copied!',
+            done: 'I have saved it',
+        },
+        table: {
+            device: 'Device',
+            keyId: 'Key ID',
+            created: 'Created',
+            lastUsed: 'Last used',
+            expires: 'Expires',
+            actions: 'Actions',
+            neverUsed: 'Never',
+            noExpiry: 'No expiry',
+            revoke: 'Revoke',
+        },
+        revoke: {
+            title: 'Revoke API key',
+            warning:
+                'This will revoke the API key for "{device}". Any device using this key will stop sending location data immediately.',
+            confirm: 'Revoke key',
+            revoking: 'Revoking…',
+            cancel: 'Cancel',
+            revokeFailed: 'Could not revoke the key. Try again.',
         },
     },
 };

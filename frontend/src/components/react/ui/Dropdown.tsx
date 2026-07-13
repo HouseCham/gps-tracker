@@ -37,6 +37,19 @@ export interface DropdownProps {
     closeOnSelect?: boolean;
     ariaLabel?: string;
 }
+/**
+ * @typedef MenuPos
+ * @property {number} top - The top position of the menu.
+ * @property {number} left - The left position of the menu.
+ * @property {number} minWidth - The minimum width of the menu.
+ * @property {'bottom' | 'top'} side - The side of the menu.
+ */
+type MenuPos = {
+    top: number;
+    left: number;
+    minWidth: number;
+    side: 'bottom' | 'top';
+};
 
 /**
  * Vertical clearance reserved for the open menu. Used only when the menu has
@@ -73,49 +86,12 @@ export default function Dropdown({
     const triggerRef = useRef<HTMLButtonElement>(null);
     const menuRef = useRef<HTMLDivElement>(null);
 
-    /**
-     * Menu placement: viewport-space `top` / `left` and which side of the
-     * trigger the menu opens on. Null while the menu is closed (or
-     * immediately after close, before the next open).
-     * @interface MenuPos
-     */
-    interface MenuPos {
-        top: number;
-        left: number;
-        minWidth: number;
-        side: 'bottom' | 'top';
-    }
     const [menuPos, setMenuPos] = useState<MenuPos | null>(null);
 
     const setOpen = (next: boolean): void => {
         if (!isControlled) setUncontrolledOpen(next);
         onOpenChange?.(next);
     };
-
-    useEffect(() => {
-        if (!open) return;
-        const onPointer = (e: MouseEvent): void => {
-            const root = rootRef.current;
-            const menu = menuRef.current;
-            const target = e.target as Node | null;
-            if (!target) return;
-            if (root && root.contains(target)) return;
-            if (menu && menu.contains(target)) return;
-            setOpen(false);
-        };
-        const onKey = (e: KeyboardEvent): void => {
-            if (e.key === 'Escape') {
-                setOpen(false);
-                triggerRef.current?.focus();
-            }
-        };
-        document.addEventListener('mousedown', onPointer);
-        document.addEventListener('keydown', onKey);
-        return (): void => {
-            document.removeEventListener('mousedown', onPointer);
-            document.removeEventListener('keydown', onKey);
-        };
-    }, [open, setOpen]);
 
     /**
      * Computes the menu's viewport position from the trigger's bounding rect.
@@ -143,6 +119,34 @@ export default function Dropdown({
         setMenuPos({ top, left, minWidth, side: flipUp ? 'top' : 'bottom' });
     };
 
+    const computeMenuPosRef = useRef(computeMenuPos);
+    computeMenuPosRef.current = computeMenuPos;
+
+    useEffect(() => {
+        if (!open) return;
+        const onPointer = (e: MouseEvent): void => {
+            const root = rootRef.current;
+            const menu = menuRef.current;
+            const target = e.target as Node | null;
+            if (!target) return;
+            if (root && root.contains(target)) return;
+            if (menu && menu.contains(target)) return;
+            setOpen(false);
+        };
+        const onKey = (e: KeyboardEvent): void => {
+            if (e.key === 'Escape') {
+                setOpen(false);
+                triggerRef.current?.focus();
+            }
+        };
+        document.addEventListener('mousedown', onPointer);
+        document.addEventListener('keydown', onKey);
+        return (): void => {
+            document.removeEventListener('mousedown', onPointer);
+            document.removeEventListener('keydown', onKey);
+        };
+    }, [open, setOpen]);
+
     // Recompute position on open + on viewport changes while open. Scroll is
     // captured so ancestor scrolls (e.g. the table's overflow:auto wrapper)
     // also reposition the menu.
@@ -151,21 +155,21 @@ export default function Dropdown({
             setMenuPos(null);
             return;
         }
-        computeMenuPos();
-        const onChange = (): void => computeMenuPos();
+        computeMenuPosRef.current();
+        const onChange = (): void => computeMenuPosRef.current();
         window.addEventListener('resize', onChange);
         window.addEventListener('scroll', onChange, true);
         return (): void => {
             window.removeEventListener('resize', onChange);
             window.removeEventListener('scroll', onChange, true);
         };
-    }, [open, computeMenuPos]);
+    }, [open]);
 
     // After the menu mounts, recompute so we can use its real height/width
     // (the first paint uses an estimate).
     useLayoutEffect(() => {
         if (open) computeMenuPos();
-    }, [open, items, sections, computeMenuPos]);
+    }, [open, items, sections]);
 
     const handleTrigger = (): void => setOpen(!open);
 

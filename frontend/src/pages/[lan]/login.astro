@@ -35,9 +35,6 @@ const loginStrings: LoginFormStrings = {
 };
 ---
 
-<AuthLayout title={`${translation.auth.loginTitle} · GPS Tracker`}>
-    <LoginForm
-        client:load
-        strings={loginStrings}
-    />
+<AuthLayout isLoginPage title={`${translation.auth.loginTitle} · GPS Tracker`}>
+    <LoginForm client:load strings={loginStrings} />
 </AuthLayout>

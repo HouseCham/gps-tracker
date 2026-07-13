@@ -35,7 +35,9 @@ describe('getDeviceTableColumns', () => {
         const cols = getDeviceTableColumns(en);
         const t = en.device.table;
         expect(cols.find(c => c.key === 'name')?.label).toBe(t.name);
-        expect(cols.find(c => c.key === 'vehicleType')?.label).toBe(t.vehicleType);
+        expect(cols.find(c => c.key === 'vehicleType')?.label).toBe(
+            t.vehicleType
+        );
         expect(cols.find(c => c.key === 'status')?.label).toBe(t.status);
         expect(cols.find(c => c.key === 'lastSeen')?.label).toBe(t.lastSeen);
         expect(cols.find(c => c.key === 'actions')?.label).toBe(t.actions);
@@ -57,7 +59,9 @@ describe('getDemoKpiItems', () => {
 
     it('emits valid variant/icon/trend literals', () => {
         for (const item of getDemoKpiItems(en)) {
-            expect(['neutral', 'success', 'warning', 'danger']).toContain(item.variant);
+            expect(['neutral', 'success', 'warning', 'danger']).toContain(
+                item.variant
+            );
             expect(['cpu', 'wifi', 'wifi-off', 'alert']).toContain(item.icon);
             expect(['up', 'down', 'flat']).toContain(item.trend);
         }
