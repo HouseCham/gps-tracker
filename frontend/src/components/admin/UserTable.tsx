@@ -9,7 +9,8 @@ import type { Language } from '@/types';
 import type { Translation } from '@/i18n';
 //-- Components
 import { TableStatus } from '@/components/ui/DataTable';
-import { Button, Input } from '@/components/ui';
+import { Button } from '@/components/ui';
+import { ConfirmActionModal } from '@/components/react/shared';
 //-- Icons
 import { Plus } from 'lucide-react';
 //-- Utils
@@ -196,19 +197,6 @@ export function UserTable({
         getAllUsers();
     }, []);
 
-    // Esc cancels whichever modal is open (only one at a time).
-    useEffect(() => {
-        const hasOpen = deleteTarget !== null;
-        if (!hasOpen) return;
-        const onKey = (e: KeyboardEvent): void => {
-            if (e.key === 'Escape') {
-                handleCancelDelete();
-            }
-        };
-        document.addEventListener('keydown', onKey);
-        return (): void => document.removeEventListener('keydown', onKey);
-    }, [deleteTarget, handleCancelDelete]);
-
     // ---- Return early if loading or user list is empty (with or without error) ----
     if (isLoading && users.length === 0)
         return <TableStatus mode="loading" className={className} />;
@@ -228,9 +216,6 @@ export function UserTable({
     const deleteTargetFullName = deleteTarget
         ? `${deleteTarget.name} ${deleteTarget.lastname}`
         : '';
-    const canDelete =
-        deleteTarget !== null &&
-        deleteConfirmName.trim() === deleteTargetFullName;
 
     return (
         <>
@@ -247,7 +232,7 @@ export function UserTable({
             </div>
             {/* Users Table */}
             {users.length === 0 ? (
-                <Suspense fallback={null}>
+                <Suspense fallback={<TableStatus mode="loading" className={className} />}>
                     <EmptyTable
                         columns={columns}
                         emptyTitle={translation.user.noUsersTitle}
@@ -255,7 +240,7 @@ export function UserTable({
                     />
                 </Suspense>
             ) : (
-                <Suspense fallback={null}>
+                <Suspense fallback={<TableStatus mode="loading" className={className} />}>
                     <DataTable columns={columns} className={className}>
                         {users.map(user => {
                             const handlers = rowHandlersById.get(user.id);
@@ -307,69 +292,34 @@ export function UserTable({
                 </Modal>
             </Suspense>
             {/* Delete User Confirmation Modal */}
-            <Suspense fallback={null}>
-                <Modal
-                    open={deleteTarget !== null}
-                    onClose={handleCancelDelete}
-                    title={t.deleteConfirm.title}
-                    variant="danger"
-                    size="md"
-                    footer={
-                        <>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={handleCancelDelete}
-                                disabled={isLoading}
-                            >
-                                {t.deleteConfirm.cancel}
-                            </Button>
-                            <Button
-                                variant="danger"
-                                size="sm"
-                                onClick={handleConfirmDelete}
-                                disabled={!canDelete || isLoading}
-                                loading={isLoading && canDelete}
-                            >
-                                {t.deleteConfirm.confirm}
-                            </Button>
-                        </>
-                    }
-                >
-                    <div className="user-delete-confirm">
-                        <p
-                            className="user-delete-confirm__warning"
-                            role="alert"
-                        >
-                            {t.deleteConfirm.warning.replace(
-                                '{name}',
-                                deleteTargetFullName
-                            )}
-                        </p>
-                        <Input
-                            name="delete-confirm-name"
-                            label={t.deleteConfirm.typeNameLabel}
-                            placeholder={
-                                deleteTarget
-                                    ? deleteTargetFullName
-                                    : t.deleteConfirm.typeNamePlaceholder
-                            }
-                            value={deleteConfirmName}
-                            onChange={onDeleteNameChange}
-                            disabled={isLoading}
-                            autocomplete="off"
-                        />
-                        {deleteError && (
-                            <p
-                                className="user-delete-confirm__error"
-                                role="alert"
-                            >
-                                {deleteError}
-                            </p>
-                        )}
-                    </div>
-                </Modal>
-            </Suspense>
+            <ConfirmActionModal
+                open={deleteTarget !== null}
+                onClose={handleCancelDelete}
+                title={t.deleteConfirm.title}
+                warning={t.deleteConfirm.warning.replace(
+                    '{name}',
+                    deleteTargetFullName
+                )}
+                rootClassName="user-delete-confirm"
+                warningClassName="user-delete-confirm__warning"
+                errorClassName="user-delete-confirm__error"
+                confirmLabel={t.deleteConfirm.confirm}
+                cancelLabel={t.deleteConfirm.cancel}
+                isLoading={isLoading}
+                errorMessage={deleteError}
+                onConfirm={(): void => {
+                    void handleConfirmDelete();
+                }}
+                confirmNameLabel={t.deleteConfirm.typeNameLabel}
+                confirmNamePlaceholder={
+                    deleteTarget
+                        ? deleteTargetFullName
+                        : t.deleteConfirm.typeNamePlaceholder
+                }
+                confirmName={deleteConfirmName}
+                expectedName={deleteTargetFullName}
+                onConfirmNameChange={onDeleteNameChange}
+            />
         </>
     );
 }

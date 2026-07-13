@@ -35,8 +35,36 @@ export interface CreateApiKeyResponse {
 }
 
 /**
- * Body returned by GET /api/v1/devices/:id/api-keys. The backend wraps the
+ * Response shape returned by GET /api/v1/devices/:id/api-keys. The backend wraps the
  * array in the standard envelope, so this is the inner `data` payload.
  * @typedef {ApiKey[]} ApiKeyListResponse
  */
 export type ApiKeyListResponse = ApiKey[];
+
+/**
+ * Single row returned by the global `GET /api/v1/api-keys` endpoint.
+ * Joins `device_api_keys` with `devices` so the admin table can render
+ * the Device column and drive the per-row revoke flow without a
+ * second round-trip per row.
+ *
+ * `name` and `device_name` both carry the device display name -- the
+ * two-field shape is intentional: `name` is what the row projects at
+ * a glance, `device_name` makes the join explicit. `device_id` is
+ * required by the per-row revoke flow
+ * (`DELETE /api/v1/devices/:id/api-keys/:keyId`).
+ *
+ * @typedef {Object} ApiKeyWithDevice
+ * @property {string} id - UUID of the key row.
+ * @property {string} name - Display name of the owning device.
+ * @property {string} device_name - Display name of the owning device
+ *   (explicit form of `name`; both fields carry the same value).
+ * @property {string} device_id - UUID of the owning device.
+ * @property {string} created_at - ISO 8601 timestamp when the key was issued.
+ */
+export interface ApiKeyWithDevice {
+    id: string;
+    name: string;
+    device_name: string;
+    device_id: string;
+    created_at: string;
+}
