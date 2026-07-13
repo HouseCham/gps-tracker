@@ -2,11 +2,11 @@
 
 ## API keys (`/api/v1/devices/:id/api-keys`)
 
-| Method | Action | Auth |
-|--------|--------|------|
-| `POST` | Issue a new key (rotates — revokes previous active key) | Session + owner role |
-| `GET` | List active keys for a device | Session + owner role |
-| `DELETE` | Revoke a specific key | Session + owner role |
+| Method   | Action                                                  | Auth                 |
+| -------- | ------------------------------------------------------- | -------------------- |
+| `POST`   | Issue a new key (rotates — revokes previous active key) | Session + owner role |
+| `GET`    | List active keys for a device                           | Session + owner role |
+| `DELETE` | Revoke a specific key                                   | Session + owner role |
 
 - `POST` returns `{ plain_key, key, created_at }` — `plain_key` is shown **once** on creation.
 - Each device has **at most one active key** at a time.
@@ -24,16 +24,16 @@ Docs: `backend/docs/api/Devices.md` section "API Keys".
 
 ### Payload fields
 
-| Field | Type | Required | Notes |
-|-------|------|----------|-------|
-| `latitude` | float64 | ✅ | ±90° |
-| `longitude` | float64 | ✅ | ±180° |
-| `recorded_at` | string (RFC 3339) | ✅ | Device timestamp |
-| `altitude` | float64 | ❌ | meters, nullable |
-| `speed` | float64 | ❌ | m/s, nullable | 
-| `accuracy` | float64 | ❌ | meters, nullable |
-| `battery_voltage` | float64 | ❌ | Volts, nullable (LiPo health) |
-| `signal_strength` | int32 | ❌ | 0–31 (AT+CSQ RSSI), nullable |
+| Field             | Type              | Required | Notes                         |
+| ----------------- | ----------------- | -------- | ----------------------------- |
+| `latitude`        | float64           | ✅       | ±90°                          |
+| `longitude`       | float64           | ✅       | ±180°                         |
+| `recorded_at`     | string (RFC 3339) | ✅       | Device timestamp              |
+| `altitude`        | float64           | ❌       | meters, nullable              |
+| `speed`           | float64           | ❌       | m/s, nullable                 |
+| `accuracy`        | float64           | ❌       | meters, nullable              |
+| `battery_voltage` | float64           | ❌       | Volts, nullable (LiPo health) |
+| `signal_strength` | int32             | ❌       | 0–31 (AT+CSQ RSSI), nullable  |
 
 Docs: `backend/docs/api/Locations.md`.
 

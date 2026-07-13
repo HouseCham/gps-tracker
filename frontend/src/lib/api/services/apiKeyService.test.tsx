@@ -39,9 +39,9 @@ function listEnv(items: ApiKey[]): { data: Envelope<ApiKeyListResponse> } {
     };
 }
 
-function issueEnv(
-    payload: CreateApiKeyResponse
-): { data: Envelope<CreateApiKeyResponse> } {
+function issueEnv(payload: CreateApiKeyResponse): {
+    data: Envelope<CreateApiKeyResponse>;
+} {
     return {
         data: {
             status_code: 201,
@@ -71,7 +71,7 @@ describe('useApiKeyService', () => {
             expect(result.current.apiKeys).toEqual(items);
             expect(apiClient).toHaveBeenCalledWith(
                 '/devices/d1/api-keys',
-                expect.objectContaining({ method: 'GET' }),
+                expect.objectContaining({ method: 'GET' })
             );
         });
 
@@ -133,14 +133,14 @@ describe('useApiKeyService', () => {
             expect(
                 result.current.apiKeys[0] as unknown as
                     | { plain_key?: string }
-                    | undefined,
+                    | undefined
             ).not.toHaveProperty('plain_key');
 
             // POST went to the correct URL with no body.
             expect(apiClient).toHaveBeenNthCalledWith(
                 2,
                 '/devices/d1/api-keys',
-                expect.objectContaining({ method: 'POST' }),
+                expect.objectContaining({ method: 'POST' })
             );
         });
 
@@ -150,7 +150,7 @@ describe('useApiKeyService', () => {
                     id: 'k-new',
                     created_at: '2024-02-02T00:00:00Z',
                     plain_key: 'opaque',
-                }),
+                })
             );
 
             const { result } = renderHook(() => useApiKeyService());
@@ -218,7 +218,7 @@ describe('useApiKeyService', () => {
             expect(apiClient).toHaveBeenNthCalledWith(
                 2,
                 '/devices/d1/api-keys/k1',
-                expect.objectContaining({ method: 'DELETE' }),
+                expect.objectContaining({ method: 'DELETE' })
             );
             expect(result.current.apiKeys.map(k => k.id)).toEqual(['k2']);
         });

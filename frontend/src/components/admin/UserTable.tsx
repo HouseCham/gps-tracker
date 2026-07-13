@@ -236,7 +236,11 @@ export function UserTable({
             </div>
             {/* Users Table */}
             {users.length === 0 ? (
-                <Suspense fallback={<TableStatus mode="loading" className={className} />}>
+                <Suspense
+                    fallback={
+                        <TableStatus mode="loading" className={className} />
+                    }
+                >
                     <EmptyTable
                         columns={columns}
                         emptyTitle={translation.user.noUsersTitle}
@@ -244,7 +248,11 @@ export function UserTable({
                     />
                 </Suspense>
             ) : (
-                <Suspense fallback={<TableStatus mode="loading" className={className} />}>
+                <Suspense
+                    fallback={
+                        <TableStatus mode="loading" className={className} />
+                    }
+                >
                     <DataTable columns={columns} className={className}>
                         {users.map(user => {
                             const handlers = rowHandlersById.get(user.id);

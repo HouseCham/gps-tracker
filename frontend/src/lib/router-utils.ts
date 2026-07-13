@@ -1,7 +1,13 @@
 import type { Translation } from '@/i18n';
 import type { Language } from '@/types';
 import type { SidebarNavItem } from '@/types/layout';
-import { Cpu, KeyRound, LayoutDashboard, ShieldCheck, User } from 'lucide-react';
+import {
+    Cpu,
+    KeyRound,
+    LayoutDashboard,
+    ShieldCheck,
+    User,
+} from 'lucide-react';
 
 /**
  * Redirects the user to a new page, preserving the current locale.

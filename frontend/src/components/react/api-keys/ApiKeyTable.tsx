@@ -92,14 +92,8 @@ export function ApiKeyTable({
     const toastStrings = translation.toast;
     const columns = getApiKeyTableColumns(t.table);
 
-    const {
-        isLoading,
-        error,
-        rows,
-        getAllApiKeys,
-        issueApiKey,
-        revokeApiKey,
-    } = useApiKeyService();
+    const { isLoading, error, rows, getAllApiKeys, issueApiKey, revokeApiKey } =
+        useApiKeyService();
 
     const { devices, getAllDevices } = useDeviceService();
 
@@ -281,7 +275,11 @@ export function ApiKeyTable({
             </div>
             {/* Content */}
             {rows.length === 0 ? (
-                <Suspense fallback={<TableStatus mode="loading" className={className} />}>
+                <Suspense
+                    fallback={
+                        <TableStatus mode="loading" className={className} />
+                    }
+                >
                     <EmptyTable
                         columns={columns}
                         emptyTitle={t.noKeys}
@@ -289,7 +287,11 @@ export function ApiKeyTable({
                     />
                 </Suspense>
             ) : (
-                <Suspense fallback={<TableStatus mode="loading" className={className} />}>
+                <Suspense
+                    fallback={
+                        <TableStatus mode="loading" className={className} />
+                    }
+                >
                     <DataTable columns={columns}>
                         {rows.map(row => {
                             const handlers = rowHandlersById.get(row.id);

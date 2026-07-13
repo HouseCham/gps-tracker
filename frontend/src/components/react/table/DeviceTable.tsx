@@ -356,7 +356,11 @@ export function DeviceTable({
             </div>
             {/* Content */}
             {devices.length === 0 ? (
-                <Suspense fallback={<TableStatus mode="loading" className={className} />}>
+                <Suspense
+                    fallback={
+                        <TableStatus mode="loading" className={className} />
+                    }
+                >
                     <EmptyTable
                         columns={columns}
                         emptyTitle={translation.device.noDevices}
@@ -364,7 +368,11 @@ export function DeviceTable({
                     />
                 </Suspense>
             ) : (
-                <Suspense fallback={<TableStatus mode="loading" className={className} />}>
+                <Suspense
+                    fallback={
+                        <TableStatus mode="loading" className={className} />
+                    }
+                >
                     <DataTable columns={columns} className={className}>
                         {devices.map((device: DeviceWithAccess) => {
                             const status = statusFromLastSeen(
@@ -435,7 +443,8 @@ export function DeviceTable({
                             uuidLabel: formStrings.uuidLabel,
                             uuidPlaceholder: formStrings.uuidPlaceholder,
                             vehicleTypeLabel: formStrings.vehicleTypeLabel,
-                            vehicleTypeRequired: formStrings.vehicleTypeRequired,
+                            vehicleTypeRequired:
+                                formStrings.vehicleTypeRequired,
                             nameRequired: formStrings.nameRequired,
                             uuidRequired: formStrings.uuidRequired,
                             uuidInvalid: formStrings.uuidInvalid,

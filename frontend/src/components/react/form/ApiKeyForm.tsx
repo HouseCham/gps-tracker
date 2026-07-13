@@ -110,9 +110,7 @@ export function ApiKeyForm({
                         {s.deviceRequired}
                     </p>
                 ) : (
-                    <p className="api-key-form__hint">
-                        {s.devicePlaceholder}
-                    </p>
+                    <p className="api-key-form__hint">{s.devicePlaceholder}</p>
                 )}
             </div>
             <div className="api-key-form__actions">

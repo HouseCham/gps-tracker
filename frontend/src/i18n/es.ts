@@ -374,8 +374,7 @@ export const es: Translation = {
     },
     apiKeys: {
         title: 'Claves de API',
-        subtitle:
-            'Gestiona los tokens IoT que autentican tus dispositivos',
+        subtitle: 'Gestiona los tokens IoT que autentican tus dispositivos',
         newKey: 'Nueva clave de API',
         noDevices: 'Aún no hay dispositivos',
         noDevicesMessage:
