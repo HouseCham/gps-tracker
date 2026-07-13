@@ -27,7 +27,7 @@ type RouterDeps struct {
 	LocationsHandler *handlers.LocationsHandler
 	BootstrapHandler *handlers.BootstrapHandler
 	AccessService    *access.AccessService
-	UsersService     *users.UserService
+	UsersService     *users.Service
 	Queries          *postgres.Queries
 	AuthHandler      http.Handler
 	SessionCookieName string
