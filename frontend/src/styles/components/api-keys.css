@@ -10,6 +10,7 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
+    margin-bottom: 16px;
 }
 
 /* ─── Table cell polish ──────────────────────────────────────────────────── */
@@ -171,6 +172,48 @@
     color: var(--red);
     font-size: 12px;
     font-weight: 500;
+}
+
+/* ─── Full-width trigger override ────────────────────────────────────────
+   The base Dropdown root is `inline-block` and its trigger button is
+   `inline-flex`, so the picker shrinks to content. Inside `.api-key-form`
+   we want the trigger to fill the form column on every viewport. Strip
+   the button's own visual chrome so the inner `.api-key-form__trigger`
+   span (border/background/padding, plus the `is-placeholder` and
+   `is-error` modifiers) is the only visible element. Focus and hover
+   propagate from the button to the span via `:focus-visible` and the
+   `.dropdown:hover` bridge, since the span itself is not focusable. */
+
+.api-key-form .dropdown {
+    display: block;
+    width: 100%;
+}
+
+.api-key-form .dropdown-trigger {
+    width: 100%;
+    padding: 0;
+    background: none;
+    border: 0;
+    gap: 8px;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text);
+    cursor: pointer;
+}
+
+.api-key-form .dropdown-trigger:focus-visible {
+    outline: none;
+}
+
+.api-key-form
+    .dropdown-trigger:focus-visible
+    .api-key-form__trigger {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.api-key-form .dropdown:hover .api-key-form__trigger {
+    border-color: var(--accent);
 }
 
 .api-key-form__trigger {

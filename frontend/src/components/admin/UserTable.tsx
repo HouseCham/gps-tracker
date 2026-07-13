@@ -10,7 +10,6 @@ import type { Translation } from '@/i18n';
 //-- Components
 import { TableStatus } from '@/components/ui/DataTable';
 import { Button } from '@/components/ui';
-import { ConfirmActionModal } from '@/components/react/shared';
 //-- Icons
 import { Plus } from 'lucide-react';
 //-- Utils
@@ -22,6 +21,11 @@ import { useUserService } from '@/lib/api/services';
 import { toastBus } from '@/lib/stores/toast.store';
 //-- Lazy components
 const Modal = lazy(() => import('@/components/react/ui/Modal'));
+const ConfirmActionModal = lazy(() =>
+    import('@/components/react/shared/ConfirmActionModal').then(m => ({
+        default: m.ConfirmActionModal,
+    }))
+);
 const CreateUserForm = lazy(() =>
     import('@/components/react/form/CreateUserForm').then(m => ({
         default: m.CreateUserForm,
@@ -292,34 +296,36 @@ export function UserTable({
                 </Modal>
             </Suspense>
             {/* Delete User Confirmation Modal */}
-            <ConfirmActionModal
-                open={deleteTarget !== null}
-                onClose={handleCancelDelete}
-                title={t.deleteConfirm.title}
-                warning={t.deleteConfirm.warning.replace(
-                    '{name}',
-                    deleteTargetFullName
-                )}
-                rootClassName="user-delete-confirm"
-                warningClassName="user-delete-confirm__warning"
-                errorClassName="user-delete-confirm__error"
-                confirmLabel={t.deleteConfirm.confirm}
-                cancelLabel={t.deleteConfirm.cancel}
-                isLoading={isLoading}
-                errorMessage={deleteError}
-                onConfirm={(): void => {
-                    void handleConfirmDelete();
-                }}
-                confirmNameLabel={t.deleteConfirm.typeNameLabel}
-                confirmNamePlaceholder={
-                    deleteTarget
-                        ? deleteTargetFullName
-                        : t.deleteConfirm.typeNamePlaceholder
-                }
-                confirmName={deleteConfirmName}
-                expectedName={deleteTargetFullName}
-                onConfirmNameChange={onDeleteNameChange}
-            />
+            <Suspense fallback={null}>
+                <ConfirmActionModal
+                    open={deleteTarget !== null}
+                    onClose={handleCancelDelete}
+                    title={t.deleteConfirm.title}
+                    warning={t.deleteConfirm.warning.replace(
+                        '{name}',
+                        deleteTargetFullName
+                    )}
+                    rootClassName="user-delete-confirm"
+                    warningClassName="user-delete-confirm__warning"
+                    errorClassName="user-delete-confirm__error"
+                    confirmLabel={t.deleteConfirm.confirm}
+                    cancelLabel={t.deleteConfirm.cancel}
+                    isLoading={isLoading}
+                    errorMessage={deleteError}
+                    onConfirm={(): void => {
+                        void handleConfirmDelete();
+                    }}
+                    confirmNameLabel={t.deleteConfirm.typeNameLabel}
+                    confirmNamePlaceholder={
+                        deleteTarget
+                            ? deleteTargetFullName
+                            : t.deleteConfirm.typeNamePlaceholder
+                    }
+                    confirmName={deleteConfirmName}
+                    expectedName={deleteTargetFullName}
+                    onConfirmNameChange={onDeleteNameChange}
+                />
+            </Suspense>
         </>
     );
 }

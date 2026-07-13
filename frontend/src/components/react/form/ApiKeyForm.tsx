@@ -11,12 +11,12 @@ import Dropdown from '@/components/react/ui/Dropdown';
 /**
  * A single device option in the create-key device picker. The
  * dropdown uses this shape directly as its `items` payload.
- * @interface CreateApiKeyDevice
+ * @interface ApiKeyDevice
  * @param {string} id - Device UUID.
  * @param {string} name - Display name.
  * @param {string} vehicleType - Pre-localized vehicle-type label.
  */
-export interface CreateApiKeyDevice {
+export interface ApiKeyDevice {
     id: string;
     name: string;
     vehicleType: string;
@@ -26,15 +26,15 @@ export interface CreateApiKeyDevice {
  * First phase of the create-modal flow. Lets the user pick a device
  * and trigger generation. Validates that a device was selected and
  * delegates submission to the parent.
- * @interface CreateApiKeyFormProps
- * @param {CreateApiKeyDevice[]} devices - Devices available to issue a key for.
+ * @interface ApiKeyFormProps
+ * @param {ApiKeyDevice[]} devices - Devices available to issue a key for.
  * @param {Translation['apiKeys']['createModal']} strings - Localized labels.
  * @param {(deviceId: string) => void} onSubmit - Invoked with the chosen device id.
  * @param {() => void} onCancel - Closes the modal without generating.
  * @param {boolean} [saving] - Disables inputs while generation is in flight.
  */
-export interface CreateApiKeyFormProps {
-    devices: CreateApiKeyDevice[];
+export interface ApiKeyFormProps {
+    devices: ApiKeyDevice[];
     strings: Translation['apiKeys']['createModal'];
     onSubmit: (deviceId: string) => void;
     onCancel: () => void;
@@ -43,16 +43,16 @@ export interface CreateApiKeyFormProps {
 
 /**
  * Form for selecting a device and triggering an API-key issue.
- * @param {CreateApiKeyFormProps} props - Component props.
+ * @param {ApiKeyFormProps} props - Component props.
  * @returns {JSX.Element} The rendered form.
  */
-export function CreateApiKeyForm({
+export function ApiKeyForm({
     devices,
     strings: s,
     onSubmit,
     onCancel,
     saving = false,
-}: CreateApiKeyFormProps): JSX.Element {
+}: ApiKeyFormProps): JSX.Element {
     const labelId = useId();
     const [selectedId, setSelectedId] = useState<string | null>(null);
     const [touched, setTouched] = useState(false);

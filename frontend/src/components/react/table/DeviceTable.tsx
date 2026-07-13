@@ -17,7 +17,6 @@ import type { Translation } from '@/i18n';
 //-- Components
 import { TableStatus } from '@/components/ui/DataTable';
 import { Button } from '@/components/ui';
-import { ConfirmActionModal } from '@/components/react/shared';
 //-- Icons
 import { Plus } from 'lucide-react';
 //-- Utils
@@ -29,6 +28,11 @@ import { asApiError } from '@/lib/api/api-utils';
 import { toastBus } from '@/lib/stores/toast.store';
 //-- Lazy components
 const Modal = lazy(() => import('@/components/react/ui/Modal'));
+const ConfirmActionModal = lazy(() =>
+    import('@/components/react/shared/ConfirmActionModal').then(m => ({
+        default: m.ConfirmActionModal,
+    }))
+);
 const EmptyTable = lazy(() =>
     import('@/components/react/table/EmptyTable').then(m => ({
         default: m.EmptyTable,
@@ -343,13 +347,14 @@ export function DeviceTable({
 
     return (
         <>
+            {/* Add device button */}
             <div className="device-table__toolbar">
                 <Button variant="primary" size="sm" onClick={handleOpenCreate}>
                     <Plus size={14} strokeWidth={2} aria-hidden="true" />
                     {t.addDevice}
                 </Button>
             </div>
-
+            {/* Content */}
             {devices.length === 0 ? (
                 <Suspense fallback={<TableStatus mode="loading" className={className} />}>
                     <EmptyTable
@@ -448,34 +453,36 @@ export function DeviceTable({
             </Suspense>
 
             {/* Delete device modal */}
-            <ConfirmActionModal
-                open={deleteTarget !== null}
-                onClose={handleCloseDeleteModal}
-                title={translation.device.deleteDevice}
-                warning={t.deleteConfirm.warning.replace(
-                    '{name}',
-                    deleteTarget?.name ?? ''
-                )}
-                rootClassName="device-delete-confirm"
-                warningClassName="device-delete-confirm__warning"
-                errorClassName="device-delete-confirm__error"
-                confirmLabel={t.deleteConfirm.confirm}
-                cancelLabel={t.deleteConfirm.cancel}
-                isLoading={isLoading}
-                errorMessage={deleteError}
-                onConfirm={(): void => {
-                    void handleConfirmDelete();
-                }}
-                confirmNameLabel={t.deleteConfirm.typeNameLabel}
-                confirmNamePlaceholder={
-                    deleteTarget
-                        ? deleteTarget.name
-                        : t.deleteConfirm.typeNamePlaceholder
-                }
-                confirmName={deleteConfirmName}
-                expectedName={deleteTarget?.name ?? ''}
-                onConfirmNameChange={onDeleteNameChange}
-            />
+            <Suspense fallback={null}>
+                <ConfirmActionModal
+                    open={deleteTarget !== null}
+                    onClose={handleCloseDeleteModal}
+                    title={translation.device.deleteDevice}
+                    warning={t.deleteConfirm.warning.replace(
+                        '{name}',
+                        deleteTarget?.name ?? ''
+                    )}
+                    rootClassName="device-delete-confirm"
+                    warningClassName="device-delete-confirm__warning"
+                    errorClassName="device-delete-confirm__error"
+                    confirmLabel={t.deleteConfirm.confirm}
+                    cancelLabel={t.deleteConfirm.cancel}
+                    isLoading={isLoading}
+                    errorMessage={deleteError}
+                    onConfirm={(): void => {
+                        void handleConfirmDelete();
+                    }}
+                    confirmNameLabel={t.deleteConfirm.typeNameLabel}
+                    confirmNamePlaceholder={
+                        deleteTarget
+                            ? deleteTarget.name
+                            : t.deleteConfirm.typeNamePlaceholder
+                    }
+                    confirmName={deleteConfirmName}
+                    expectedName={deleteTarget?.name ?? ''}
+                    onConfirmNameChange={onDeleteNameChange}
+                />
+            </Suspense>
         </>
     );
 }

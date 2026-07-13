@@ -7,14 +7,23 @@ import type { Language } from '@/types';
 import type { Translation } from '@/i18n';
 //-- Components
 import { TableStatus } from '@/components/ui/DataTable';
-import { ConfirmActionModal } from '@/components/react/shared';
+import { Button } from '@/components/ui';
+//-- Icons
+import { Plus } from 'lucide-react';
 //-- Utils
 import { getApiKeyTableColumns } from '@/lib/api-keys-utils';
+import type { ApiKeyDevice } from '@/components/react/form/ApiKeyForm';
 //-- Services
-import { useApiKeyService } from '@/lib/api/services';
+import { useApiKeyService, useDeviceService } from '@/lib/api/services';
 //-- Toast bus
 import { toastBus } from '@/lib/stores/toast.store';
 //-- Lazy components
+const Modal = lazy(() => import('@/components/react/ui/Modal'));
+const ConfirmActionModal = lazy(() =>
+    import('@/components/react/shared/ConfirmActionModal').then(m => ({
+        default: m.ConfirmActionModal,
+    }))
+);
 const EmptyTable = lazy(() =>
     import('@/components/react/table/EmptyTable').then(m => ({
         default: m.EmptyTable,
@@ -40,6 +49,16 @@ const ApiKeyMobileCard = lazy(() =>
         default: m.ApiKeyMobileCard,
     }))
 );
+const ApiKeyForm = lazy(() =>
+    import('@/components/react/form/ApiKeyForm').then(m => ({
+        default: m.ApiKeyForm,
+    }))
+);
+const ApiKeyReveal = lazy(() =>
+    import('@/components/react/api-keys/ApiKeyReveal').then(m => ({
+        default: m.ApiKeyReveal,
+    }))
+);
 /**
  * Interface for the ApiKeyTable island.
  * @interface ApiKeyTableProps
@@ -56,9 +75,11 @@ interface ApiKeyTableProps {
 /**
  * Main island for the `/api-keys` page. Fetches the flat list of every
  * active api key across every device the caller has access to via the
- * global `GET /api/v1/api-keys` endpoint and renders the table. Issue
- * of new keys lives on the device detail page (it needs a device
- * picker), so this component is list + revoke only.
+ * global `GET /api/v1/api-keys` endpoint and renders the table.
+ * Issuance lives behind the toolbar `+ New API key` button: the user
+ * picks a device, the backend issues a one-time `plain_key`, and the
+ * reveal modal flashes the value with a copy button before the user
+ * dismisses it.
  * @param {ApiKeyTableProps} props - Component props.
  * @returns {JSX.Element} The rendered island.
  */
@@ -76,10 +97,20 @@ export function ApiKeyTable({
         error,
         rows,
         getAllApiKeys,
+        issueApiKey,
         revokeApiKey,
     } = useApiKeyService();
 
-    // ─── State ────────────────────────────────────────────────────────────
+    const { devices, getAllDevices } = useDeviceService();
+
+    // ─── Create-key flow state ────────────────────────────────────────────
+    const [createOpen, setCreateOpen] = useState(false);
+    const [issuedKey, setIssuedKey] = useState<{
+        plainKey: string;
+        deviceName: string;
+    } | null>(null);
+
+    // ─── Revoke flow state ────────────────────────────────────────────────
     const [revokeTarget, setRevokeTarget] = useState<{
         deviceId: string;
         keyId: string;
@@ -89,11 +120,67 @@ export function ApiKeyTable({
 
     // ─── Initial load ─────────────────────────────────────────────────────
     /**
-     * Fetches the global list of api keys on mount. Runs once.
+     * Fetches the global key list and the device list on mount. Runs once.
      */
     useEffect(() => {
-        void getAllApiKeys();
+        getAllApiKeys();
+        getAllDevices();
     }, []);
+
+    // ─── Create-key flow ──────────────────────────────────────────────────
+    /**
+     * Devices the user can pick from in the create modal. Filters out
+     * every device that already appears in `rows` (joined on
+     * `device_id`) so the picker can't offer an option the backend
+     * would reject with 409 "already has a key".
+     */
+    const pickableDevices: ApiKeyDevice[] = ((): ApiKeyDevice[] => {
+        const takenIds = new Set(rows.map(r => r.device_id));
+        return devices
+            .filter(d => !takenIds.has(d.id))
+            .map(d => ({
+                id: d.id,
+                name: d.name,
+                vehicleType:
+                    translation.device.table.vehicleTypes[d.vehicle_type] ??
+                    d.vehicle_type,
+            }));
+    })();
+
+    /**
+     * Issues a fresh API key for the picked device. On success swaps the
+     * modal body to the reveal view. On `null` (incl. 409 / network
+     * failure) the form stays put so the user can retry — the service
+     * already pushed the matching toast.
+     * @param {string} deviceId - The picked device's id.
+     */
+    async function handleIssue(deviceId: string): Promise<void> {
+        const created = await issueApiKey(deviceId);
+        if (!created) return;
+        const device = devices.find(d => d.id === deviceId);
+        setIssuedKey({
+            plainKey: created.plain_key,
+            deviceName: device?.name ?? '',
+        });
+    }
+
+    /**
+     * Closes the create modal and resets reveal state so a stale
+     * `plain_key` never survives a reopen.
+     */
+    function handleCloseCreate(): void {
+        setCreateOpen(false);
+        setIssuedKey(null);
+    }
+
+    /**
+     * Refreshes the global keys list after the user confirms they've
+     * saved the new key, then closes the modal.
+     */
+    async function handleDone(): Promise<void> {
+        await getAllApiKeys();
+        handleCloseCreate();
+    }
 
     // ─── Revoke flow ──────────────────────────────────────────────────────
     /**
@@ -180,6 +267,19 @@ export function ApiKeyTable({
 
     return (
         <>
+            {/* Toolbar */}
+            <div className="api-keys__toolbar">
+                <Button
+                    variant="primary"
+                    size="sm"
+                    onClick={() => setCreateOpen(true)}
+                    disabled={devices.length === 0}
+                >
+                    <Plus size={14} strokeWidth={2} aria-hidden="true" />
+                    {t.newKey}
+                </Button>
+            </div>
+            {/* Content */}
             {rows.length === 0 ? (
                 <Suspense fallback={<TableStatus mode="loading" className={className} />}>
                     <EmptyTable
@@ -235,25 +335,57 @@ export function ApiKeyTable({
                 </Suspense>
             )}
 
-            <ConfirmActionModal
-                open={revokeTarget !== null}
-                onClose={closeRevoke}
-                title={t.revoke.title}
-                warning={t.revoke.warning.replace(
-                    '{device}',
-                    revokeTarget?.deviceName ?? ''
-                )}
-                rootClassName="api-key-revoke"
-                warningClassName="api-key-revoke__warning"
-                errorClassName="api-key-revoke__error"
-                confirmLabel={t.revoke.confirm}
-                cancelLabel={t.revoke.cancel}
-                isLoading={isLoading}
-                errorMessage={revokeError}
-                onConfirm={(): void => {
-                    void confirmRevoke();
-                }}
-            />
+            {/* Create / Reveal modal */}
+            <Suspense fallback={null}>
+                <Modal
+                    open={createOpen}
+                    onClose={handleCloseCreate}
+                    title={issuedKey ? t.reveal.title : t.createModal.title}
+                >
+                    {issuedKey ? (
+                        <ApiKeyReveal
+                            plainKey={issuedKey.plainKey}
+                            deviceName={issuedKey.deviceName}
+                            strings={t.reveal}
+                            toastStrings={toastStrings}
+                            onClose={() => void handleDone()}
+                        />
+                    ) : (
+                        <ApiKeyForm
+                            devices={pickableDevices}
+                            strings={t.createModal}
+                            saving={isLoading}
+                            onSubmit={deviceId => {
+                                void handleIssue(deviceId);
+                            }}
+                            onCancel={handleCloseCreate}
+                        />
+                    )}
+                </Modal>
+            </Suspense>
+
+            {/* Revoke confirmation modal */}
+            <Suspense fallback={null}>
+                <ConfirmActionModal
+                    open={revokeTarget !== null}
+                    onClose={closeRevoke}
+                    title={t.revoke.title}
+                    warning={t.revoke.warning.replace(
+                        '{device}',
+                        revokeTarget?.deviceName ?? ''
+                    )}
+                    rootClassName="api-key-revoke"
+                    warningClassName="api-key-revoke__warning"
+                    errorClassName="api-key-revoke__error"
+                    confirmLabel={t.revoke.confirm}
+                    cancelLabel={t.revoke.cancel}
+                    isLoading={isLoading}
+                    errorMessage={revokeError}
+                    onConfirm={(): void => {
+                        void confirmRevoke();
+                    }}
+                />
+            </Suspense>
         </>
     );
 }
