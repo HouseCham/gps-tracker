@@ -78,6 +78,13 @@ func (s *Service) ListForDevice(ctx context.Context, deviceID uuid.UUID) ([]KeyM
 	return s.reader.ListForDevice(ctx, deviceID)
 }
 
+// ListForUser returns every active key for every device the user has
+// access to, enriched with the owning device's display name. Drives
+// the global `/api-keys` admin page.
+func (s *Service) ListForUser(ctx context.Context, userID uuid.UUID) ([]KeyWithDevice, error) {
+	return s.reader.ListForUser(ctx, userID)
+}
+
 // Authenticate verifies a token against a specific device:
 //
 //  1. Look up the exact token in `device_api_keys` (partial unique

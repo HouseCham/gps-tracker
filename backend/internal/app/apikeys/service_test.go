@@ -80,6 +80,24 @@ func (s *fakeStore) ListForDevice(_ context.Context, deviceID uuid.UUID) ([]KeyM
 	return out, nil
 }
 
+// ListForUser is a stub for the global list. The fake doesn't model
+// user-device access, so it returns every active key tagged with a
+// placeholder device name -- enough to keep the service test suite
+// compilable. End-to-end behavior is covered by integration tests
+// against a real Postgres.
+func (s *fakeStore) ListForUser(_ context.Context, _ uuid.UUID) ([]KeyWithDevice, error) {
+	out := make([]KeyWithDevice, 0, len(s.keys))
+	for _, k := range s.keys {
+		out = append(out, KeyWithDevice{
+			ID:         k.ID,
+			DeviceID:   k.DeviceID,
+			CreatedAt:  k.CreatedAt,
+			DeviceName: "fake-device",
+		})
+	}
+	return out, nil
+}
+
 // activeKeyForDevice mirrors the partial UNIQUE index invariant
 // (WHERE deleted_at IS NULL). Revoked keys are dropped from s.keys,
 // so a simple lookup already implements the soft-delete filter.

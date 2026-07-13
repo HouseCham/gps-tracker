@@ -94,6 +94,28 @@ func (a *Adapter) ListForDevice(ctx context.Context, deviceID uuid.UUID) ([]KeyM
 	return out, nil
 }
 
+// ListForUser returns every active key for every device the user has
+// access to, enriched with the owning device's id and display name.
+// Powers the global `/api-keys` admin page so the table can render
+// the Device column and drive the per-row revoke flow without a
+// second round-trip per row.
+func (a *Adapter) ListForUser(ctx context.Context, userID uuid.UUID) ([]KeyWithDevice, error) {
+	rows, err := a.q.ListAPIKeysForUser(ctx, postgres.PgtypeUUID(userID))
+	if err != nil {
+		return nil, postgres.WrapPgError(err)
+	}
+	out := make([]KeyWithDevice, 0, len(rows))
+	for _, r := range rows {
+		out = append(out, KeyWithDevice{
+			ID:         postgres.UuidFromPgtype(r.ID),
+			DeviceID:   postgres.UuidFromPgtype(r.DeviceID),
+			CreatedAt:  r.CreatedAt.Time,
+			DeviceName: r.DeviceName,
+		})
+	}
+	return out, nil
+}
+
 // toDomainKey builds the projection the service uses. We never expose
 // the lookup token past this boundary — admin UI gets KeyMetadata,
 // middleware gets Key.DeviceID.

@@ -149,3 +149,54 @@ func (h *APIKeysHandler) Revoke(c fiber.Ctx) error {
 	log.Info(operation, "api key revoked", "deviceID", deviceID, "keyID", keyID)
 	return c.SendStatus(fiber.StatusNoContent)
 }
+
+// ListAll handles GET /api/v1/api-keys.
+// Returns every active api key across every device the authenticated
+// user has access to. Each entry is enriched with the owning device's
+// display name so the global admin table can render the Device column
+// without a second round-trip.
+//
+// Access: any authenticated user. The SQL join filters by user_id so
+// only the caller's own devices' keys are returned. Per-device role
+// gating is intentionally relaxed here — the listing is metadata only
+// (no token, no hash) and is the same data any viewer of the device
+// would see on the device detail page.
+//
+// Response shape: { id, name, device_name, created_at } per entry,
+// where `name` and `device_name` both carry the device display name
+// (see dto.APIKeyWithDeviceResponse for the rationale).
+func (h *APIKeysHandler) ListAll(c fiber.Ctx) error {
+	const operation = "APIKeysHandler:ListAll"
+	log.Debug(operation, "request received")
+
+	user, ok := middleware.GetRequestUser(c)
+	if !ok {
+		log.Error(operation, "err", fiber.ErrUnauthorized)
+		return middleware.UnauthorizedResponse(c)
+	}
+
+	log.Debug(operation, "executing use case", "userID", user.ID)
+	items, err := h.service.ListForUser(c.Context(), user.ID)
+	if err != nil {
+		log.Error(operation, "err", err, "userID", user.ID)
+		return fmt.Errorf("APIKeysHandler.ListAll: %w", err)
+	}
+
+	resp := make([]dto.APIKeyWithDeviceResponse, 0, len(items))
+	for _, k := range items {
+		resp = append(resp, dto.APIKeyWithDeviceResponse{
+			ID:         k.ID.String(),
+			Name:       k.DeviceName,
+			DeviceName: k.DeviceName,
+			DeviceID:   k.DeviceID.String(),
+			CreatedAt:  k.CreatedAt,
+		})
+	}
+
+	log.Info(operation, "api keys listed", "userID", user.ID, "count", len(items))
+	return c.Status(fiber.StatusOK).JSON(response.HTTPResponse[[]dto.APIKeyWithDeviceResponse]{
+		StatusCode: fiber.StatusOK,
+		Message:    "api keys listed",
+		Data:       resp,
+	})
+}

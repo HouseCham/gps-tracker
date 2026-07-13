@@ -19,3 +19,22 @@ type CreateAPIKeyResponse struct {
 	APIKeyResponse
 	PlainKey string `json:"plain_key"`
 }
+
+// APIKeyWithDeviceResponse is the body of GET /api/v1/api-keys —
+// the global admin listing that joins device_api_keys with devices
+// so the table can render the Device column without a second
+// round-trip per row.
+//
+// `name` and `device_name` both carry the device display name. The
+// two fields are intentional: `name` is what the row projects at a
+// glance, `device_name` makes the join explicit for clients that want
+// to reason about the relation. `device_id` is the owning device's
+// UUID and is required by the per-row revoke flow
+// (`DELETE /api/v1/devices/:id/api-keys/:keyId`).
+type APIKeyWithDeviceResponse struct {
+	ID         string    `json:"id"`
+	Name       string    `json:"name"`
+	DeviceName string    `json:"device_name"`
+	DeviceID   string    `json:"device_id"`
+	CreatedAt  time.Time `json:"created_at"`
+}

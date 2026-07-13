@@ -21,6 +21,10 @@ type Reader interface {
 	// ListForDevice returns every non-revoked key for a device, for
 	// the admin UI. Returns metadata only (no token, no hash).
 	ListForDevice(ctx context.Context, deviceID uuid.UUID) ([]KeyMetadata, error)
+	// ListForUser returns every active key across every device the
+	// given user has access to, enriched with the owning device's
+	// display name. Drives the global `/api-keys` admin page.
+	ListForUser(ctx context.Context, userID uuid.UUID) ([]KeyWithDevice, error)
 }
 
 // Writer is the write port: create / revoke.
@@ -51,6 +55,17 @@ type KeyMetadata struct {
 	CreatedAt  time.Time
 	LastUsedAt *time.Time
 	ExpiresAt  *time.Time
+}
+
+// KeyWithDevice is the projection used by the global `/api-keys` admin
+// page: same metadata as KeyMetadata, enriched with the owning device's
+// id and display name so the table can render the Device column and
+// drive the per-row revoke flow without a second round-trip.
+type KeyWithDevice struct {
+	ID         uuid.UUID
+	DeviceID   uuid.UUID
+	CreatedAt  time.Time
+	DeviceName string
 }
 
 // Sentinel errors. Handlers translate ErrNotFound / ErrKeyMismatch to a

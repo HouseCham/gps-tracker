@@ -185,6 +185,18 @@ func NewRouter(deps RouterDeps) *fiber.App {
 		deps.APIKeysHandler.Revoke,
 	)
 
+	// === Global api-keys admin listing ===
+	// Flat list of every active key across every device the caller has
+	// access to, joined with the owning device's display name. Mounted
+	// on `apiV1` (not the `devices` group) because there is no :id in
+	// the URL — the per-device gating middleware requires one. The
+	// user_id filter inside the SQL is the access control.
+	apiV1.Get("/api-keys",
+		authSession,
+		requirePasswordChanged,
+		deps.APIKeysHandler.ListAll,
+	)
+
 	// === IoT ingest ===
 	// Public to devices (no session cookie). Auth is X-Device-API-Key
 	// resolved against the :uuid_firmware in the URL. Registered on

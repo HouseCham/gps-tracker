@@ -52,3 +52,22 @@ SELECT id, device_id, key_hash, created_at, expires_at, last_used_at, deleted_at
 FROM device_api_keys
 WHERE device_id = $1 AND deleted_at IS NULL
 ORDER BY created_at DESC;
+
+-- name: ListAPIKeysForUser :many
+-- Returns every active api key for every device the given user has
+-- access to, with the owning device's display name. Drives the global
+-- admin `/api-keys` page. Filters out soft-deleted keys, soft-deleted
+-- devices, and soft-deleted access grants.
+SELECT
+  k.id,
+  k.device_id,
+  k.created_at,
+  d.name AS device_name
+FROM device_api_keys k
+INNER JOIN devices d
+  ON d.id = k.device_id AND d.deleted_at IS NULL
+INNER JOIN user_device_access uda
+  ON uda.device_id = k.device_id AND uda.deleted_at IS NULL
+WHERE uda.user_id = $1
+  AND k.deleted_at IS NULL
+ORDER BY k.created_at DESC;
