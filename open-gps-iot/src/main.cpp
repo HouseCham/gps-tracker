@@ -1,18 +1,44 @@
 #include <Arduino.h>
+#include "gps_board.h"
 
-// put function declarations here:
-int myFunction(int, int);
+static GpsBoard board;
 
 void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+    // GpsBoard::begin() owns all bring-up logging itself.
+    if (!board.begin()) {
+        Serial.println(F("[HALT] bring-up failed; rebooting in 5 s"));
+        delay(5000);
+        ESP.restart();
+    }
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-}
+    // millis()-driven non-blocking state machine (per AGENTS.md timing rules).
+    static unsigned long lastPoll = 0;
+    static unsigned long lastIdle = 0;
+    const unsigned long now = millis();
 
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+    if (now - lastPoll < 2000) return;
+    lastPoll = now;
+
+    float lat = 0.0f, lon = 0.0f, alt = 0.0f;
+    if (board.pollFix(lat, lon, alt)) {
+        lastIdle = 0;  // reset idle cadence so a lost-fix banner fires quickly
+        Serial.printf("[FIX ] sats=%lu  lat=%.6f  lon=%.6f  alt=%.1fm\n",
+                      (unsigned long)board.satellitesUsed(), lat, lon, alt);
+        return;
+    }
+
+    // No fix: surface the raw +CGNSINF line so we can see whether the
+    // receiver is running, has sats in view, or is dead. First field after
+    // the prefix is run_status (1=running), second is fix_status (1=locked).
+    if (now - lastIdle >= 10000) {
+        lastIdle = now;
+        String s = board.rawGnssState();
+        if (s.length() == 0) {
+            Serial.println(F("[....] modem returned no +CGNSINF"));
+        } else {
+            Serial.print(F("[STAT] ")); Serial.println(s);
+        }
+    }
 }
