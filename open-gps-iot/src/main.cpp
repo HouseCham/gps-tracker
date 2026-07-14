@@ -39,12 +39,17 @@ static constexpr uint32_t MODEM_BAUD = 115200U;
 // stack buffer with `vsnprintf` (which IS va_list-aware) first.
 static void logLine(const char *tag, const char *fmt, ...) {
     Serial.printf("[%lu][%s] ", (unsigned long)millis(), tag);
-    char buf[512];  // ESP32-S3 has 512 KB SRAM; 512 bytes on the stack is trivial
+    char buf[512];
     va_list ap;
     va_start(ap, fmt);
-    vsnprintf(buf, sizeof(buf), fmt, ap);
+    int len = vsnprintf(buf, sizeof(buf), fmt, ap);
     va_end(ap);
-    Serial.print(buf);
+    if (len > 0) {
+        Serial.print(buf);
+    }
+    if (len >= (int)sizeof(buf)) {
+        Serial.print(" [TRUNCATED]");
+    }
     Serial.println();
 }
 
@@ -138,9 +143,13 @@ static bool modemPowerOn() {
 // multi-constellation stack (GPS + GLONASS + BeiDou + Galileo).
 class GpsReader {
 public:
-    void begin() {
-        modem.enableGPS();
+    bool begin() {
+        if (!modem.enableGPS()) {
+            LOG_E("GPS", "enableGPS() failed — GPS will not function");
+            return false;
+        }
         LOG_I("GPS", "enabled (AT+CGNSPWR=1)");
+        return true;
     }
 
     void tick() {
@@ -236,7 +245,9 @@ void setup() {
         while (true) { delay(1000); }
     }
 
-    gps.begin();
+    if (!gps.begin()) {
+        LOG_W("BOOT", "GPS init failed — continuing without GPS");
+    }
     LOG_I("BOOT", "ready — polling GPS every %lu ms",
           (unsigned long)GPS_READ_INTERVAL_MS);
 }
