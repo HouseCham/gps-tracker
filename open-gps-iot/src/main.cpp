@@ -1,272 +1,248 @@
-#include <Arduino.h>
-#include <Wire.h>
+// =====================================================================
+// LilyGo T-SIM7080G-S3 (H606) — bare-bones GPS logger.
+//
+// Polls the SIM7080G's integrated multi-constellation GNSS every 8
+// seconds via TinyGSM and prints each fix (or "no fix yet") to
+// USB-CDC. Designed as a field-debugging sketch: every state
+// transition is logged with a `[<ms>][<TAG>]` prefix so a single
+// `pio device monitor -b 115200` shows exactly where the firmware is
+// at any moment.
+//
+// Pin map, PMU prologue, and PWRKEY sequence are documented in
+// the Synapse vault under note-lilygo-t-sim7080g-* and
+// decision-0008-gps-tracker-iot-stack.
+// =====================================================================
 
-#define XPOWERS_CHIP_AXP2101
+#include <Arduino.h>
+#include <esp_sleep.h>
+#include <TinyGsmClient.h>
 #include <XPowersLib.h>
 
 #include "utilities.h"
 
-// Modem + AT stream logging. TinyGSM 0.12.x dropped its StreamDebugger.h,
-// so we ship a 20-line passthrough that prefixes every TX byte and echoes
-// every RX byte to Serial. Leave DUMP_AT_COMMANDS on for bring-up.
-#define DUMP_AT_COMMANDS
+// User-requested interval between GPS polls. Gives the SIM7080G
+// real time to deliver a fresh fix between reads without
+// busy-spinning the AT port.
+static constexpr uint32_t GPS_READ_INTERVAL_MS = 8000UL;
 
-// TINY_GSM_MODEM_SIM7080 / TINY_GSM_RX_BUFFER are set in platformio.ini
-// build_flags. Keep them here commented so the sketch is self-documenting.
-//   #define TINY_GSM_MODEM_SIM7080
-//   #define TINY_GSM_RX_BUFFER 1024
-#include <TinyGsmClient.h>
+// Modem UART baud — matches the upstream LilyGo debug examples.
+static constexpr uint32_t MODEM_BAUD = 115200U;
 
-class StreamDebugger : public Stream
-{
-    Stream &_modem;
-    Stream &_debug;
-public:
-    StreamDebugger(Stream &modem, Stream &debug)
-        : _modem(modem), _debug(debug) {}
+// --- Minimal log helper -------------------------------------------
+// Every line starts with `[<uptime_ms>][<TAG>]`. The TAG tells the
+// reader which subsystem owns the message ("PMU", "MODEM", "GPS",
+// "BOOT", "FATAL"); the message tells them what. TinyGSM keeps its
+// own AT traces off Serial, so USB-CDC stays clean and grep-able.
+// `Serial.printf()` only accepts `...` args — it has no `vprintf()`
+// overload that takes a `va_list`. Passing a `va_list` directly to it
+// makes the whole variadic part print garbage. Fix: format into a
+// stack buffer with `vsnprintf` (which IS va_list-aware) first.
+static void logLine(const char *tag, const char *fmt, ...) {
+    Serial.printf("[%lu][%s] ", (unsigned long)millis(), tag);
+    char buf[512];  // ESP32-S3 has 512 KB SRAM; 512 bytes on the stack is trivial
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(buf, sizeof(buf), fmt, ap);
+    va_end(ap);
+    Serial.print(buf);
+    Serial.println();
+}
 
-    int available() override           { return _modem.available(); }
-    int peek() override                { return _modem.peek(); }
-    int read() override
-    {
-        int c = _modem.read();
-        if (c >= 0) _debug.write(static_cast<uint8_t>(c));
-        return c;
-    }
-    void flush() override              { _modem.flush(); }
-    size_t write(uint8_t c) override
-    {
-        size_t n = _modem.write(c);
-        _debug.print(F(">>> "));
-        _debug.write(c);
-        return n;
-    }
-    size_t write(const uint8_t *buf, size_t size) override
-    {
-        size_t n = _modem.write(buf, size);
-        _debug.print(F(">>> "));
-        _debug.write(buf, size);
-        return n;
-    }
-};
+#define LOG_I(tag, ...) logLine((tag), __VA_ARGS__)
+// No separate levels for now — the tag already disambiguates.
+#define LOG_W         LOG_I
+#define LOG_E         LOG_I
 
-#ifdef DUMP_AT_COMMANDS
-StreamDebugger debugger(Serial1, Serial);
-TinyGsm        modem(debugger);
-#else
-TinyGsm        modem(Serial1);
-#endif
+static XPowersAXP2101 PMU;
+static TinyGsm    modem(Serial1);
 
-static XPowersPMU PMU;
-
-static constexpr uint32_t STATUS_LOG_INTERVAL_MS = 10000;
-static constexpr uint32_t RAW_DUMP_INTERVAL_MS   = 30000;
-static constexpr uint32_t GPS_SETTLE_MS          = 3000;
-static constexpr uint8_t  PWRKEY_MAX_ATTEMPTS    = 30;
-
-static uint32_t g_fixCount      = 0;
-static uint32_t g_lastStatusMs  = 0;
-static uint32_t g_lastRawDumpMs = 0;
-static bool     g_blinkLevel    = false;
-
-// ---- pmuBringUp: power on the modem rail + GPS antenna rail ----
-static bool pmuBringUp()
-{
-    Serial.println(F("[pmu] init AXP2101 (I2C 0x34)"));
+// =====================================================================
+// AXP2101 PMU bring-up.
+// =====================================================================
+// Out of the box the PMU already has DC1 (ESP32 core) and DC3
+// (modem) enabled. We disable every other rail so quiescent draw
+// is minimal, force a clean modem power-on across cold boots, then
+// enable the two rails the GPS path depends on:
+//
+//   * BLDO1 — 3.3 V level shifter between ESP32-S3 and the modem
+//     UART. Without it, AT commands silently no-op.
+//   * BLDO2 — supplies the active GNSS antenna. The onboard LNA
+//     will not work without it.
+//
+// `disableTSPinMeasure()` is also mandatory: the H606 has no NTC,
+// so without this line the AXP2101 refuses to charge the battery
+// and the blue LED just blinks forever.
+static bool pmuInit() {
+    Wire.begin(I2C_SDA, I2C_SCL);
     if (!PMU.begin(Wire, AXP2101_SLAVE_ADDRESS, I2C_SDA, I2C_SCL)) {
-        Serial.println(F("[pmu] FAIL: AXP2101 not detected on Wire"));
         return false;
     }
-    Serial.println(F("[pmu] OK"));
+    LOG_I("PMU", "AXP2101 detected @0x%02X", AXP2101_SLAVE_ADDRESS);
 
-    // Cold-boot housekeeping: drop the modem rail so the upcoming PWRKEY
-    // pulse starts from a known state. esp_sleep_get_wakeup_cause() ==
-    // UNDEFINED means we came up from power-on (not deep-sleep wake).
+    PMU.disableDC2();   PMU.disableDC4();   PMU.disableDC5();
+    PMU.disableALDO1(); PMU.disableALDO2(); PMU.disableALDO3(); PMU.disableALDO4();
+    PMU.disableCPUSLDO(); PMU.disableDLDO1(); PMU.disableDLDO2();
+
+    // PMU latches DC3 across deep-sleep, so on a true cold-boot
+    // we have to drop and re-assert PWRKEY manually to be sure the
+    // modem is actually fresh.
     if (esp_sleep_get_wakeup_cause() == ESP_SLEEP_WAKEUP_UNDEFINED) {
-        Serial.println(F("[pmu] cold boot -> disableDC3() before PWRKEY"));
         PMU.disableDC3();
         delay(200);
+        LOG_I("PMU", "cold-boot: DC3 cycled");
     }
 
-    // Modem main rail: 3.0V (SIM7080 range 2.7-3.4V).
-    Serial.println(F("[pmu] DC3 = 3000 mV (modem rail)"));
-    PMU.setDC3Voltage(3000);
+    PMU.enableBLDO1();
     PMU.enableDC3();
-
-    // GPS active antenna rail (BLDO2): 3.3V. Antenna must be powered for
-    // the SIM7080 GNSS receiver to see satellites.
-    Serial.println(F("[pmu] BLDO2 = 3300 mV (GPS antenna rail)"));
-    PMU.setBLDO2Voltage(3300);
     PMU.enableBLDO2();
-
-    // No NTC on this board — leaving TS pin measure enabled would block
-    // charging forever.
-    Serial.println(F("[pmu] disableTSPinMeasure() (no NTC on board)"));
     PMU.disableTSPinMeasure();
-
+    LOG_I("PMU", "rails ok: DC3 BLDO1 BLDO2 (modem / UART / antenna)");
     return true;
 }
 
-// ---- modemPwrKeyPulse: toggle BOARD_MODEM_PWR_PIN low->high->low ----
-// The SIM7080 PWRKEY pin wants a >1s low pulse to power on.
-static void modemPwrKeyPulse()
-{
+// =====================================================================
+// SIM7080G bring-up.
+// =====================================================================
+// PWRKEY is active-low: pulling the line LOW for ~1 s toggles power.
+// The pattern below (LOW/HIGH/LOW with the listed delays) is the
+// sequence SIMCom documents in the AT reference for SIM70xx-family
+// modems. After pulsing we poll `testAT` until the modem answers —
+// first boot can take several seconds, hence the 10-retry budget.
+static bool modemPowerOn() {
     pinMode(BOARD_MODEM_PWR_PIN, OUTPUT);
+    digitalWrite(BOARD_MODEM_PWR_PIN, LOW);   delay(100);
+    digitalWrite(BOARD_MODEM_PWR_PIN, HIGH);  delay(1000);
     digitalWrite(BOARD_MODEM_PWR_PIN, LOW);
-    delay(100);
-    digitalWrite(BOARD_MODEM_PWR_PIN, HIGH);
-    delay(1000);
-    digitalWrite(BOARD_MODEM_PWR_PIN, LOW);
-}
+    LOG_I("MODEM", "PWRKEY pulse sent (gpio=%d)", (int)BOARD_MODEM_PWR_PIN);
 
-// ---- modemBringUp: open Serial1, pulse PWRKEY until AT responds ----
-static bool modemBringUp()
-{
-    Serial.printf("[serial1] begin 115200 8N1 rxd=%d txd=%d\n",
-                  BOARD_MODEM_RXD_PIN, BOARD_MODEM_TXD_PIN);
-    Serial1.begin(115200, SERIAL_8N1, BOARD_MODEM_RXD_PIN, BOARD_MODEM_TXD_PIN);
-
-    Serial.println(F("[modem] PWRKEY pulse + testAT(1000) until AT responds"));
-    for (uint8_t attempt = 1; attempt <= PWRKEY_MAX_ATTEMPTS; ++attempt) {
-        modemPwrKeyPulse();
+    for (uint8_t i = 0; i < 10; ++i) {
         if (modem.testAT(1000)) {
-            Serial.printf("[modem] AT OK on attempt %u\n", attempt);
-            Serial.println(F("[modem] AT+CGMR (firmware version) ->"));
-            modem.sendAT("+CGMR");
-            modem.waitResponse(3000UL);
+            LOG_I("MODEM", "AT ready after %u retries",
+                  (unsigned)(i + 1));
             return true;
         }
-        Serial.printf("[modem] no AT yet (attempt %u/%u)\n",
-                      attempt, PWRKEY_MAX_ATTEMPTS);
+        LOG_W("MODEM", "AT not ready (retry %u/10)", (unsigned)(i + 1));
+        delay(1000);
     }
-    Serial.println(F("[modem] FAIL: no AT response after max attempts"));
     return false;
 }
 
-// ---- gpsBegin: cold-start the GNSS engine, enable, settle, select constellations ----
-static bool gpsBegin()
-{
-    Serial.println(F("[gps] cycling BLDO2 (GPS antenna rail) for hard GNSS reset"));
-    PMU.disableBLDO2(); delay(500);
-    PMU.enableBLDO2();  delay(1000);
-
-    Serial.println(F("[gps] AT+CFUN=4 (airplane mode: cellular off, SIM preserved) ->"));
-    modem.sendAT("+CFUN=4");
-    modem.waitResponse(5000UL);
-    delay(2000);  // let modem settle after radio-off
-
-    Serial.println(F("[gps] AT+CGNSCOLD (force GNSS engine cold start) ->"));
-    modem.sendAT("+CGNSCOLD");
-    if (modem.waitResponse(5000UL) != 1) {
-        Serial.println(F("[gps] WARN: no OK from AT+CGNSCOLD, continuing anyway"));
+// =====================================================================
+// GPS reader — non-blocking polling at GPS_READ_INTERVAL_MS.
+// =====================================================================
+// `modem.enableGPS()` sends `AT+CGNSPWR=1` once. From then on,
+// `modem.getGPS(...)` issues `AT+CGNSINF` and returns either the
+// latest fix or "no fix" in roughly 100 ms — fast enough to live
+// directly inside `tick()`. No NMEA parsing in firmware: TinyGSM
+// fills the out-params, and the SIM7080G's own parser handles the
+// multi-constellation stack (GPS + GLONASS + BeiDou + Galileo).
+class GpsReader {
+public:
+    void begin() {
+        modem.enableGPS();
+        LOG_I("GPS", "enabled (AT+CGNSPWR=1)");
     }
 
-    Serial.println(F("[gps] AT+CGPIO=0,48,1,1 (H606 GPS antenna power on) ->"));
-    modem.sendAT("+CGPIO=0,48,1,1");
-    modem.waitResponse(2000UL);
-
-    Serial.println(F("[gps] enableGPS()"));
-    if (!modem.enableGPS()) {
-        Serial.println(F("[gps] FAIL: enableGPS() returned false"));
-        return false;
-    }
-    Serial.println(F("[gps] enableGPS returned OK"));
-
-    // The SIM7080 GNSS task isn't fully alive the moment AT+CGNSPWR=1
-    // returns OK — it takes ~2-3s to register and start answering
-    // AT+CGNSINF. Querying in that window returns nothing (not even an
-    // ERROR), which is what the user was hitting. 3s settle is the
-    // community workaround for the same symptom on SIM7000/SIM7080.
-    Serial.printf("[gps] settling %lu ms for GNSS engine cold start\n",
-                  (unsigned long)GPS_SETTLE_MS);
-    delay(GPS_SETTLE_MS);
-
-    Serial.println(F("[gps] AT+CGNSMOD=1,0,1,0,0 (GPS+BeiDou) ->"));
-    modem.sendAT("+CGNSMOD=1,0,1,0,0");
-    modem.waitResponse(2000UL);
-
-    Serial.println(F("[gps] ready — fix may take minutes outdoors"));
-    return true;
-}
-
-// ---- readGps: one fix attempt + LED feedback + periodic status / raw dump ----
-static void readGps()
-{
-    float lat = 0, lon = 0, spd = 0, alt = 0, acc = 0;
-    int   vsat = 0, usat = 0, yy = 0, mo = 0, dd = 0, hh = 0, mi = 0, ss = 0;
-
-    if (modem.getGPS(&lat, &lon, &spd, &alt, &vsat, &usat, &acc,
-                     &yy, &mo, &dd, &hh, &mi, &ss))
-    {
-        Serial.println();
-        Serial.printf("[gps] FIX #%u:\n", (unsigned)++g_fixCount);
-        Serial.printf("       lat=%.8f  lon=%.8f\n", (double)lat, (double)lon);
-        Serial.printf("       speed=%.2f knots  alt=%.1f m  acc=%.1f m\n",
-                      (double)spd, (double)alt, (double)acc);
-        Serial.printf("       sats in view=%d  used=%d\n", vsat, usat);
-        Serial.printf("       time=%04d-%02d-%02d %02d:%02d:%02d UTC\n",
-                      yy, mo, dd, hh, mi, ss);
-        Serial.println();
-
-        PMU.setChargingLedMode(XPOWERS_CHG_LED_BLINK_4HZ);
-        g_lastStatusMs = millis();
-    }
-    else
-    {
-        PMU.setChargingLedMode(g_blinkLevel ? XPOWERS_CHG_LED_ON
-                                            : XPOWERS_CHG_LED_OFF);
-        g_blinkLevel = !g_blinkLevel;
-
-        if (millis() - g_lastStatusMs > STATUS_LOG_INTERVAL_MS) {
-            Serial.println(F("[gps] no fix yet"));
-            g_lastStatusMs = millis();
+    void tick() {
+        const uint32_t now = millis();
+        if ((int32_t)(nextReadMs - now) > 0) {
+            return;  // interval not yet elapsed; loop is non-blocking
         }
+        nextReadMs = now + GPS_READ_INTERVAL_MS;
+        ++ticks;
 
-        // Periodic raw dump: show whatever the modem actually returns for
-        // AT+CGNSINF (or the absence of it) so we can see WHY getGPS() is
-        // failing — silent modem, "no fix" response, or parse error.
-        if (millis() - g_lastRawDumpMs > RAW_DUMP_INTERVAL_MS) {
-            g_lastRawDumpMs = millis();
-            Serial.println(F("[gps] raw: AT+CGNSINF ->"));
-            modem.sendAT("+CGNSINF");
-            modem.waitResponse(3000UL);
+        float lat   = 0.0f;
+        float lon   = 0.0f;
+        float speed = 0.0f;   // knots
+        float alt   = 0.0f;   // metres
+        int   vsat  = 0;      // satellites in view
+        int   usat  = 0;      // satellites used
+        float acc   = 0.0f;   // estimated horizontal accuracy (m)
+        int   yy    = 0;
+        int   mo    = 0;
+        int   dd    = 0;
+        int   hh    = 0;
+        int   mi    = 0;
+        int   ss    = 0;
+
+        // DEBUG: dump the raw +CGNSINF response from the modem. The
+        // SIM70xx driver parses this same AT command into float/int
+        // out-params in `modem.getGPS(...)`, but when the parsed values
+        // look obviously broken (lat pinned at one value, lon in the
+        // gigabytes) the raw line tells us whether the modem is
+        // returning sparse fields, malformed timestamps, or a real
+        // fix we just aren't parsing right. Costs one extra AT round-
+        // trip per 8 s — negligible while debugging.
+        const String raw = modem.getGPSraw();
+        LOG_I("GPS-RAW", "%s", raw.c_str());
+
+        const bool ok = modem.getGPS(&lat, &lon, &speed, &alt,
+                                     &vsat, &usat, &acc,
+                                     &yy, &mo, &dd,
+                                     &hh, &mi, &ss);
+
+        if (ok) {
+            noFixStreak = 0;
+            LOG_I("GPS",
+                  "FIX #%lu  lat=%.6f lon=%.6f alt=%.1fm speed=%.1fkn "
+                  "sats=%d/%d acc=%.0fm utc=%04d-%02d-%02dT%02d:%02d:%02d",
+                  (unsigned long)ticks, lat, lon, alt, speed,
+                  usat, vsat, acc,
+                  yy, mo, dd, hh, mi, ss);
+        } else {
+            ++noFixStreak;
+            LOG_W("GPS",
+                  "no fix  tick=%lu  noFixStreak=%lu  "
+                  "(first fix can take minutes — try outdoors)",
+                  (unsigned long)ticks, (unsigned long)noFixStreak);
         }
     }
-}
 
-void setup()
-{
+private:
+    uint32_t nextReadMs  = 0;
+    uint32_t ticks       = 0;
+    uint32_t noFixStreak = 0;
+};
+
+static GpsReader gps;
+
+// =====================================================================
+// Arduino lifecycle.
+// =====================================================================
+void setup() {
     Serial.begin(115200);
-    delay(200);
-    Serial.println();
-    Serial.println(F("========================================="));
-    Serial.println(F(" open-gps-iot: T-SIM7080G bring-up sketch"));
-    Serial.println(F("========================================="));
-    Serial.printf("free heap: %u bytes\n", (unsigned)ESP.getFreeHeap());
-    Serial.printf("wakeup cause: %d "
-                  "(0=power-on, >0=deep-sleep wake)\n",
-                  (int)esp_sleep_get_wakeup_cause());
+    delay(200);  // give USB-CDC time to enumerate before first print
+    LOG_I("BOOT", "LilyGo T-SIM7080G-S3 (H606) GPS logger");
 
-    if (!pmuBringUp()) {
-        Serial.println(F("HALT: PMU not responding — check I2C wiring"));
-        while (1) delay(1000);
+    if (!pmuInit()) {
+        LOG_E("FATAL",
+              "PMU init failed (I2C SDA=%d SCL=%d) — check wiring",
+              (int)I2C_SDA, (int)I2C_SCL);
+        while (true) { delay(1000); }
     }
 
-    if (!modemBringUp()) {
-        Serial.println(F("HALT: modem not responding to AT"));
-        while (1) delay(1000);
+    Serial1.begin(MODEM_BAUD, SERIAL_8N1,
+                  BOARD_MODEM_RXD_PIN, BOARD_MODEM_TXD_PIN);
+    LOG_I("MODEM", "UART1  RXD=%d TXD=%d  @%lu baud",
+          (int)BOARD_MODEM_RXD_PIN, (int)BOARD_MODEM_TXD_PIN,
+          (unsigned long)MODEM_BAUD);
+
+    if (!modemPowerOn()) {
+        LOG_E("FATAL",
+              "modem did not respond to AT after 10 retries — "
+              "SIM inserted before power? PWRKEY (gpio=%d) wired? "
+              "BLDO1 enabled?",
+              (int)BOARD_MODEM_PWR_PIN);
+        while (true) { delay(1000); }
     }
 
-    if (!gpsBegin()) {
-        Serial.println(F("HALT: GPS enable failed"));
-        while (1) delay(1000);
-    }
-
-    Serial.println(F("[setup] done — entering loop()"));
+    gps.begin();
+    LOG_I("BOOT", "ready — polling GPS every %lu ms",
+          (unsigned long)GPS_READ_INTERVAL_MS);
 }
 
-void loop()
-{
-    readGps();
-    delay(1000);
+void loop() {
+    gps.tick();
+    // No `delay()` here on purpose: a future cellular / sleep stage
+    // can hook into the same millis-based scheduler.
 }
