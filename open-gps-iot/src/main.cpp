@@ -1,10 +1,18 @@
 #include <Arduino.h>
+#include <esp_task_wdt.h>
+
 #include "gps_board.h"
+#include "config.h"
 
 static GpsBoard board;
 
 void setup() {
-    // GpsBoard::begin() owns all bring-up logging itself.
+    Serial.begin(115200);
+    delay(300);
+
+    esp_task_wdt_init(WATCHDOG_TIMEOUT_S, true);
+    esp_task_wdt_add(NULL);
+
     if (!board.begin()) {
         Serial.println(F("[HALT] bring-up failed; rebooting in 5 s"));
         delay(5000);
@@ -13,12 +21,13 @@ void setup() {
 }
 
 void loop() {
-    // millis()-driven non-blocking state machine (per AGENTS.md timing rules).
+    esp_task_wdt_reset();
+
     static unsigned long lastPoll = 0;
     static unsigned long lastIdle = 0;
     const unsigned long now = millis();
 
-    if (now - lastPoll < 2000) return;
+    if (now - lastPoll < FIX_POLL_MS) return;
     lastPoll = now;
 
     float lat = 0.0f, lon = 0.0f, alt = 0.0f;
