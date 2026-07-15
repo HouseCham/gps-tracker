@@ -2,6 +2,8 @@
 
 #include <Arduino.h>
 
+#include "location_payload.h"
+
 // Single-class wrapper around the LilyGo T-SIM7080G-S3 GPS bring-up:
 // PMU prologue, modem power-on, AT handshake, GNSS enable, fix poll.
 // Owns one TinyGsm instance backed by Serial1 (UART1) and one XPowersPMU
@@ -16,6 +18,12 @@ public:
     // decimal-degrees latitude/longitude and meters altitude. On a failed
     // poll resets internal satellite counters to 0.
     bool pollFix(float &lat, float &lon, float &alt);
+
+    // Polls the GNSS receiver once and fills a full LocationPayload,
+    // including speed, satellite counts, accuracy, and timestamp.
+    // Convenience wrapper around pollFix() + the +CGNSINF timestamp
+    // fields; returns false (and zeroes the payload) on a failed poll.
+    bool pollFixPayload(LocationPayload& out);
 
     // Raw `+CGNSINF` line for diagnostic visibility when pollFix() returns
     // false. First two fields after the prefix are run_status (1 = receiver

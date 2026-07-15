@@ -114,3 +114,28 @@ bool GpsBoard::pollFix(float &lat, float &lon, float &alt) {
 String GpsBoard::rawGnssState() {
     return modem.getGPSraw();
 }
+
+bool GpsBoard::pollFixPayload(LocationPayload& out) {
+    // Zero the payload first so a failed poll leaves it cleanly empty
+    // (no stale lat/lon from a previous fix leaking through).
+    memset(&out, 0, sizeof(out));
+
+    float lat = 0, lon = 0, spd = 0, alt = 0, acc = 0;
+    int   vsat = 0, usat = 0;
+    int   yy = 0, mo = 0, dd = 0, hh = 0, mi = 0, ss = 0;
+
+    if (!modem.getGPS(&lat, &lon, &spd, &alt,
+                      &vsat, &usat, &acc,
+                      &yy, &mo, &dd, &hh, &mi, &ss)) {
+        _vsat = 0;
+        _usat = 0;
+        return false;
+    }
+    _vsat = static_cast<uint32_t>(vsat);
+    _usat = static_cast<uint32_t>(usat);
+
+    location_payload_from_fix(out,
+        lat, lon, spd, alt, usat, acc,
+        yy, mo, dd, hh, mi, ss);
+    return true;
+}

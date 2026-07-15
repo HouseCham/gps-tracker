@@ -2,6 +2,7 @@
 #include <esp_task_wdt.h>
 
 #include "gps_board.h"
+#include "location_payload.h"
 #include "config.h"
 #include "secrets.h"
 
@@ -40,11 +41,22 @@ void loop() {
     if (now - lastPoll < FIX_POLL_MS) return;
     lastPoll = now;
 
-    float lat = 0.0f, lon = 0.0f, alt = 0.0f;
-    if (board.pollFix(lat, lon, alt)) {
+    LocationPayload payload;
+    if (board.pollFixPayload(payload)) {
         lastIdle = 0;  // reset idle cadence so a lost-fix banner fires quickly
         Serial.printf("[FIX ] sats=%lu  lat=%.6f  lon=%.6f  alt=%.1fm\n",
-                      (unsigned long)board.satellitesUsed(), lat, lon, alt);
+                      (unsigned long)board.satellitesUsed(),
+                      payload.latitude, payload.longitude, payload.altitude);
+
+        // Stage 3 will replace this with the actual HTTP POST. For now,
+        // serialise and print so we can eyeball the JSON contract.
+        char json[256];
+        size_t n = location_payload_to_json(payload, json, sizeof(json));
+        if (n > 0) {
+            Serial.print(F("[JSON] ")); Serial.println(json);
+        } else {
+            Serial.println(F("[ERR ] JSON serialization overflow"));
+        }
         return;
     }
 
