@@ -3,8 +3,10 @@
 
 #include "gps_board.h"
 #include "config.h"
+#include "secrets.h"
 
 static GpsBoard board;
+static Secrets  secrets;
 
 void setup() {
     Serial.begin(115200);
@@ -18,6 +20,14 @@ void setup() {
         delay(5000);
         ESP.restart();
     }
+
+    if (!secrets_load(secrets)) {
+        Serial.println(F("[ERR ] secrets missing — copy config/secrets.example.h to config/secrets.h and fill uuid + api_key"));
+        Serial.println(F("[HALT] rebooting in 5 s"));
+        delay(5000);
+        ESP.restart();
+    }
+    secrets_print_diag(secrets);
 }
 
 void loop() {
