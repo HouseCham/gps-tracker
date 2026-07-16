@@ -7,7 +7,7 @@ import {
     MAP_ONLINE_THRESHOLD_MS,
     MAP_ROUTE_LINE_COLOR,
     MAP_STYLE_URL,
-} from '@/constants';
+} from '@/constants/components';
 //-- Components
 import { MapPin } from 'lucide-react';
 import Map, {
@@ -65,24 +65,27 @@ export default function DeviceMapLive({
 
     const markerStatus = statusFromRecordedAt(location?.recordedAt);
 
-    const routeGeoJson: GeoJSON.FeatureCollection | null =
-        ((): GeoJSON.FeatureCollection | null => {
-            const points = route ?? [];
-            if (points.length < 2) return null;
-            return {
-                type: 'FeatureCollection',
-                features: [
-                    {
-                        type: 'Feature',
-                        geometry: {
-                            type: 'LineString',
-                            coordinates: points.map(p => [p.lng, p.lat]),
-                        },
-                        properties: {},
+    /**
+     * @function routeGeoJson
+     * @description Renders the route as a GeoJSON LineString layer.
+     */
+    const routeGeoJson = (() => {
+        const points = route ?? [];
+        if (points.length < 2) return null;
+        return {
+            type: 'FeatureCollection' as const,
+            features: [
+                {
+                    type: 'Feature' as const,
+                    geometry: {
+                        type: 'LineString' as const,
+                        coordinates: points.map(p => [p.lng, p.lat]),
                     },
-                ],
-            };
-        })();
+                    properties: {},
+                },
+            ],
+        };
+    })();
 
     const wrapperClass = ['device-map-live', className]
         .filter(Boolean)

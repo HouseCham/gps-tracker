@@ -275,6 +275,11 @@ export const es: Translation = {
                 editor: 'Editor',
                 viewer: 'Visualizador',
             },
+            connection: {
+                online: 'En línea',
+                disconnected: 'Desconectado',
+                neverSeen: 'Sin reportes',
+            },
             vehicleTypes: {
                 bicycle: 'Bicicleta',
                 motorcycle: 'Motocicleta',

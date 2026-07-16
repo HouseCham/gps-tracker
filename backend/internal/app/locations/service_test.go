@@ -16,17 +16,29 @@ import (
 // the service range-checks happen before persistence and that is what
 // the tests care about.
 type mockWriter struct {
-	calls []domain.LocationIngest
+	calls []domain.Location
 	err   error
 }
 
-func (m *mockWriter) Insert(_ context.Context, loc domain.LocationIngest) error {
+func (m *mockWriter) Insert(_ context.Context, loc domain.Location) error {
 	m.calls = append(m.calls, loc)
 	return m.err
 }
 
-func validBase() domain.LocationIngest {
-	return domain.LocationIngest{
+// mockReader is the no-op Reader used by every Ingest unit test — Ingest
+// never touches the read path. The GetLatest tests swap in their own
+// reader to control the returned location / error.
+type mockReader struct {
+	loc domain.Location
+	err error
+}
+
+func (m *mockReader) GetLatest(_ context.Context, _ uuid.UUID) (domain.Location, error) {
+	return m.loc, m.err
+}
+
+func validBase() domain.Location {
+	return domain.Location{
 		DeviceID:   uuid.New(),
 		RecordedAt: time.Now(),
 		Latitude:   19.432608,
@@ -36,7 +48,7 @@ func validBase() domain.LocationIngest {
 
 func TestIngest_AcceptsValidPayload(t *testing.T) {
 	w := &mockWriter{}
-	svc := New(w)
+	svc := New(w, &mockReader{})
 
 	in := validBase()
 	if err := svc.Ingest(context.Background(), in); err != nil {
@@ -57,7 +69,7 @@ func TestIngest_RejectsOutOfRangeLatitude(t *testing.T) {
 			w := &mockWriter{}
 			in := validBase()
 			in.Latitude = lat
-			if err := New(w).Ingest(context.Background(), in); !errors.Is(err, ErrInvalidLatitude) {
+			if err := New(w, &mockReader{}).Ingest(context.Background(), in); !errors.Is(err, ErrInvalidLatitude) {
 				tt.Fatalf("latitude=%v: got %v want ErrInvalidLatitude", lat, err)
 			}
 			if len(w.calls) != 0 {
@@ -74,7 +86,7 @@ func TestIngest_RejectsOutOfRangeLongitude(t *testing.T) {
 			w := &mockWriter{}
 			in := validBase()
 			in.Longitude = lon
-			if err := New(w).Ingest(context.Background(), in); !errors.Is(err, ErrInvalidLongitude) {
+			if err := New(w, &mockReader{}).Ingest(context.Background(), in); !errors.Is(err, ErrInvalidLongitude) {
 				tt.Fatalf("longitude=%v: got %v want ErrInvalidLongitude", lon, err)
 			}
 		})
@@ -90,7 +102,7 @@ func TestIngest_AcceptsBoundaryAltitudes(t *testing.T) {
 		in := validBase()
 		a := alt
 		in.Altitude = &a
-		err := New(w).Ingest(context.Background(), in)
+		err := New(w, &mockReader{}).Ingest(context.Background(), in)
 		if alt == minAlt || alt == maxAlt {
 			if err != nil {
 				t.Errorf("altitude=%v should be accepted, got %v", alt, err)
@@ -108,7 +120,7 @@ func TestIngest_RejectsNegativeSpeed(t *testing.T) {
 	in := validBase()
 	s := -0.01
 	in.Speed = &s
-	if err := New(w).Ingest(context.Background(), in); !errors.Is(err, ErrInvalidSpeed) {
+	if err := New(w, &mockReader{}).Ingest(context.Background(), in); !errors.Is(err, ErrInvalidSpeed) {
 		t.Fatalf("got %v want ErrInvalidSpeed", err)
 	}
 }
@@ -118,7 +130,7 @@ func TestIngest_RejectsNegativeAccuracy(t *testing.T) {
 	in := validBase()
 	a := -5.0
 	in.Accuracy = &a
-	if err := New(w).Ingest(context.Background(), in); !errors.Is(err, ErrInvalidAccuracy) {
+	if err := New(w, &mockReader{}).Ingest(context.Background(), in); !errors.Is(err, ErrInvalidAccuracy) {
 		t.Fatalf("got %v want ErrInvalidAccuracy", err)
 	}
 }
@@ -137,7 +149,7 @@ func TestIngest_BatteryVoltageBoundaries(t *testing.T) {
 		in := validBase()
 		v := c.volts
 		in.BatteryVoltage = &v
-		got := New(w).Ingest(context.Background(), in)
+		got := New(w, &mockReader{}).Ingest(context.Background(), in)
 		if c.wantErr == nil && got != nil {
 			t.Errorf("volts=%v: got %v want nil", c.volts, got)
 		}
@@ -161,7 +173,7 @@ func TestIngest_SignalStrengthBoundaries(t *testing.T) {
 		in := validBase()
 		r := c.rssi
 		in.SignalStrength = &r
-		got := New(w).Ingest(context.Background(), in)
+		got := New(w, &mockReader{}).Ingest(context.Background(), in)
 		if c.wantErr == nil && got != nil {
 			t.Errorf("rssi=%v: got %v want nil", c.rssi, got)
 		}
@@ -176,15 +188,57 @@ func TestIngest_AcceptsNilOptionalFields(t *testing.T) {
 	in := validBase()
 	// All five optional fields stay nil — the device might not have
 	// every sensor reading on every cycle.
-	if err := New(w).Ingest(context.Background(), in); err != nil {
+	if err := New(w, &mockReader{}).Ingest(context.Background(), in); err != nil {
 		t.Fatalf("got %v want nil", err)
 	}
 }
 
 func TestIngest_PropagatesWriterError(t *testing.T) {
 	w := &mockWriter{err: errors.New("db down")}
-	svc := New(w)
+	svc := New(w, &mockReader{})
 	if err := svc.Ingest(context.Background(), validBase()); err == nil {
 		t.Fatal("expected writer error to propagate")
+	}
+}
+
+func TestGetLatest_ReturnsReaderLocation(t *testing.T) {
+	now := time.Now().UTC()
+	want := domain.Location{
+		DeviceID:   uuid.New(),
+		RecordedAt: now,
+		Latitude:   19.4326,
+		Longitude:  -99.1332,
+	}
+	r := &mockReader{loc: want}
+	svc := New(&mockWriter{}, r)
+
+	got, err := svc.GetLatest(context.Background(), want.DeviceID)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if got.DeviceID != want.DeviceID || got.RecordedAt != want.RecordedAt {
+		t.Errorf("got %+v want %+v", got, want)
+	}
+}
+
+func TestGetLatest_PreservesErrNotFound(t *testing.T) {
+	// The handler matches on errors.Is(err, domain.ErrNotFound); the
+	// service's fmt.Errorf wrap must keep the sentinel reachable.
+	r := &mockReader{err: domain.ErrNotFound}
+	svc := New(&mockWriter{}, r)
+
+	_, err := svc.GetLatest(context.Background(), uuid.New())
+	if !errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("got %v want domain.ErrNotFound", err)
+	}
+}
+
+func TestGetLatest_PropagatesOtherErrors(t *testing.T) {
+	r := &mockReader{err: errors.New("db down")}
+	svc := New(&mockWriter{}, r)
+
+	_, err := svc.GetLatest(context.Background(), uuid.New())
+	if err == nil || errors.Is(err, domain.ErrNotFound) {
+		t.Fatalf("expected wrapped db-down error, got %v", err)
 	}
 }

@@ -1,5 +1,11 @@
 package dto
 
+import (
+	"time"
+
+	"github.com/HouseCham/gps-tracker/backend/internal/domain"
+)
+
 // IngestLocationRequest is the body of POST /api/v1/devices/:uuid_firmware/locations.
 // The device sends this on every cycle: one payload per ~30 s with up to 9 telemetry fields.
 //
@@ -22,4 +28,39 @@ type IngestLocationRequest struct {
 	Accuracy       *float64 `json:"accuracy"        validate:"omitempty,gte=0"`
 	BatteryVoltage *float64 `json:"battery_voltage" validate:"omitempty,gte=0,lte=6"`
 	SignalStrength *int     `json:"signal_strength" validate:"omitempty,gte=0,lte=31"`
+}
+
+// LocationResponse is the body returned by GET /api/v1/devices/:id/locations/latest.
+// One row — the device's most recent location — projected for the dashboard's
+// "last location" preview. Nullable telemetry fields stay as *T so a missing
+// sensor reading surfaces as JSON null rather than a misleading zero.
+//
+// Times are serialised to RFC 3339 by Go's time.Time JSON marshaller; the
+// frontend's `formatDate` helper parses the same shape.
+type LocationResponse struct {
+	DeviceID       string    `json:"device_id"`
+	RecordedAt     time.Time `json:"recorded_at"`
+	Latitude       float64   `json:"latitude"`
+	Longitude      float64   `json:"longitude"`
+	Altitude       *float64  `json:"altitude"`
+	Speed          *float64  `json:"speed"`
+	Accuracy       *float64  `json:"accuracy"`
+	BatteryVoltage *float64  `json:"battery_voltage"`
+	SignalStrength *int      `json:"signal_strength"`
+}
+
+// LocationFromDomain projects a domain.Location into the wire shape
+// consumed by the dashboard.
+func LocationFromDomain(loc domain.Location) LocationResponse {
+	return LocationResponse{
+		DeviceID:       loc.DeviceID.String(),
+		RecordedAt:     loc.RecordedAt,
+		Latitude:       loc.Latitude,
+		Longitude:      loc.Longitude,
+		Altitude:       loc.Altitude,
+		Speed:          loc.Speed,
+		Accuracy:       loc.Accuracy,
+		BatteryVoltage: loc.BatteryVoltage,
+		SignalStrength: loc.SignalStrength,
+	}
 }

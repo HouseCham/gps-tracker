@@ -213,6 +213,19 @@ func NewRouter(deps RouterDeps) *fiber.App {
 		deps.LocationsHandler.Ingest,
 	)
 
+	// === Location read ===
+	// Session-cookie + per-device RBAC (viewer or higher). Lives on
+	// the `devices` group so the standard authSession +
+	// RequireDeviceRole pipeline applies. The paginated history
+	// endpoint lands in the same follow-up PR as the LivePreview
+	// component — see project-gps-tracker status row.
+	devices.Get("/:id/locations/latest",
+		authSession,
+		requirePasswordChanged,
+		middleware.RequireDeviceRole(domain.AccessRoleViewer, deps.AccessService),
+		deps.LocationsHandler.Latest,
+	)
+
 	// === Users routes ===
 	users := apiV1.Group("/users")
 	users.Get("/",

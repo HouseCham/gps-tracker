@@ -2,7 +2,64 @@
 
 Base URL: `/api/v1`
 
-The `locations` endpoint is the IoT ingestion path. Unlike every other route in this API it is **not** session-cookie authenticated — devices send an opaque per-device token in the `X-Device-API-Key` header instead. See [Authentication.md](./Authentication.md) for the IoT auth model and [Devices.md](./Devices.md#device-api-keys) for how devices obtain their tokens.
+The `locations` endpoint group serves both the IoT ingestion path (write, device-authenticated) and the dashboard read path (session-authenticated). Device-auth routes are reachable via `X-Device-API-Key`; user-auth routes follow the standard session-cookie + per-device RBAC pipeline. See [Authentication.md](./Authentication.md) for both auth models and [Devices.md](./Devices.md#device-api-keys) for how devices obtain their tokens.
+
+---
+
+## GET /api/v1/devices/:id/locations/latest
+
+Returns the device's most recent location — the one-row read that powers the dashboard's "last location" preview on the device-detail page.
+
+**Authorization:** Session cookie (Authula) + `viewer` (or higher) access on the device. The access check is enforced by `middleware.RequireDeviceRole(viewer)`; a user without access receives a `404` (security-through-obscurity, same as the rest of the per-device routes).
+
+**Path Parameters**
+
+| Parameter | Description |
+|-----------|-------------|
+| `id` | Device UUID. Must resolve to an active device the caller has at least `viewer` access to. |
+
+**Request**
+
+```
+GET /api/v1/devices/550e8400-e29b-41d4-a716-446655440001/locations/latest
+Cookie: authula.session_token=...
+```
+
+**Response `200 OK`**
+
+```json
+{
+  "status_code": 200,
+  "message": "latest location retrieved",
+  "data": {
+    "device_id": "550e8400-e29b-41d4-a716-446655440001",
+    "recorded_at": "2026-07-15T12:00:00Z",
+    "latitude": 19.432608,
+    "longitude": -99.133207,
+    "altitude": 2240.5,
+    "speed": 45.3,
+    "accuracy": 4.1,
+    "battery_voltage": 3.72,
+    "signal_strength": 23
+  }
+}
+```
+
+Nullable telemetry fields (`altitude`, `speed`, `accuracy`, `battery_voltage`, `signal_strength`) are returned as JSON `null` when the device did not report them on that cycle.
+
+**Error Responses**
+
+| Status Code | Message | Meaning |
+|-------------|---------|---------|
+| 400 | `invalid device id` | `:id` is not a valid UUID |
+| 401 | `unauthorized` | No session cookie or session expired |
+| 403 | `must change password` | Caller has `must_change_password=true` |
+| 404 | (per RBAC) | Caller has no access to the device (security-through-obscurity) |
+| 404 | `no location reported for this device yet` | The device has never sent a location row |
+
+> **Why a 404 for "never reported":** `GETLatestLocationForDevice` is `LIMIT 1` on an empty result set, which surfaces as `pgx.ErrNoRows` and maps to `domain.ErrNotFound`. The handler turns it into a distinct 404 so the dashboard can render a "Never seen" badge without inspecting 5xx errors.
+
+> **Why no `?include_history=true` flag:** the paginated history endpoint (`GET /api/v1/devices/:id/locations`) is a separate, follow-up route — it lands alongside the `LivePreview` component. Combining it here would mix the latest (object) shape with the history (paginated list) shape; keeping them separate matches the "uniform envelope per endpoint" rule.
 
 ---
 
@@ -67,7 +124,7 @@ Content-Length: 7
 Created
 ```
 
-No response body. The status code conveys success; clients can read the inserted row back via `GET /api/v1/devices/:id/locations` (sibling read endpoint, not yet implemented — open dashboard-side).
+No response body. The status code conveys success; clients can read the inserted row back via `GET /api/v1/devices/:id/locations/latest`.
 
 **Error Responses**
 
@@ -93,6 +150,6 @@ No response body. The status code conveys success; clients can read the inserted
 
 **Why does idempotency live in the DB layer?** ESP32 cellular radios have lossy links and the firmware retries every POST until it gets a response. Without idempotency a 30-second cycle can produce duplicates every time the network blips. `ON CONFLICT (device_id, recorded_at) DO NOTHING` makes retries a no-op.
 
-**Why no `GET /api/v1/devices/:id/locations`?** Read endpoints are an independent design (paginated history, time-range queries) that intersects with the dashboard's UI needs. They land in a follow-up PR.
+**Why no paginated `GET /api/v1/devices/:id/locations`?** The paginated history endpoint is a separate, follow-up route that lands alongside the `LivePreview` component. Combining it with the `latest` endpoint would mix the latest (object) shape with the history (paginated list) shape; keeping them separate matches the "uniform envelope per endpoint" rule.
 
 **Why aren't GPS-only devices rejected?** A bare GPS + ESP32 can fill in lat/lng/recorded_at/altitude/speed/accuracy; the other five fields are optional. The empty `signal_strength` case is common in indoor benches, etc.

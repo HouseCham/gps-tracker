@@ -16,3 +16,4 @@ export * from './devices.types';
 export * from './users.types';
 export * from './system.types';
 export * from './api-keys.types';
+export * from './locations.types';

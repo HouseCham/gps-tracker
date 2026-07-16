@@ -6,15 +6,18 @@ import (
 	"github.com/google/uuid"
 )
 
-// LocationIngest carries the data the IoT device posts on every cycle.
-// It is the app-layer projection of the IngestLocationRequest DTO after
-// the transport middleware has parsed/validated the JSON body.
+// Location is the app-layer projection of one row in the locations table.
+// It is used for both the ingest path (what the IoT device posts) and the
+// read path (what the dashboard requests). Same fields on both sides:
+// the wire DTOs already separate concerns at the transport boundary
+// (IngestLocationRequest for write, LocationResponse for read), and the
+// numeric / nullable semantics match across them.
 //
 // Nullable fields (Altitude, Speed, Accuracy, BatteryVoltage, SignalStrength)
 // stay as *T: zero values from a no-fix GPS cycle are encoded as JSON null
 // in the payload, and we do not want to coerce them to 0 (which would
 // flatten reporting analytics).
-type LocationIngest struct {
+type Location struct {
 	DeviceID       uuid.UUID
 	RecordedAt     time.Time
 	Latitude       float64

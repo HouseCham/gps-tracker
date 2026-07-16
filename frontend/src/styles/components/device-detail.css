@@ -18,6 +18,13 @@
     min-width: 0;
 }
 
+.device-detail__badges {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
 .device-detail__name {
     margin: 0;
     font-size: 24px;
