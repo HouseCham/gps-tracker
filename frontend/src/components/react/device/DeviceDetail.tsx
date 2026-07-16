@@ -84,7 +84,7 @@ export function DeviceDetail({
             getDeviceById(deviceId);
             getLatestLocation(deviceId);
         }
-    }, [deviceId, getDeviceById, getLatestLocation]);
+    }, [deviceId]);
 
     // Connection state is derived from the latest reported location.
     // Recomputed each render — the 1-minute threshold means a single
@@ -99,11 +99,11 @@ export function DeviceDetail({
     // map island expects. No util — one call site, two fields.
     const mapLocation: DeviceLocationPoint | null = latest
         ? {
-              lat: latest.latitude,
-              lng: latest.longitude,
-              recordedAt: latest.recorded_at,
-              speed: latest.speed ?? undefined,
-          }
+            lat: latest.latitude,
+            lng: latest.longitude,
+            recordedAt: latest.recorded_at,
+            speed: latest.speed ?? undefined,
+        }
         : null;
 
     // Return loading UI
@@ -181,6 +181,7 @@ export function DeviceDetail({
                     </div>
                 </div>
             </header>
+            {/* Detail Layout */}
             <div className="device-detail__layout">
                 {/* Device Detail Section */}
                 <div className="device-detail__main">
@@ -235,9 +236,9 @@ export function DeviceDetail({
                                 <dd className="device-detail__value device-detail__value--mono">
                                     {device.last_seen_at
                                         ? formatDate(
-                                              locale,
-                                              device.last_seen_at
-                                          )
+                                            locale,
+                                            device.last_seen_at
+                                        )
                                         : t.notAvailable}
                                 </dd>
                             </div>
@@ -279,18 +280,18 @@ export function DeviceDetail({
                     )}
                 </div>
                 {/* Map Section */}
-                <aside
-                    className="device-detail__map"
-                    aria-label={mapStrings.map}
-                >
-                    <Suspense fallback={null}>
+                <Suspense fallback={null}>
+                    <aside
+                        className="device-detail__map"
+                        aria-label={mapStrings.map}
+                    >
                         <DeviceMapLive
                             location={mapLocation}
                             route={[]}
                             deviceName={device.name}
                         />
-                    </Suspense>
-                </aside>
+                    </aside>
+                </Suspense>
             </div>
         </section>
     );

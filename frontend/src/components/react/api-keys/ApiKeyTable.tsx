@@ -287,6 +287,8 @@ export function ApiKeyTable({
                     />
                 </Suspense>
             ) : (
+                <>
+
                 <Suspense
                     fallback={
                         <TableStatus mode="loading" className={className} />
@@ -313,6 +315,9 @@ export function ApiKeyTable({
                             );
                         })}
                     </DataTable>
+                </Suspense>
+
+                <Suspense fallback={null}>
                     <MobileCardList variant="api-key" label={t.table.device}>
                         {rows.map(row => {
                             const handlers = rowHandlersById.get(row.id);
@@ -335,6 +340,7 @@ export function ApiKeyTable({
                         })}
                     </MobileCardList>
                 </Suspense>
+                </>
             )}
 
             {/* Create / Reveal modal */}
