@@ -31,6 +31,12 @@ compatible SIM is available — the modem bring-up code is already in place.
 - Secrets loaded from a git-ignored header, masked in boot logs
 - Pure-data modules unit-tested on the host with Unity (no ESP32 toolchain needed)
 
+> **TLS note:** the current build uses `setInsecure()` (cert validation
+> bypassed) because the ESP32's clock is unset at boot and mbedtls rejects
+> modern certs as not-yet-valid. Acceptable for dev/bench; **production
+> builds must add NTP sync (`configTime()`)** and revert to `setCACert(NULL)`
+> — see Design Decision #9 below.
+
 ## Repository layout
 
 ```
@@ -241,6 +247,34 @@ Anything that doesn't need `<Arduino.h>` lives under `lib/` so the `native`
 env can compile and test it on the host. Anything that touches hardware
 lives in `src/` and is excluded from the test build via `build_src_filter`.
 
+### 9. TLS currently uses `setInsecure()` — NTP sync is a Stage 4 task
+
+The ESP32's `time(NULL)` is 0 at boot (~1970-01-01) and the firmware never
+sets it. mbedtls checks every cert's `notBefore` against `time(NULL)` during
+the TLS handshake, so any cert issued after 2024 gets rejected as "not yet
+valid" with `MBEDTLS_ERR_X509_CERT_VERIFY_FAILED` (-1). `HTTPClient` collapses
+that to `HTTPC_ERROR_CONNECTION_REFUSED` and the device logs
+`HTTP transport failure (code=-1)`.
+
+The diagnosis is one line: log `time(nullptr)` before the POST. `time=179`
+≈ 1970-01-01 00:02:59 is the smoking gun.
+
+**Current workaround (dev only):** `client.setInsecure()` in `src/transport.cpp`.
+This bypasses cert validation entirely, which is fine for bench/iteration
+against your own backend, but means anyone on the LAN can MITM the
+connection and read the `X-Device-API-Key`.
+
+**Production fix (Stage 4 task):** add `configTime()` with NTP servers
+(`pool.ntp.org`, `time.nist.gov`, `time.cloudflare.com`) in `setup()`
+after `WiFi.begin()` succeeds, wait for `time(nullptr) > 1700000000`,
+then swap `setInsecure()` back to `setCACert(NULL)` (use the framework's
+default CA bundle) or pin CloudFlare's root CA explicitly with
+`setCACert(root_ca_pem)`.
+
+**Generalization:** any TLS connection from a freshly-booted ESP32 fails
+this way — HTTPS, MQTT over TLS, anything using mbedtls. Don't ship a
+project that depends on `setInsecure()` in production.
+
 ## API contract
 
 ```
@@ -271,7 +305,7 @@ rotation soft-deletes the prior key). The backend's locations table uses
 | 1 | done | Secrets loader + masked diagnostic |
 | 2 | done | `LocationPayload` — pure logic, 7 unit tests |
 | 3 | done | WiFi HTTPS transport — 5 URL unit tests, hardware-verified |
-| 4 | next | Sleep + cycle (`WiFi.mode(WIFI_OFF)` between uploads, optional deep sleep) |
+| 4 | next | Sleep + cycle (`WiFi.mode(WIFI_OFF)` between uploads, optional deep sleep) + NTP time sync (`configTime()`) so `setInsecure()` can revert to `setCACert(NULL)` |
 | 5 | planned | SIM7080G cellular swap (Cat-M/NB-IoT, Hologram APN) |
 | 6 | planned | Battery voltage + cellular signal in the payload |
 

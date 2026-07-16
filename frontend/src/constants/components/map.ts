@@ -1,5 +1,4 @@
 import type {
-    DeviceLocationPoint,
     DeviceMapPin,
     DeviceMapRoutePoint,
     MarkerStatus,
@@ -78,42 +77,28 @@ export const MAP_DEMO_ROUTE: DeviceMapRoutePoint[] = [
  */
 export const MAP_SPEED_OPTIONS: RouteSpeed[] = [1, 2, 4];
 /**
- * @constant MAP_LIVE_DEMO_LOCATION
- * @description Latest device location for the device-detail live map demo.
- * Stub data — replaced by /devices/:id/locations/latest once the backend
- * exposes the endpoint.
+ * @constant {string}
+ * @description Default map style URL
  */
-export const MAP_LIVE_DEMO_LOCATION: DeviceLocationPoint = {
-    lat: 19.4326,
-    lng: -99.1332,
-    recordedAt: new Date(Date.now() - 90 * 1000).toISOString(),
-    speed: 42,
-};
+const DEFAULT_MAP_STYLE = 'https://tiles.openfreemap.org/styles/liberty';
 /**
- * @constant MAP_LIVE_DEMO_ROUTE
- * @description Recent route history for the device-detail live map demo.
- * Stub data — replaced by /devices/:id/locations once the backend
- * exposes the endpoint.
+ * @constant {string}
+ * @description Map style URL
  */
-export const MAP_LIVE_DEMO_ROUTE: DeviceLocationPoint[] = [
-    { lat: 19.405, lng: -99.17, recordedAt: '2026-06-29T10:02:00Z' },
-    { lat: 19.408, lng: -99.164, recordedAt: '2026-06-29T10:08:00Z' },
-    { lat: 19.412, lng: -99.158, recordedAt: '2026-06-29T10:15:00Z' },
-    { lat: 19.415, lng: -99.152, recordedAt: '2026-06-29T10:22:00Z' },
-    { lat: 19.418, lng: -99.146, recordedAt: '2026-06-29T10:35:00Z' },
-    { lat: 19.421, lng: -99.142, recordedAt: '2026-06-29T10:48:00Z' },
-    { lat: 19.423, lng: -99.139, recordedAt: '2026-06-29T11:02:00Z' },
-    { lat: 19.425, lng: -99.137, recordedAt: '2026-06-29T11:18:00Z' },
-    { lat: 19.427, lng: -99.135, recordedAt: '2026-06-29T11:35:00Z' },
-    { lat: 19.428, lng: -99.134, recordedAt: '2026-06-29T12:01:00Z' },
-    { lat: 19.429, lng: -99.1335, recordedAt: '2026-06-29T12:30:00Z' },
-    { lat: 19.43, lng: -99.1333, recordedAt: '2026-06-29T13:05:00Z' },
-    { lat: 19.4308, lng: -99.133, recordedAt: '2026-06-29T13:42:00Z' },
-    { lat: 19.4314, lng: -99.1328, recordedAt: '2026-06-29T14:08:00Z' },
-    { lat: 19.4319, lng: -99.1326, recordedAt: '2026-06-29T14:21:00Z' },
-    {
-        lat: 19.4326,
-        lng: -99.1332,
-        recordedAt: new Date(Date.now() - 90 * 1000).toISOString(),
-    },
-];
+export const MAP_STYLE_URL: string =
+    // in case the env var is not set, fallback to the default style
+    (import.meta.env.PUBLIC_MAP_STYLE_URL as string | undefined) ??
+    DEFAULT_MAP_STYLE;
+/**
+ * @constant {number}
+ * @description Online threshold in milliseconds. A reading older than
+ * this is treated as "disconnected" — drives both the map marker
+ * status (DeviceMapLive.statusFromRecordedAt) and the device-detail
+ * header badge. Shared threshold so the two indicators never drift.
+ */
+export const MAP_ONLINE_THRESHOLD_MS = 60 * 1000;
+/**
+ * @constant {string}
+ * @description Stroke color for the route polyline drawn on the live device map.
+ */
+export const MAP_ROUTE_LINE_COLOR = '#1a73e8';

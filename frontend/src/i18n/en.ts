@@ -267,6 +267,11 @@ export const en = {
                 editor: 'Editor',
                 viewer: 'Viewer',
             },
+            connection: {
+                online: 'Online',
+                disconnected: 'Disconnected',
+                neverSeen: 'Never seen',
+            },
             vehicleTypes: {
                 bicycle: 'Bicycle',
                 motorcycle: 'Motorcycle',
