@@ -107,9 +107,11 @@ func main() {
 	apiKeysAdapter := apikeys.NewAdapter(pool)
 	apiKeysService := apikeys.New(apiKeysAdapter, apiKeysAdapter)
 
-	//-- locations (IoT device ingest)
+	//-- locations (IoT device ingest + read use cases)
+	// The same adapter instance satisfies both Writer and Reader ports;
+	// the api-keys service follows the same convention.
 	locationsAdapter := locations.NewAdapter(pool)
-	locationsService := locations.New(locationsAdapter)
+	locationsService := locations.New(locationsAdapter, locationsAdapter)
 
 	//-- queries pool — kept separate so the IoT auth middleware can
 	//   use it without taking a service dependency.

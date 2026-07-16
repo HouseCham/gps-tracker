@@ -4,20 +4,34 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/google/uuid"
+
 	"github.com/HouseCham/gps-tracker/backend/internal/domain"
 )
 
-// Service validates incoming ingest payloads before persisting them.
-// It only enforces numeric ranges that Postgres cannot enforce directly
-// (the DTO already handles "required / type" fields via validate_struct);
-// database constraints (NOT NULL on lat/lng, FK on device_id, partition
-// key composite PK, idempotent ON CONFLICT) live one layer below.
+// Service validates incoming ingest payloads before persisting them and
+// exposes the read use cases for the dashboard's location preview.
+//
+// The write side only enforces numeric ranges that Postgres cannot
+// enforce directly (the DTO already handles "required / type" fields
+// via validate_struct); database constraints (NOT NULL on lat/lng, FK
+// on device_id, partition key composite PK, idempotent ON CONFLICT)
+// live one layer below.
+//
+// The read side is a thin pass-through to the Reader port — no business
+// rules here yet (the device-existence check is enforced upstream by
+// the per-route RequireDeviceRole middleware; the service stays
+// single-responsibility).
 type Service struct {
 	writer Writer
+	reader Reader
 }
 
-func New(w Writer) *Service {
-	return &Service{writer: w}
+// New constructs a Service backed by a single adapter that satisfies
+// both ports. Following the api-keys service convention: pass the
+// same adapter twice rather than introducing a combined interface.
+func New(w Writer, r Reader) *Service {
+	return &Service{writer: w, reader: r}
 }
 
 // Ingest validates the payload and inserts one location row.
@@ -29,7 +43,7 @@ func New(w Writer) *Service {
 // ErrInvalidLongitude / ErrInvalidAltitude / ErrInvalidSpeed /
 // ErrInvalidAccuracy / ErrInvalidBatteryVoltage / ErrInvalidSignalStrength
 // to a 400 envelope via the httpErrorHandler.
-func (s *Service) Ingest(ctx context.Context, loc domain.LocationIngest) error {
+func (s *Service) Ingest(ctx context.Context, loc domain.Location) error {
 	if loc.Latitude < -90 || loc.Latitude > 90 {
 		return ErrInvalidLatitude
 	}
@@ -55,4 +69,17 @@ func (s *Service) Ingest(ctx context.Context, loc domain.LocationIngest) error {
 		return fmt.Errorf("Service.Ingest: %w", err)
 	}
 	return nil
+}
+
+// GetLatest returns the device's most recent location, or
+// domain.ErrNotFound when the device has never reported. The device-
+// existence check itself is enforced upstream by RequireDeviceRole;
+// returning ErrNotFound here means "the device exists but has not
+// pinged yet" — a real, distinct state the UI surfaces as "Never seen".
+func (s *Service) GetLatest(ctx context.Context, deviceID uuid.UUID) (domain.Location, error) {
+	loc, err := s.reader.GetLatest(ctx, deviceID)
+	if err != nil {
+		return domain.Location{}, fmt.Errorf("Service.GetLatest: %w", err)
+	}
+	return loc, nil
 }

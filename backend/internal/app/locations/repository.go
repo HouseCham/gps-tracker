@@ -4,13 +4,24 @@ import (
 	"context"
 	"errors"
 
+	"github.com/google/uuid"
+
 	"github.com/HouseCham/gps-tracker/backend/internal/domain"
 )
 
 // Writer is the write port for the locations package. The IoT ingest
 // path only needs to insert; reads live in other packages (devices, users).
 type Writer interface {
-	Insert(ctx context.Context, loc domain.LocationIngest) error
+	Insert(ctx context.Context, loc domain.Location) error
+}
+
+// Reader is the read port for the locations package. The dashboard's
+// "latest location" preview uses GetLatest; the paginated history
+// endpoint (GetHistory + Count) lands in the follow-up PR together with
+// the LivePreview component — declared here so the adapter implements it
+// the moment the SQL queries are wired up.
+type Reader interface {
+	GetLatest(ctx context.Context, deviceID uuid.UUID) (domain.Location, error)
 }
 
 // Errors returned by the ingest service. The handlers translate these
