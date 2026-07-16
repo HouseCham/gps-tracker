@@ -1,5 +1,5 @@
 //-- Types
-import type { ConnectionState } from "@/types/api";
+import type { ConnectionState } from '@/types/api';
 //-- Constants
 import { MAP_ONLINE_THRESHOLD_MS } from '@/constants/components';
 
@@ -24,7 +24,9 @@ export function getConnectionStateFrom(
  * @param {ConnectionState} state - The connection state of the device.
  * @returns {BadgeVariant} 'success' | 'danger' | 'default'.
  */
-export function getConnectionVariant(state: ConnectionState): 'success' | 'danger' | 'default' {
+export function getConnectionVariant(
+    state: ConnectionState
+): 'success' | 'danger' | 'default' {
     switch (state) {
         case 'online':
             return 'success';

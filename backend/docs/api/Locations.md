@@ -124,7 +124,7 @@ Content-Length: 7
 Created
 ```
 
-No response body. The status code conveys success; clients can read the inserted row back via `GET /api/v1/devices/:id/locations` (sibling read endpoint, not yet implemented — open dashboard-side).
+No response body. The status code conveys success; clients can read the inserted row back via `GET /api/v1/devices/:id/locations/latest`.
 
 **Error Responses**
 
@@ -150,6 +150,6 @@ No response body. The status code conveys success; clients can read the inserted
 
 **Why does idempotency live in the DB layer?** ESP32 cellular radios have lossy links and the firmware retries every POST until it gets a response. Without idempotency a 30-second cycle can produce duplicates every time the network blips. `ON CONFLICT (device_id, recorded_at) DO NOTHING` makes retries a no-op.
 
-**Why no `GET /api/v1/devices/:id/locations`?** Read endpoints are an independent design (paginated history, time-range queries) that intersects with the dashboard's UI needs. They land in a follow-up PR.
+**Why no paginated `GET /api/v1/devices/:id/locations`?** The paginated history endpoint is a separate, follow-up route that lands alongside the `LivePreview` component. Combining it with the `latest` endpoint would mix the latest (object) shape with the history (paginated list) shape; keeping them separate matches the "uniform envelope per endpoint" rule.
 
 **Why aren't GPS-only devices rejected?** A bare GPS + ESP32 can fill in lat/lng/recorded_at/altitude/speed/accuracy; the other five fields are optional. The empty `signal_strength` case is common in indoor benches, etc.

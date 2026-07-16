@@ -58,10 +58,7 @@ export function DeviceDetail({
         revokeAccess,
     } = useDeviceService();
 
-    const {
-        latest,
-        getLatestLocation,
-    } = useLocationService();
+    const { latest, getLatestLocation } = useLocationService();
 
     const t = translation.device.detail;
     const fields = t.fields;
