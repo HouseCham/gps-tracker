@@ -34,14 +34,43 @@ bool transport_begin(const Secrets& s) {
     return true;
 }
 
+static const char* http_error_name(int code) {
+    // HTTPClient error codes from <HTTPClient.h>. ESP32 Arduino renames
+    // a few mbedtls errors to HTTPC_ERROR_CONNECTION_REFUSED (-1), which is
+    // the code you'll see for: DNS failure, TCP refused, TLS handshake
+    // failure, cert validation failure. The mbedtls underlying code is
+    // not surfaced by HTTPClient — for that you have to drop down to
+    // WiFiClientSecure directly.
+    switch (code) {
+        case HTTPC_ERROR_CONNECTION_REFUSED:  return "connection_refused (TLS/DNS/TCP)";
+        case HTTPC_ERROR_SEND_HEADER_FAILED:  return "send_header_failed";
+        case HTTPC_ERROR_SEND_PAYLOAD_FAILED: return "send_payload_failed";
+        case HTTPC_ERROR_NOT_CONNECTED:       return "not_connected";
+        case HTTPC_ERROR_CONNECTION_LOST:     return "connection_lost";
+        case HTTPC_ERROR_READ_TIMEOUT:        return "read_timeout";
+        default:                              return "unknown";
+    }
+}
+
 static bool post_once(const char* url, const char* api_key,
                       const char* json_body) {
+    Serial.printf("[POST] %u-byte body, "
+                  "time=%lu free_heap=%u\n",
+                  (unsigned)strlen(json_body),
+                  (unsigned long)time(nullptr),
+                  (unsigned)ESP.getFreeHeap());
+
     WiFiClientSecure client;
-    client.setCACert(NULL);  // ponytail: stage 3 dev — use system CA bundle
-                              // via the framework default (no setInsecure()).
-                              // If gps-tracker.local has no public cert,
-                              // we'll see HTTPC_ERROR_CONNECTION_REFUSED
-                              // and switch to setInsecure() then.
+    // STAGE 3 DEV ONLY — bypass cert validation. CloudFlare's cert is
+    // rejected because the ESP32's clock is unset (time=0 at boot);
+    // mbedtls checks cert notBefore against time(NULL) and bails with -1.
+    // For dev/bench, setInsecure() is the fastest path to a working
+    // pipeline. For Stage 4 (sleep + cycle): add configTime() with NTP
+    // after WiFi.begin() succeeds, wait for time(nullptr) > 2025-01-01,
+    // then switch back to setCACert(cloudflare_root_ca). Otherwise any
+    // attacker on the LAN can MITM the connection (and steal the
+    // X-Device-API-Key).
+    client.setInsecure();
 
     HTTPClient http;
     http.begin(client, url);
@@ -62,7 +91,27 @@ static bool post_once(const char* url, const char* api_key,
         Serial.printf("[ERR ] HTTP %d: %s\n", code, body.c_str());
     } else {
         // code < 0: transport-level failure (DNS, TLS, connection refused).
-        Serial.printf("[ERR ] HTTP transport failure (code=%d)\n", code);
+        // The underlying mbedtls error code is NOT exposed by HTTPClient.
+        // We can only narrow it down by looking at the diagnostic context
+        // we logged above + the WiFiClientSecure.cpp line that fired.
+        Serial.printf("[ERR ] HTTP transport failure (code=%d %s)\n",
+                      code, http_error_name(code));
+
+        // Hint at the two most common causes so the log is actionable.
+        if (time(nullptr) < 1700000000UL) {
+            // < 2023-11-14 means the system clock is unset or wildly wrong.
+            // With setInsecure() this is harmless for now, but it WILL block
+            // cert-validated HTTPS in production.
+            Serial.println(F("[HINT] system clock looks unset (time<2023-11). "
+                             "OK while using setInsecure(); will block TLS cert "
+                             "validation in production — schedule configTime()+NTP "
+                             "for Stage 4"));
+        }
+        if (code == HTTPC_ERROR_CONNECTION_REFUSED) {
+            Serial.println(F("[HINT] TLS handshake failed (mbedtls returned -1). "
+                             "If setInsecure() is already on, this is a DNS, TCP, "
+                             "or cipher mismatch — not a cert issue"));
+        }
     }
 
     http.end();
@@ -70,10 +119,13 @@ static bool post_once(const char* url, const char* api_key,
 }
 
 bool transport_post_locations(const LocationPayload& p, const Secrets& s) {
-    if (WiFi.status() != WL_CONNECTED) {
-        Serial.println(F("[ERR ] WiFi not connected; skipping upload"));
+    const wl_status_t ws = WiFi.status();
+    if (ws != WL_CONNECTED) {
+        Serial.printf("[ERR ] WiFi not connected (status=%d); skipping upload\n", (int)ws);
         return false;
     }
+    Serial.printf("[NET ] wifi rssi=%d dBm chan=%d\n",
+                  (int)WiFi.RSSI(), (int)WiFi.channel());
 
     char url[256];
     if (transport_build_url(API_HOST, 0, s.uuid,
