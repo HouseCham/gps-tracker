@@ -16,7 +16,7 @@ export default function GalleryIslands(): JSX.Element {
     const [basicOpen, setBasicOpen] = useState(false);
     const [dangerOpen, setDangerOpen] = useState(false);
     const [largeOpen, setLargeOpen] = useState(false);
-    const toast = useToast({ position: 'bottom-right' });
+    const toast = useToast();
 
     return (
         <div className="islands">
@@ -73,7 +73,7 @@ export default function GalleryIslands(): JSX.Element {
                         Make changes to your device configuration. Changes take
                         effect immediately after saving.
                     </p>
-                    <div style={{ marginTop: '12px' }}>
+                    <div className="islands__field">
                         <label className="input-label" htmlFor="m-name">
                             Device name
                         </label>
@@ -257,13 +257,7 @@ export default function GalleryIslands(): JSX.Element {
                     <Dropdown
                         align="end"
                         trigger={
-                            <span
-                                style={{
-                                    display: 'inline-flex',
-                                    alignItems: 'center',
-                                    gap: '6px',
-                                }}
-                            >
+                            <span>
                                 <MoreVertical size={14} />
                                 More
                             </span>
@@ -318,8 +312,6 @@ export default function GalleryIslands(): JSX.Element {
                     />
                 </div>
             </section>
-
-            <toast.Container />
         </div>
     );
 }

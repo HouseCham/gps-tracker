@@ -22,7 +22,7 @@ import (
 // resolution hits the database. With cookies the split is
 // unnecessary — the cookie lookup is cheap, the user join is the
 // same call, and the two responsibilities always run together.
-func AuthSession(cookieName string, authenticator ports.SessionAuthenticator, lookup ports.UserLookup, svc *users.UserService) fiber.Handler {
+func AuthSession(cookieName string, authenticator ports.SessionAuthenticator, lookup ports.UserLookup, svc *users.Service) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		cookie := c.Cookies(cookieName)
 		actor, err := authenticator.Authenticate(c.Context(), cookie)

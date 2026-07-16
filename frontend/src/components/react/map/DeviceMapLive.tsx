@@ -1,9 +1,13 @@
 //-- React
-import { useMemo, type JSX } from 'react';
+import { type JSX } from 'react';
 //-- Types
 import type { DeviceLocationPoint, MarkerStatus } from '@/types/components';
 //-- Constants
-import { MAP_ONLINE_THRESHOLD_MS, MAP_STYLE_URL } from '@/constants';
+import {
+    MAP_ONLINE_THRESHOLD_MS,
+    MAP_ROUTE_LINE_COLOR,
+    MAP_STYLE_URL,
+} from '@/constants/components';
 //-- Components
 import { MapPin } from 'lucide-react';
 import Map, {
@@ -61,9 +65,11 @@ export default function DeviceMapLive({
 
     const markerStatus = statusFromRecordedAt(location?.recordedAt);
 
-    //* note: build the GeoJSON once per route reference; the route shape
-    //   is small (~20 points) so memoising on identity is enough.
-    const routeGeoJson = useMemo(() => {
+    /**
+     * @function routeGeoJson
+     * @description Renders the route as a GeoJSON LineString layer.
+     */
+    const routeGeoJson = (() => {
         const points = route ?? [];
         if (points.length < 2) return null;
         return {
@@ -79,7 +85,7 @@ export default function DeviceMapLive({
                 },
             ],
         };
-    }, [route]);
+    })();
 
     const wrapperClass = ['device-map-live', className]
         .filter(Boolean)
@@ -104,7 +110,6 @@ export default function DeviceMapLive({
                 touchPitch={false}
                 boxZoom={false}
                 attributionControl={{ compact: true }}
-                style={{ width: '100%', height: '100%' }}
             >
                 <NavigationControl
                     position="top-right"
@@ -118,7 +123,7 @@ export default function DeviceMapLive({
                             id="route-line"
                             type="line"
                             paint={{
-                                'line-color': '#1a73e8',
+                                'line-color': MAP_ROUTE_LINE_COLOR,
                                 'line-width': [
                                     'interpolate',
                                     ['linear'],

@@ -19,6 +19,9 @@
 }
 
 .device-form__label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-size: 13px;
     font-weight: 600;
     color: var(--text);
@@ -127,6 +130,19 @@
 
 .device-form__btn--secondary:hover:not(:disabled) {
     background: var(--surface-2);
+}
+
+.device-form__btn--ghost {
+    height: 28px;
+    padding: 0 10px;
+    font-size: 12px;
+    background: transparent;
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+.device-form__btn--ghost:hover:not(:disabled) {
+    background: var(--accent-soft);
 }
 
 .device-form__danger {

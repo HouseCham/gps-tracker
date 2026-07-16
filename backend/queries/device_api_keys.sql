@@ -10,6 +10,17 @@ WHERE key_hash = $1
   AND deleted_at IS NULL
   AND (expires_at IS NULL OR expires_at > NOW());
 
+-- name: GetActiveKeyByDeviceID :one
+-- Pre-check used by the application service before issuing a new key.
+-- The new partial UNIQUE index on (device_id) WHERE deleted_at IS NULL
+-- is the source of truth; this query exists only to surface a friendly
+-- 409 error path on the common case (without it the user gets a raw
+-- SQLSTATE 23505). Soft-deleted rows are ignored — revoked keys do not
+-- count against the single-active-key invariant.
+SELECT id, device_id, key_hash, created_at, expires_at, last_used_at, deleted_at
+FROM device_api_keys
+WHERE device_id = $1 AND deleted_at IS NULL;
+
 -- name: CreateAPIKey :one
 -- Inserts a new API key. The caller must bcrypt-hash the key before storing;
 -- the plain key is returned to the admin only at creation time and never again.
@@ -41,3 +52,22 @@ SELECT id, device_id, key_hash, created_at, expires_at, last_used_at, deleted_at
 FROM device_api_keys
 WHERE device_id = $1 AND deleted_at IS NULL
 ORDER BY created_at DESC;
+
+-- name: ListAPIKeysForUser :many
+-- Returns every active api key for every device the given user has
+-- access to, with the owning device's display name. Drives the global
+-- admin `/api-keys` page. Filters out soft-deleted keys, soft-deleted
+-- devices, and soft-deleted access grants.
+SELECT
+  k.id,
+  k.device_id,
+  k.created_at,
+  d.name AS device_name
+FROM device_api_keys k
+INNER JOIN devices d
+  ON d.id = k.device_id AND d.deleted_at IS NULL
+INNER JOIN user_device_access uda
+  ON uda.device_id = k.device_id AND uda.deleted_at IS NULL
+WHERE uda.user_id = $1
+  AND k.deleted_at IS NULL
+ORDER BY k.created_at DESC;

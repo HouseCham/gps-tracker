@@ -1,5 +1,4 @@
 //-- API
-import type { BetterFetchOption } from '@better-fetch/fetch';
 import { authClient } from './client';
 //-- Types
 import type {
@@ -12,7 +11,7 @@ import type {
     SignUpCredentials,
 } from '@/types/api';
 //-- Utils
-import { handleApiError } from '@/lib/api/api-utils';
+import { handleApiError, withApiErrorToast } from '@/lib/api/api-utils';
 import { clearUser, setAuthLoading, setUser } from '@/lib/stores/auth';
 import { redirectTo } from '@/lib';
 //-- Constants
@@ -36,21 +35,16 @@ const OAUTH_CALLBACK_PATH = '/callback/google';
 async function postSignIn(
     credentials: SignInCredentials
 ): Promise<AuthSession> {
-    try {
-        const { data } = await authClient<AuthSession | null>(
-            '/email-password/sign-in',
-            {
-                method: 'POST',
-                body: credentials,
-            } as BetterFetchOption
-        );
-        if (!data) {
-            handleApiError(new Error('sign-in returned an empty response'));
-        }
-        return data!;
-    } catch (error) {
-        handleApiError(error);
+    const { data } = await withApiErrorToast(() =>
+        authClient<AuthSession | null>('/email-password/sign-in', {
+            method: 'POST',
+            body: credentials,
+        })
+    );
+    if (!data) {
+        handleApiError(new Error('sign-in returned an empty response'));
     }
+    return data;
 }
 
 /**
@@ -63,21 +57,16 @@ async function postSignIn(
 async function postSignUp(
     credentials: SignUpCredentials
 ): Promise<AuthSession> {
-    try {
-        const { data } = await authClient<AuthSession | null>(
-            '/email-password/sign-up',
-            {
-                method: 'POST',
-                body: credentials,
-            } as BetterFetchOption
-        );
-        if (!data) {
-            handleApiError(new Error('sign-up returned an empty response'));
-        }
-        return data!;
-    } catch (error) {
-        handleApiError(error);
+    const { data } = await withApiErrorToast(() =>
+        authClient<AuthSession | null>('/email-password/sign-up', {
+            method: 'POST',
+            body: credentials,
+        })
+    );
+    if (!data) {
+        handleApiError(new Error('sign-up returned an empty response'));
     }
+    return data;
 }
 
 /**
@@ -89,9 +78,9 @@ async function postSignUp(
  */
 async function fetchMe(): Promise<AuthUser | null> {
     try {
-        const { data } = await authClient<MeResponse | null>('/me', {
-            method: 'GET',
-        });
+        const { data } = await withApiErrorToast(() =>
+            authClient<MeResponse | null>('/me', { method: 'GET' })
+        );
         return data?.user ?? null;
     } catch {
         return null;
@@ -110,22 +99,16 @@ async function fetchOAuthAuthorizeUrl(
     provider: OAuthProvider,
     callbackUrl: string
 ): Promise<string> {
-    try {
-        const { data } = await authClient<OAuthAuthorizeResponse | null>(
+    const { data } = await withApiErrorToast(() =>
+        authClient<OAuthAuthorizeResponse | null>(
             `/oauth2/authorize/${provider}?redirect_to=${encodeURIComponent(callbackUrl)}`,
-            {
-                method: 'GET',
-            } as BetterFetchOption
-        );
-        if (!data?.authUrl) {
-            handleApiError(
-                new Error('oauth authorize returned an empty response')
-            );
-        }
-        return data.authUrl;
-    } catch (error) {
-        handleApiError(error);
+            { method: 'GET' }
+        )
+    );
+    if (!data?.authUrl) {
+        handleApiError(new Error('oauth authorize returned an empty response'));
     }
+    return data.authUrl;
 }
 
 /**
@@ -207,11 +190,13 @@ export const authService = {
     async signOut(): Promise<void> {
         setAuthLoading(true);
         try {
-            await authClient('/sign-out', {
-                method: 'POST',
-            } as BetterFetchOption);
+            // ponytail: sign-out is best-effort. Backend failures must not
+            // block local sign-out — the `finally` block clears the user
+            // and redirects regardless. Bind the error so the catch is
+            // not empty (lint rule) and we have it if logging is added.
+            await authClient('/sign-out', { method: 'POST' });
         } catch (error) {
-            throw new Error('sign-out failed', { cause: error });
+            void error;
         } finally {
             clearUser();
             redirectTo(REDIRECT_AFTER_SIGNOUT);

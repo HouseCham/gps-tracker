@@ -5,10 +5,10 @@
 -- This relies on the composite PK (device_id, recorded_at) from migration 000006.
 INSERT INTO locations (
   device_id, recorded_at, latitude, longitude,
-  altitude, speed, accuracy, satellites
+  altitude, speed, accuracy, battery_voltage, signal_strength
 ) VALUES (
   $1, $2, $3, $4,
-  $5, $6, $7, $8
+  $5, $6, $7, $8, $9
 )
 ON CONFLICT (device_id, recorded_at) DO NOTHING;
 
@@ -18,7 +18,7 @@ ON CONFLICT (device_id, recorded_at) DO NOTHING;
 -- that fall outside the [$2, $3) range. Critical for performance as data grows.
 -- $2 is the inclusive lower bound, $3 is the exclusive upper bound.
 SELECT device_id, recorded_at, latitude, longitude,
-       altitude, speed, accuracy, satellites
+       altitude, speed, accuracy, battery_voltage, signal_strength
 FROM locations
 WHERE device_id = $1
   AND recorded_at >= $2
@@ -29,7 +29,7 @@ ORDER BY recorded_at DESC;
 -- Returns the most recent location for a device. Used by the live map view.
 -- Hits the most recent partition first via partition pruning.
 SELECT device_id, recorded_at, latitude, longitude,
-       altitude, speed, accuracy, satellites
+       altitude, speed, accuracy, battery_voltage, signal_strength
 FROM locations
 WHERE device_id = $1
 ORDER BY recorded_at DESC
@@ -47,7 +47,8 @@ SELECT
   l.altitude,
   l.speed,
   l.accuracy,
-  l.satellites
+  l.battery_voltage,
+  l.signal_strength
 FROM locations l
 INNER JOIN user_device_access uda
   ON l.device_id = uda.device_id AND uda.deleted_at IS NULL

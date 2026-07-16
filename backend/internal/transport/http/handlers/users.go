@@ -17,13 +17,13 @@ import (
 )
 
 type UsersHandler struct {
-	usersService    *users.UserService
+	usersService    *users.Service
 	devicesService  *devices.Service
 	passwordUpdater ports.PasswordUpdater
 	sessionManager  ports.SessionManager
 }
 
-func NewUsersHandler(usersSvc *users.UserService, devicesSvc *devices.Service, passwordUpdater ports.PasswordUpdater, sessionManager ports.SessionManager) *UsersHandler {
+func NewUsersHandler(usersSvc *users.Service, devicesSvc *devices.Service, passwordUpdater ports.PasswordUpdater, sessionManager ports.SessionManager) *UsersHandler {
 	return &UsersHandler{usersService: usersSvc, devicesService: devicesSvc, passwordUpdater: passwordUpdater, sessionManager: sessionManager}
 }
 

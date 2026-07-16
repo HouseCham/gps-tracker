@@ -1,25 +1,24 @@
 import '@/styles/components/device-detail.css';
 //-- React
-import { Suspense, lazy, useEffect } from 'react';
+import { Suspense, lazy, useEffect, useMemo } from 'react';
 import type { JSX } from 'react/jsx-runtime';
 //-- Types
 import type { Language } from '@/types';
 import type { Translation } from '@/i18n';
-import type { DeviceVehicleType } from '@/types/api';
+import type { ConnectionState, DeviceVehicleType } from '@/types/api';
+import type { DeviceLocationPoint } from '@/types/components';
 //-- Components
 import { Badge, Button } from '@/components/ui';
 import { TableStatus } from '@/components/ui/DataTable';
 import { NotFoundUI } from '@/components/react/ui';
 //-- Utils
 import { formatDate, readDeviceIdFromUrl } from '@/lib';
-//-- Constants
-import {
-    MAP_LIVE_DEMO_LOCATION,
-    MAP_LIVE_DEMO_ROUTE,
-} from '@/constants/components/map';
 //-- Services
-import { useDeviceService } from '@/lib/api/services';
+import { useDeviceService, useLocationService } from '@/lib/api/services';
 import { AdminDeviceDetail } from './AdminDeviceDetail';
+//-- Toast bus
+import { toastBus } from '@/lib/stores/toast.store';
+import { getConnectionStateFrom, getConnectionVariant } from '@/lib/locations';
 //-- Lazy components
 const DeviceMapLive = lazy(
     () => import('@/components/react/map/DeviceMapLive')
@@ -59,10 +58,14 @@ export function DeviceDetail({
         revokeAccess,
     } = useDeviceService();
 
+    const { latest, getLatestLocation } = useLocationService();
+
     const t = translation.device.detail;
     const fields = t.fields;
     const vehicleLabels = t.vehicleTypes;
+    const connectionLabels = t.connection;
     const mapStrings = translation.section.deviceDetail;
+    const toastStrings = translation.toast;
 
     const wrapperClass = `device-detail ${className ?? ''}`;
 
@@ -71,14 +74,40 @@ export function DeviceDetail({
     const deviceId = readDeviceIdFromUrl();
 
     /**
-     * Loads the device detail on mount and whenever the URL id changes.
+     * Loads the device detail and the latest location on mount and
+     * whenever the URL id changes. Both requests fire in parallel;
+     * the map renders as soon as `latest` arrives, independent of
+     * the device metadata fetch.
      */
     useEffect(() => {
-        if (deviceId) getDeviceById(deviceId);
-    }, [deviceId, getDeviceById]);
+        if (deviceId) {
+            getDeviceById(deviceId);
+            getLatestLocation(deviceId);
+        }
+    }, [deviceId]);
+
+    // Connection state is derived from the latest reported location.
+    // Recomputed each render — the 1-minute threshold means a single
+    // render is fine, no setInterval needed for this slice (LivePreview
+    // adds polling; DeviceDetail stays static after mount).
+    const connection = useMemo<ConnectionState>(
+        () => getConnectionStateFrom(latest?.recorded_at),
+        [latest?.recorded_at]
+    );
+
+    // Project the snake_case API shape onto the camelCase shape the
+    // map island expects. No util — one call site, two fields.
+    const mapLocation: DeviceLocationPoint | null = latest
+        ? {
+            lat: latest.latitude,
+            lng: latest.longitude,
+            recordedAt: latest.recorded_at,
+            speed: latest.speed ?? undefined,
+        }
+        : null;
 
     // Return loading UI
-    if (isLoading && !device) {
+    if (isLoading) {
         return (
             <section className={wrapperClass}>
                 <TableStatus mode="loading" />
@@ -138,13 +167,21 @@ export function DeviceDetail({
             <header className="device-detail__head">
                 <div className="device-detail__head-left">
                     <h1 className="device-detail__name">{device?.name}</h1>
-                    <Badge
-                        variant={isOwner ? 'accent' : 'default'}
-                        size="sm"
-                        label={t.roles[device.access_role]}
-                    />
+                    <div className="device-detail__badges">
+                        <Badge
+                            variant={getConnectionVariant(connection)}
+                            size="sm"
+                            label={connectionLabels[connection]}
+                        />
+                        <Badge
+                            variant={isOwner ? 'accent' : 'default'}
+                            size="sm"
+                            label={t.roles[device.access_role]}
+                        />
+                    </div>
                 </div>
             </header>
+            {/* Detail Layout */}
             <div className="device-detail__layout">
                 {/* Device Detail Section */}
                 <div className="device-detail__main">
@@ -199,9 +236,9 @@ export function DeviceDetail({
                                 <dd className="device-detail__value device-detail__value--mono">
                                     {device.last_seen_at
                                         ? formatDate(
-                                              locale,
-                                              device.last_seen_at
-                                          )
+                                            locale,
+                                            device.last_seen_at
+                                        )
                                         : t.notAvailable}
                                 </dd>
                             </div>
@@ -223,24 +260,38 @@ export function DeviceDetail({
                             locale={locale}
                             translation={translation}
                             isLoading={isLoading}
-                            onGrant={userId => grantAccess(deviceId, userId)}
-                            onRevoke={userId => revokeAccess(deviceId, userId)}
+                            onGrant={async userId => {
+                                await grantAccess(deviceId, userId);
+                                toastBus.push({
+                                    variant: 'success',
+                                    title: toastStrings.accessGranted.title,
+                                    message: toastStrings.accessGranted.message,
+                                });
+                            }}
+                            onRevoke={async userId => {
+                                await revokeAccess(deviceId, userId);
+                                toastBus.push({
+                                    variant: 'success',
+                                    title: toastStrings.accessRevoked.title,
+                                    message: toastStrings.accessRevoked.message,
+                                });
+                            }}
                         />
                     )}
                 </div>
                 {/* Map Section */}
-                <aside
-                    className="device-detail__map"
-                    aria-label={mapStrings.map}
-                >
-                    <Suspense fallback={null}>
+                <Suspense fallback={null}>
+                    <aside
+                        className="device-detail__map"
+                        aria-label={mapStrings.map}
+                    >
                         <DeviceMapLive
-                            location={MAP_LIVE_DEMO_LOCATION}
-                            route={MAP_LIVE_DEMO_ROUTE}
+                            location={mapLocation}
+                            route={[]}
                             deviceName={device.name}
                         />
-                    </Suspense>
-                </aside>
+                    </aside>
+                </Suspense>
             </div>
         </section>
     );

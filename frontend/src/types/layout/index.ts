@@ -5,7 +5,12 @@ import type { LayoutDashboard } from 'lucide-react';
  * `TabBar`. Drives the `.active` highlight and `aria-current`.
  * @typedef {'dashboard' | 'devices' | 'admin' | 'profile'} SidebarNavItem
  */
-export type SidebarNavItemType = 'dashboard' | 'devices' | 'admin' | 'profile';
+export type SidebarNavItemType =
+    | 'dashboard'
+    | 'devices'
+    | 'admin'
+    | 'profile'
+    | 'api-keys';
 /**
  * Interface for a sidebar navigation item, used in the `Sidebar` and `TabBar` components.
  * @interface SidebarNavItem

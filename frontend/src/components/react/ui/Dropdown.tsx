@@ -1,7 +1,6 @@
 import '@/styles/ui/dropdown.css';
 //-- React
 import {
-    useCallback,
     useEffect,
     useId,
     useLayoutEffect,
@@ -38,6 +37,19 @@ export interface DropdownProps {
     closeOnSelect?: boolean;
     ariaLabel?: string;
 }
+/**
+ * @typedef MenuPos
+ * @property {number} top - The top position of the menu.
+ * @property {number} left - The left position of the menu.
+ * @property {number} minWidth - The minimum width of the menu.
+ * @property {'bottom' | 'top'} side - The side of the menu.
+ */
+type MenuPos = {
+    top: number;
+    left: number;
+    minWidth: number;
+    side: 'bottom' | 'top';
+};
 
 /**
  * Vertical clearance reserved for the open menu. Used only when the menu has
@@ -74,27 +86,41 @@ export default function Dropdown({
     const triggerRef = useRef<HTMLButtonElement>(null);
     const menuRef = useRef<HTMLDivElement>(null);
 
-    /**
-     * Menu placement: viewport-space `top` / `left` and which side of the
-     * trigger the menu opens on. Null while the menu is closed (or
-     * immediately after close, before the next open).
-     * @interface MenuPos
-     */
-    interface MenuPos {
-        top: number;
-        left: number;
-        minWidth: number;
-        side: 'bottom' | 'top';
-    }
     const [menuPos, setMenuPos] = useState<MenuPos | null>(null);
 
-    const setOpen = useCallback(
-        (next: boolean): void => {
-            if (!isControlled) setUncontrolledOpen(next);
-            onOpenChange?.(next);
-        },
-        [isControlled, onOpenChange]
-    );
+    const setOpen = (next: boolean): void => {
+        if (!isControlled) setUncontrolledOpen(next);
+        onOpenChange?.(next);
+    };
+
+    /**
+     * Computes the menu's viewport position from the trigger's bounding rect.
+     * Uses the actually-measured menu height when available so the auto-flip
+     * accounts for the real menu size.
+     */
+    const computeMenuPos = (): void => {
+        const trigger = triggerRef.current;
+        if (!trigger) return;
+        const rect = trigger.getBoundingClientRect();
+        const menuHeight =
+            menuRef.current?.offsetHeight ?? MENU_HEIGHT_ESTIMATE;
+        const flipUp =
+            side === 'top' ||
+            (side === 'auto' &&
+                window.innerHeight - rect.bottom < menuHeight + 8);
+        const top = flipUp ? rect.top - menuHeight - 4 : rect.bottom + 4;
+        const minWidth = rect.width;
+        let left = rect.left;
+        if (align === 'end') {
+            const menuWidth = menuRef.current?.offsetWidth ?? minWidth;
+            left = rect.right - menuWidth;
+            if (left < 4) left = 4;
+        }
+        setMenuPos({ top, left, minWidth, side: flipUp ? 'top' : 'bottom' });
+    };
+
+    const computeMenuPosRef = useRef(computeMenuPos);
+    computeMenuPosRef.current = computeMenuPos;
 
     useEffect(() => {
         if (!open) return;
@@ -121,32 +147,6 @@ export default function Dropdown({
         };
     }, [open, setOpen]);
 
-    /**
-     * Computes the menu's viewport position from the trigger's bounding rect.
-     * Uses the actually-measured menu height when available so the auto-flip
-     * accounts for the real menu size.
-     */
-    const computeMenuPos = useCallback((): void => {
-        const trigger = triggerRef.current;
-        if (!trigger) return;
-        const rect = trigger.getBoundingClientRect();
-        const menuHeight =
-            menuRef.current?.offsetHeight ?? MENU_HEIGHT_ESTIMATE;
-        const flipUp =
-            side === 'top' ||
-            (side === 'auto' &&
-                window.innerHeight - rect.bottom < menuHeight + 8);
-        const top = flipUp ? rect.top - menuHeight - 4 : rect.bottom + 4;
-        const minWidth = rect.width;
-        let left = rect.left;
-        if (align === 'end') {
-            const menuWidth = menuRef.current?.offsetWidth ?? minWidth;
-            left = rect.right - menuWidth;
-            if (left < 4) left = 4;
-        }
-        setMenuPos({ top, left, minWidth, side: flipUp ? 'top' : 'bottom' });
-    }, [align, side]);
-
     // Recompute position on open + on viewport changes while open. Scroll is
     // captured so ancestor scrolls (e.g. the table's overflow:auto wrapper)
     // also reposition the menu.
@@ -155,21 +155,21 @@ export default function Dropdown({
             setMenuPos(null);
             return;
         }
-        computeMenuPos();
-        const onChange = (): void => computeMenuPos();
+        computeMenuPosRef.current();
+        const onChange = (): void => computeMenuPosRef.current();
         window.addEventListener('resize', onChange);
         window.addEventListener('scroll', onChange, true);
         return (): void => {
             window.removeEventListener('resize', onChange);
             window.removeEventListener('scroll', onChange, true);
         };
-    }, [open, computeMenuPos]);
+    }, [open]);
 
     // After the menu mounts, recompute so we can use its real height/width
     // (the first paint uses an estimate).
     useLayoutEffect(() => {
         if (open) computeMenuPos();
-    }, [open, items, sections, computeMenuPos]);
+    }, [open, items, sections]);
 
     const handleTrigger = (): void => setOpen(!open);
 

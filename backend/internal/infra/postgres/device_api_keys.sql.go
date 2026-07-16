@@ -41,6 +41,33 @@ func (q *Queries) CreateAPIKey(ctx context.Context, arg CreateAPIKeyParams) (Dev
 	return i, err
 }
 
+const getActiveKeyByDeviceID = `-- name: GetActiveKeyByDeviceID :one
+SELECT id, device_id, key_hash, created_at, expires_at, last_used_at, deleted_at
+FROM device_api_keys
+WHERE device_id = $1 AND deleted_at IS NULL
+`
+
+// Pre-check used by the application service before issuing a new key.
+// The new partial UNIQUE index on (device_id) WHERE deleted_at IS NULL
+// is the source of truth; this query exists only to surface a friendly
+// 409 error path on the common case (without it the user gets a raw
+// SQLSTATE 23505). Soft-deleted rows are ignored — revoked keys do not
+// count against the single-active-key invariant.
+func (q *Queries) GetActiveKeyByDeviceID(ctx context.Context, deviceID pgtype.UUID) (DeviceApiKey, error) {
+	row := q.db.QueryRow(ctx, getActiveKeyByDeviceID, deviceID)
+	var i DeviceApiKey
+	err := row.Scan(
+		&i.ID,
+		&i.DeviceID,
+		&i.KeyHash,
+		&i.CreatedAt,
+		&i.ExpiresAt,
+		&i.LastUsedAt,
+		&i.DeletedAt,
+	)
+	return i, err
+}
+
 const getActiveKeyByHash = `-- name: GetActiveKeyByHash :one
 SELECT id, device_id, key_hash, created_at, expires_at, last_used_at, deleted_at
 FROM device_api_keys
@@ -95,6 +122,58 @@ func (q *Queries) ListAPIKeysForDevice(ctx context.Context, deviceID pgtype.UUID
 			&i.ExpiresAt,
 			&i.LastUsedAt,
 			&i.DeletedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listAPIKeysForUser = `-- name: ListAPIKeysForUser :many
+SELECT
+  k.id,
+  k.device_id,
+  k.created_at,
+  d.name AS device_name
+FROM device_api_keys k
+INNER JOIN devices d
+  ON d.id = k.device_id AND d.deleted_at IS NULL
+INNER JOIN user_device_access uda
+  ON uda.device_id = k.device_id AND uda.deleted_at IS NULL
+WHERE uda.user_id = $1
+  AND k.deleted_at IS NULL
+ORDER BY k.created_at DESC
+`
+
+type ListAPIKeysForUserRow struct {
+	ID         pgtype.UUID
+	DeviceID   pgtype.UUID
+	CreatedAt  pgtype.Timestamptz
+	DeviceName string
+}
+
+// Returns every active api key for every device the given user has
+// access to, with the owning device's display name. Drives the global
+// admin `/api-keys` page. Filters out soft-deleted keys, soft-deleted
+// devices, and soft-deleted access grants.
+func (q *Queries) ListAPIKeysForUser(ctx context.Context, userID pgtype.UUID) ([]ListAPIKeysForUserRow, error) {
+	rows, err := q.db.Query(ctx, listAPIKeysForUser, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListAPIKeysForUserRow
+	for rows.Next() {
+		var i ListAPIKeysForUserRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.DeviceID,
+			&i.CreatedAt,
+			&i.DeviceName,
 		); err != nil {
 			return nil, err
 		}

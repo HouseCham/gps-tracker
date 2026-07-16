@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 //-- Types
 import type {
     ApiError,
@@ -11,7 +11,8 @@ import type {
     UpdateDeviceDto,
 } from '@/types/api';
 //-- Utils
-import { handleApiError } from '@/lib/api/api-utils';
+import { handleApiError, withApiErrorToast } from '@/lib/api/api-utils';
+import { toastBus } from '@/lib/stores/toast.store';
 //-- Http Client
 import { apiClient } from '@/lib/auth/client';
 
@@ -76,22 +77,23 @@ export const useDeviceService = (): IDeviceService => {
         setIsLoading(true);
         setDevices([]);
         try {
-            const { data: response } =
-                await apiClient<Envelope<DeviceListResponse> | null>(
-                    '/devices',
-                    {
-                        method: 'GET',
-                        query: { page, page_size: pageSize },
-                    }
-                );
+            const { data: response } = await withApiErrorToast(() =>
+                apiClient<Envelope<DeviceListResponse> | null>('/devices', {
+                    method: 'GET',
+                    query: { page, page_size: pageSize },
+                })
+            );
             if (!response) {
+                toastBus.push({
+                    variant: 'error',
+                    title: 'Error',
+                    message: 'get all devices returned a null response',
+                });
                 handleApiError(
                     new Error('get all devices returned a null response')
                 );
             }
-            setDevices(response!.data.items);
-        } catch (error) {
-            handleApiError(error);
+            setDevices(response.data.items);
         } finally {
             setIsLoading(false);
         }
@@ -103,30 +105,31 @@ export const useDeviceService = (): IDeviceService => {
      * @param {string} id - The ID of the device to retrieve.
      * @returns {Promise<void>} Resolves when the device is fetched and state is updated.
      */
-    async function getDeviceById(id: string): Promise<void> {
+    const getDeviceById = useCallback(async (id: string): Promise<void> => {
         resetState();
         setIsLoading(true);
         setDevice(null);
         try {
-            const { data: response } =
-                await apiClient<Envelope<DeviceDetail> | null>(
-                    `/devices/${id}`,
-                    {
-                        method: 'GET',
-                    }
-                );
+            const { data: response } = await withApiErrorToast(() =>
+                apiClient<Envelope<DeviceDetail> | null>(`/devices/${id}`, {
+                    method: 'GET',
+                })
+            );
             if (!response) {
+                toastBus.push({
+                    variant: 'error',
+                    title: 'Error',
+                    message: 'get device returned a null response',
+                });
                 handleApiError(
                     new Error('get device returned a null response')
                 );
             }
             setDevice(response!.data);
-        } catch (error) {
-            handleApiError(error);
         } finally {
             setIsLoading(false);
         }
-    }
+    }, []);
 
     /**
      * Creates a new device and grants the authenticated user owner access to it.
@@ -137,26 +140,28 @@ export const useDeviceService = (): IDeviceService => {
         resetState();
         setIsLoading(true);
         try {
-            const { data: response } = await apiClient<Envelope<Device> | null>(
-                '/devices',
-                {
+            const { data: response } = await withApiErrorToast(() =>
+                apiClient<Envelope<Device> | null>('/devices', {
                     method: 'POST',
                     body: payload,
-                }
+                })
             );
             if (!response || !response.data) {
+                toastBus.push({
+                    variant: 'error',
+                    title: 'Error',
+                    message: 'create device returned a null response',
+                });
                 handleApiError(
                     new Error('create device returned a null response')
                 );
             }
             // Optimistically add the new device to the list as a DeviceWithAccess
             const newDeviceWithAccess: DeviceWithAccess = {
-                ...response!.data,
+                ...response.data,
                 access_role: 'owner',
             };
             setDevices([newDeviceWithAccess, ...devices]);
-        } catch (error) {
-            handleApiError(error);
         } finally {
             setIsLoading(false);
         }
@@ -175,29 +180,31 @@ export const useDeviceService = (): IDeviceService => {
         resetState();
         setIsLoading(true);
         try {
-            const { data: response } = await apiClient<Envelope<Device> | null>(
-                `/devices/${id}`,
-                {
+            const { data: response } = await withApiErrorToast(() =>
+                apiClient<Envelope<Device> | null>(`/devices/${id}`, {
                     method: 'PUT',
                     body: payload,
-                }
+                })
             );
             if (!response || !response.data) {
+                toastBus.push({
+                    variant: 'error',
+                    title: 'Error',
+                    message: 'update device returned a null response',
+                });
                 handleApiError(
                     new Error('update device returned a null response')
                 );
             }
             // Update the device in the list if it is present there
             setDevices(prev =>
-                prev.map(d => (d.id === id ? { ...d, ...response!.data } : d))
+                prev.map(d => (d.id === id ? { ...d, ...response.data } : d))
             );
             // Update the single-device state if it matches; preserve fields
             // the PUT response does not carry (users, access_role).
             if (device && device.id === id) {
-                setDevice({ ...device, ...response!.data });
+                setDevice({ ...device, ...response.data });
             }
-        } catch (error) {
-            handleApiError(error);
         } finally {
             setIsLoading(false);
         }
@@ -212,17 +219,17 @@ export const useDeviceService = (): IDeviceService => {
         resetState();
         setIsLoading(true);
         try {
-            await apiClient<Envelope<null> | null>(`/devices/${id}`, {
-                method: 'DELETE',
-            });
+            await withApiErrorToast(() =>
+                apiClient<Envelope<null> | null>(`/devices/${id}`, {
+                    method: 'DELETE',
+                })
+            );
             // Remove the deleted device from the list
             setDevices(prev => prev.filter(d => d.id !== id));
             // Clear single-device state if it matches
             if (device && device.id === id) {
                 setDevice(null);
             }
-        } catch (error) {
-            handleApiError(error);
         } finally {
             setIsLoading(false);
         }
@@ -242,17 +249,17 @@ export const useDeviceService = (): IDeviceService => {
         setIsLoading(true);
         setError(null);
         try {
-            await apiClient<Envelope<unknown> | null>(
-                `/devices/${deviceId}/access`,
-                {
-                    method: 'POST',
-                    body: { user_id: userId },
-                }
+            await withApiErrorToast(() =>
+                apiClient<Envelope<unknown> | null>(
+                    `/devices/${deviceId}/access`,
+                    {
+                        method: 'POST',
+                        body: { user_id: userId },
+                    }
+                )
             );
             // Refresh the device so `device.users` reflects the new grant.
             await getDeviceById(deviceId);
-        } catch (error) {
-            handleApiError(error);
         } finally {
             setIsLoading(false);
         }
@@ -272,16 +279,16 @@ export const useDeviceService = (): IDeviceService => {
         setIsLoading(true);
         setError(null);
         try {
-            await apiClient<Envelope<null> | null>(
-                `/devices/${deviceId}/access/${userId}`,
-                {
-                    method: 'DELETE',
-                }
+            await withApiErrorToast(() =>
+                apiClient<Envelope<null> | null>(
+                    `/devices/${deviceId}/access/${userId}`,
+                    {
+                        method: 'DELETE',
+                    }
+                )
             );
             // Refresh the device so `device.users` reflects the revocation.
             await getDeviceById(deviceId);
-        } catch (error) {
-            handleApiError(error);
         } finally {
             setIsLoading(false);
         }

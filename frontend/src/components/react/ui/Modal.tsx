@@ -65,13 +65,21 @@ export default function Modal({
             }
         };
         document.addEventListener('keydown', onKey);
-        (initialFocusRef?.current ?? panelRef.current)?.focus();
 
         return (): void => {
             document.removeEventListener('keydown', onKey);
             document.body.style.overflow = previousOverflow;
         };
-    }, [open, onClose, closeOnEscape, initialFocusRef]);
+    }, [open, onClose, closeOnEscape]);
+
+    // Separate effect: only refocus on open transitions or when the
+    // initialFocusRef identity changes. Keeping focus out of the effect
+    // above prevents an unstable `onClose` (e.g. an inline handler from
+    // the parent) from stealing focus from inputs on every keystroke.
+    useEffect(() => {
+        if (!open) return;
+        (initialFocusRef?.current ?? panelRef.current)?.focus();
+    }, [open, initialFocusRef]);
 
     if (!open) return null;
 

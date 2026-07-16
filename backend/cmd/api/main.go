@@ -11,7 +11,9 @@ import (
 	"github.com/gofiber/fiber/v3/log"
 
 	"github.com/HouseCham/gps-tracker/backend/internal/app/access"
+	"github.com/HouseCham/gps-tracker/backend/internal/app/apikeys"
 	"github.com/HouseCham/gps-tracker/backend/internal/app/devices"
+	"github.com/HouseCham/gps-tracker/backend/internal/app/locations"
 	"github.com/HouseCham/gps-tracker/backend/internal/app/users"
 	"github.com/HouseCham/gps-tracker/backend/internal/auth"
 	"github.com/HouseCham/gps-tracker/backend/internal/config"
@@ -87,7 +89,7 @@ func main() {
 	}
 
 	userCreator := authInstance.NewUserCreator()
-	usersService := users.NewUserService(usersRepo, userCreator)
+	usersService := users.NewService(usersRepo, userCreator)
 
 	// After-signup sync: Authula owns credentials, we own the
 	// application-level projection (role, must_change_password, FKs).
@@ -101,6 +103,20 @@ func main() {
 	accessRepo := postgres.NewAccessAdapter(pool)
 	accessService := access.NewAccessService(accessRepo, usersRepo)
 
+	//-- api keys (IoT device auth)
+	apiKeysAdapter := apikeys.NewAdapter(pool)
+	apiKeysService := apikeys.New(apiKeysAdapter, apiKeysAdapter)
+
+	//-- locations (IoT device ingest + read use cases)
+	// The same adapter instance satisfies both Writer and Reader ports;
+	// the api-keys service follows the same convention.
+	locationsAdapter := locations.NewAdapter(pool)
+	locationsService := locations.New(locationsAdapter, locationsAdapter)
+
+	//-- queries pool — kept separate so the IoT auth middleware can
+	//   use it without taking a service dependency.
+	queries := postgres.New(pool)
+
 	//-- handlers
 	healthHandler := handlers.NewHealthHandler()
 	devicesHandler := handlers.NewDevicesHandler(devicesService, accessService)
@@ -108,15 +124,20 @@ func main() {
 	sessionManager := authInstance.NewSessionManager()
 	usersHandler := handlers.NewUsersHandler(usersService, devicesService, passwordUpdater, sessionManager)
 	accessHandler := handlers.NewAccessHandler(accessService)
+	apiKeysHandler := handlers.NewAPIKeysHandler(apiKeysService)
+	locationsHandler := handlers.NewLocationsHandler(locationsService)
 
 	app := http.NewRouter(http.RouterDeps{
 		HealthHandler:     healthHandler,
 		DevicesHandler:    devicesHandler,
 		UsersHandler:      usersHandler,
 		AccessHandler:     accessHandler,
+		APIKeysHandler:    apiKeysHandler,
+		LocationsHandler:  locationsHandler,
 		BootstrapHandler:  handlers.NewBootstrapHandler(usersService),
 		AccessService:     accessService,
 		UsersService:      usersService,
+		Queries:           queries,
 		AuthHandler:       authInstance.Handler(),
 		SessionCookieName: authInstance.CookieName(),
 		AuthSession:       authInstance.NewSessionAuthenticator(),

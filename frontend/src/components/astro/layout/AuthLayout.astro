@@ -20,9 +20,10 @@ interface Props {
     locale?: Language;
     title?: string;
     class?: string;
+    isLoginPage?: boolean;
 }
 
-const { locale = 'en', title = 'GPS Tracker', class: className } = Astro.props;
+const { locale = 'en', title = 'GPS Tracker', class: className, isLoginPage } = Astro.props;
 const classes = ['auth-layout', className].filter(Boolean).join(' ');
 ---
 
@@ -35,17 +36,11 @@ const classes = ['auth-layout', className].filter(Boolean).join(' ');
         <meta name="generator" content={Astro.generator} />
         <title>{title}</title>
         <meta name="description" content="GPS Tracker App" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            rel="stylesheet"
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cal+Sans:wght@600&display=swap"
-        />
     </head>
     <body>
+        <Toolbar locale={locale} />
         <AuthProvider client:load>
-            <PublicOnlyRoute client:load>
-                <Toolbar locale={locale} />
+            <PublicOnlyRoute client:load isLoginPage={isLoginPage}>
                 <div class={classes}>
                     <div class="auth-layout__card">
                         <slot />
