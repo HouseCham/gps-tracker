@@ -5,8 +5,9 @@
 // ----- API endpoint -----
 // Replace with your actual backend URL before deploying.
 // The device resolves this via DNS over WiFi or cellular.
-constexpr const char* API_HOST = "https://gps-tracker.local";
-constexpr uint16_t    API_PORT = 8080;
+// Do not include a trailing slash or path — the transport module appends
+// the locations path automatically.
+constexpr const char* API_HOST = "https://api-host.example.com";
 
 // ----- GPS polling -----
 constexpr uint32_t FIX_POLL_MS = 2000;  // how often loop() checks for a new fix
