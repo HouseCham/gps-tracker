@@ -1,0 +1,34 @@
+---
+import type { GetStaticPaths } from 'astro';
+//-- Translations
+import { getTranslation } from '@/i18n';
+//-- Types
+import type { Language } from '@/types';
+//-- Components
+import MainLayout from '@/components/astro/layout/MainLayout.astro';
+import { DevicesPage } from '@/components/react/devices/DevicesPage';
+
+/**
+ * Static paths — same locales as the index page.
+ */
+export const getStaticPaths: GetStaticPaths = () => {
+    return [{ params: { lan: 'en' } }, { params: { lan: 'es' } }];
+};
+
+const locale = Astro.params.lan as Language;
+const translation = getTranslation(locale);
+const title = `${translation.page.devices.title} · ${translation.layout.appName}`;
+---
+
+<MainLayout
+    locale={locale}
+    title={title}
+    pageLabel={translation.page.devices.title}
+    pageEyebrow={translation.layout.workspace}
+>
+    <DevicesPage
+        client:load
+        translations={translation.device}
+        pageLabel={translation.page.devices.title}
+    />
+</MainLayout>

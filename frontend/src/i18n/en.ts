@@ -216,8 +216,28 @@ export const en = {
         title: 'Devices',
         online: 'Online',
         offline: 'Offline',
+        stale: 'Stale',
         neverSeen: 'Never seen',
         unknown: 'Unknown',
+        roles: {
+            owner: 'Owner',
+            editor: 'Editor',
+            viewer: 'Viewer',
+        },
+        page: {
+            summary:
+                '{total} total · {online} online · {stale} stale · {offline} offline · {never} never seen',
+            export: 'Export',
+            noResultsTitle: 'No devices match your filters',
+            noResultsMessage:
+                'Try clearing the search or changing the status / vehicle filter.',
+            clearFilters: 'Clear filters',
+            addFirstDevice: 'Add your first device',
+            refreshed: 'Refreshed.',
+            addedToast: 'Added "{name}" to your fleet.',
+            savedToast: 'Saved changes to "{name}".',
+            removedToast: 'Removed "{name}".',
+        },
         table: {
             name: 'Name',
             vehicleType: 'Type',
@@ -232,6 +252,18 @@ export const en = {
             failedToLoad: 'Failed to load devices',
             retry: 'Try again',
             notAvailable: '—',
+            searchPlaceholder: 'Search by name, UUID, or vehicle…',
+            refresh: 'Refresh',
+            filter: {
+                allStatuses: 'All statuses',
+                allVehicles: 'All vehicles',
+            },
+            sort: {
+                'name-asc': 'Name (A–Z)',
+                'name-desc': 'Name (Z–A)',
+                recent: 'Recently active',
+                oldest: 'Longest offline',
+            },
             vehicleTypes: {
                 bicycle: 'Bicycle',
                 motorcycle: 'Motorcycle',
@@ -259,6 +291,39 @@ export const en = {
                 mismatch: 'The name must match the device exactly.',
                 deleteFailed: 'Could not delete the device. Try again.',
             },
+        },
+        modals: {
+            cancel: 'Cancel',
+            save: 'Save changes',
+            add: 'Add device',
+            delete: 'Delete device',
+            required: 'Required',
+            addTitle: 'Add device',
+            addSubtitle: 'Register a new ESP32 tracker in your fleet.',
+            editTitle: 'Edit device',
+            editSubtitle:
+                'Editing {name} · firmware UUID {uuid}',
+            uuidLabel: 'Firmware UUID',
+            uuidPlaceholder: 'esp32-001',
+            uuidHint: 'Unique ID printed by the ESP32 firmware.',
+            uuidImmutable: 'UUID is immutable.',
+            nameLabel: 'Device name',
+            namePlaceholder: 'Truck BCN-04',
+            nameHint: "A human-friendly label, e.g. 'Truck BCN-04'.",
+            vehicleTypeLabel: 'Vehicle type',
+            roleLabel: 'Your role',
+            roleHint: 'Defaults to owner.',
+            accessRoleLabel: 'Access role',
+            generateUuid: 'Generate',
+            deleteTitle: 'Delete device',
+            deleteSubtitle:
+                'This action removes the device from your fleet. Telemetry history is retained.',
+            deleteWarningTitle: 'This will permanently remove the device',
+            deleteWarningMessage:
+                'Drivers assigned will lose access. You can re-add the device later by registering its firmware UUID again.',
+            deleteTypeToConfirm: 'Type "{name}" to confirm',
+            deleteTip:
+                'Tip: type the device name exactly as shown — case-sensitive.',
         },
         detail: {
             accessTable: {

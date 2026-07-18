@@ -222,8 +222,28 @@ export const es: Translation = {
         title: 'Dispositivos',
         online: 'En línea',
         offline: 'Desconectado',
+        stale: 'Inactivo',
         neverSeen: 'Nunca visto',
         unknown: 'Desconocido',
+        roles: {
+            owner: 'Propietario',
+            editor: 'Editor',
+            viewer: 'Visor',
+        },
+        page: {
+            summary:
+                '{total} en total · {online} en línea · {stale} inactivos · {offline} desconectados · {never} nunca vistos',
+            export: 'Exportar',
+            noResultsTitle: 'Ningún dispositivo coincide con los filtros',
+            noResultsMessage:
+                'Prueba a borrar la búsqueda o cambiar el estado / tipo de vehículo.',
+            clearFilters: 'Borrar filtros',
+            addFirstDevice: 'Añade tu primer dispositivo',
+            refreshed: 'Actualizado.',
+            addedToast: '«{name}» añadido a tu flota.',
+            savedToast: 'Cambios guardados en «{name}».',
+            removedToast: '«{name}» eliminado.',
+        },
         table: {
             name: 'Nombre',
             vehicleType: 'Tipo',
@@ -238,6 +258,18 @@ export const es: Translation = {
             failedToLoad: 'Error al cargar dispositivos',
             retry: 'Reintentar',
             notAvailable: '—',
+            searchPlaceholder: 'Buscar por nombre, UUID o vehículo…',
+            refresh: 'Actualizar',
+            filter: {
+                allStatuses: 'Todos los estados',
+                allVehicles: 'Todos los vehículos',
+            },
+            sort: {
+                'name-asc': 'Nombre (A–Z)',
+                'name-desc': 'Nombre (Z–A)',
+                recent: 'Activos recientemente',
+                oldest: 'Desconectados hace más tiempo',
+            },
             vehicleTypes: {
                 bicycle: 'Bicicleta',
                 motorcycle: 'Motocicleta',
@@ -268,6 +300,39 @@ export const es: Translation = {
                 deleteFailed:
                     'No se pudo eliminar el dispositivo. Inténtalo de nuevo.',
             },
+        },
+        modals: {
+            cancel: 'Cancelar',
+            save: 'Guardar cambios',
+            add: 'Añadir dispositivo',
+            delete: 'Eliminar dispositivo',
+            required: 'Obligatorio',
+            addTitle: 'Añadir dispositivo',
+            addSubtitle: 'Registra un nuevo rastreador ESP32 en tu flota.',
+            editTitle: 'Editar dispositivo',
+            editSubtitle: 'Editando {name} · UUID de firmware {uuid}',
+            uuidLabel: 'UUID de firmware',
+            uuidPlaceholder: 'esp32-001',
+            uuidHint: 'ID único impreso por el firmware ESP32.',
+            uuidImmutable: 'El UUID es inmutable.',
+            nameLabel: 'Nombre del dispositivo',
+            namePlaceholder: 'Camión BCN-04',
+            nameHint: "Una etiqueta legible, p. ej. 'Camión BCN-04'.",
+            vehicleTypeLabel: 'Tipo de vehículo',
+            roleLabel: 'Tu rol',
+            roleHint: 'Propietario por defecto.',
+            accessRoleLabel: 'Rol de acceso',
+            generateUuid: 'Generar',
+            deleteTitle: 'Eliminar dispositivo',
+            deleteSubtitle:
+                'Esta acción elimina el dispositivo de tu flota. El historial de telemetría se conserva.',
+            deleteWarningTitle:
+                'Esto eliminará permanentemente el dispositivo',
+            deleteWarningMessage:
+                'Los conductores asignados perderán el acceso. Puedes volver a añadir el dispositivo registrando de nuevo su UUID de firmware.',
+            deleteTypeToConfirm: 'Escribe «{name}» para confirmar',
+            deleteTip:
+                'Consejo: escribe el nombre del dispositivo exactamente como se muestra — distingue mayúsculas.',
         },
         detail: {
             accessTable: {
