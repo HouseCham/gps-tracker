@@ -4,23 +4,14 @@ export const en = {
         devices: 'Devices',
         admin: 'Admin',
         profile: 'Profile',
-        logout: 'Log out',
     },
     layout: {
         appName: 'GPS Tracker',
-        userMenu: 'User menu',
         primaryNav: 'Primary',
         primaryNavMobile: 'Primary mobile',
     },
-    language: {
-        switchToSpanish: 'Switch to Spanish',
-        switchToEnglish: 'Switch to English',
-    },
     admin: {
         title: 'Admin',
-        stats: 'Statistics',
-        users: 'Users',
-        totalUsers: 'Total Users',
         totalDevices: 'Total Devices',
         activeToday: 'Active Today',
         onlineNow: 'Online Now',
@@ -85,10 +76,6 @@ export const en = {
             user: 'User',
             superAdmin: 'Super Admin',
         },
-        status: {
-            active: 'Active',
-            inactive: 'Inactive',
-        },
     },
     section: {
         kpiBar: {
@@ -96,17 +83,6 @@ export const en = {
         },
         activityFeed: {
             title: 'Activity',
-            viewAll: 'View all',
-            noActivities: 'No recent activity.',
-            ago: 'ago',
-        },
-        deviceDetail: {
-            overview: 'Overview',
-            map: 'Map',
-            activity: 'Activity',
-            noData: 'No data available.',
-            createdAt: 'Created',
-            uuid: 'Firmware UUID',
         },
     },
     auth: {
@@ -118,8 +94,6 @@ export const en = {
         passwordPlaceholder: 'Enter your password',
         name: 'Name',
         namePlaceholder: 'Your name',
-        lastname: 'Last name',
-        lastnamePlaceholder: 'Your last name',
         loggingIn: 'Logging in...',
         signingUp: 'Creating account...',
         haveAccount: 'Already have an account?',
@@ -132,21 +106,70 @@ export const en = {
         loginSubtitle: 'Sign in to your GPS Tracker account',
         signupTitle: 'Create an account',
         signupSubtitle: 'Start tracking your devices in minutes',
-        logoutConfirm: 'Are you sure you want to log out?',
         signInWithGoogle: 'Sign in with Google',
-        signUpWithGoogle: 'Sign up with Google',
         orContinueWith: 'Or continue with email',
+
+        // Brand panel (AuthLayout)
+        appName: 'Open GPS',
+        version: 'v0.15.0',
+        tagline: 'Track every device in your fleet, ',
+        taglineAccent: 'in real time.',
+        brandSubtitle:
+            'Self-hostable GPS tracking for delivery vans, rentals, and field teams — no SaaS lock-in, no data resale.',
+        svgStatus: 'LIVE  •  5 stops  •  ● en route',
+        footerHost: 'auth.open-gps.local',
+        footerTech: 'built with Go + Astro',
+        metaDescription: 'Open GPS · Auth',
+
+        // LoginForm additional strings
+        rememberDevice: 'Remember this device for 30 days',
+        forgotPassword: 'Forgot password?',
+        noAccount: "Don't have an account?",
+        createOne: 'Create one',
+        firstAdminBadge: 'No accounts yet — first login becomes the super admin.',
+        loginFailed:
+            "We couldn't sign you in. Double-check your credentials and try again.",
+        showPassword: 'Show password',
+        hidePassword: 'Hide password',
+
+        // Shared validation
+        emailPasswordRequired: 'Email and password are required.',
+
+        // ApiInspector (dev preview)
+        apiInspectorTitle: 'Live request preview',
+        apiInspectorCookieNote:
+            'Sets cookie authula.session_token (HttpOnly, SameSite=lax).',
+
+        // SignupForm additional strings
+        strengthLabel: 'Strength',
+        strengthTooShort: 'Too short',
+        strengthWeak: 'Weak',
+        strengthFair: 'Fair',
+        strengthGood: 'Good',
+        strengthStrong: 'Strong',
+        nameHelp: 'Optional — only used in your profile.',
+        passwordHelp:
+            'At least 8 characters with mixed case and a number or symbol.',
+        confirmPassword: 'Confirm password',
+        passwordsDoNotMatch: 'Passwords do not match.',
+        termsAgree: 'I agree to the',
+        termsLabel: 'Terms',
+        privacyLabel: 'Privacy Policy',
+        creatingAccount: 'Creating account…',
+        orDivider: 'or',
+        continueWithGoogle: 'Continue with Google',
+        firstAdminWelcome: "Welcome — you'll be the first admin.",
+        createAccountBadge: 'Create your account',
+        acceptTerms: 'Please accept the terms to continue.',
+        pickStrongerPassword:
+            'Pick a stronger password (mix case + numbers or symbols).',
+        signupFailed:
+            "We couldn't create your account right now. That email might already be registered.",
+        autoSignInNote:
+            'Auto-signin: the response sets the session cookie and returns 200 with the user profile.',
     },
     profile: {
         title: 'Profile',
-        accountInfo: 'Account Information',
-        personalInfo: 'Personal Information',
-        deviceCount: 'Devices',
-        memberSince: 'Member since',
-        save: 'Save Changes',
-        saving: 'Saving...',
-        loadFailed: 'Could not load profile',
-        retry: 'Try again',
     },
     page: {
         devices: {
@@ -164,38 +187,10 @@ export const en = {
     },
     device: {
         title: 'Devices',
-        addDevice: 'Add Device',
-        editDevice: 'Edit Device',
-        deleteDevice: 'Delete Device',
-        name: 'Name',
-        status: 'Status',
-        lastSeen: 'Last seen',
-        battery: 'Battery',
-        signal: 'Signal',
-        actions: 'Actions',
         online: 'Online',
         offline: 'Offline',
         neverSeen: 'Never seen',
         unknown: 'Unknown',
-        noDevices: 'No devices yet',
-        noDevicesMessage: 'Add your first GPS device to get started.',
-        form: {
-            nameLabel: 'Device name',
-            namePlaceholder: 'e.g. Delivery Van #3',
-            uuidLabel: 'Firmware UUID',
-            uuidPlaceholder: 'e.g. a1b2c3d4-e5f6-7890-abcd-ef1234567890',
-            vehicleTypeLabel: 'Vehicle type',
-            vehicleTypeRequired: 'Vehicle type is required',
-            nameRequired: 'Device name is required',
-            uuidRequired: 'Firmware UUID is required',
-            uuidInvalid: 'Invalid UUID format',
-            generateUuid: 'Generate',
-            save: 'Save',
-            saving: 'Saving...',
-            cancel: 'Cancel',
-            deleteConfirm:
-                'Are you sure you want to delete this device? This action cannot be undone.',
-        },
         table: {
             name: 'Name',
             vehicleType: 'Type',
@@ -239,47 +234,6 @@ export const en = {
             },
         },
         detail: {
-            notFound: 'Device not found',
-            notFoundMessage:
-                "We couldn't find a device with the id provided. It may have been deleted or the link is wrong.",
-            missingId: 'No device selected',
-            missingIdMessage:
-                'Open a device from the list to see its details here.',
-            backToList: 'Back to devices',
-            loading: 'Loading device...',
-            loadFailed: 'Could not load device',
-            retry: 'Try again',
-            notAvailable: '—',
-            sections: {
-                overview: 'General information',
-                access: 'Users with access',
-            },
-            fields: {
-                name: 'Name',
-                uuid: 'Firmware UUID',
-                vehicleType: 'Vehicle type',
-                createdAt: 'Created',
-                lastSeen: 'Last seen',
-                accessRole: 'Your access',
-            },
-            roles: {
-                owner: 'Owner',
-                editor: 'Editor',
-                viewer: 'Viewer',
-            },
-            connection: {
-                online: 'Online',
-                disconnected: 'Disconnected',
-                neverSeen: 'Never seen',
-            },
-            vehicleTypes: {
-                bicycle: 'Bicycle',
-                motorcycle: 'Motorcycle',
-                car: 'Car',
-                truck: 'Truck',
-                van: 'Van',
-                other: 'Other',
-            },
             accessTable: {
                 name: 'Name',
                 email: 'Email',
@@ -304,16 +258,6 @@ export const en = {
                     revokeFailed: 'Could not revoke access. Try again.',
                 },
             },
-            grantAccess: {
-                title: 'Grant device access',
-                userId: 'User ID',
-                userIdPlaceholder: '550e8400-e29b-41d4-a716-446655440001',
-                userIdRequired: 'User ID is required',
-                userIdInvalid: 'Invalid UUID format',
-                grant: 'Grant access',
-                granting: 'Granting...',
-                cancel: 'Cancel',
-            },
         },
     },
     user: {
@@ -321,26 +265,6 @@ export const en = {
         noUsersMessage: 'Add your first user to get started.',
     },
     toast: {
-        deviceCreated: {
-            title: 'Created',
-            message: 'Device has been added.',
-        },
-        deviceUpdated: {
-            title: 'Saved',
-            message: 'Changes saved.',
-        },
-        deviceDeleted: {
-            title: 'Deleted',
-            message: 'Device has been removed.',
-        },
-        accessGranted: {
-            title: 'Access granted',
-            message: 'User now has viewer access.',
-        },
-        accessRevoked: {
-            title: 'Access revoked',
-            message: "User's access has been removed.",
-        },
         userCreated: {
             title: 'User created',
             message: 'User has been added.',
@@ -349,51 +273,9 @@ export const en = {
             title: 'User deleted',
             message: 'User has been removed.',
         },
-        apiKeyCreated: {
-            title: 'Key generated',
-            message: 'Store the key in your device firmware.',
-        },
-        apiKeyRevoked: {
-            title: 'Key revoked',
-            message: 'The key is no longer valid.',
-        },
-        apiKeyCopied: {
-            title: 'Copied',
-            message: 'API key copied to clipboard.',
-        },
-        copyFailed: {
-            title: 'Copy failed',
-            message: 'Could not copy to clipboard.',
-        },
     },
     apiKeys: {
         title: 'API Keys',
-        subtitle: 'Manage the IoT tokens that authenticate your devices',
-        newKey: 'New API key',
-        noDevices: 'No devices yet',
-        noDevicesMessage:
-            'You need to create a device before you can issue an API key.',
-        noKeys: 'No active keys',
-        noKeysMessage:
-            'Issue a key to start receiving location pings from your devices.',
-        failedToLoad: 'Failed to load API keys',
-        createModal: {
-            title: 'Generate API key',
-            deviceLabel: 'Device',
-            devicePlaceholder: 'Select a device',
-            deviceRequired: 'Pick a device',
-            generate: 'Generate key',
-            generating: 'Generating…',
-            cancel: 'Cancel',
-        },
-        reveal: {
-            title: 'Save this API key',
-            warning:
-                'This is the only time the key will be displayed. Copy it and store it securely — you will not be able to see it again.',
-            copy: 'Copy',
-            copied: 'Copied!',
-            done: 'I have saved it',
-        },
         table: {
             device: 'Device',
             keyId: 'Key ID',
@@ -401,18 +283,6 @@ export const en = {
             lastUsed: 'Last used',
             expires: 'Expires',
             actions: 'Actions',
-            neverUsed: 'Never',
-            noExpiry: 'No expiry',
-            revoke: 'Revoke',
-        },
-        revoke: {
-            title: 'Revoke API key',
-            warning:
-                'This will revoke the API key for "{device}". Any device using this key will stop sending location data immediately.',
-            confirm: 'Revoke key',
-            revoking: 'Revoking…',
-            cancel: 'Cancel',
-            revokeFailed: 'Could not revoke the key. Try again.',
         },
     },
 };

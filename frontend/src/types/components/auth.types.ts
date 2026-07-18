@@ -37,6 +37,17 @@ export interface LoginFormStrings {
     loginSubtitle: string;
     signInWithGoogle: string;
     orContinueWith: string;
+    rememberDevice: string;
+    forgotPassword: string;
+    noAccount: string;
+    createOne: string;
+    firstAdminBadge: string;
+    loginFailed: string;
+    showPassword: string;
+    hidePassword: string;
+    emailPasswordRequired: string;
+    apiInspectorTitle: string;
+    apiInspectorCookieNote: string;
 }
 /**
  * @interface SignupFormData
@@ -87,4 +98,31 @@ export interface SignupFormStrings {
     nameRequired: string;
     signupTitle: string;
     signupSubtitle: string;
+    strengthLabel: string;
+    strengthTooShort: string;
+    strengthWeak: string;
+    strengthFair: string;
+    strengthGood: string;
+    strengthStrong: string;
+    nameHelp: string;
+    passwordHelp: string;
+    confirmPassword: string;
+    passwordsDoNotMatch: string;
+    termsAgree: string;
+    termsLabel: string;
+    privacyLabel: string;
+    creatingAccount: string;
+    orDivider: string;
+    continueWithGoogle: string;
+    firstAdminWelcome: string;
+    createAccountBadge: string;
+    emailPasswordRequired: string;
+    acceptTerms: string;
+    pickStrongerPassword: string;
+    signupFailed: string;
+    showPassword: string;
+    hidePassword: string;
+    apiInspectorTitle: string;
+    apiInspectorCookieNote: string;
+    autoSignInNote: string;
 }

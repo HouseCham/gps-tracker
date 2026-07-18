@@ -6,23 +6,14 @@ export const es: Translation = {
         devices: 'Dispositivos',
         admin: 'Administración',
         profile: 'Perfil',
-        logout: 'Cerrar sesión',
     },
     layout: {
         appName: 'GPS Tracker',
-        userMenu: 'Menú de usuario',
         primaryNav: 'Principal',
         primaryNavMobile: 'Principal móvil',
     },
-    language: {
-        switchToSpanish: 'Cambiar a español',
-        switchToEnglish: 'Cambiar a inglés',
-    },
     admin: {
         title: 'Administración',
-        stats: 'Estadísticas',
-        users: 'Usuarios',
-        totalUsers: 'Usuarios totales',
         totalDevices: 'Dispositivos totales',
         activeToday: 'Activos hoy',
         onlineNow: 'En línea ahora',
@@ -90,10 +81,6 @@ export const es: Translation = {
             user: 'Usuario',
             superAdmin: 'Super Admin',
         },
-        status: {
-            active: 'Activo',
-            inactive: 'Inactivo',
-        },
     },
     section: {
         kpiBar: {
@@ -101,17 +88,6 @@ export const es: Translation = {
         },
         activityFeed: {
             title: 'Actividad',
-            viewAll: 'Ver todo',
-            noActivities: 'Sin actividad reciente.',
-            ago: 'atrás',
-        },
-        deviceDetail: {
-            overview: 'Resumen',
-            map: 'Mapa',
-            activity: 'Actividad',
-            noData: 'Sin datos disponibles.',
-            createdAt: 'Creado',
-            uuid: 'UUID del firmware',
         },
     },
     auth: {
@@ -123,8 +99,6 @@ export const es: Translation = {
         passwordPlaceholder: 'Ingresa tu contraseña',
         name: 'Nombre',
         namePlaceholder: 'Tu nombre',
-        lastname: 'Apellido',
-        lastnamePlaceholder: 'Tu apellido',
         loggingIn: 'Iniciando sesión...',
         signingUp: 'Creando cuenta...',
         haveAccount: '¿Ya tienes cuenta?',
@@ -137,21 +111,71 @@ export const es: Translation = {
         loginSubtitle: 'Inicia sesión en tu cuenta GPS Tracker',
         signupTitle: 'Crear una cuenta',
         signupSubtitle: 'Empieza a rastrear tus dispositivos en minutos',
-        logoutConfirm: '¿Estás seguro de cerrar sesión?',
         signInWithGoogle: 'Iniciar sesión con Google',
-        signUpWithGoogle: 'Registrarse con Google',
         orContinueWith: 'O continúa con tu correo',
+
+        // Panel de marca (AuthLayout)
+        appName: 'Open GPS',
+        version: 'v0.15.0',
+        tagline: 'Rastrea cada dispositivo de tu flota, ',
+        taglineAccent: 'en tiempo real.',
+        brandSubtitle:
+            'Rastreo GPS auto-hospedado para furgonetas de reparto, alquileres y equipos de campo — sin bloqueo de SaaS, sin reventa de datos.',
+        svgStatus: 'EN VIVO  •  5 paradas  •  ● en ruta',
+        footerHost: 'auth.open-gps.local',
+        footerTech: 'hecho con Go + Astro',
+        metaDescription: 'Open GPS · Auth',
+
+        // Cadenas adicionales del LoginForm
+        rememberDevice: 'Recordar este dispositivo por 30 días',
+        forgotPassword: '¿Olvidaste tu contraseña?',
+        noAccount: '¿No tienes cuenta?',
+        createOne: 'Crear una',
+        firstAdminBadge:
+            'Aún no hay cuentas — el primer inicio de sesión será el super admin.',
+        loginFailed:
+            'No pudimos iniciar tu sesión. Verifica tus credenciales e intenta de nuevo.',
+        showPassword: 'Mostrar contraseña',
+        hidePassword: 'Ocultar contraseña',
+
+        // Validación compartida
+        emailPasswordRequired: 'El correo y la contraseña son obligatorios.',
+
+        // ApiInspector (vista previa de desarrollo)
+        apiInspectorTitle: 'Vista previa de la solicitud',
+        apiInspectorCookieNote:
+            'Establece la cookie authula.session_token (HttpOnly, SameSite=lax).',
+
+        // Cadenas adicionales del SignupForm
+        strengthLabel: 'Fortaleza',
+        strengthTooShort: 'Muy corta',
+        strengthWeak: 'Débil',
+        strengthFair: 'Regular',
+        strengthGood: 'Buena',
+        strengthStrong: 'Fuerte',
+        nameHelp: 'Opcional — solo se usa en tu perfil.',
+        passwordHelp:
+            'Al menos 8 caracteres con mayúsculas y minúsculas y un número o símbolo.',
+        confirmPassword: 'Confirmar contraseña',
+        passwordsDoNotMatch: 'Las contraseñas no coinciden.',
+        termsAgree: 'Acepto los',
+        termsLabel: 'Términos',
+        privacyLabel: 'Política de Privacidad',
+        creatingAccount: 'Creando cuenta…',
+        orDivider: 'o',
+        continueWithGoogle: 'Continuar con Google',
+        firstAdminWelcome: 'Bienvenido — serás el primer admin.',
+        createAccountBadge: 'Crea tu cuenta',
+        acceptTerms: 'Acepta los términos para continuar.',
+        pickStrongerPassword:
+            'Elige una contraseña más fuerte (mezcla mayúsculas y minúsculas con números o símbolos).',
+        signupFailed:
+            'No pudimos crear tu cuenta. Es posible que ese correo ya esté registrado.',
+        autoSignInNote:
+            'Auto-login: la respuesta establece la cookie de sesión y devuelve 200 con el perfil del usuario.',
     },
     profile: {
         title: 'Perfil',
-        accountInfo: 'Información de la cuenta',
-        personalInfo: 'Información personal',
-        deviceCount: 'Dispositivos',
-        memberSince: 'Miembro desde',
-        save: 'Guardar cambios',
-        saving: 'Guardando...',
-        loadFailed: 'No se pudo cargar el perfil',
-        retry: 'Reintentar',
     },
     page: {
         devices: {
@@ -169,38 +193,10 @@ export const es: Translation = {
     },
     device: {
         title: 'Dispositivos',
-        addDevice: 'Añadir dispositivo',
-        editDevice: 'Editar dispositivo',
-        deleteDevice: 'Eliminar dispositivo',
-        name: 'Nombre',
-        status: 'Estado',
-        lastSeen: 'Última vez',
-        battery: 'Batería',
-        signal: 'Señal',
-        actions: 'Acciones',
         online: 'En línea',
         offline: 'Desconectado',
         neverSeen: 'Nunca visto',
         unknown: 'Desconocido',
-        noDevices: 'Sin dispositivos',
-        noDevicesMessage: 'Añade tu primer dispositivo GPS para empezar.',
-        form: {
-            nameLabel: 'Nombre del dispositivo',
-            namePlaceholder: 'Ej. Furgoneta #3',
-            uuidLabel: 'UUID del firmware',
-            uuidPlaceholder: 'Ej. a1b2c3d4-e5f6-7890-abcd-ef1234567890',
-            vehicleTypeLabel: 'Tipo de vehículo',
-            vehicleTypeRequired: 'El tipo de vehículo es obligatorio',
-            nameRequired: 'El nombre es obligatorio',
-            uuidRequired: 'El UUID es obligatorio',
-            uuidInvalid: 'Formato de UUID inválido',
-            generateUuid: 'Generar',
-            save: 'Guardar',
-            saving: 'Guardando...',
-            cancel: 'Cancelar',
-            deleteConfirm:
-                '¿Estás seguro de eliminar este dispositivo? Esta acción no se puede deshacer.',
-        },
         table: {
             name: 'Nombre',
             vehicleType: 'Tipo',
@@ -247,47 +243,6 @@ export const es: Translation = {
             },
         },
         detail: {
-            notFound: 'Dispositivo no encontrado',
-            notFoundMessage:
-                'No encontramos un dispositivo con el id proporcionado. Puede haber sido eliminado o el enlace es incorrecto.',
-            missingId: 'Ningún dispositivo seleccionado',
-            missingIdMessage:
-                'Abre un dispositivo desde la lista para ver sus detalles aquí.',
-            backToList: 'Volver a dispositivos',
-            loading: 'Cargando dispositivo...',
-            loadFailed: 'No se pudo cargar el dispositivo',
-            retry: 'Reintentar',
-            notAvailable: '—',
-            sections: {
-                overview: 'Información general',
-                access: 'Usuarios con acceso',
-            },
-            fields: {
-                name: 'Nombre',
-                uuid: 'UUID del firmware',
-                vehicleType: 'Tipo de vehículo',
-                createdAt: 'Creado',
-                lastSeen: 'Última vez',
-                accessRole: 'Tu acceso',
-            },
-            roles: {
-                owner: 'Propietario',
-                editor: 'Editor',
-                viewer: 'Visualizador',
-            },
-            connection: {
-                online: 'En línea',
-                disconnected: 'Desconectado',
-                neverSeen: 'Sin reportes',
-            },
-            vehicleTypes: {
-                bicycle: 'Bicicleta',
-                motorcycle: 'Motocicleta',
-                car: 'Coche',
-                truck: 'Camión',
-                van: 'Furgoneta',
-                other: 'Otro',
-            },
             accessTable: {
                 name: 'Nombre',
                 email: 'Correo',
@@ -315,16 +270,6 @@ export const es: Translation = {
                         'No se pudo revocar el acceso. Inténtalo de nuevo.',
                 },
             },
-            grantAccess: {
-                title: 'Otorgar acceso al dispositivo',
-                userId: 'ID de usuario',
-                userIdPlaceholder: '550e8400-e29b-41d4-a716-446655440001',
-                userIdRequired: 'El ID de usuario es obligatorio',
-                userIdInvalid: 'Formato de UUID inválido',
-                grant: 'Otorgar acceso',
-                granting: 'Otorgando...',
-                cancel: 'Cancelar',
-            },
         },
     },
     user: {
@@ -332,26 +277,6 @@ export const es: Translation = {
         noUsersMessage: 'Añade tu primer usuario para empezar.',
     },
     toast: {
-        deviceCreated: {
-            title: 'Creado',
-            message: 'El dispositivo se ha añadido.',
-        },
-        deviceUpdated: {
-            title: 'Guardado',
-            message: 'Cambios guardados.',
-        },
-        deviceDeleted: {
-            title: 'Eliminado',
-            message: 'El dispositivo se ha eliminado.',
-        },
-        accessGranted: {
-            title: 'Acceso otorgado',
-            message: 'El usuario ya tiene acceso de visualización.',
-        },
-        accessRevoked: {
-            title: 'Acceso revocado',
-            message: 'Se ha eliminado el acceso del usuario.',
-        },
         userCreated: {
             title: 'Usuario creado',
             message: 'El usuario se ha añadido.',
@@ -360,51 +285,9 @@ export const es: Translation = {
             title: 'Usuario eliminado',
             message: 'El usuario se ha eliminado.',
         },
-        apiKeyCreated: {
-            title: 'Clave generada',
-            message: 'Guarda la clave en el firmware del dispositivo.',
-        },
-        apiKeyRevoked: {
-            title: 'Clave revocada',
-            message: 'La clave ya no es válida.',
-        },
-        apiKeyCopied: {
-            title: 'Copiado',
-            message: 'Clave de API copiada al portapapeles.',
-        },
-        copyFailed: {
-            title: 'Error al copiar',
-            message: 'No se pudo copiar al portapapeles.',
-        },
     },
     apiKeys: {
         title: 'Claves de API',
-        subtitle: 'Gestiona los tokens IoT que autentican tus dispositivos',
-        newKey: 'Nueva clave de API',
-        noDevices: 'Aún no hay dispositivos',
-        noDevicesMessage:
-            'Necesitas crear un dispositivo antes de poder generar una clave de API.',
-        noKeys: 'No hay claves activas',
-        noKeysMessage:
-            'Genera una clave para empezar a recibir datos de ubicación desde tus dispositivos.',
-        failedToLoad: 'Error al cargar las claves de API',
-        createModal: {
-            title: 'Generar clave de API',
-            deviceLabel: 'Dispositivo',
-            devicePlaceholder: 'Selecciona un dispositivo',
-            deviceRequired: 'Elige un dispositivo',
-            generate: 'Generar clave',
-            generating: 'Generando…',
-            cancel: 'Cancelar',
-        },
-        reveal: {
-            title: 'Guarda esta clave de API',
-            warning:
-                'Esta es la única vez que se mostrará la clave. Cópiala y guárdala en un lugar seguro — no podrás volver a verla.',
-            copy: 'Copiar',
-            copied: '¡Copiado!',
-            done: 'Ya la guardé',
-        },
         table: {
             device: 'Dispositivo',
             keyId: 'ID de clave',
@@ -412,18 +295,6 @@ export const es: Translation = {
             lastUsed: 'Último uso',
             expires: 'Expira',
             actions: 'Acciones',
-            neverUsed: 'Nunca',
-            noExpiry: 'Sin expiración',
-            revoke: 'Revocar',
-        },
-        revoke: {
-            title: 'Revocar clave de API',
-            warning:
-                'Esto revocará la clave de API de "{device}". Cualquier dispositivo que la use dejará de enviar datos de ubicación inmediatamente.',
-            confirm: 'Revocar clave',
-            revoking: 'Revocando…',
-            cancel: 'Cancelar',
-            revokeFailed: 'No se pudo revocar la clave. Inténtalo de nuevo.',
         },
     },
 };

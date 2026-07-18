@@ -1,4 +1,4 @@
-import type { DeviceCardItem, DeviceTableItem } from '@/types/components';
+import type { DeviceCardItem, DeviceData, DeviceTableItem } from '@/types/components';
 /**
  * @constant DEVICE_GALLERY_DEMO_DEVICES
  * @description Demo devices for the device gallery
@@ -80,3 +80,14 @@ export const DEVICE_GALLERY_DEMO_CARD_DEVICES: Array<DeviceCardItem> = [
         uuid_firmware: 'c3d4e5f6-a7b8-9012-cdef-123456789012',
     },
 ];
+
+/**
+ * @constant DEMO_DEVICE
+ * @description Demo device for the device table
+ */
+export const DEMO_DEVICE: DeviceData = {
+    id: 'D-001',
+    name: 'Delivery Van #3',
+    uuid_firmware: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890',
+    vehicle_type: 'van',
+};

@@ -2,22 +2,6 @@ import type { User } from '@/types/api';
 import type { Translation } from '@/i18n';
 import type { AdminStatItem, DataTableColumn } from '@/types/components';
 /**
- * @constant DEMO_USER
- * @description Demo user for the admin gallery
- * @type {User}
- */
-export const DEMO_USER: User = {
-    id: '03b0b79d-083f-4d8b-b84e-64df6ce5fcaf',
-    email: 'john.doe@example.com',
-    name: 'John',
-    lastname: 'Doe',
-    role: 'super_admin',
-    created_at: '2022-01-01T00:00:00.000Z',
-    email_verified: true,
-    image: null,
-    must_change_password: false,
-};
-/**
  * @constant USER_TABLE_COLUMNS
  * @description Columns for the user table
  * @type {DataTableColumn[]}
