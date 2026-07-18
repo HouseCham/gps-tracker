@@ -1,0 +1,26 @@
+---
+import type { GetStaticPaths } from 'astro';
+//-- Translations
+import { getTranslation } from '@/i18n';
+//-- Types
+import type { Language } from '@/types';
+//-- Components
+import MainLayout from '@/components/astro/layout/MainLayout.astro';
+/**
+ * @type {GetStaticPaths}
+ */
+export const getStaticPaths = (() => {
+    return [{ params: { lan: 'en' } }, { params: { lan: 'es' } }];
+}) satisfies GetStaticPaths;
+
+const locale = Astro.params.lan as Language;
+const translation = getTranslation(locale);
+---
+
+<MainLayout
+    locale={locale}
+    title={"Open GPS"}
+    pageLabel={"Open GPS"}
+>
+    <h1>{"Hello World"}</h1>
+</MainLayout>
