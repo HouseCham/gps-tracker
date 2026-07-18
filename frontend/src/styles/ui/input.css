@@ -37,3 +37,7 @@
     color: var(--text-muted);
     cursor: not-allowed;
 }
+
+.input.is-mono {
+    font-family: var(--font-mono);
+}

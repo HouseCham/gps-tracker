@@ -5,6 +5,7 @@ import { $sidebarOpen, closeSidebar, toggleSidebar } from '@/lib/stores/layout';
 import { $user } from '@/lib/stores/auth';
 //-- Types
 import type { Translation } from '@/i18n';
+import type { Language } from '@/types';
 //-- Hooks
 import { useAuth } from '@/lib/hooks/useAuth';
 import { useTheme } from '@/lib/hooks/useTheme';
@@ -15,6 +16,7 @@ import { getInitials } from '@/lib';
 //-- Icons
 import {
     Bell,
+    Globe,
     Menu,
     Search as SearchIcon,
     Settings as SettingsIcon,
@@ -27,6 +29,7 @@ import { ThemeGlyph } from './ThemeGlyph';
 /**
  * Props for the Topbar component.
  * @interface TopbarProps
+ * @property {Language} locale - The current locale.
  * @property {string} pageLabel - The label of the current page.
  * @property {string} [pageEyebrow] - Optional eyebrow text for the current page.
  * @property {Translation['layout']} layout - The layout strings.
@@ -34,6 +37,7 @@ import { ThemeGlyph } from './ThemeGlyph';
  * @property {(value: string) => void} [onSearchChange] - Called on each keystroke.
  */
 export interface TopbarProps {
+    locale: Language;
     pageLabel: string;
     pageEyebrow?: string;
     layout: Translation['layout'];
@@ -46,6 +50,7 @@ export interface TopbarProps {
  * @returns {JSX.Element} The rendered component.
  */
 export function Topbar({
+    locale,
     pageLabel,
     pageEyebrow,
     layout,
@@ -101,6 +106,7 @@ export function Topbar({
                     <Menu size={16} strokeWidth={1.6} />
                 </button>
             )}
+            {/* Searchbar */}
             <div className="gp-topbar-meta">
                 {pageEyebrow && <span className="gp-topbar-eyebrow">{pageEyebrow}</span>}
                 <span className="gp-topbar-title">{pageLabel}</span>
@@ -118,6 +124,7 @@ export function Topbar({
                 />
                 <kbd>⌘K</kbd>
             </label>
+            {/*  */}
             <div className="gp-topbar-actions">
                 <button
                     type="button"
@@ -128,6 +135,7 @@ export function Topbar({
                 >
                     <ThemeGlyph theme={theme} />
                 </button>
+                <LanguageToggle locale={locale} />
                 <div className="chrome-pop">
                     <button
                         type="button"
@@ -183,5 +191,55 @@ export function Topbar({
                 </div>
             </div>
         </header>
+    );
+}
+/**
+ * Language toggle button. Swaps the URL prefix between /en/ and /es/ so
+ * the Astro router renders the matching locale. Persists the choice in
+ * localStorage so the next visit keeps the same language.
+ * @param {{ locale: Language }} props - The current locale.
+ * @returns {JSX.Element} The rendered button.
+ */
+function LanguageToggle({ locale }: { locale: Language }): JSX.Element {
+    const [currentLocale, setCurrentLocale] = useState<Language>(() => {
+        if (typeof document === 'undefined') return locale;
+        // Safe: localStorage.getItem returns string | null; the next guard
+        // narrows the value to 'en' | 'es' with an explicit equality check.
+        const stored = localStorage.getItem('language') as Language | null;
+        if (stored === 'en' || stored === 'es') return stored;
+        const browser = navigator.language.toLowerCase();
+        return browser.startsWith('es') ? 'es' : 'en';
+    });
+
+    useEffect(() => {
+        localStorage.setItem('language', currentLocale);
+    }, [currentLocale]);
+
+    const toggleLanguage = (): void => {
+        const next: Language = currentLocale === 'en' ? 'es' : 'en';
+        setCurrentLocale(next);
+        const pathname = window.location.pathname;
+        const newPath = pathname.replace(/^\/(en|es)/, `/${next}`);
+        window.location.href = newPath;
+    };
+
+    return (
+        <button
+            type="button"
+            className="chrome-icon-btn"
+            onClick={toggleLanguage}
+            aria-label={
+                currentLocale === 'en'
+                    ? 'Cambiar a español'
+                    : 'Switch to English'
+            }
+            title={
+                currentLocale === 'en'
+                    ? 'Cambiar a español'
+                    : 'Switch to English'
+            }
+        >
+            <Globe size={16} strokeWidth={1.6} />
+        </button>
     );
 }

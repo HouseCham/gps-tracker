@@ -9,17 +9,20 @@ import { ChevronDown } from 'lucide-react';
 import { SHELL_NAV_ITEMS, SIDEBAR_ICONS } from '@/constants/layout';
 //-- i18n
 import type { Translation } from '@/i18n';
+import type { Language } from '@/types';
 //-- Utils
 import { getInitials } from '@/lib';
 
 /**
  * Properties for the sidebar component.
  * @interface SidebarProps
+ * @property {Language} locale - The current locale.
  * @property {string} pathname - The current pathname.
  * @property {Translation['nav']} nav - The navigation items.
  * @property {Translation['layout']} layout - The layout strings.
  */
 export interface SidebarProps {
+    locale: Language;
     pathname: string;
     nav: Translation['nav'];
     layout: Translation['layout'];
@@ -29,7 +32,7 @@ export interface SidebarProps {
  * @param {SidebarProps} props - The props for the component.
  * @returns {JSX.Element} The rendered sidebar.
  */
-export function Sidebar({ pathname, nav, layout }: SidebarProps): JSX.Element {
+export function Sidebar({ locale, pathname, nav, layout }: SidebarProps): JSX.Element {
     const sidebarOpen = useStore($sidebarOpen);
     const user = useStore($user);
 
@@ -55,13 +58,15 @@ export function Sidebar({ pathname, nav, layout }: SidebarProps): JSX.Element {
                 <div className="gp-sidebar-nav">
                     {SHELL_NAV_ITEMS.map(item => {
                         const Icon = SIDEBAR_ICONS[item.icon];
+                        const href = `/${locale}${item.href}`;
                         const isActive =
-                            pathname === item.href ||
-                            (item.href !== '/' && pathname.startsWith(`${item.href}/`));
+                            pathname === href ||
+                            (href !== `/${locale}` &&
+                                pathname.startsWith(`${href}/`));
                         return (
                             <a
                                 key={item.id}
-                                href={item.href}
+                                href={href}
                                 className={`gp-sidebar-link${isActive ? ' is-active' : ''}`}
                                 aria-current={isActive ? 'page' : undefined}
                                 onClick={closeSidebar}
