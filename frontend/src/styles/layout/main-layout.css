@@ -141,6 +141,30 @@ button {
     stroke-width: 1.6;
 }
 
+.gp-iconbtn {
+    appearance: none;
+    background: transparent;
+    border: 1px solid var(--gp-border);
+    border-radius: var(--gp-radius-1);
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gp-text-mute);
+    cursor: pointer;
+}
+
+.gp-iconbtn:hover {
+    color: var(--gp-text);
+    background: var(--gp-bg);
+}
+
+.gp-iconbtn:focus-visible {
+    outline: none;
+    box-shadow: var(--gp-focus);
+}
+
 @keyframes spin {
     to {
         transform: rotate(360deg);

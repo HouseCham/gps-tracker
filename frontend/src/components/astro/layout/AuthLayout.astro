@@ -10,6 +10,7 @@ import {
     AuthProvider,
     PublicOnlyRoute
 } from '@/components/react/auth';
+import { ThemeToggle } from '@/components/react/ui/ThemeToggle';
 
 /**
  * @interface Props
@@ -60,6 +61,10 @@ const classes = ['auth-layout', className].filter(Boolean).join(' ');
                 <div class={classes}>
                     <div class="auth-split">
                         <aside class="auth-brand">
+                            <div class="brand-controls">
+                                <ThemeToggle client:load />
+                            </div>
+
                             <div class="mark">
                                 <span class="dot"></span>
                                 <span class="name">{t.auth.appName}</span>
@@ -161,7 +166,30 @@ const classes = ['auth-layout', className].filter(Boolean).join(' ');
 
 <style>
     .auth-layout {
+        display: flex;
         min-height: 100vh;
         background: var(--gp-bg);
+    }
+
+    .auth-layout > .auth-split {
+        flex: 1;
+        min-height: 100vh;
+    }
+
+    .auth-layout .auth-brand,
+    .auth-layout .auth-form {
+        min-height: 100%;
+    }
+
+    .auth-layout .brand-controls {
+        position: absolute;
+        top: 12px;
+        right: 16px;
+    }
+
+    @media (max-width: 920px) {
+        .auth-layout > .auth-split {
+            min-height: auto;
+        }
     }
 </style>
