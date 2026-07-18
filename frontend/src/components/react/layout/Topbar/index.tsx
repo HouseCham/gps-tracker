@@ -66,7 +66,7 @@ export function Topbar({
         const update = (): void => setIsMobile(mq.matches);
         update();
         mq.addEventListener('change', update);
-        return () => mq.removeEventListener('change', update);
+        return (): void => mq.removeEventListener('change', update);
     }, []);
 
     useEffect(() => {
@@ -77,7 +77,7 @@ export function Topbar({
             }
         };
         window.addEventListener('keydown', onKey);
-        return () => window.removeEventListener('keydown', onKey);
+        return (): void => window.removeEventListener('keydown', onKey);
     }, []);
 
     useEffect(() => {
@@ -86,7 +86,7 @@ export function Topbar({
             if (window.innerWidth > MOBILE_BREAKPOINT) closeSidebar();
         };
         window.addEventListener('resize', onResize);
-        return () => window.removeEventListener('resize', onResize);
+        return (): void => window.removeEventListener('resize', onResize);
     }, [sidebarOpen]);
 
     return (
@@ -141,7 +141,12 @@ export function Topbar({
                         <Bell size={16} strokeWidth={1.6} />
                         <span className="chrome-notif-dot" />
                     </button>
-                    {notifOpen && <NotificationsDropdown layout={layout} />}
+                    {notifOpen && (
+                        <NotificationsDropdown 
+                            layout={layout}
+                            handleClose={() => setNotifOpen(false)} 
+                        />
+                    )}
                 </div>
                 <button
                     type="button"
@@ -172,6 +177,7 @@ export function Topbar({
                             theme={theme}
                             setTheme={setTheme}
                             onSignOut={signOut}
+                            handleClose={() => setProfileOpen(false)}
                         />
                     )}
                 </div>

@@ -11,18 +11,20 @@ import { useClickOutside } from "@/lib";
  * Properties for the notifications dropdown component.
  * @interface NotificationDropdownProps
  * @property {Translation['layout']} layout - The layout strings.
+ * @property {() => void} [handleClose] - Close handler.
  */
 interface NotificationDropdownProps {
     layout: Translation['layout'];
+    handleClose: () => void;
 }
 /**
  * The notifications dropdown component.
  * @param {NotificationDropdownProps} props - The props for the component.
  * @returns {JSX.Element} The rendered component.
  */
-export function NotificationsDropdown({ layout }: NotificationDropdownProps): JSX.Element {
+export function NotificationsDropdown({ layout, handleClose }: NotificationDropdownProps): JSX.Element {
     const ref = useRef<HTMLDivElement>(null);
-    useClickOutside(ref, () => undefined);
+    useClickOutside(ref, handleClose);
 
     return (
         <div className="chrome-dropdown" ref={ref} style={{ width: 380 }}>

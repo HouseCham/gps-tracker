@@ -17,6 +17,7 @@ import type { AuthUser } from "@/types/api";
  * @property {AuthUser | null} user - The current user.
  * @property {(next: 'light' | 'dark') => void} setTheme - The function to set the theme.
  * @property {() => void} onSignOut - The function to sign out.
+ * @property {() => void} handleClose - The function to close the dropdown.
  */
 interface ProfileDropdownProps {
     layout: Translation['layout'];
@@ -24,15 +25,16 @@ interface ProfileDropdownProps {
     user: AuthUser | null;
     setTheme: (next: 'light' | 'dark') => void;
     onSignOut: () => void;
+    handleClose: () => void;
 }
 /**
  * The profile dropdown component.
  * @param {ProfileDropdownProps} props - The props for the component.
  * @returns {JSX.Element} The rendered component.
  */
-export function ProfileDropdown({ layout, theme, user, setTheme, onSignOut }: ProfileDropdownProps): JSX.Element {
+export function ProfileDropdown({ layout, theme, user, setTheme, onSignOut, handleClose }: ProfileDropdownProps): JSX.Element {
     const ref = useRef<HTMLDivElement>(null);
-    useClickOutside(ref, () => undefined);
+    useClickOutside(ref, handleClose);
 
     return (
         <div
