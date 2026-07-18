@@ -20,6 +20,14 @@
     pointer-events: none;
 }
 
-.check-row .forgot-link {
+.form-action-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 4px;
+}
+
+.form-action-row .forgot-link {
     color: var(--gp-text-mute);
 }

@@ -1,12 +1,17 @@
 import '@/styles/components/form/login-form.css';
 
 import { useState } from 'react';
-import type { ChangeEvent, FormEvent, JSX, ReactNode } from 'react';
-import { AlertCircle, ArrowRight, Eye, EyeOff, Mail, Lock } from 'lucide-react';
+import type { ChangeEvent, JSX } from 'react';
+import { AlertCircle, ArrowRight, Eye, EyeOff, Lock, Mail } from 'lucide-react';
 //-- API
 import { isApiError } from '@/lib/api/api-utils';
 //-- Services
 import { authService } from '@/lib/auth/service';
+//-- Components
+import { Alert } from '@/components/react/ui/Alert';
+import { Badge } from '@/components/react/ui/Badge';
+import { Button } from '@/components/react/ui/Button';
+import { Checkbox, Field, Input } from '@/components/react/form/ui';
 //-- Types
 import type { LoginFormStrings } from '@/types/components';
 
@@ -19,49 +24,6 @@ import type { LoginFormStrings } from '@/types/components';
 export interface LoginFormProps {
     strings: LoginFormStrings;
     firstUser?: boolean;
-}
-
-// ponytail: local helpers keep the form self-contained and avoid class collisions
-// between main-layout.css (.field/.input) and the global ui tokens.
-
-function Field({
-    label,
-    htmlFor,
-    required,
-    help,
-    error,
-    children,
-}: {
-    label?: string;
-    htmlFor?: string;
-    required?: boolean;
-    help?: string;
-    error?: string | null;
-    children: ReactNode;
-}): JSX.Element {
-    return (
-        <div className="field">
-            {label && (
-                <label className="field-label" htmlFor={htmlFor}>
-                    {label}
-                    {required && (
-                        <span className="req" aria-hidden="true">
-                            *
-                        </span>
-                    )}
-                </label>
-            )}
-            {children}
-            {error ? (
-                <span className="field-error" role="alert">
-                    <AlertCircle className="icon-14" />
-                    {error}
-                </span>
-            ) : help ? (
-                <span className="field-help">{help}</span>
-            ) : null}
-        </div>
-    );
 }
 
 function GoogleLogo(): JSX.Element {
@@ -166,20 +128,19 @@ function PasswordField({
     const [show, setShow] = useState(false);
     return (
         <div className="input-with-suffix">
-            <input
+            <Input
                 id={id}
                 type={show ? 'text' : 'password'}
-                className="input"
                 placeholder={placeholder}
                 value={value}
-                onChange={(e) => onChange(e.target.value)}
-                aria-invalid={invalid ? 'true' : 'false'}
+                onChange={e => onChange(e.target.value)}
+                invalid={invalid}
                 autoComplete={autoComplete}
             />
             <button
                 type="button"
                 className="suffix"
-                onClick={() => setShow((s) => !s)}
+                onClick={() => setShow(s => !s)}
                 aria-label={show ? hideLabel : showLabel}
                 aria-pressed={show}
             >
@@ -188,8 +149,6 @@ function PasswordField({
         </div>
     );
 }
-
-// ponytail: useState was moved to the top import group.
 
 /**
  * LoginForm — email + password sign-in with remember me and Google OAuth.
@@ -202,14 +161,8 @@ export function LoginForm({ strings, firstUser }: LoginFormProps): JSX.Element {
     const [remember, setRemember] = useState(true);
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState<string | null>(null);
-    /**
-     * Handle form submission.
-     * @param {FormEvent<HTMLFormElement>} e
-     * @returns {Promise<void>}
-     */
-    async function handleSubmit(
-        e: FormEvent<HTMLFormElement>
-    ): Promise<void> {
+
+    async function handleSubmit(e: React.FormEvent<HTMLFormElement>): Promise<void> {
         e.preventDefault();
         setErr(null);
         if (!email || !password) {
@@ -219,9 +172,9 @@ export function LoginForm({ strings, firstUser }: LoginFormProps): JSX.Element {
         setLoading(true);
         try {
             await authService.signIn({ email: email.trim(), password });
-        } catch (err) {
-            const apiError = isApiError(err)
-                ? err
+        } catch (error) {
+            const apiError = isApiError(error)
+                ? error
                 : { status: 0, message: strings.loginFailed };
             setErr(apiError.message);
             setLoading(false);
@@ -232,33 +185,31 @@ export function LoginForm({ strings, firstUser }: LoginFormProps): JSX.Element {
         <>
             <div className="heading">
                 {firstUser ? (
-                    <span className="badge badge-accent">
-                        {strings.firstAdminBadge}
-                    </span>
+                    <Badge tone="accent">{strings.firstAdminBadge}</Badge>
                 ) : null}
                 <h1>{strings.loginTitle}</h1>
                 <div className="sub">{strings.loginSubtitle}</div>
             </div>
 
             {err && (
-                <div className="alert alert-danger" role="alert">
-                    <AlertCircle className="icon-16" />
-                    <span>{err}</span>
-                </div>
+                <Alert
+                    tone="danger"
+                    title={err}
+                    icon={<AlertCircle size={14} aria-hidden="true" />}
+                />
             )}
 
             <form onSubmit={handleSubmit} noValidate>
                 <Field label={strings.email} htmlFor="login-email" required>
                     <div className="input-with-prefix">
-                        <input
+                        <Input
                             id="login-email"
                             type="email"
-                            className="input"
                             placeholder={strings.emailPlaceholder}
                             autoComplete="email"
                             value={email}
+                            invalid={!!err && !email}
                             onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-                            aria-invalid={!!err && !email ? 'true' : 'false'}
                             aria-label={strings.email}
                         />
                         <Mail className="icon-16 prefix" />
@@ -278,36 +229,27 @@ export function LoginForm({ strings, firstUser }: LoginFormProps): JSX.Element {
                     />
                 </Field>
 
-                <div className="check-row">
-                    <label className="check" htmlFor="remember">
-                        <input
-                            id="remember"
-                            type="checkbox"
-                            checked={remember}
-                            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                                setRemember(e.target.checked)
-                            }
-                        />
-                        <span>{strings.rememberDevice}</span>
-                    </label>
+                <div className="form-action-row">
+                    <Checkbox
+                        id="remember"
+                        label={strings.rememberDevice}
+                        checked={remember}
+                        onChange={setRemember}
+                    />
                     <a href="#" className="mono forgot-link">
                         {strings.forgotPassword}
                     </a>
                 </div>
 
-                <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
-                    {loading ? (
-                        <>
-                            <span className="spinner" />
-                            {strings.loggingIn}
-                        </>
-                    ) : (
-                        <>
-                            {strings.login}
-                            <ArrowRight className="icon-14" />
-                        </>
-                    )}
-                </button>
+                <Button
+                    type="submit"
+                    variant="primary"
+                    loading={loading}
+                    iconRight={loading ? undefined : <ArrowRight size={14} strokeWidth={1.6} />}
+                    className="btn-block"
+                >
+                    {loading ? strings.loggingIn : strings.login}
+                </Button>
 
                 <OrDivider label={strings.orContinueWith} />
 
@@ -324,7 +266,7 @@ export function LoginForm({ strings, firstUser }: LoginFormProps): JSX.Element {
 
                 <div className="alt">
                     {strings.noAccount}{' '}
-                    <a href="#" onClick={(e) => e.preventDefault()}>
+                    <a href="#" onClick={e => e.preventDefault()}>
                         {strings.createOne}
                     </a>
                 </div>

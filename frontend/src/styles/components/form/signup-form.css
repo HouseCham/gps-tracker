@@ -1,3 +1,29 @@
+/* SignupForm — uses shared primitives from main-layout.css.
+   Reserved for signup-specific overrides. */
+
+.input-with-prefix {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-with-prefix .input {
+    padding-left: 38px;
+}
+
+.input-with-prefix .prefix {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gp-text-faint);
+    pointer-events: none;
+}
+
+.form-check-row {
+    margin-top: 4px;
+}
+
 /* Password strength meter — signup-only */
 .pw-strength {
     display: flex;

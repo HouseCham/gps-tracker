@@ -1,6 +1,6 @@
 import '@/styles/ui/checkbox.css';
 
-import { useEffect, useRef, type JSX } from 'react';
+import { useEffect, useRef, type JSX, type ReactNode } from 'react';
 
 /**
  * Props for the Checkbox component.
@@ -8,7 +8,7 @@ import { useEffect, useRef, type JSX } from 'react';
  * @prop {boolean} checked - Whether the checkbox is checked.
  * @prop {(checked: boolean) => void} onChange - Called when state changes.
  * @prop {boolean} indeterminate - Renders a horizontal dash (mixed state).
- * @prop {string} label - Visible label.
+ * @prop {ReactNode} label - Visible label.
  * @prop {string} id - id used to associate the label.
  */
 export interface CheckboxProps {
@@ -16,7 +16,7 @@ export interface CheckboxProps {
     onChange: (checked: boolean) => void;
     disabled?: boolean;
     indeterminate?: boolean;
-    label?: string;
+    label?: ReactNode;
     id?: string;
 }
 

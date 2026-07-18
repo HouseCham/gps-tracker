@@ -1,8 +1,13 @@
 import '@/styles/components/form/signup-form.css';
 
 import { useMemo, useState } from 'react';
-import type { ChangeEvent, FormEvent, JSX, ReactNode } from 'react';
+import type { ChangeEvent, JSX } from 'react';
 import { AlertCircle, ArrowRight, Eye, EyeOff, Info, Lock, Mail, User } from 'lucide-react';
+//-- Components
+import { Alert } from '@/components/react/ui/Alert';
+import { Badge } from '@/components/react/ui/Badge';
+import { Button } from '@/components/react/ui/Button';
+import { Checkbox, Field, Input } from '@/components/react/form/ui';
 //-- Types
 import type { SignupFormStrings } from '@/types/components';
 
@@ -15,49 +20,6 @@ import type { SignupFormStrings } from '@/types/components';
 export interface SignupFormProps {
     strings: SignupFormStrings;
     firstUser?: boolean;
-}
-
-// ponytail: local helpers keep the form self-contained and avoid class collisions
-// between main-layout.css (.field/.input) and the global ui tokens.
-
-function Field({
-    label,
-    htmlFor,
-    required,
-    help,
-    error,
-    children,
-}: {
-    label?: string;
-    htmlFor?: string;
-    required?: boolean;
-    help?: string | null;
-    error?: string | null;
-    children: ReactNode;
-}): JSX.Element {
-    return (
-        <div className="field">
-            {label && (
-                <label className="field-label" htmlFor={htmlFor}>
-                    {label}
-                    {required && (
-                        <span className="req" aria-hidden="true">
-                            *
-                        </span>
-                    )}
-                </label>
-            )}
-            {children}
-            {error ? (
-                <span className="field-error" role="alert">
-                    <AlertCircle className="icon-14" />
-                    {error}
-                </span>
-            ) : help ? (
-                <span className="field-help">{help}</span>
-            ) : null}
-        </div>
-    );
 }
 
 function PasswordField({
@@ -84,21 +46,20 @@ function PasswordField({
     const [show, setShow] = useState(false);
     return (
         <div className="input-with-suffix">
-            <input
+            <Input
                 id={id}
                 type={show ? 'text' : 'password'}
-                className="input"
                 placeholder={placeholder}
                 value={value}
-                onChange={(e) => onChange(e.target.value)}
-                aria-invalid={invalid ? 'true' : 'false'}
+                onChange={e => onChange(e.target.value)}
+                invalid={invalid}
                 autoComplete={autoComplete}
                 required={required}
             />
             <button
                 type="button"
                 className="suffix"
-                onClick={() => setShow((s) => !s)}
+                onClick={() => setShow(s => !s)}
                 aria-label={show ? hideLabel : showLabel}
                 aria-pressed={show}
             >
@@ -188,7 +149,7 @@ function ApiInspector({
     method: string;
     path: string;
     body?: Record<string, unknown>;
-    extra?: ReactNode;
+    extra?: React.ReactNode;
     title: string;
     cookieNote: string;
 }): JSX.Element {
@@ -245,7 +206,7 @@ export function SignupForm({ strings, firstUser }: SignupFormProps): JSX.Element
 
     const mismatch = !!pw2 && pw !== pw2;
 
-    const submit = (e: FormEvent<HTMLFormElement>) => {
+    function submit(e: React.FormEvent<HTMLFormElement>): void {
         e.preventDefault();
         setErr(null);
         if (!email || !pw) {
@@ -264,84 +225,60 @@ export function SignupForm({ strings, firstUser }: SignupFormProps): JSX.Element
             setErr(strings.pickStrongerPassword);
             return;
         }
-        // ponytail: submit handler is a stub — wire to auth service later.
         setLoading(true);
         window.setTimeout(() => {
             setLoading(false);
             setErr(strings.signupFailed);
         }, 900);
-    };
+    }
 
     return (
         <>
             <div className="heading">
                 {firstUser ? (
-                    <span className="badge badge-accent">{strings.firstAdminWelcome}</span>
+                    <Badge tone="accent">{strings.firstAdminWelcome}</Badge>
                 ) : (
-                    <span className="badge">{strings.createAccountBadge}</span>
+                    <Badge>{strings.createAccountBadge}</Badge>
                 )}
                 <h1>{strings.signupTitle}</h1>
                 <div className="sub">{strings.signupSubtitle}</div>
             </div>
 
             {err && (
-                <div className="alert alert-danger" role="alert">
-                    <AlertCircle className="icon-16" />
-                    <span>{err}</span>
-                </div>
+                <Alert
+                    tone="danger"
+                    title={err}
+                    icon={<AlertCircle size={14} aria-hidden="true" />}
+                />
             )}
 
             <form onSubmit={submit} noValidate>
                 <Field label={strings.name} htmlFor="su-name" help={strings.nameHelp}>
-                    <div className="input-with-suffix">
-                        <input
+                    <div className="input-with-prefix">
+                        <Input
                             id="su-name"
-                            className="input"
                             placeholder={strings.namePlaceholder}
                             autoComplete="name"
                             value={name}
                             onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
-                            style={{ paddingLeft: 38 }}
                         />
-                        <User
-                            className="icon-16"
-                            style={{
-                                position: 'absolute',
-                                left: 12,
-                                top: '50%',
-                                transform: 'translateY(-50%)',
-                                color: 'var(--gp-text-faint)',
-                                pointerEvents: 'none',
-                            }}
-                        />
+                        <User className="icon-16 prefix" />
                     </div>
                 </Field>
 
                 <Field label={strings.email} htmlFor="su-email" required>
-                    <div className="input-with-suffix">
-                        <input
+                    <div className="input-with-prefix">
+                        <Input
                             id="su-email"
                             type="email"
-                            className="input"
                             placeholder={strings.emailPlaceholder}
                             autoComplete="email"
                             required
                             value={email}
+                            invalid={!!err && !email}
                             onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-                            aria-invalid={!!err && !email ? 'true' : 'false'}
-                            style={{ paddingLeft: 38 }}
                         />
-                        <Mail
-                            className="icon-16"
-                            style={{
-                                position: 'absolute',
-                                left: 12,
-                                top: '50%',
-                                transform: 'translateY(-50%)',
-                                color: 'var(--gp-text-faint)',
-                                pointerEvents: 'none',
-                            }}
-                        />
+                        <Mail className="icon-16 prefix" />
                     </div>
                 </Field>
 
@@ -349,7 +286,7 @@ export function SignupForm({ strings, firstUser }: SignupFormProps): JSX.Element
                     label={strings.password}
                     htmlFor="su-pw"
                     required
-                    help={pw ? null : strings.passwordHelp}
+                    help={pw ? undefined : strings.passwordHelp}
                 >
                     <PasswordField
                         id="su-pw"
@@ -378,7 +315,7 @@ export function SignupForm({ strings, firstUser }: SignupFormProps): JSX.Element
                     label={strings.confirmPassword}
                     htmlFor="su-pw2"
                     required
-                    error={mismatch ? strings.passwordsDoNotMatch : null}
+                    error={mismatch ? strings.passwordsDoNotMatch : undefined}
                 >
                     <PasswordField
                         id="su-pw2"
@@ -392,41 +329,36 @@ export function SignupForm({ strings, firstUser }: SignupFormProps): JSX.Element
                     />
                 </Field>
 
-                <div className="check-row">
-                    <label className="check" htmlFor="terms">
-                        <input
-                            id="terms"
-                            type="checkbox"
-                            checked={terms}
-                            onChange={(e: ChangeEvent<HTMLInputElement>) => setTerms(e.target.checked)}
-                        />
-                        <span>
-                            {strings.termsAgree}{' '}
-                            <a href="#" onClick={(e) => e.preventDefault()}>
-                                {strings.termsLabel}
-                            </a>{' '}
-                            and{' '}
-                            <a href="#" onClick={(e) => e.preventDefault()}>
-                                {strings.privacyLabel}
-                            </a>
-                            .
-                        </span>
-                    </label>
+                <div className="form-check-row">
+                    <Checkbox
+                        id="terms"
+                        checked={terms}
+                        onChange={setTerms}
+                        label={
+                            <>
+                                {strings.termsAgree}{' '}
+                                <a href="#" onClick={e => e.preventDefault()}>
+                                    {strings.termsLabel}
+                                </a>{' '}
+                                and{' '}
+                                <a href="#" onClick={e => e.preventDefault()}>
+                                    {strings.privacyLabel}
+                                </a>
+                                .
+                            </>
+                        }
+                    />
                 </div>
 
-                <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
-                    {loading ? (
-                        <>
-                            <span className="spinner" />
-                            {strings.creatingAccount}
-                        </>
-                    ) : (
-                        <>
-                            {strings.signup}
-                            <ArrowRight className="icon-14" />
-                        </>
-                    )}
-                </button>
+                <Button
+                    type="submit"
+                    variant="primary"
+                    loading={loading}
+                    iconRight={loading ? undefined : <ArrowRight size={14} strokeWidth={1.6} />}
+                    className="btn-block"
+                >
+                    {loading ? strings.creatingAccount : strings.signup}
+                </Button>
 
                 <OrDivider label={strings.orDivider} />
 
@@ -443,7 +375,7 @@ export function SignupForm({ strings, firstUser }: SignupFormProps): JSX.Element
 
                 <div className="alt">
                     {strings.haveAccount}{' '}
-                    <a href="#" onClick={(e) => e.preventDefault()}>
+                    <a href="#" onClick={e => e.preventDefault()}>
                         {strings.loginLink}
                     </a>
                 </div>
