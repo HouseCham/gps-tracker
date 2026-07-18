@@ -26,7 +26,7 @@ interface Props {
     isLoginPage?: boolean;
 }
 
-const { locale = 'en', title = 'GPS Tracker', class: className, isLoginPage } = Astro.props;
+const { locale = 'en', title = 'Open GPS', class: className, isLoginPage } = Astro.props;
 const t = getTranslation(locale);
 const classes = ['auth-layout', className].filter(Boolean).join(' ');
 ---
@@ -41,6 +41,7 @@ const classes = ['auth-layout', className].filter(Boolean).join(' ');
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" href="/favicon.ico" />
         <script is:inline>
+            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
             (function () {
                 try {
                     var t = localStorage.getItem('open-gps:theme');

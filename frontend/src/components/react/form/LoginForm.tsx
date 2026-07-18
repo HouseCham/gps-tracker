@@ -3,6 +3,10 @@ import '@/styles/components/form/login-form.css';
 import { useState } from 'react';
 import type { ChangeEvent, FormEvent, JSX, ReactNode } from 'react';
 import { AlertCircle, ArrowRight, Eye, EyeOff, Mail, Lock } from 'lucide-react';
+//-- API
+import { isApiError } from '@/lib/api/api-utils';
+//-- Services
+import { authService } from '@/lib/auth/service';
 //-- Types
 import type { LoginFormStrings } from '@/types/components';
 
@@ -198,21 +202,31 @@ export function LoginForm({ strings, firstUser }: LoginFormProps): JSX.Element {
     const [remember, setRemember] = useState(true);
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState<string | null>(null);
-
-    const submit = (e: FormEvent<HTMLFormElement>) => {
+    /**
+     * Handle form submission.
+     * @param {FormEvent<HTMLFormElement>} e
+     * @returns {Promise<void>}
+     */
+    async function handleSubmit(
+        e: FormEvent<HTMLFormElement>
+    ): Promise<void> {
         e.preventDefault();
         setErr(null);
         if (!email || !password) {
             setErr(strings.emailPasswordRequired);
             return;
         }
-        // ponytail: submit handler is a stub — wire to auth service later.
         setLoading(true);
-        window.setTimeout(() => {
+        try {
+            await authService.signIn({ email: email.trim(), password });
+        } catch (err) {
+            const apiError = isApiError(err)
+                ? err
+                : { status: 0, message: strings.loginFailed };
+            setErr(apiError.message);
             setLoading(false);
-            setErr(strings.loginFailed);
-        }, 900);
-    };
+        }
+    }
 
     return (
         <>
@@ -233,9 +247,9 @@ export function LoginForm({ strings, firstUser }: LoginFormProps): JSX.Element {
                 </div>
             )}
 
-            <form onSubmit={submit} noValidate>
+            <form onSubmit={handleSubmit} noValidate>
                 <Field label={strings.email} htmlFor="login-email" required>
-                    <div className="input-with-suffix">
+                    <div className="input-with-prefix">
                         <input
                             id="login-email"
                             type="email"
@@ -246,19 +260,8 @@ export function LoginForm({ strings, firstUser }: LoginFormProps): JSX.Element {
                             onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                             aria-invalid={!!err && !email ? 'true' : 'false'}
                             aria-label={strings.email}
-                            style={{ paddingLeft: 38 }}
                         />
-                        <Mail
-                            className="icon-16"
-                            style={{
-                                position: 'absolute',
-                                left: 12,
-                                top: '50%',
-                                transform: 'translateY(-50%)',
-                                color: 'var(--gp-text-faint)',
-                                pointerEvents: 'none',
-                            }}
-                        />
+                        <Mail className="icon-16 prefix" />
                     </div>
                 </Field>
 
@@ -287,11 +290,7 @@ export function LoginForm({ strings, firstUser }: LoginFormProps): JSX.Element {
                         />
                         <span>{strings.rememberDevice}</span>
                     </label>
-                    <a
-                        href="#"
-                        className="mono"
-                        style={{ color: 'var(--gp-text-mute)', fontSize: 12 }}
-                    >
+                    <a href="#" className="mono forgot-link">
                         {strings.forgotPassword}
                     </a>
                 </div>

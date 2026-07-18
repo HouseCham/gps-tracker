@@ -1,2 +1,25 @@
 /* LoginForm — uses shared primitives from main-layout.css.
-   Reserved for login-specific overrides (currently none). */
+   Reserved for login-specific overrides. */
+
+.input-with-prefix {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-with-prefix .input {
+    padding-left: 38px;
+}
+
+.input-with-prefix .prefix {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--gp-text-faint);
+    pointer-events: none;
+}
+
+.check-row .forgot-link {
+    color: var(--gp-text-mute);
+}

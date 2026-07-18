@@ -78,6 +78,11 @@
     display: flex;
     align-items: center;
     gap: var(--s-2);
+    position: relative;
+}
+
+.chrome-pop {
+    position: relative;
 }
 
 /* Search */
@@ -149,6 +154,14 @@
     background: transparent;
     border: 0;
     cursor: pointer;
+}
+
+.chrome-icon-btn--avatar {
+    padding: 0;
+}
+
+.chrome-icon-btn--avatar .gp-sidebar-avatar {
+    margin: 0;
 }
 
 .chrome-icon-btn:hover {

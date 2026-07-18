@@ -1,0 +1,93 @@
+---
+import '@/styles/global.css';
+import '@/styles/sidebar.css';
+import '@/styles/topbar.css';
+//-- i18n
+import { getTranslation } from '@/i18n';
+//-- Types
+import type { Language } from '@/types';
+//-- Components
+import { Sidebar } from '@/components/react/layout/Sidebar';
+import { Topbar } from '@/components/react/layout/Topbar';
+import { AuthProvider, ProtectedRoute } from '@/components/react/auth';
+
+interface Props {
+    locale?: Language;
+    title?: string;
+    pageLabel: string;
+    pageEyebrow?: string;
+    class?: string;
+}
+
+const {
+    locale = 'en',
+    title = 'Open GPS',
+    pageLabel,
+    pageEyebrow,
+    class: className,
+} = Astro.props;
+const t = getTranslation(locale);
+const classes = ['gp-app', className].filter(Boolean).join(' ');
+const currentPath = Astro.url.pathname;
+---
+
+<html lang={locale}>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width" />
+        <meta name="generator" content={Astro.generator} />
+        <title>{title}</title>
+        <meta
+            name="description"
+            content={`${pageLabel} · ${t.layout.appName}`}
+        />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" href="/favicon.ico" />
+        <script is:inline>
+            // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+            (function () {
+                try {
+                    var stored = localStorage.getItem('open-gps:theme');
+                    var theme =
+                        stored === 'light' || stored === 'dark'
+                            ? stored
+                            : matchMedia('(prefers-color-scheme: dark)').matches
+                              ? 'dark'
+                              : 'light';
+                    document.documentElement.setAttribute('data-theme', theme);
+                } catch (err) {
+                    void err;
+                    document.documentElement.setAttribute(
+                        'data-theme',
+                        'light'
+                    );
+                }
+            })();
+        </script>
+    </head>
+    <body>
+        <AuthProvider client:load>
+            <ProtectedRoute client:load>
+                <div class={classes}>
+                    <Sidebar
+                        client:load
+                        pathname={currentPath}
+                        nav={t.nav}
+                        layout={t.layout}
+                    />
+                    <main class="gp-main">
+                        <Topbar
+                            client:load
+                            pageLabel={pageLabel}
+                            pageEyebrow={pageEyebrow}
+                            layout={t.layout}
+                        />
+                        <div class="gp-content">
+                            <slot />
+                        </div>
+                    </main>
+                </div>
+            </ProtectedRoute>
+        </AuthProvider>
+    </body>
+</html>
