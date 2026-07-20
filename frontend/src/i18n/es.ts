@@ -246,6 +246,7 @@ export const es: Translation = {
         },
         table: {
             name: 'Nombre',
+            firmwareUuid: 'UUID de firmware',
             vehicleType: 'Tipo',
             status: 'Estado',
             lastSeen: 'Última vez',
@@ -260,6 +261,8 @@ export const es: Translation = {
             notAvailable: '—',
             searchPlaceholder: 'Buscar por nombre, UUID o vehículo…',
             refresh: 'Actualizar',
+            copy: 'Copiar',
+            copied: 'Copiado',
             filter: {
                 allStatuses: 'Todos los estados',
                 allVehicles: 'Todos los vehículos',
@@ -326,10 +329,9 @@ export const es: Translation = {
             deleteTitle: 'Eliminar dispositivo',
             deleteSubtitle:
                 'Esta acción elimina el dispositivo de tu flota. El historial de telemetría se conserva.',
-            deleteWarningTitle:
-                'Esto eliminará permanentemente el dispositivo',
+            deleteWarningTitle: 'Esto eliminará permanentemente el dispositivo',
             deleteWarningMessage:
-                'Los conductores asignados perderán el acceso. Puedes volver a añadir el dispositivo registrando de nuevo su UUID de firmware.',
+                'Los conductores asignados perderán el acceso a este dispositivo. Esta acción no se puede deshacer.',
             deleteTypeToConfirm: 'Escribe «{name}» para confirmar',
             deleteTip:
                 'Consejo: escribe el nombre del dispositivo exactamente como se muestra — distingue mayúsculas.',

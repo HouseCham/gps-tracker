@@ -1,16 +1,16 @@
-import { useEffect, useState, type ChangeEvent } from "react";
+import { useEffect, useState, type ChangeEvent } from 'react';
 //-- Types
-import type { JSX } from "react/jsx-runtime";
-import type { Translation } from "@/i18n";
-import type { DeviceVehicleType, DeviceWithAccess } from "@/types/api";
-import { VEHICLE_TYPE_OPTIONS, type DeviceAccessRole } from "@/constants";
+import type { JSX } from 'react/jsx-runtime';
+import type { Translation } from '@/i18n';
+import type { DeviceVehicleType, DeviceWithAccess } from '@/types/api';
+import { VEHICLE_TYPE_OPTIONS, type DeviceAccessRole } from '@/constants';
 //-- Icons
-import { Check } from "lucide-react";
+import { Check } from 'lucide-react';
 //-- Components
-import { Button, Modal } from "@/components/react/ui";
-import { Field, Input, Select } from "@/components/react/form/ui";
+import { Button, Modal } from '@/components/react/ui';
+import { Field, Input, Select } from '@/components/react/form/ui';
 //-- Utils
-import { interpolateTemplate } from "@/lib";
+import { interpolateTemplate } from '@/lib';
 /**
  * Props for the EditDeviceModal component.
  * @interface EditDeviceModalProps
@@ -26,7 +26,11 @@ interface EditDeviceModalProps {
     onClose: () => void;
     onSave: (
         id: string,
-        data: { name: string; vehicle_type: DeviceVehicleType; access_role: DeviceAccessRole }
+        data: {
+            name: string;
+            vehicle_type: DeviceVehicleType;
+            access_role: DeviceAccessRole;
+        }
     ) => Promise<void> | void;
     t: Translation['device'];
 }
@@ -35,7 +39,13 @@ interface EditDeviceModalProps {
  * @param {EditDeviceModalProps} props - Props for the component.
  * @returns {JSX.Element | null} The rendered component.
  */
-export function EditDeviceModal({ open, device, onClose, onSave, t }: EditDeviceModalProps): JSX.Element | null {
+export function EditDeviceModal({
+    open,
+    device,
+    onClose,
+    onSave,
+    t,
+}: EditDeviceModalProps): JSX.Element | null {
     const [form, setForm] = useState<{
         name: string;
         vehicle_type: DeviceVehicleType;
@@ -98,12 +108,18 @@ export function EditDeviceModal({ open, device, onClose, onSave, t }: EditDevice
                 <div className="edit-readonly-label">{t.modals.uuidLabel}</div>
                 <div className="edit-readonly-value">
                     <code>{device.uuid_firmware}</code>
-                    <span className="edit-readonly-hint">{t.modals.uuidImmutable}</span>
+                    <span className="edit-readonly-hint">
+                        {t.modals.uuidImmutable}
+                    </span>
                 </div>
             </div>
             {form && (
                 <>
-                    <Field label={t.modals.nameLabel} required error={errors.name}>
+                    <Field
+                        label={t.modals.nameLabel}
+                        required
+                        error={errors.name}
+                    >
                         <Input
                             value={form.name}
                             invalid={!!errors.name}
@@ -123,34 +139,23 @@ export function EditDeviceModal({ open, device, onClose, onSave, t }: EditDevice
                                     label: t.table.vehicleTypes[v],
                                 }))}
                                 value={form.vehicle_type}
-                                onChange={(e: ChangeEvent<HTMLSelectElement>) =>
+                                onChange={(
+                                    e: ChangeEvent<HTMLSelectElement>
+                                ) => {
+                                    const vehicleType =
+                                        VEHICLE_TYPE_OPTIONS.find(
+                                            option => option === e.target.value
+                                        );
+                                    if (!vehicleType) return;
                                     setForm(f =>
                                         f
                                             ? {
-                                                ...f,
-                                                vehicle_type: e.target.value as DeviceVehicleType,
-                                            }
+                                                  ...f,
+                                                  vehicle_type: vehicleType,
+                                              }
                                             : f
-                                    )
-                                }
-                            />
-                        </Field>
-                        <Field label={t.modals.accessRoleLabel}>
-                            <Select
-                                options={(
-                                    ['owner', 'editor', 'viewer'] as DeviceAccessRole[]
-                                ).map(r => ({ value: r, label: t.roles[r] }))}
-                                value={form.access_role}
-                                onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-                                    setForm(f =>
-                                        f
-                                            ? {
-                                                ...f,
-                                                access_role: e.target.value as DeviceAccessRole,
-                                            }
-                                            : f
-                                    )
-                                }
+                                    );
+                                }}
                             />
                         </Field>
                     </div>

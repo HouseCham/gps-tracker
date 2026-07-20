@@ -153,7 +153,8 @@ export const en = {
         forgotPassword: 'Forgot password?',
         noAccount: "Don't have an account?",
         createOne: 'Create one',
-        firstAdminBadge: 'No accounts yet — first login becomes the super admin.',
+        firstAdminBadge:
+            'No accounts yet — first login becomes the super admin.',
         loginFailed:
             "We couldn't sign you in. Double-check your credentials and try again.",
         showPassword: 'Show password',
@@ -240,6 +241,7 @@ export const en = {
         },
         table: {
             name: 'Name',
+            firmwareUuid: 'Firmware UUID',
             vehicleType: 'Type',
             status: 'Status',
             lastSeen: 'Last Seen',
@@ -254,6 +256,8 @@ export const en = {
             notAvailable: '—',
             searchPlaceholder: 'Search by name, UUID, or vehicle…',
             refresh: 'Refresh',
+            copy: 'Copy',
+            copied: 'Copied',
             filter: {
                 allStatuses: 'All statuses',
                 allVehicles: 'All vehicles',
@@ -301,8 +305,7 @@ export const en = {
             addTitle: 'Add device',
             addSubtitle: 'Register a new ESP32 tracker in your fleet.',
             editTitle: 'Edit device',
-            editSubtitle:
-                'Editing {name} · firmware UUID {uuid}',
+            editSubtitle: 'Editing {name} · firmware UUID {uuid}',
             uuidLabel: 'Firmware UUID',
             uuidPlaceholder: 'esp32-001',
             uuidHint: 'Unique ID printed by the ESP32 firmware.',
@@ -320,7 +323,7 @@ export const en = {
                 'This action removes the device from your fleet. Telemetry history is retained.',
             deleteWarningTitle: 'This will permanently remove the device',
             deleteWarningMessage:
-                'Drivers assigned will lose access. You can re-add the device later by registering its firmware UUID again.',
+                'Drivers assigned will lose access. This action cannot be undone.',
             deleteTypeToConfirm: 'Type "{name}" to confirm',
             deleteTip:
                 'Tip: type the device name exactly as shown — case-sensitive.',

@@ -1,14 +1,14 @@
-import { useEffect, useState, type ChangeEvent } from "react";
+import { useEffect, useState, type ChangeEvent } from 'react';
 //-- Types
-import { VEHICLE_TYPE_OPTIONS, type DeviceAccessRole } from "@/constants";
-import type { Translation } from "@/i18n";
-import type { DeviceVehicleType } from "@/types/api";
-import type { JSX } from "react/jsx-runtime";
+import { VEHICLE_TYPE_OPTIONS, type DeviceAccessRole } from '@/constants';
+import type { Translation } from '@/i18n';
+import type { DeviceVehicleType } from '@/types/api';
+import type { JSX } from 'react/jsx-runtime';
 //-- Icons
-import { Plus, Sparkles } from "lucide-react";
+import { Plus, Sparkles } from 'lucide-react';
 //-- Components
-import { Button, Modal } from "@/components/react/ui";
-import { Field, Input, Select } from "@/components/react/form/ui";
+import { Button, Modal } from '@/components/react/ui';
+import { Field, Input, Select } from '@/components/react/form/ui';
 /**
  * Props for the AddDeviceModal component.
  * @interface AddDeviceModalProps
@@ -33,14 +33,27 @@ interface AddDeviceModalProps {
  * @param {AddDeviceModalProps} props - Props for the component.
  * @returns {JSX.Element | null} The rendered component.
  */
-export function AddDeviceModal({ open, onClose, onCreate, t }: AddDeviceModalProps): JSX.Element | null {
-    const [form, setForm] = useState({
+export function AddDeviceModal({
+    open,
+    onClose,
+    onCreate,
+    t,
+}: AddDeviceModalProps): JSX.Element | null {
+    const [form, setForm] = useState<{
+        uuid_firmware: string;
+        name: string;
+        vehicle_type: DeviceVehicleType;
+        access_role: DeviceAccessRole;
+    }>({
         uuid_firmware: '',
         name: '',
-        vehicle_type: 'car' as DeviceVehicleType,
-        access_role: 'owner' as DeviceAccessRole,
+        vehicle_type: 'car',
+        access_role: 'owner',
     });
-    const [errors, setErrors] = useState<{ name?: string; uuid_firmware?: string }>({});
+    const [errors, setErrors] = useState<{
+        name?: string;
+        uuid_firmware?: string;
+    }>({});
 
     useEffect(() => {
         if (open) {
@@ -91,7 +104,12 @@ export function AddDeviceModal({ open, onClose, onCreate, t }: AddDeviceModalPro
                 </>
             }
         >
-            <Field label={t.modals.nameLabel} required error={errors.name} help={t.modals.nameHint}>
+            <Field
+                label={t.modals.nameLabel}
+                required
+                error={errors.name}
+                help={t.modals.nameHint}
+            >
                 <Input
                     placeholder={t.modals.namePlaceholder}
                     value={form.name}
@@ -114,14 +132,22 @@ export function AddDeviceModal({ open, onClose, onCreate, t }: AddDeviceModalPro
                         value={form.uuid_firmware}
                         invalid={!!errors.uuid_firmware}
                         onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                            setForm(f => ({ ...f, uuid_firmware: e.target.value }))
+                            setForm(f => ({
+                                ...f,
+                                uuid_firmware: e.target.value,
+                            }))
                         }
                         className="is-mono"
                     />
                     <Button
                         variant="secondary"
                         icon={<Sparkles size={13} strokeWidth={1.6} />}
-                        onClick={() => setForm(f => ({ ...f, uuid_firmware: crypto.randomUUID() }))}
+                        onClick={() =>
+                            setForm(f => ({
+                                ...f,
+                                uuid_firmware: crypto.randomUUID(),
+                            }))
+                        }
                         type="button"
                     >
                         {t.modals.generateUuid}
@@ -136,20 +162,13 @@ export function AddDeviceModal({ open, onClose, onCreate, t }: AddDeviceModalPro
                             label: t.table.vehicleTypes[v],
                         }))}
                         value={form.vehicle_type}
-                        onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-                            setForm(f => ({ ...f, vehicle_type: e.target.value as DeviceVehicleType }))
-                        }
-                    />
-                </Field>
-                <Field label={t.modals.roleLabel} help={t.modals.roleHint}>
-                    <Select
-                        options={(
-                            ['owner', 'editor', 'viewer'] as DeviceAccessRole[]
-                        ).map(r => ({ value: r, label: t.roles[r] }))}
-                        value={form.access_role}
-                        onChange={(e: ChangeEvent<HTMLSelectElement>) =>
-                            setForm(f => ({ ...f, access_role: e.target.value as DeviceAccessRole }))
-                        }
+                        onChange={(e: ChangeEvent<HTMLSelectElement>) => {
+                            const vehicleType = VEHICLE_TYPE_OPTIONS.find(
+                                option => option === e.target.value
+                            );
+                            if (!vehicleType) return;
+                            setForm(f => ({ ...f, vehicle_type: vehicleType }));
+                        }}
                     />
                 </Field>
             </div>
