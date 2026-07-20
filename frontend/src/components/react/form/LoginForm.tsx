@@ -144,7 +144,11 @@ function PasswordField({
                 aria-label={show ? hideLabel : showLabel}
                 aria-pressed={show}
             >
-                {show ? <EyeOff className="icon-16" /> : <Eye className="icon-16" />}
+                {show ? (
+                    <EyeOff className="icon-16" />
+                ) : (
+                    <Eye className="icon-16" />
+                )}
             </button>
         </div>
     );
@@ -162,7 +166,9 @@ export function LoginForm({ strings, firstUser }: LoginFormProps): JSX.Element {
     const [loading, setLoading] = useState(false);
     const [err, setErr] = useState<string | null>(null);
 
-    async function handleSubmit(e: React.FormEvent<HTMLFormElement>): Promise<void> {
+    async function handleSubmit(
+        e: React.FormEvent<HTMLFormElement>
+    ): Promise<void> {
         e.preventDefault();
         setErr(null);
         if (!email || !password) {
@@ -209,14 +215,20 @@ export function LoginForm({ strings, firstUser }: LoginFormProps): JSX.Element {
                             autoComplete="email"
                             value={email}
                             invalid={!!err && !email}
-                            onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                setEmail(e.target.value)
+                            }
                             aria-label={strings.email}
                         />
                         <Mail className="icon-16 prefix" />
                     </div>
                 </Field>
 
-                <Field label={strings.password} htmlFor="login-password" required>
+                <Field
+                    label={strings.password}
+                    htmlFor="login-password"
+                    required
+                >
                     <PasswordField
                         id="login-password"
                         autoComplete="current-password"
@@ -245,7 +257,11 @@ export function LoginForm({ strings, firstUser }: LoginFormProps): JSX.Element {
                     type="submit"
                     variant="primary"
                     loading={loading}
-                    iconRight={loading ? undefined : <ArrowRight size={14} strokeWidth={1.6} />}
+                    iconRight={
+                        loading ? undefined : (
+                            <ArrowRight size={14} strokeWidth={1.6} />
+                        )
+                    }
                     className="btn-block"
                 >
                     {loading ? strings.loggingIn : strings.login}
@@ -257,7 +273,9 @@ export function LoginForm({ strings, firstUser }: LoginFormProps): JSX.Element {
                     type="button"
                     className="btn btn-google btn-block"
                     onClick={() => {
-                        window.location.assign('/api/auth/oauth2/authorize/google');
+                        window.location.assign(
+                            '/api/auth/oauth2/authorize/google'
+                        );
                     }}
                 >
                     <GoogleLogo />

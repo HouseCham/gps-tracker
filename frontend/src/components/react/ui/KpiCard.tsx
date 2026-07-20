@@ -37,7 +37,15 @@ export interface KpiCardProps {
  * @param {KpiCardProps} props
  * @returns {JSX.Element}
  */
-export function KpiCard({ icon, label, value, unit, delta, deltaDir = 'up', spark = [] }: KpiCardProps): JSX.Element {
+export function KpiCard({
+    icon,
+    label,
+    value,
+    unit,
+    delta,
+    deltaDir = 'up',
+    spark = [],
+}: KpiCardProps): JSX.Element {
     return (
         <div className="kpi-card">
             <div className="kpi-card-head">
@@ -50,7 +58,13 @@ export function KpiCard({ icon, label, value, unit, delta, deltaDir = 'up', spar
             </div>
             <div className="kpi-card-foot">
                 {delta != null && (
-                    <span className={deltaDir === 'up' ? 'kpi-delta-up' : 'kpi-delta-down'}>
+                    <span
+                        className={
+                            deltaDir === 'up'
+                                ? 'kpi-delta-up'
+                                : 'kpi-delta-down'
+                        }
+                    >
                         {deltaDir === 'up' ? '▲' : '▼'} {delta}
                     </span>
                 )}
@@ -63,7 +77,9 @@ export function KpiCard({ icon, label, value, unit, delta, deltaDir = 'up', spar
                                 <span
                                     key={i}
                                     style={{ height: `${h}px` }}
-                                    className={i === spark.length - 1 ? 'on' : ''}
+                                    className={
+                                        i === spark.length - 1 ? 'on' : ''
+                                    }
                                 />
                             );
                         })}

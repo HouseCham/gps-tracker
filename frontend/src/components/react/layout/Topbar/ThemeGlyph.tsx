@@ -1,6 +1,6 @@
-import type { JSX } from "react/jsx-runtime";
+import type { JSX } from 'react/jsx-runtime';
 //-- Icons
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun } from 'lucide-react';
 /**
  * Properties for the theme glyph component.
  * @interface ThemeGlyphProps

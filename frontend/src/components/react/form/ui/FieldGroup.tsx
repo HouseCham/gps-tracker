@@ -38,9 +38,13 @@ export function FieldGroup({
                 className="input"
                 placeholder={placeholder}
                 value={value}
-                onChange={(e) => onChange(e.target.value)}
+                onChange={e => onChange(e.target.value)}
             />
-            <button type="button" className="btn btn-md btn-primary" onClick={onButtonClick}>
+            <button
+                type="button"
+                className="btn btn-md btn-primary"
+                onClick={onButtonClick}
+            >
                 {buttonLabel}
             </button>
         </div>

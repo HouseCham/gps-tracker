@@ -36,7 +36,10 @@ const PALETTE = [
  * @param {AvatarGroupProps} props
  * @returns {JSX.Element}
  */
-export function AvatarGroup({ people, max = 3 }: AvatarGroupProps): JSX.Element {
+export function AvatarGroup({
+    people,
+    max = 3,
+}: AvatarGroupProps): JSX.Element {
     const shown = people.slice(0, max);
     const overflow = people.length - shown.length;
     return (

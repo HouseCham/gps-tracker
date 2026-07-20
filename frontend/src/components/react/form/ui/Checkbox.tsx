@@ -25,7 +25,14 @@ export interface CheckboxProps {
  * @param {CheckboxProps} props
  * @returns {JSX.Element}
  */
-export function Checkbox({ checked, onChange, disabled, indeterminate, label, id }: CheckboxProps): JSX.Element {
+export function Checkbox({
+    checked,
+    onChange,
+    disabled,
+    indeterminate,
+    label,
+    id,
+}: CheckboxProps): JSX.Element {
     const ref = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
@@ -40,7 +47,7 @@ export function Checkbox({ checked, onChange, disabled, indeterminate, label, id
                 type="checkbox"
                 className="check"
                 checked={checked}
-                onChange={(e) => onChange(e.target.checked)}
+                onChange={e => onChange(e.target.checked)}
                 disabled={disabled}
             />
             {label}

@@ -1,13 +1,21 @@
 //-- Types
-import type { DeviceSortKey, DeviceStatusFilter, DeviceVehicleFilter } from "@/constants";
-import type { Translation } from "@/i18n";
-import type { ChangeEvent } from "react";
-import type { JSX } from "react/jsx-runtime";
+import type {
+    DeviceSortKey,
+    DeviceStatusFilter,
+    DeviceVehicleFilter,
+} from '@/constants';
+import type { Translation } from '@/i18n';
+import type { ChangeEvent } from 'react';
+import type { JSX } from 'react/jsx-runtime';
 //-- Icons
-import { Filter as FilterIcon, RefreshCw, Search as SearchIcon, } from "lucide-react";
+import {
+    Filter as FilterIcon,
+    RefreshCw,
+    Search as SearchIcon,
+} from 'lucide-react';
 //-- Components
-import { Button } from "@/components/react/ui";
-import { Select } from "@/components/react/form/ui";
+import { Button } from '@/components/react/ui';
+import { Select } from '@/components/react/form/ui';
 /**
  * Properties for the DeviceFilterBar component.
  * @interface DeviceFilterBarProps
@@ -65,7 +73,11 @@ export function DeviceFilterBar({
             {/* Search */}
             <div className="dev-search-row">
                 <label className="dev-search">
-                    <SearchIcon size={14} strokeWidth={1.6} aria-hidden="true" />
+                    <SearchIcon
+                        size={14}
+                        strokeWidth={1.6}
+                        aria-hidden="true"
+                    />
                     <input
                         type="text"
                         placeholder={t.table.searchPlaceholder}
@@ -86,14 +98,22 @@ export function DeviceFilterBar({
             </div>
             {/* Filters */}
             <div className="dev-filter-row">
-                <FilterIconLabel icon={<FilterIcon size={13} strokeWidth={1.6} />}>
+                <FilterIconLabel
+                    icon={<FilterIcon size={13} strokeWidth={1.6} />}
+                >
                     <Select
                         options={[
                             { value: 'all', label: statusOptions['all'] },
                             { value: 'online', label: statusOptions['online'] },
                             { value: 'stale', label: statusOptions['stale'] },
-                            { value: 'offline', label: statusOptions['offline'] },
-                            { value: 'never-seen', label: statusOptions['never-seen'] },
+                            {
+                                value: 'offline',
+                                label: statusOptions['offline'],
+                            },
+                            {
+                                value: 'never-seen',
+                                label: statusOptions['never-seen'],
+                            },
                         ]}
                         value={statusFilter}
                         onChange={(e: ChangeEvent<HTMLSelectElement>) =>

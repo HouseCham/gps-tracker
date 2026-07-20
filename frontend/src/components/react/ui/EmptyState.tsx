@@ -22,7 +22,12 @@ export interface EmptyStateProps {
  * @param {EmptyStateProps} props
  * @returns {JSX.Element}
  */
-export function EmptyState({ icon, title, message, action }: EmptyStateProps): JSX.Element {
+export function EmptyState({
+    icon,
+    title,
+    message,
+    action,
+}: EmptyStateProps): JSX.Element {
     return (
         <div className="empty-state">
             {icon && <div className="empty-state-icon">{icon}</div>}

@@ -17,7 +17,10 @@ export interface StatusIndicatorProps {
  * @param {StatusIndicatorProps} props
  * @returns {JSX.Element}
  */
-export function StatusIndicator({ status, label }: StatusIndicatorProps): JSX.Element {
+export function StatusIndicator({
+    status,
+    label,
+}: StatusIndicatorProps): JSX.Element {
     return (
         <span className={`status-indicator ${status}`}>
             <span className="dot" />

@@ -32,7 +32,12 @@ export interface SidebarProps {
  * @param {SidebarProps} props - The props for the component.
  * @returns {JSX.Element} The rendered sidebar.
  */
-export function Sidebar({ locale, pathname, nav, layout }: SidebarProps): JSX.Element {
+export function Sidebar({
+    locale,
+    pathname,
+    nav,
+    layout,
+}: SidebarProps): JSX.Element {
     const sidebarOpen = useStore($sidebarOpen);
     const user = useStore($user);
 
@@ -74,7 +79,9 @@ export function Sidebar({ locale, pathname, nav, layout }: SidebarProps): JSX.El
                                 <Icon strokeWidth={1.6} />
                                 <span>{nav[item.labelKey]}</span>
                                 {item.count !== undefined && (
-                                    <span className="gp-sidebar-count">{item.count}</span>
+                                    <span className="gp-sidebar-count">
+                                        {item.count}
+                                    </span>
                                 )}
                             </a>
                         );
@@ -82,7 +89,11 @@ export function Sidebar({ locale, pathname, nav, layout }: SidebarProps): JSX.El
                 </div>
             </nav>
             <footer className="gp-sidebar-foot">
-                <button type="button" className="gp-sidebar-user" aria-label={layout.profileMenu}>
+                <button
+                    type="button"
+                    className="gp-sidebar-user"
+                    aria-label={layout.profileMenu}
+                >
                     <span className="gp-sidebar-avatar">
                         {user ? getInitials(user.name) : layout.unknownInitials}
                     </span>

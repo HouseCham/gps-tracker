@@ -14,7 +14,10 @@ import type { ButtonHTMLAttributes, JSX, ReactNode } from 'react';
  * @prop {boolean} loading - Show spinner and disable interaction.
  * @prop {boolean} disabled - Disabled state.
  */
-export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'children'> {
+export interface ButtonProps extends Omit<
+    ButtonHTMLAttributes<HTMLButtonElement>,
+    'children'
+> {
     children?: ReactNode;
     variant?: 'primary' | 'secondary' | 'ghost' | 'destructive';
     size?: 'sm' | 'md' | 'lg';

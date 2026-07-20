@@ -28,14 +28,19 @@ export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
  * @param {SelectProps} props
  * @returns {JSX.Element}
  */
-export function Select({ options, invalid, className = '', ...rest }: SelectProps): JSX.Element {
+export function Select({
+    options,
+    invalid,
+    className = '',
+    ...rest
+}: SelectProps): JSX.Element {
     return (
         <select
             className={`select-native ${className}`}
             aria-invalid={invalid || undefined}
             {...rest}
         >
-            {options.map((o) => (
+            {options.map(o => (
                 <option key={o.value} value={o.value}>
                     {o.label}
                 </option>

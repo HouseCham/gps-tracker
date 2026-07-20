@@ -1,7 +1,19 @@
 //-- Types
-import type { ShellNavIcon, ShellNavItem, ShellNotification } from '@/types/components';
+import type {
+    ShellNavIcon,
+    ShellNavItem,
+    ShellNotification,
+} from '@/types/components';
 //-- Icons
-import { Key, LayoutGrid, List, type LucideIcon, Satellite, Settings, Users } from 'lucide-react';
+import {
+    Key,
+    LayoutGrid,
+    List,
+    type LucideIcon,
+    Satellite,
+    Settings,
+    Users,
+} from 'lucide-react';
 
 /**
  * Storage key for the user's theme.
@@ -65,9 +77,26 @@ export const SHELL_NOTIFICATIONS: ShellNotification[] = [
  */
 export const SHELL_NAV_ITEMS: ShellNavItem[] = [
     { id: 'dashboard', href: '/', labelKey: 'dashboard', icon: 'dashboard' },
-    { id: 'devices', href: '/devices', labelKey: 'devices', icon: 'devices', count: 128 },
-    { id: 'users', href: '/users', labelKey: 'usersRoles', icon: 'users', count: 14 },
-    { id: 'settings', href: '/settings', labelKey: 'settings', icon: 'settings' },
+    {
+        id: 'devices',
+        href: '/devices',
+        labelKey: 'devices',
+        icon: 'devices',
+        count: 128,
+    },
+    {
+        id: 'users',
+        href: '/users',
+        labelKey: 'usersRoles',
+        icon: 'users',
+        count: 14,
+    },
+    {
+        id: 'settings',
+        href: '/settings',
+        labelKey: 'settings',
+        icon: 'settings',
+    },
     { id: 'reports', href: '/reports', labelKey: 'reports', icon: 'reports' },
     { id: 'access', href: '/access', labelKey: 'access', icon: 'access' },
 ];

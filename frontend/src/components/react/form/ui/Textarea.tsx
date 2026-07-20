@@ -16,7 +16,12 @@ export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElemen
  * @param {TextareaProps} props
  * @returns {JSX.Element}
  */
-export function Textarea({ rows = 4, invalid, className = '', ...rest }: TextareaProps): JSX.Element {
+export function Textarea({
+    rows = 4,
+    invalid,
+    className = '',
+    ...rest
+}: TextareaProps): JSX.Element {
     return (
         <textarea
             rows={rows}

@@ -1,16 +1,16 @@
-import { useEffect, useState, type ChangeEvent } from "react";
+import { useEffect, useState, type ChangeEvent } from 'react';
 //-- Types
-import type { Translation } from "@/i18n";
-import type { DeviceWithAccess } from "@/types/api";
-import type { JSX } from "react/jsx-runtime";
+import type { Translation } from '@/i18n';
+import type { DeviceWithAccess } from '@/types/api';
+import type { JSX } from 'react/jsx-runtime';
 //-- Icons
-import { AlertTriangle, Trash2 } from "lucide-react";
+import { AlertTriangle, Trash2 } from 'lucide-react';
 //-- Components
-import { Button, Modal } from "@/components/react/ui";
-import { VehicleIcon } from "@/components/react/devices";
-import { Field, Input } from "@/components/react/form/ui";
+import { Button, Modal } from '@/components/react/ui';
+import { VehicleIcon } from '@/components/react/devices';
+import { Field, Input } from '@/components/react/form/ui';
 //-- Utils
-import { interpolateTemplate } from "@/lib";
+import { interpolateTemplate } from '@/lib';
 /**
  * Props for the DeleteDeviceModal component.
  * @interface DeleteDeviceModalProps
@@ -73,8 +73,12 @@ export function DeleteDeviceModal({
                     <AlertTriangle size={16} strokeWidth={1.6} />
                 </span>
                 <div className="delete-warn-body">
-                    <div className="delete-warn-title">{t.modals.deleteWarningTitle}</div>
-                    <div className="delete-warn-msg">{t.modals.deleteWarningMessage}</div>
+                    <div className="delete-warn-title">
+                        {t.modals.deleteWarningTitle}
+                    </div>
+                    <div className="delete-warn-msg">
+                        {t.modals.deleteWarningMessage}
+                    </div>
                 </div>
             </div>
             <div className="delete-target">
@@ -84,14 +88,21 @@ export function DeleteDeviceModal({
                 <div className="delete-target-info">
                     <div className="delete-target-name">{device.name}</div>
                     <div className="delete-target-meta">
-                        {device.uuid_firmware} · {t.table.vehicleTypes[device.vehicle_type]}
+                        {device.uuid_firmware} ·{' '}
+                        {t.table.vehicleTypes[device.vehicle_type]}
                     </div>
                 </div>
             </div>
-            <Field label={interpolateTemplate(t.modals.deleteTypeToConfirm, { name: device.name })}>
+            <Field
+                label={interpolateTemplate(t.modals.deleteTypeToConfirm, {
+                    name: device.name,
+                })}
+            >
                 <Input
                     value={typed}
-                    onChange={(e: ChangeEvent<HTMLInputElement>) => setTyped(e.target.value)}
+                    onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                        setTyped(e.target.value)
+                    }
                     placeholder={device.name}
                     autoFocus
                 />

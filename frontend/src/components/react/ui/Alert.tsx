@@ -27,7 +27,14 @@ export interface AlertProps {
  * @param {AlertProps} props
  * @returns {JSX.Element}
  */
-export function Alert({ tone = 'info', icon, title, message, actions, onClose }: AlertProps): JSX.Element {
+export function Alert({
+    tone = 'info',
+    icon,
+    title,
+    message,
+    actions,
+    onClose,
+}: AlertProps): JSX.Element {
     return (
         <div className={`alert alert-${tone}`} role="status">
             {icon && <div className="alert-icon">{icon}</div>}

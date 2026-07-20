@@ -26,7 +26,15 @@ export interface RadioProps {
  * @param {RadioProps} props
  * @returns {JSX.Element}
  */
-export function Radio({ name, value, checked, onChange, label, id, disabled }: RadioProps): JSX.Element {
+export function Radio({
+    name,
+    value,
+    checked,
+    onChange,
+    label,
+    id,
+    disabled,
+}: RadioProps): JSX.Element {
     return (
         <label className="check-row" htmlFor={id}>
             <input

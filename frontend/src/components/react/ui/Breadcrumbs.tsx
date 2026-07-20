@@ -36,7 +36,11 @@ export function Breadcrumbs({ items }: BreadcrumbsProps): JSX.Element {
                 return (
                     <span
                         key={`${it.label}-${i}`}
-                        style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}
+                        style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 8,
+                        }}
                     >
                         {i > 0 && (
                             <span className="sep">

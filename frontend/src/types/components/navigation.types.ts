@@ -21,7 +21,13 @@ export type ShellNavIcon =
 export interface ShellNavItem {
     id: ShellNavIcon;
     href: string;
-    labelKey: 'dashboard' | 'devices' | 'usersRoles' | 'settings' | 'reports' | 'access';
+    labelKey:
+        | 'dashboard'
+        | 'devices'
+        | 'usersRoles'
+        | 'settings'
+        | 'reports'
+        | 'access';
     icon: ShellNavIcon;
     count?: number;
 }

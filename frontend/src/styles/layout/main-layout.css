@@ -28,16 +28,22 @@
     --gp-ink: #14181d;
     --gp-ink-soft: #22282f;
     --gp-route: #2a6f4f;
-    --gp-shadow-1: 0 1px 0 rgba(20, 24, 29, 0.04), 0 1px 2px rgba(20, 24, 29, 0.04);
-    --gp-shadow-2: 0 8px 24px -10px rgba(20, 24, 29, 0.18), 0 1px 0 rgba(20, 24, 29, 0.04);
+    --gp-shadow-1:
+        0 1px 0 rgba(20, 24, 29, 0.04), 0 1px 2px rgba(20, 24, 29, 0.04);
+    --gp-shadow-2:
+        0 8px 24px -10px rgba(20, 24, 29, 0.18), 0 1px 0 rgba(20, 24, 29, 0.04);
     --gp-focus: 0 0 0 1px #fff, 0 0 0 3px rgba(42, 111, 79, 0.45);
     --gp-focus-danger: 0 0 0 1px #fff, 0 0 0 3px rgba(162, 59, 59, 0.35);
     --gp-radius-1: 6px;
     --gp-radius-2: 10px;
     --gp-radius-3: 14px;
     --gp-radius-4: 20px;
-    --gp-mono: ui-monospace, SFMono-Regular, 'JetBrains Mono', Menlo, Consolas, monospace;
-    --gp-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    --gp-mono:
+        ui-monospace, SFMono-Regular, 'JetBrains Mono', Menlo, Consolas,
+        monospace;
+    --gp-sans:
+        'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+        sans-serif;
 }
 
 [data-theme='dark'] {
@@ -66,7 +72,8 @@
     --gp-ink-soft: #0b0e12;
     --gp-route: #7cc7a4;
     --gp-shadow-1: 0 1px 0 rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.4);
-    --gp-shadow-2: 0 12px 32px -12px rgba(0, 0, 0, 0.6), 0 1px 0 rgba(0, 0, 0, 0.4);
+    --gp-shadow-2:
+        0 12px 32px -12px rgba(0, 0, 0, 0.6), 0 1px 0 rgba(0, 0, 0, 0.4);
     --gp-focus: 0 0 0 1px #0e1115, 0 0 0 3px rgba(124, 199, 164, 0.45);
     --gp-focus-danger: 0 0 0 1px #0e1115, 0 0 0 3px rgba(232, 134, 134, 0.4);
 }
@@ -209,8 +216,7 @@ button {
     color: var(--gp-text);
     border-radius: var(--gp-radius-2);
     padding: 9px 14px;
-    font:
-        500 13px/1 var(--gp-sans);
+    font: 500 13px/1 var(--gp-sans);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -347,8 +353,7 @@ button {
     border: 1px solid var(--gp-border-strong);
     border-radius: var(--gp-radius-2);
     padding: 10px 12px;
-    font:
-        400 14px/1.4 var(--gp-sans);
+    font: 400 14px/1.4 var(--gp-sans);
     transition:
         border-color 0.15s,
         box-shadow 0.15s;
@@ -574,7 +579,11 @@ textarea.textarea {
 .auth-brand {
     position: relative;
     overflow: hidden;
-    background: linear-gradient(180deg, var(--gp-surface) 0%, var(--gp-surface-2) 100%);
+    background: linear-gradient(
+        180deg,
+        var(--gp-surface) 0%,
+        var(--gp-surface-2) 100%
+    );
     border-right: 1px solid var(--gp-border);
     padding: 40px 36px;
     display: flex;
@@ -600,14 +609,12 @@ textarea.textarea {
 }
 
 .auth-brand .mark .name {
-    font:
-        600 16px/1 var(--gp-sans);
+    font: 600 16px/1 var(--gp-sans);
     letter-spacing: -0.005em;
 }
 
 .auth-brand .mark .ver {
-    font:
-        400 11px/1 var(--gp-mono);
+    font: 400 11px/1 var(--gp-mono);
     color: var(--gp-text-faint);
     border: 1px solid var(--gp-border);
     border-radius: 4px;
@@ -615,8 +622,7 @@ textarea.textarea {
 }
 
 .auth-brand .tagline {
-    font:
-        600 22px/1.25 var(--gp-sans);
+    font: 600 22px/1.25 var(--gp-sans);
     color: var(--gp-text);
     letter-spacing: -0.015em;
     max-width: 28ch;
@@ -701,8 +707,7 @@ textarea.textarea {
 }
 
 .auth-form h1 {
-    font:
-        600 22px/1.2 var(--gp-sans);
+    font: 600 22px/1.2 var(--gp-sans);
     margin: 0;
     letter-spacing: -0.01em;
 }
@@ -830,8 +835,7 @@ textarea.textarea {
     background: var(--gp-bg);
     border: 1px solid var(--gp-border);
     border-radius: var(--gp-radius-1);
-    font:
-        400 12px/1.5 var(--gp-mono);
+    font: 400 12px/1.5 var(--gp-mono);
     color: var(--gp-text);
     overflow: auto;
     max-height: 120px;

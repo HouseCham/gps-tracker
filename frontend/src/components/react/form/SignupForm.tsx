@@ -2,7 +2,16 @@ import '@/styles/components/form/signup-form.css';
 
 import { useMemo, useState } from 'react';
 import type { ChangeEvent, JSX } from 'react';
-import { AlertCircle, ArrowRight, Eye, EyeOff, Info, Lock, Mail, User } from 'lucide-react';
+import {
+    AlertCircle,
+    ArrowRight,
+    Eye,
+    EyeOff,
+    Info,
+    Lock,
+    Mail,
+    User,
+} from 'lucide-react';
 //-- Components
 import { Alert } from '@/components/react/ui/Alert';
 import { Badge } from '@/components/react/ui/Badge';
@@ -63,7 +72,11 @@ function PasswordField({
                 aria-label={show ? hideLabel : showLabel}
                 aria-pressed={show}
             >
-                {show ? <EyeOff className="icon-16" /> : <Eye className="icon-16" />}
+                {show ? (
+                    <EyeOff className="icon-16" />
+                ) : (
+                    <Eye className="icon-16" />
+                )}
             </button>
         </div>
     );
@@ -195,7 +208,10 @@ function ApiInspector({
  * @param {SignupFormProps} props
  * @returns {JSX.Element}
  */
-export function SignupForm({ strings, firstUser }: SignupFormProps): JSX.Element {
+export function SignupForm({
+    strings,
+    firstUser,
+}: SignupFormProps): JSX.Element {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [pw, setPw] = useState('');
@@ -253,14 +269,20 @@ export function SignupForm({ strings, firstUser }: SignupFormProps): JSX.Element
             )}
 
             <form onSubmit={submit} noValidate>
-                <Field label={strings.name} htmlFor="su-name" help={strings.nameHelp}>
+                <Field
+                    label={strings.name}
+                    htmlFor="su-name"
+                    help={strings.nameHelp}
+                >
                     <div className="input-with-prefix">
                         <Input
                             id="su-name"
                             placeholder={strings.namePlaceholder}
                             autoComplete="name"
                             value={name}
-                            onChange={(e: ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                setName(e.target.value)
+                            }
                         />
                         <User className="icon-16 prefix" />
                     </div>
@@ -276,7 +298,9 @@ export function SignupForm({ strings, firstUser }: SignupFormProps): JSX.Element
                             required
                             value={email}
                             invalid={!!err && !email}
-                            onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                                setEmail(e.target.value)
+                            }
                         />
                         <Mail className="icon-16 prefix" />
                     </div>
@@ -354,7 +378,11 @@ export function SignupForm({ strings, firstUser }: SignupFormProps): JSX.Element
                     type="submit"
                     variant="primary"
                     loading={loading}
-                    iconRight={loading ? undefined : <ArrowRight size={14} strokeWidth={1.6} />}
+                    iconRight={
+                        loading ? undefined : (
+                            <ArrowRight size={14} strokeWidth={1.6} />
+                        )
+                    }
                     className="btn-block"
                 >
                     {loading ? strings.creatingAccount : strings.signup}
@@ -366,7 +394,9 @@ export function SignupForm({ strings, firstUser }: SignupFormProps): JSX.Element
                     type="button"
                     className="btn btn-google btn-block"
                     onClick={() => {
-                        window.location.assign('/api/auth/oauth2/authorize/google');
+                        window.location.assign(
+                            '/api/auth/oauth2/authorize/google'
+                        );
                     }}
                 >
                     <GoogleLogo />

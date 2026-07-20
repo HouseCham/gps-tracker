@@ -16,6 +16,16 @@ export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
  * @param {InputProps} props
  * @returns {JSX.Element}
  */
-export function Input({ invalid, className = '', ...rest }: InputProps): JSX.Element {
-    return <input className={`input ${className}`} aria-invalid={invalid || undefined} {...rest} />;
+export function Input({
+    invalid,
+    className = '',
+    ...rest
+}: InputProps): JSX.Element {
+    return (
+        <input
+            className={`input ${className}`}
+            aria-invalid={invalid || undefined}
+            {...rest}
+        />
+    );
 }

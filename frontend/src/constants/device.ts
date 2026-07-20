@@ -1,5 +1,13 @@
 import type { DeviceVehicleType } from '@/types/api';
-import { Bike, Car, Motorbike, Package, Truck, Van, type LucideIcon } from 'lucide-react';
+import {
+    Bike,
+    Car,
+    Motorbike,
+    Package,
+    Truck,
+    Van,
+    type LucideIcon,
+} from 'lucide-react';
 
 /**
  * @constant VEHICLE_TYPE_OPTIONS
@@ -68,7 +76,9 @@ export type DeviceAccessRole = (typeof DEVICE_ACCESS_ROLES)[number];
  * Filter sentinel that means "no vehicle filter".
  */
 export const DEVICE_VEHICLE_FILTER_ALL = 'all';
-export type DeviceVehicleFilter = typeof DEVICE_VEHICLE_FILTER_ALL | DeviceVehicleType;
+export type DeviceVehicleFilter =
+    | typeof DEVICE_VEHICLE_FILTER_ALL
+    | DeviceVehicleType;
 
 /**
  * lucide-react does not ship a dedicated `Bike` + `Motorcycle` distinction

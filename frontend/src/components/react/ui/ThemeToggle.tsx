@@ -14,7 +14,9 @@ export function ThemeToggle(): JSX.Element {
         <button
             className="gp-iconbtn"
             onClick={toggleTheme}
-            aria-label={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
+            aria-label={
+                isDark ? 'Switch to light theme' : 'Switch to dark theme'
+            }
             title={isDark ? 'Light' : 'Dark'}
             type="button"
         >

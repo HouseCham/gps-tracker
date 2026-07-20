@@ -108,7 +108,9 @@ export function Topbar({
             )}
             {/* Searchbar */}
             <div className="gp-topbar-meta">
-                {pageEyebrow && <span className="gp-topbar-eyebrow">{pageEyebrow}</span>}
+                {pageEyebrow && (
+                    <span className="gp-topbar-eyebrow">{pageEyebrow}</span>
+                )}
                 <span className="gp-topbar-title">{pageLabel}</span>
             </div>
             <label className="chrome-topbar-search">
@@ -129,9 +131,17 @@ export function Topbar({
                 <button
                     type="button"
                     className="chrome-icon-btn"
-                    onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-                    aria-label={theme === 'dark' ? layout.switchToLight : layout.switchToDark}
-                    title={theme === 'dark' ? layout.themeLight : layout.themeDark}
+                    onClick={() =>
+                        setTheme(theme === 'dark' ? 'light' : 'dark')
+                    }
+                    aria-label={
+                        theme === 'dark'
+                            ? layout.switchToLight
+                            : layout.switchToDark
+                    }
+                    title={
+                        theme === 'dark' ? layout.themeLight : layout.themeDark
+                    }
                 >
                     <ThemeGlyph theme={theme} />
                 </button>
@@ -150,9 +160,9 @@ export function Topbar({
                         <span className="chrome-notif-dot" />
                     </button>
                     {notifOpen && (
-                        <NotificationsDropdown 
+                        <NotificationsDropdown
                             layout={layout}
-                            handleClose={() => setNotifOpen(false)} 
+                            handleClose={() => setNotifOpen(false)}
                         />
                     )}
                 </div>

@@ -1,5 +1,5 @@
-import type { LucideIcon } from "lucide-react";
-import type { JSX } from "react/jsx-runtime";
+import type { LucideIcon } from 'lucide-react';
+import type { JSX } from 'react/jsx-runtime';
 /**
  * Properties for a menu item.
  * @interface MenuItemProps
@@ -21,7 +21,13 @@ interface MenuItemProps {
  * @param {MenuItemProps} props - The props for the component.
  * @returns {JSX.Element} The rendered component.
  */
-export function MenuItem({ icon: Icon, label, shortcut, danger, onClick }: MenuItemProps): JSX.Element {
+export function MenuItem({
+    icon: Icon,
+    label,
+    shortcut,
+    danger,
+    onClick,
+}: MenuItemProps): JSX.Element {
     return (
         <button
             type="button"
@@ -33,4 +39,4 @@ export function MenuItem({ icon: Icon, label, shortcut, danger, onClick }: MenuI
             {shortcut && <span className="shortcut">{shortcut}</span>}
         </button>
     );
-};
+}

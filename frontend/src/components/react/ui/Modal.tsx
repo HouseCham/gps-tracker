@@ -86,7 +86,9 @@ export function Modal({
                 <header className="gp-modal-head">
                     <div className="gp-modal-head-text">
                         <div className="gp-modal-title">{title}</div>
-                        {subtitle && <div className="gp-modal-sub">{subtitle}</div>}
+                        {subtitle && (
+                            <div className="gp-modal-sub">{subtitle}</div>
+                        )}
                     </div>
                     <button
                         type="button"

@@ -58,7 +58,9 @@
     --n-900: #2e3440;
 
     /* Typography */
-    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    --font-sans:
+        'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui,
+        sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 
     /* Radii */

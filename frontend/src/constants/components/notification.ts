@@ -1,4 +1,4 @@
-import type { NotificationTone } from "@/types/components";
+import type { NotificationTone } from '@/types/components';
 /**
  * @constant NOTIF_DOT_CLASS
  * @description Class for each notification tone

@@ -22,7 +22,12 @@ export interface BadgeProps {
  * @param {BadgeProps} props
  * @returns {JSX.Element}
  */
-export function Badge({ tone = 'neutral', shape, dot, children }: BadgeProps): JSX.Element {
+export function Badge({
+    tone = 'neutral',
+    shape,
+    dot,
+    children,
+}: BadgeProps): JSX.Element {
     const cls = [
         'badge',
         `badge-${tone}`,

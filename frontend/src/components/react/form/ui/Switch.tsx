@@ -22,7 +22,13 @@ export interface SwitchProps {
  * @param {SwitchProps} props
  * @returns {JSX.Element}
  */
-export function Switch({ checked, onChange, disabled, label, id }: SwitchProps): JSX.Element {
+export function Switch({
+    checked,
+    onChange,
+    disabled,
+    label,
+    id,
+}: SwitchProps): JSX.Element {
     return (
         <label className="switch-row" htmlFor={id}>
             <input
@@ -30,7 +36,7 @@ export function Switch({ checked, onChange, disabled, label, id }: SwitchProps):
                 type="checkbox"
                 className="switch"
                 checked={checked}
-                onChange={(e) => onChange(e.target.checked)}
+                onChange={e => onChange(e.target.checked)}
                 disabled={disabled}
             />
             {label}

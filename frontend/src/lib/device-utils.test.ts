@@ -125,9 +125,18 @@ describe('deriveDeviceStatus', () => {
     });
 
     it('returns the localized label for each state', () => {
-        const online = deriveDeviceStatus(new Date(now - 1000).toISOString(), strings);
-        const stale = deriveDeviceStatus(new Date(now - 10 * 60 * 1000).toISOString(), strings);
-        const offline = deriveDeviceStatus(new Date(now - 2 * 60 * 60 * 1000).toISOString(), strings);
+        const online = deriveDeviceStatus(
+            new Date(now - 1000).toISOString(),
+            strings
+        );
+        const stale = deriveDeviceStatus(
+            new Date(now - 10 * 60 * 1000).toISOString(),
+            strings
+        );
+        const offline = deriveDeviceStatus(
+            new Date(now - 2 * 60 * 60 * 1000).toISOString(),
+            strings
+        );
         const never = deriveDeviceStatus(null, strings);
         expect(online.label).toBe(strings.online);
         expect(stale.label).toBe(strings.stale);

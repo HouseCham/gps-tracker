@@ -27,8 +27,11 @@ export function SignalIndicator({ dbm }: SignalIndicatorProps): JSX.Element {
     return (
         <span style={{ display: 'inline-flex', alignItems: 'center' }}>
             <span className="signal">
-                {[1, 2, 3, 4].map((n) => (
-                    <span key={n} className={`signal-bar ${n <= lvl ? 'on' : ''}`} />
+                {[1, 2, 3, 4].map(n => (
+                    <span
+                        key={n}
+                        className={`signal-bar ${n <= lvl ? 'on' : ''}`}
+                    />
                 ))}
             </span>
             <span className="signal-dbm">{dbm} dBm</span>

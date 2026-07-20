@@ -19,7 +19,11 @@ export interface PaginationProps {
  * @param {PaginationProps} props
  * @returns {JSX.Element}
  */
-export function Pagination({ current, total, onChange }: PaginationProps): JSX.Element {
+export function Pagination({
+    current,
+    total,
+    onChange,
+}: PaginationProps): JSX.Element {
     const pages = Array.from({ length: total }, (_, i) => i + 1);
     /**
      * Go to a page.
@@ -41,7 +45,7 @@ export function Pagination({ current, total, onChange }: PaginationProps): JSX.E
             >
                 <span className="arr">‹</span>
             </button>
-            {pages.map((p) => (
+            {pages.map(p => (
                 <button
                     key={p}
                     type="button"

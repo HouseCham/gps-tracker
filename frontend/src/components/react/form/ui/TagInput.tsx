@@ -21,7 +21,11 @@ export interface TagInputProps {
  * @param {TagInputProps} props
  * @returns {JSX.Element}
  */
-export function TagInput({ value, onChange, placeholder = 'Add tag…' }: TagInputProps): JSX.Element {
+export function TagInput({
+    value,
+    onChange,
+    placeholder = 'Add tag…',
+}: TagInputProps): JSX.Element {
     const [draft, setDraft] = useState('');
     /**
      * Add a new tag.
@@ -46,7 +50,7 @@ export function TagInput({ value, onChange, placeholder = 'Add tag…' }: TagInp
     return (
         <div
             className="tag-input"
-            onClick={(e) => {
+            onClick={e => {
                 const target = e.target as HTMLElement;
                 target.querySelector('input')?.focus();
             }}
@@ -58,11 +62,11 @@ export function TagInput({ value, onChange, placeholder = 'Add tag…' }: TagInp
                         className="x"
                         role="button"
                         tabIndex={0}
-                        onClick={(e) => {
+                        onClick={e => {
                             e.stopPropagation();
                             remove(i);
                         }}
-                        onKeyDown={(e) => {
+                        onKeyDown={e => {
                             if (e.key === 'Enter' || e.key === ' ') {
                                 e.preventDefault();
                                 remove(i);
@@ -77,8 +81,8 @@ export function TagInput({ value, onChange, placeholder = 'Add tag…' }: TagInp
             <input
                 value={draft}
                 placeholder={placeholder}
-                onChange={(e) => setDraft(e.target.value)}
-                onKeyDown={(e) => {
+                onChange={e => setDraft(e.target.value)}
+                onKeyDown={e => {
                     if (e.key === 'Enter' || e.key === ',') {
                         e.preventDefault();
                         commit(draft);

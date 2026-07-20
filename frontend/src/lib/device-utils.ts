@@ -39,7 +39,11 @@ export function deriveDeviceStatus(
         return { key: 'online', label: strings.online, dot: 'success' };
     }
     if (ageMin < DEVICE_OFFLINE_THRESHOLD_MIN) {
-        return { key: 'stale', label: strings.stale ?? strings.offline, dot: 'warning' };
+        return {
+            key: 'stale',
+            label: strings.stale ?? strings.offline,
+            dot: 'warning',
+        };
     }
     return { key: 'offline', label: strings.offline, dot: 'danger' };
 }

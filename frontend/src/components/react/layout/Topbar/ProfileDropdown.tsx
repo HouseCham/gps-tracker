@@ -1,13 +1,22 @@
-import { useRef, type JSX } from "react";
+import { useRef, type JSX } from 'react';
 //-- Types
-import type { Translation } from "@/i18n";
+import type { Translation } from '@/i18n';
 //-- Icons
-import { Bell, HelpCircle, Key, LogOut, Moon, Shield, Sun, User as UserIcon } from "lucide-react";
+import {
+    Bell,
+    HelpCircle,
+    Key,
+    LogOut,
+    Moon,
+    Shield,
+    Sun,
+    User as UserIcon,
+} from 'lucide-react';
 //-- Components
-import { MenuItem } from "./MenuItem";
+import { MenuItem } from './MenuItem';
 //-- Utils
-import { getInitials, useClickOutside } from "@/lib";
-import type { AuthUser } from "@/types/api";
+import { getInitials, useClickOutside } from '@/lib';
+import type { AuthUser } from '@/types/api';
 
 /**
  * Properties for the profile dropdown component.
@@ -32,7 +41,14 @@ interface ProfileDropdownProps {
  * @param {ProfileDropdownProps} props - The props for the component.
  * @returns {JSX.Element} The rendered component.
  */
-export function ProfileDropdown({ layout, theme, user, setTheme, onSignOut, handleClose }: ProfileDropdownProps): JSX.Element {
+export function ProfileDropdown({
+    layout,
+    theme,
+    user,
+    setTheme,
+    onSignOut,
+    handleClose,
+}: ProfileDropdownProps): JSX.Element {
     const ref = useRef<HTMLDivElement>(null);
     useClickOutside(ref, handleClose);
 
@@ -47,7 +63,9 @@ export function ProfileDropdown({ layout, theme, user, setTheme, onSignOut, hand
                     {user ? getInitials(user.name) : '?'}
                 </div>
                 <div className="chrome-profile-info">
-                    <div className="chrome-profile-name">{user?.name ?? layout.unknownUser}</div>
+                    <div className="chrome-profile-name">
+                        {user?.name ?? layout.unknownUser}
+                    </div>
                     <div className="chrome-profile-mail">
                         {user?.email ?? layout.unknownMail}
                     </div>
@@ -59,7 +77,10 @@ export function ProfileDropdown({ layout, theme, user, setTheme, onSignOut, hand
             </div>
             <div className="chrome-menu-section">
                 <div className="chrome-menu-label">{layout.appearance}</div>
-                <div className="chrome-theme-toggle" style={{ margin: '0 0 var(--s-2)' }}>
+                <div
+                    className="chrome-theme-toggle"
+                    style={{ margin: '0 0 var(--s-2)' }}
+                >
                     <button
                         type="button"
                         className={`chrome-theme-toggle-btn${theme === 'light' ? ' is-active' : ''}`}
@@ -81,7 +102,11 @@ export function ProfileDropdown({ layout, theme, user, setTheme, onSignOut, hand
             <div className="chrome-menu-divider" />
             <div className="chrome-menu-section">
                 <MenuItem icon={UserIcon} label={layout.accountSettings} />
-                <MenuItem icon={Bell} label={layout.notificationsMenu} shortcut="⌘N" />
+                <MenuItem
+                    icon={Bell}
+                    label={layout.notificationsMenu}
+                    shortcut="⌘N"
+                />
                 <MenuItem icon={Key} label={layout.apiTokens} />
                 <MenuItem icon={HelpCircle} label={layout.helpDocs} />
             </div>

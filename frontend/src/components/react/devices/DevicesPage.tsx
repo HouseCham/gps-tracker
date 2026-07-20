@@ -17,18 +17,17 @@ import {
     VEHICLE_TYPE_OPTIONS,
 } from '@/constants/device';
 //-- Icons
-import {
-    AlertTriangle,
-    List as ListIcon,
-    Plus,
-    Satellite,
-} from 'lucide-react';
+import { AlertTriangle, List as ListIcon, Plus, Satellite } from 'lucide-react';
 //-- Components
 import { Button } from '@/components/react/ui/Button';
 import { EmptyState } from '@/components/react/ui/EmptyState';
 import { DeviceFilterBar } from './DeviceFilterBar';
 import { DevicesTable } from './DevicesTable';
-import { AddDeviceModal, DeleteDeviceModal, EditDeviceModal } from '@/components/react/modal';
+import {
+    AddDeviceModal,
+    DeleteDeviceModal,
+    EditDeviceModal,
+} from '@/components/react/modal';
 //-- Services
 import { useDeviceService } from '@/lib/api/services/deviceService';
 //-- Utils
@@ -65,12 +64,16 @@ export function DevicesPage({
 
     const [query, setQuery] = useState('');
     const [statusFilter, setStatusFilter] = useState<DeviceStatusFilter>('all');
-    const [vehicleFilter, setVehicleFilter] = useState<DeviceVehicleFilter>(DEVICE_VEHICLE_FILTER_ALL);
+    const [vehicleFilter, setVehicleFilter] = useState<DeviceVehicleFilter>(
+        DEVICE_VEHICLE_FILTER_ALL
+    );
     const [sortBy, setSortBy] = useState<DeviceSortKey>('name-asc');
 
     const [addOpen, setAddOpen] = useState(false);
     const [editTarget, setEditTarget] = useState<DeviceWithAccess | null>(null);
-    const [deleteTarget, setDeleteTarget] = useState<DeviceWithAccess | null>(null);
+    const [deleteTarget, setDeleteTarget] = useState<DeviceWithAccess | null>(
+        null
+    );
 
     useEffect(() => {
         void getAllDevices();
@@ -86,10 +89,16 @@ export function DevicesPage({
 
     const vehicleOptions: { value: DeviceVehicleFilter; label: string }[] = [
         { value: DEVICE_VEHICLE_FILTER_ALL, label: t.table.filter.allVehicles },
-        ...VEHICLE_TYPE_OPTIONS.map(v => ({ value: v, label: t.table.vehicleTypes[v] })),
+        ...VEHICLE_TYPE_OPTIONS.map(v => ({
+            value: v,
+            label: t.table.vehicleTypes[v],
+        })),
     ];
 
-    const sortOptions = DEVICE_SORT_OPTIONS.map(k => ({ value: k, label: t.table.sort[k] }));
+    const sortOptions = DEVICE_SORT_OPTIONS.map(k => ({
+        value: k,
+        label: t.table.sort[k],
+    }));
 
     const filtered = useMemo(() => {
         const q = query.trim().toLowerCase();
@@ -102,7 +111,10 @@ export function DevicesPage({
             ) {
                 return false;
             }
-            if (vehicleFilter !== DEVICE_VEHICLE_FILTER_ALL && d.vehicle_type !== vehicleFilter) {
+            if (
+                vehicleFilter !== DEVICE_VEHICLE_FILTER_ALL &&
+                d.vehicle_type !== vehicleFilter
+            ) {
                 return false;
             }
             if (statusFilter !== 'all') {
@@ -161,9 +173,16 @@ export function DevicesPage({
 
     const handleSave = async (
         id: string,
-        data: { name: string; vehicle_type: DeviceVehicleType; access_role: DeviceAccessRole },
+        data: {
+            name: string;
+            vehicle_type: DeviceVehicleType;
+            access_role: DeviceAccessRole;
+        }
     ): Promise<void> => {
-        await updateDevice(id, { name: data.name, vehicle_type: data.vehicle_type });
+        await updateDevice(id, {
+            name: data.name,
+            vehicle_type: data.vehicle_type,
+        });
         setEditTarget(null);
     };
 
@@ -189,7 +208,10 @@ export function DevicesPage({
                     </div>
                 </div>
                 <div className="dev-page-header-actions">
-                    <Button variant="secondary" icon={<ListIcon size={14} strokeWidth={1.6} />}>
+                    <Button
+                        variant="secondary"
+                        icon={<ListIcon size={14} strokeWidth={1.6} />}
+                    >
                         {t.page.export}
                     </Button>
                     <Button
@@ -249,8 +271,12 @@ export function DevicesPage({
                 />
             ) : filtered.length === 0 ? (
                 <div className="dev-no-results">
-                    <div className="dev-no-results-title">{t.page.noResultsTitle}</div>
-                    <div className="dev-no-results-msg">{t.page.noResultsMessage}</div>
+                    <div className="dev-no-results-title">
+                        {t.page.noResultsTitle}
+                    </div>
+                    <div className="dev-no-results-msg">
+                        {t.page.noResultsMessage}
+                    </div>
                     <Button
                         variant="secondary"
                         onClick={() => {

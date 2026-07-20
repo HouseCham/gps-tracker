@@ -55,7 +55,7 @@ export function SearchInput({
                 className="input"
                 placeholder={placeholder}
                 value={value}
-                onChange={(e) => onChange(e.target.value)}
+                onChange={e => onChange(e.target.value)}
                 aria-label="Search"
             />
             <div className="input-search-append">

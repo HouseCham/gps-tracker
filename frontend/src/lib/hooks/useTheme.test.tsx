@@ -26,7 +26,9 @@ describe('useTheme', () => {
     it('writes data-theme attribute and localStorage when changed', () => {
         const { result } = renderHook(() => useTheme());
         act(() => result.current[1]('dark'));
-        expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+        expect(document.documentElement.getAttribute('data-theme')).toBe(
+            'dark'
+        );
         expect(localStorage.getItem('opengps-theme')).toBe('dark');
     });
 

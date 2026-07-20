@@ -22,23 +22,42 @@ export interface SkeletonProps {
  * @param {SkeletonProps} props
  * @returns {JSX.Element}
  */
-export function Skeleton({ variant = 'text', width, height, style }: SkeletonProps): JSX.Element {
+export function Skeleton({
+    variant = 'text',
+    width,
+    height,
+    style,
+}: SkeletonProps): JSX.Element {
     if (variant === 'card') {
         return (
             <div className="skel-card">
                 <span className="skeleton skel-text" style={{ width: '60%' }} />
-                <span className="skeleton skel-text-sm" style={{ width: '40%' }} />
-                <span className="skeleton skel-block" style={{ marginTop: 'auto' }} />
+                <span
+                    className="skeleton skel-text-sm"
+                    style={{ width: '40%' }}
+                />
+                <span
+                    className="skeleton skel-block"
+                    style={{ marginTop: 'auto' }}
+                />
             </div>
         );
     }
     if (variant === 'row') {
         return (
             <div className="skel-row">
-                <span className="skeleton" style={{ width: 24, height: 24, borderRadius: '50%' }} />
+                <span
+                    className="skeleton"
+                    style={{ width: 24, height: 24, borderRadius: '50%' }}
+                />
                 <span className="skeleton skel-text" style={{ width: '60%' }} />
             </div>
         );
     }
-    return <span className={`skeleton skel-${variant}`} style={{ width, height, ...style }} />;
+    return (
+        <span
+            className={`skeleton skel-${variant}`}
+            style={{ width, height, ...style }}
+        />
+    );
 }

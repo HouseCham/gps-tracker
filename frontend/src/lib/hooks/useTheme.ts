@@ -12,7 +12,11 @@ export type Theme = 'light' | 'dark';
  *
  * @returns A tuple of [currentTheme, setTheme, toggleTheme].
  */
-export function useTheme(): readonly [Theme, (next: Theme) => void, () => void] {
+export function useTheme(): readonly [
+    Theme,
+    (next: Theme) => void,
+    () => void,
+] {
     const [theme, setThemeState] = useState<Theme>(() => {
         if (typeof document === 'undefined') return 'light';
         const current = document.documentElement.getAttribute(ATTR);
@@ -33,7 +37,7 @@ export function useTheme(): readonly [Theme, (next: Theme) => void, () => void] 
     }, []);
 
     const toggleTheme = useCallback(() => {
-        setThemeState((prev) => (prev === 'dark' ? 'light' : 'dark'));
+        setThemeState(prev => (prev === 'dark' ? 'light' : 'dark'));
     }, []);
 
     return [theme, setTheme, toggleTheme] as const;

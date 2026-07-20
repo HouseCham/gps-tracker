@@ -27,7 +27,14 @@ export interface FieldProps {
  * @param {FieldProps} props
  * @returns {JSX.Element}
  */
-export function Field({ label, required, help, error, children, htmlFor }: FieldProps): JSX.Element {
+export function Field({
+    label,
+    required,
+    help,
+    error,
+    children,
+    htmlFor,
+}: FieldProps): JSX.Element {
     return (
         <div className="field">
             {label && (

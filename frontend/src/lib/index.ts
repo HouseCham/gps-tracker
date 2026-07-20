@@ -14,8 +14,11 @@ export * from './layout-utils';
  * @param {string} template - The template to interpolate.
  * @param {Record<string, string | number>} vars - The variables to interpolate.
  */
-export function interpolateTemplate(template: string, vars: Record<string, string | number>): string {
+export function interpolateTemplate(
+    template: string,
+    vars: Record<string, string | number>
+): string {
     return template.replace(/\{(\w+)\}/g, (_, key: string) =>
         vars[key] === undefined ? `{${key}}` : String(vars[key])
     );
-};
+}

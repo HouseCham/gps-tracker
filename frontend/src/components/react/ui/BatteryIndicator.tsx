@@ -27,7 +27,10 @@ function filledCells(pct: number): number {
  * @param {BatteryIndicatorProps} props
  * @returns {JSX.Element}
  */
-export function BatteryIndicator({ pct, showPct = true }: BatteryIndicatorProps): JSX.Element {
+export function BatteryIndicator({
+    pct,
+    showPct = true,
+}: BatteryIndicatorProps): JSX.Element {
     const filled = filledCells(pct);
     return (
         <span className="battery">
