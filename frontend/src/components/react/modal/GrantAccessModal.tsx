@@ -2,7 +2,8 @@ import { useEffect, useState, type JSX } from 'react';
 //-- Types
 import type { Translation } from '@/i18n';
 //-- Components
-import { Button, Modal } from '@/components/react/ui';
+import { Modal } from '@/components/react/ui';
+import { Button } from '@/components/react/ui/button';
 import { Field, Input } from '@/components/react/form/ui';
 /**
  * Props for the GrantAccessModal component

@@ -1,5 +1,6 @@
 import type { LucideIcon } from 'lucide-react';
 import type { JSX } from 'react/jsx-runtime';
+import { Button } from '@/components/react/ui/button';
 /**
  * Properties for a menu item.
  * @interface MenuItemProps
@@ -29,14 +30,16 @@ export function MenuItem({
     onClick,
 }: MenuItemProps): JSX.Element {
     return (
-        <button
+        <Button
             type="button"
+            variant="ghost"
+            size="sm"
             className={`chrome-menu-item${danger ? ' is-danger' : ''}`}
+            icon={<Icon size={15} strokeWidth={1.6} className="glyph" />}
             onClick={onClick}
         >
-            <Icon size={15} strokeWidth={1.6} className="glyph" />
             <span>{label}</span>
             {shortcut && <span className="shortcut">{shortcut}</span>}
-        </button>
+        </Button>
     );
 }

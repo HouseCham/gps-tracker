@@ -3,15 +3,16 @@ import type { JSX } from 'react';
 import { useStore } from '@nanostores/react';
 import { $sidebarOpen, closeSidebar } from '@/lib/stores/layout';
 import { $user } from '@/lib/stores/auth';
-//-- Icons
-import { ChevronDown } from 'lucide-react';
-//-- Constants
-import { SHELL_NAV_ITEMS, SIDEBAR_ICONS } from '@/constants/layout';
-//-- i18n
+//-- Types
 import type { Translation } from '@/i18n';
 import type { Language } from '@/types';
+//-- Constants
+import { SHELL_NAV_ITEMS, SIDEBAR_ICONS } from '@/constants/layout';
 //-- Utils
 import { getInitials } from '@/lib';
+import { redirectTo } from '@/lib/router-utils';
+//-- Components
+import { Button } from '@/components/react/ui/button';
 
 /**
  * Properties for the sidebar component.
@@ -89,10 +90,12 @@ export function Sidebar({
                 </div>
             </nav>
             <footer className="gp-sidebar-foot">
-                <button
+                <Button
                     type="button"
+                    variant="ghost"
                     className="gp-sidebar-user"
                     aria-label={layout.profileMenu}
+                    onClick={() => redirectTo('/profile')}
                 >
                     <span className="gp-sidebar-avatar">
                         {user ? getInitials(user.name) : layout.unknownInitials}
@@ -105,8 +108,7 @@ export function Sidebar({
                             {user?.email ?? layout.unknownMail}
                         </span>
                     </span>
-                    <ChevronDown size={14} strokeWidth={1.6} />
-                </button>
+                </Button>
             </footer>
         </aside>
     );

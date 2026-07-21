@@ -6,7 +6,8 @@ import type { JSX } from 'react/jsx-runtime';
 //-- Icons
 import { AlertTriangle, Trash2 } from 'lucide-react';
 //-- Components
-import { Button, Modal } from '@/components/react/ui';
+import { Modal } from '@/components/react/ui';
+import { Button } from '@/components/react/ui/button';
 import { VehicleIcon } from '@/components/react/devices';
 import { Field, Input } from '@/components/react/form/ui';
 //-- Utils

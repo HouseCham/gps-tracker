@@ -3,7 +3,8 @@ import { useEffect, useState, type JSX } from 'react';
 import type { DeviceAccessListItem } from '@/types/api';
 import type { Translation } from '@/i18n';
 //-- Components
-import { Button, Modal } from '@/components/react/ui';
+import { Modal } from '@/components/react/ui';
+import { Button } from '@/components/react/ui/button';
 import { Field, Input } from '@/components/react/form/ui';
 //-- Utils
 import { interpolateTemplate } from '@/lib';

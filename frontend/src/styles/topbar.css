@@ -487,6 +487,7 @@
     padding: 8px var(--s-3);
     border-radius: var(--radius-control);
     background: var(--bg-page);
+    margin-bottom: var(--s-2);
 }
 
 .chrome-theme-toggle-btn.btn {

@@ -1,6 +1,7 @@
 import { useRef, type JSX } from 'react';
 //-- Types
 import type { Translation } from '@/i18n';
+import type { AuthUser } from '@/types/api';
 //-- Icons
 import {
     Bell,
@@ -13,10 +14,11 @@ import {
     User as UserIcon,
 } from 'lucide-react';
 //-- Components
+import { Button } from '@/components/react/ui/button';
 import { MenuItem } from './MenuItem';
 //-- Utils
 import { getInitials, useClickOutside } from '@/lib';
-import type { AuthUser } from '@/types/api';
+import { redirectTo } from '@/lib/router-utils';
 
 /**
  * Properties for the profile dropdown component.
@@ -56,7 +58,6 @@ export function ProfileDropdown({
         <div
             className="chrome-dropdown chrome-dropdown--profile"
             ref={ref}
-            style={{ width: 280, right: 0, left: 'auto' }}
         >
             <div className="chrome-profile-card">
                 <div className="chrome-profile-avatar">
@@ -75,33 +76,41 @@ export function ProfileDropdown({
                     </div>
                 </div>
             </div>
+            {/* Appearance */}
             <div className="chrome-menu-section">
                 <div className="chrome-menu-label">{layout.appearance}</div>
-                <div
-                    className="chrome-theme-toggle"
-                    style={{ margin: '0 0 var(--s-2)' }}
-                >
-                    <button
+                <div className="chrome-theme-toggle">
+                    <Button
                         type="button"
+                        variant="ghost"
+                        size="sm"
                         className={`chrome-theme-toggle-btn${theme === 'light' ? ' is-active' : ''}`}
+                        icon={<Sun size={13} strokeWidth={1.6} />}
                         onClick={() => setTheme('light')}
                     >
-                        <Sun size={13} strokeWidth={1.6} />
                         {layout.themeLight}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         type="button"
+                        variant="ghost"
+                        size="sm"
                         className={`chrome-theme-toggle-btn${theme === 'dark' ? ' is-active' : ''}`}
+                        icon={<Moon size={13} strokeWidth={1.6} />}
                         onClick={() => setTheme('dark')}
                     >
-                        <Moon size={13} strokeWidth={1.6} />
                         {layout.themeDark}
-                    </button>
+                    </Button>
                 </div>
             </div>
             <div className="chrome-menu-divider" />
+
+            {/* Settings */}
             <div className="chrome-menu-section">
-                <MenuItem icon={UserIcon} label={layout.accountSettings} />
+                <MenuItem
+                    icon={UserIcon}
+                    label={layout.accountSettings}
+                    onClick={() => redirectTo('/profile')}
+                />
                 <MenuItem
                     icon={Bell}
                     label={layout.notificationsMenu}

@@ -3,12 +3,14 @@ import { useEffect, useState, type ChangeEvent } from 'react';
 import type { JSX } from 'react/jsx-runtime';
 import type { Translation } from '@/i18n';
 import type { DeviceVehicleType, DeviceWithAccess } from '@/types/api';
-import { VEHICLE_TYPE_OPTIONS, type DeviceAccessRole } from '@/constants';
+import { type DeviceAccessRole } from '@/constants';
 //-- Icons
 import { Check } from 'lucide-react';
 //-- Components
-import { Button, Modal } from '@/components/react/ui';
-import { Field, Input, Select } from '@/components/react/form/ui';
+import { Modal } from '@/components/react/ui';
+import { Button } from '@/components/react/ui/button';
+import { Field, Input } from '@/components/react/form/ui';
+import { VehicleTypeSelect } from '@/components/react/devices/VehicleTypeSelect';
 //-- Utils
 import { interpolateTemplate } from '@/lib';
 /**
@@ -133,29 +135,14 @@ export function EditDeviceModal({
                     </Field>
                     <div className="gp-field-row">
                         <Field label={t.modals.vehicleTypeLabel}>
-                            <Select
-                                options={VEHICLE_TYPE_OPTIONS.map(v => ({
-                                    value: v,
-                                    label: t.table.vehicleTypes[v],
-                                }))}
+                            <VehicleTypeSelect
                                 value={form.vehicle_type}
-                                onChange={(
-                                    e: ChangeEvent<HTMLSelectElement>
-                                ) => {
-                                    const vehicleType =
-                                        VEHICLE_TYPE_OPTIONS.find(
-                                            option => option === e.target.value
-                                        );
-                                    if (!vehicleType) return;
+                                labels={t.table.vehicleTypes}
+                                onChange={vehicleType =>
                                     setForm(f =>
-                                        f
-                                            ? {
-                                                  ...f,
-                                                  vehicle_type: vehicleType,
-                                              }
-                                            : f
-                                    );
-                                }}
+                                        f ? { ...f, vehicle_type: vehicleType } : f
+                                    )
+                                }
                             />
                         </Field>
                     </div>
