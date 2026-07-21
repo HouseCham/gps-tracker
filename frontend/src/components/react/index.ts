@@ -13,8 +13,8 @@ export type { BatteryIndicatorProps } from './ui/BatteryIndicator';
 export { Breadcrumbs } from './ui/Breadcrumbs';
 export type { BreadcrumbsProps, BreadcrumbItem } from './ui/Breadcrumbs';
 
-export { Button } from './ui/Button';
-export type { ButtonProps } from './ui/Button';
+export { Button } from './ui/button/Button';
+export type { ButtonProps } from './ui/button/Button';
 
 export { EmptyState } from './ui/EmptyState';
 export type { EmptyStateProps } from './ui/EmptyState';
@@ -39,5 +39,3 @@ export type { StatusBadgeProps } from './ui/StatusBadge';
 
 export { StatusIndicator } from './ui/StatusIndicator';
 export type { StatusIndicatorProps } from './ui/StatusIndicator';
-
-export { CopyButton } from './CopyButton';

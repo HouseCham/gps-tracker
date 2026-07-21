@@ -1,0 +1,28 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getTranslation } from '@/i18n';
+import type { Language } from '@/types';
+import MainLayout from '@/components/astro/layout/MainLayout.astro';
+import { ProfilePage } from '@/components/react/profile/ProfilePage';
+
+export const getStaticPaths: GetStaticPaths = () => {
+    return [{ params: { lan: 'en' } }, { params: { lan: 'es' } }];
+};
+
+const locale = Astro.params.lan as Language;
+const translation = getTranslation(locale);
+const title = `${translation.profile.title} · ${translation.layout.appName}`;
+---
+
+<MainLayout
+    locale={locale}
+    title={title}
+    pageLabel={translation.profile.title}
+    pageEyebrow={translation.layout.workspace}
+>
+    <ProfilePage
+        client:load
+        locale={locale}
+        translations={translation.profile}
+    />
+</MainLayout>

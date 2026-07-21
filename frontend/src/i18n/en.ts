@@ -197,7 +197,55 @@ export const en = {
             'Auto-signin: the response sets the session cookie and returns 200 with the user profile.',
     },
     profile: {
-        title: 'Profile',
+        title: 'My profile',
+        eyebrow: 'User',
+        subtitle: 'View and update your account information and device access.',
+        refresh: 'Refresh',
+        editProfile: 'Edit profile',
+        loading: 'Loading profile…',
+        failedToLoad: 'Profile unavailable',
+        failedToLoadDescription:
+            'Your profile could not be loaded. Please try again.',
+        retry: 'Try again',
+        joined: 'Joined',
+        id: 'ID',
+        roles: {
+            user: 'User',
+            superAdmin: 'Super admin',
+        },
+        account: {
+            title: 'Account information',
+            description: 'Identity and contact details for this account.',
+            fullName: 'Full name',
+            email: 'Email',
+            verified: 'Verified',
+            unverified: 'Unverified',
+            role: 'Role',
+            memberSince: 'Member since',
+            userId: 'User ID',
+            readOnlyNote:
+                'Email and role changes must be managed by an administrator.',
+        },
+        devices: {
+            title: 'Device access',
+            description: 'Devices available to this account.',
+            empty: 'No devices are assigned to this account.',
+            summary: 'Showing {shown} of {total} devices.',
+        },
+        edit: {
+            title: 'Edit profile',
+            subtitle:
+                'Update your name. Email and role are managed by your administrator.',
+            firstName: 'First name',
+            lastName: 'Last name',
+            required: 'This field is required.',
+            cancel: 'Cancel',
+            save: 'Save changes',
+            saving: 'Saving…',
+            savedTitle: 'Profile updated',
+            saved: 'Your profile was updated successfully.',
+            updateFailed: 'Could not update your profile. Try again.',
+        },
     },
     page: {
         devices: {

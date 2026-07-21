@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 //-- Types
 import type {
     ApiError,
@@ -6,10 +6,16 @@ import type {
     Envelope,
     UpdateUserDto,
     User,
+    UserWithDevices,
 } from '@/types/api';
 
 //-- Utils
-import { handleApiError, withApiErrorToast } from '@/lib/api/api-utils';
+import {
+    handleApiError,
+    isApiError,
+    toApiError,
+    withApiErrorToast,
+} from '@/lib/api/api-utils';
 import { toastBus } from '@/lib/stores/toast.store';
 //-- Http Client
 import { apiClient } from '@/lib/auth/client';
@@ -19,7 +25,9 @@ import { apiClient } from '@/lib/auth/client';
  * @property {boolean} isLoading - Whether the service is currently loading data.
  * @property {ApiError | null} error - The error that occurred, if any.
  * @property {User[]} users - The list of users.
+ * @property {UserWithDevices | null} user - The user retrieved by ID.
  * @method getAllUsers - Retrieves a list of all users.
+ * @method getUserByID - Retrieves a user and their paginated devices.
  * @method createUser - Creates a new user.
  * @method updateUser - Updates an existing user's `name` / `lastname`.
  * @method deleteUser - Soft-deletes a user (`204 No Content`).
@@ -28,7 +36,13 @@ interface IUserService {
     isLoading: boolean;
     error: ApiError | null;
     users: User[];
+    user: UserWithDevices | null;
     getAllUsers: () => Promise<void>;
+    getUserByID: (
+        id: string,
+        page?: number,
+        pageSize?: number
+    ) => Promise<void>;
     createUser: (payload: CreateUserDto) => Promise<void>;
     updateUser: (id: string, payload: UpdateUserDto) => Promise<void>;
     deleteUser: (id: string) => Promise<void>;
@@ -40,6 +54,7 @@ export const useUserService = (): IUserService => {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [error, setError] = useState<ApiError | null>(null);
     const [users, setUsers] = useState<User[]>([]);
+    const [user, setUser] = useState<UserWithDevices | null>(null);
     /**
      * Resets the state of the service to its initial values.
      * @returns {void}
@@ -81,12 +96,53 @@ export const useUserService = (): IUserService => {
     /**
      * Retrieves a user by their ID, including their associated devices.
      * @param {string} id - The ID of the user to retrieve.
-     * @returns {Promise<UserWithDevices>} A promise that resolves to the user with devices.
+     * @param {number} [page=1] - The device page number.
+     * @param {number} [pageSize=10] - The number of devices per page.
+     * @returns {Promise<void>} Resolves when the user is fetched and state is updated.
      * @throws {ApiError} An error object containing the error status, message, and code.
      */
-    // function getById(id: string): Promise<UserWithDevices>{
-
-    // }
+    const getUserByID = useCallback(
+        async (
+            id: string,
+            page: number = 1,
+            pageSize: number = 10
+        ): Promise<void> => {
+            setError(null);
+            setIsLoading(true);
+            setUser(null);
+            try {
+                const { data: response } = await withApiErrorToast(() =>
+                    apiClient<Envelope<UserWithDevices> | null>(
+                        `/users/${id}`,
+                        {
+                            method: 'GET',
+                            query: { page, page_size: pageSize },
+                        }
+                    )
+                );
+                if (!response) {
+                    toastBus.push({
+                        variant: 'error',
+                        title: 'Error',
+                        message: 'get user returned a null response',
+                    });
+                    handleApiError(
+                        new Error('get user returned a null response')
+                    );
+                }
+                setUser(response.data);
+            } catch (caught: unknown) {
+                const apiError = isApiError(caught)
+                    ? caught
+                    : toApiError(caught);
+                setError(apiError);
+                throw apiError;
+            } finally {
+                setIsLoading(false);
+            }
+        },
+        []
+    );
 
     /**
      * Creates a new user.
@@ -152,6 +208,7 @@ export const useUserService = (): IUserService => {
             }
             const updated = response.data;
             setUsers(prev => prev.map(u => (u.id === id ? updated : u)));
+            setUser(prev => (prev?.id === id ? { ...prev, ...updated } : prev));
         } finally {
             setIsLoading(false);
         }
@@ -183,8 +240,10 @@ export const useUserService = (): IUserService => {
         isLoading,
         error,
         users,
+        user,
         //-- actions
         getAllUsers,
+        getUserByID,
         createUser,
         updateUser,
         deleteUser,

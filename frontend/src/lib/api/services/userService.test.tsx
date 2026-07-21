@@ -8,7 +8,12 @@ vi.mock('@/lib/auth/client', () => ({
 
 import * as clientMod from '@/lib/auth/client';
 import { $toasts } from '@/lib/stores/toast.store';
-import type { CreateUserDto, Envelope, User } from '@/types/api';
+import type {
+    CreateUserDto,
+    Envelope,
+    User,
+    UserWithDevices,
+} from '@/types/api';
 import { useUserService } from './userService';
 
 const apiClient = vi.mocked(clientMod.apiClient);
@@ -55,6 +60,40 @@ describe('useUserService', () => {
             '/users',
             expect.objectContaining({ method: 'GET' })
         );
+    });
+
+    it('getUserByID fetches the user and their paginated devices', async () => {
+        const user: UserWithDevices = {
+            ...u1,
+            devices: [
+                {
+                    id: 'd1',
+                    uuid_firmware: 'esp32-001',
+                    name: 'Tracker',
+                },
+            ],
+            pagination: {
+                page: 2,
+                page_size: 5,
+                total: 6,
+                total_pages: 2,
+            },
+        };
+        apiClient.mockResolvedValue({
+            data: { status_code: 200, message: 'OK', data: user },
+        });
+        const { result } = renderHook(() => useUserService());
+
+        await act(async () => {
+            await result.current.getUserByID('u1', 2, 5);
+        });
+
+        expect(result.current.user).toEqual(user);
+        expect(result.current.isLoading).toBe(false);
+        expect(apiClient).toHaveBeenCalledWith('/users/u1', {
+            method: 'GET',
+            query: { page: 2, page_size: 5 },
+        });
     });
 
     it('createUser appends the returned user to the existing list', async () => {

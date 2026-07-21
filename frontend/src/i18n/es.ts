@@ -202,7 +202,57 @@ export const es: Translation = {
             'Auto-login: la respuesta establece la cookie de sesión y devuelve 200 con el perfil del usuario.',
     },
     profile: {
-        title: 'Perfil',
+        title: 'Mi perfil',
+        eyebrow: 'Usuario',
+        subtitle:
+            'Consulta y actualiza la información de tu cuenta y el acceso a dispositivos.',
+        refresh: 'Actualizar',
+        editProfile: 'Editar perfil',
+        loading: 'Cargando perfil…',
+        failedToLoad: 'Perfil no disponible',
+        failedToLoadDescription:
+            'No se pudo cargar tu perfil. Inténtalo de nuevo.',
+        retry: 'Reintentar',
+        joined: 'Desde',
+        id: 'ID',
+        roles: {
+            user: 'Usuario',
+            superAdmin: 'Super admin',
+        },
+        account: {
+            title: 'Información de la cuenta',
+            description: 'Datos de identidad y contacto de esta cuenta.',
+            fullName: 'Nombre completo',
+            email: 'Correo',
+            verified: 'Verificado',
+            unverified: 'Sin verificar',
+            role: 'Rol',
+            memberSince: 'Miembro desde',
+            userId: 'ID de usuario',
+            readOnlyNote:
+                'Los cambios de correo y rol deben ser gestionados por un administrador.',
+        },
+        devices: {
+            title: 'Acceso a dispositivos',
+            description: 'Dispositivos disponibles para esta cuenta.',
+            empty: 'No hay dispositivos asignados a esta cuenta.',
+            summary: 'Mostrando {shown} de {total} dispositivos.',
+        },
+        edit: {
+            title: 'Editar perfil',
+            subtitle:
+                'Actualiza tu nombre. El correo y el rol los gestiona tu administrador.',
+            firstName: 'Nombre',
+            lastName: 'Apellido',
+            required: 'Este campo es obligatorio.',
+            cancel: 'Cancelar',
+            save: 'Guardar cambios',
+            saving: 'Guardando…',
+            savedTitle: 'Perfil actualizado',
+            saved: 'Tu perfil se actualizó correctamente.',
+            updateFailed:
+                'No se pudo actualizar tu perfil. Inténtalo de nuevo.',
+        },
     },
     page: {
         devices: {

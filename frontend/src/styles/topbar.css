@@ -428,9 +428,10 @@
     padding: var(--s-2) var(--s-3) var(--s-1);
 }
 
-.chrome-menu-item {
+.chrome-menu-item.btn {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
     gap: 10px;
     width: 100%;
     padding: 8px var(--s-3);
@@ -444,7 +445,7 @@
     font-family: inherit;
 }
 
-.chrome-menu-item:hover {
+.chrome-menu-item.btn:hover {
     background: var(--bg-page);
 }
 
@@ -464,11 +465,11 @@
     border-radius: 4px;
 }
 
-.chrome-menu-item.is-danger {
+.chrome-menu-item.btn.is-danger {
     color: var(--danger);
 }
 
-.chrome-menu-item.is-danger:hover {
+.chrome-menu-item.btn.is-danger:hover {
     background: var(--danger-tint);
 }
 
@@ -488,7 +489,7 @@
     background: var(--bg-page);
 }
 
-.chrome-theme-toggle-btn {
+.chrome-theme-toggle-btn.btn {
     flex: 1;
     display: flex;
     align-items: center;
@@ -507,13 +508,13 @@
     font-family: inherit;
 }
 
-.chrome-theme-toggle-btn.is-active {
+.chrome-theme-toggle-btn.btn.is-active {
     background: var(--bg-surface);
     color: var(--text-primary);
     box-shadow: inset 0 0 0 1px var(--border);
 }
 
-.chrome-theme-toggle-btn svg {
+.chrome-theme-toggle-btn.btn svg {
     width: 13px;
     height: 13px;
 }

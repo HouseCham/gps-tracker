@@ -3,7 +3,6 @@ export * from './AvatarGroup';
 export * from './Badge';
 export * from './BatteryIndicator';
 export * from './Breadcrumbs';
-export * from './Button';
 export * from './EmptyState';
 export * from './KpiCard';
 export * from './Pagination';

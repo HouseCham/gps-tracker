@@ -164,7 +164,7 @@
     background: var(--bg-sidebar);
 }
 
-.gp-sidebar-user {
+.gp-sidebar-user.btn {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -180,11 +180,11 @@
     font: inherit;
 }
 
-.gp-sidebar-user:hover {
+.gp-sidebar-user.btn:hover {
     background: rgba(255, 255, 255, 0.5);
 }
 
-[data-theme='dark'] .gp-sidebar-user:hover {
+[data-theme='dark'] .gp-sidebar-user.btn:hover {
     background: rgba(255, 255, 255, 0.05);
 }
 
