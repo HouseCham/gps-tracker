@@ -3,9 +3,9 @@ import type { Translation } from "@/i18n";
 import type { DeviceAccessListItem, DeviceDetail } from "@/types/api";
 import type { DeviceAccessTableTranslations } from "@/types/components";
 import type { Language } from "@/types/i18n";
-import type { JSX } from "react/jsx-runtime";
+import type { JSX, MouseEvent } from "react";
 //-- Components
-import { Button } from "@/components/react/ui";
+import { Button } from "@/components/react/ui/button";
 import { Plus, Trash2, UserRound, Users } from "lucide-react";
 import { RolePill } from "@/components/react/RolePill";
 //-- Utils
@@ -41,6 +41,19 @@ export function DeviceAccessTable({
     const t: DeviceAccessTableTranslations = translations.detail.accessTable;
     const users = device.users ?? [];
     const owner = device.access_role === 'owner';
+
+    /**
+     * Resolve the user id from the clicked button and forward to onRevoke.
+     * @param {MouseEvent<HTMLButtonElement>} e - The click event.
+     * @returns {void}
+     */
+    const handleRevoke = (e: MouseEvent<HTMLButtonElement>): void => {
+        const userId = e.currentTarget.dataset.userId;
+        if (!userId) return;
+        const user = users.find(u => u.user_id === userId);
+        if (!user) return;
+        onRevoke(user);
+    };
 
     return (
         <div className="dd-card dd-access-card">
@@ -128,7 +141,8 @@ export function DeviceAccessTable({
                                                 size="sm"
                                                 iconOnly
                                                 icon={<Trash2 size={13} />}
-                                                onClick={() => onRevoke(user)}
+                                                data-user-id={user.user_id}
+                                                onClick={handleRevoke}
                                                 aria-label={`${t.remove} ${user.name}`}
                                                 title={t.remove}
                                             />

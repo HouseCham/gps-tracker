@@ -14,7 +14,7 @@ import {
     Search as SearchIcon,
 } from 'lucide-react';
 //-- Components
-import { Button } from '@/components/react/ui';
+import { Button } from '@/components/react/ui/button';
 import { Select } from '@/components/react/form/ui';
 /**
  * Properties for the DeviceFilterBar component.

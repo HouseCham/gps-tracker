@@ -20,7 +20,7 @@ import {
 //-- Icons
 import { AlertTriangle, List as ListIcon, Plus, Satellite } from 'lucide-react';
 //-- Components
-import { Button } from '@/components/react/ui/Button';
+import { Button } from '@/components/react/ui/button';
 import { EmptyState } from '@/components/react/ui/EmptyState';
 import { DeviceFilterBar } from './DeviceFilterBar';
 import { DevicesTable } from './DevicesTable';

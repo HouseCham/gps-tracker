@@ -1,5 +1,4 @@
 //-- Types
-import { useEffect, useRef, useState } from 'react';
 import type { JSX, MouseEvent } from 'react';
 import type { DeviceWithAccess } from '@/types/api';
 import type { Translation } from '@/i18n';
@@ -10,11 +9,9 @@ import { redirectTo } from '@/lib/router-utils';
 //-- Icons
 import { Pencil, Trash2 } from 'lucide-react';
 //-- Components
-import { Button } from '@/components/react/ui/Button';
-import { CopyButton } from '@/components/react/CopyButton';
+import { CopyButton } from '@/components/react/ui/button';
 import { VehicleIcon } from './VehicleIcon';
 
-const COPIED_FEEDBACK_DURATION_MS = 1500;
 /**
  * Props for the DevicesTable component.
  * @interface DevicesTableProps
@@ -43,25 +40,9 @@ export function DevicesTable({
     onEdit,
     onDelete,
 }: DevicesTableProps): JSX.Element {
-    const [copiedDeviceId, setCopiedDeviceId] = useState<string | null>(null);
-    const copiedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const vehicleLabels = t.table.vehicleTypes;
     const roleLabels = t.roles;
 
-    /**
-     * Clear the copied device ID after a short delay.
-     */
-    useEffect(() => {
-        if (!copiedDeviceId) return;
-        if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
-        copiedTimerRef.current = setTimeout(
-            () => setCopiedDeviceId(null),
-            COPIED_FEEDBACK_DURATION_MS
-        );
-        return (): void => {
-            if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
-        };
-    }, [copiedDeviceId]);
     /**
      * Handle an action on a device row.
      * @param {MouseEvent<HTMLButtonElement>} e - The click event.
@@ -75,6 +56,17 @@ export function DevicesTable({
         if (!row) return;
         if (action === 'delete') onDelete(row);
         else onEdit(row);
+    };
+
+    /**
+     * Navigate to a device's detail page from a row link.
+     * @param {MouseEvent<HTMLElement>} e - The click event.
+     * @returns {void}
+     */
+    const handleNavigate = (e: MouseEvent<HTMLElement>): void => {
+        const id = e.currentTarget.dataset.id;
+        if (!id) return;
+        redirectTo(`/devices/detail?id=${id}`);
     };
     return (
         <div className="dev-table-wrap">
@@ -114,7 +106,8 @@ export function DevicesTable({
                                                 className="dev-cell-name dev-cell-clickable"
                                                 role="button"
                                                 tabIndex={0}
-                                                onClick={() => redirectTo(`/devices/detail?id=${d.id}`)}
+                                                data-id={d.id}
+                                                onClick={handleNavigate}
                                             >
                                                 {d.name}
                                             </div>
@@ -130,7 +123,7 @@ export function DevicesTable({
                                         <code className="dev-firmware">
                                             {d.uuid_firmware}
                                         </code>
-                                        <CopyButton 
+                                        <CopyButton
                                             value={d.uuid_firmware}
                                             label={t.table.copy}
                                             copiedLabel={t.table.copied}
@@ -161,38 +154,28 @@ export function DevicesTable({
                                 {/* Actions */}
                                 <td className="col-actions">
                                     <div className="dev-row-actions">
-                                        <Button
+                                        <button
                                             type="button"
                                             className="dev-action-btn"
-                                            iconOnly
                                             data-id={d.id}
                                             data-action="edit"
                                             onClick={handleAction}
                                             aria-label={`${t.table.edit} ${d.name}`}
                                             title={t.table.edit}
-                                            icon={
-                                                <Pencil
-                                                    size={14}
-                                                    strokeWidth={1.6}
-                                                />
-                                            }
-                                        />
-                                        <Button
+                                        >
+                                            <Pencil size={14} strokeWidth={1.6} />
+                                        </button>
+                                        <button
                                             type="button"
                                             className="dev-action-btn is-danger"
-                                            iconOnly
                                             data-id={d.id}
                                             data-action="delete"
                                             onClick={handleAction}
                                             aria-label={`${t.table.delete} ${d.name}`}
                                             title={t.table.delete}
-                                            icon={
-                                                <Trash2
-                                                    size={14}
-                                                    strokeWidth={1.6}
-                                                />
-                                            }
-                                        />
+                                        >
+                                            <Trash2 size={14} strokeWidth={1.6} />
+                                        </button>
                                     </div>
                                 </td>
                             </tr>

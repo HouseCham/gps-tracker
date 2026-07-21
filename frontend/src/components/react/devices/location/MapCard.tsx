@@ -4,7 +4,7 @@ import type { LocationPoint } from '@/types/api';
 import type { Language } from '@/types/i18n';
 import type { JSX } from 'react/jsx-runtime';
 //-- Components
-import { Button } from '@/components/react/ui';
+import { Button } from '@/components/react/ui/button';
 import {
     Map as MapLibreMap,
     type MapRef,

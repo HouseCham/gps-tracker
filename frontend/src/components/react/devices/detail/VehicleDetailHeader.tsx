@@ -7,7 +7,7 @@ import type { Translation } from "@/i18n";
 //-- Components
 import { StatusPill } from "./StatusPill";
 import { VehicleTag } from "./VehicleTag";
-import { Button } from "@/components/react/ui";
+import { Button } from "@/components/react/ui/button";
 import { RolePill } from "@/components/react/RolePill";
 //-- Icons
 import { Activity, ArrowLeft, Clock3, Pencil, Shield, Trash2, Users } from "lucide-react";

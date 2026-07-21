@@ -1,7 +1,7 @@
 //-- Types
 import type { JSX } from "react/jsx-runtime";
 //-- Components
-import { Button } from "@/components/react/ui/Button";
+import { Button } from "@/components/react/ui/button";
 //-- Icons
 import { AlertTriangle } from "lucide-react";
 /**

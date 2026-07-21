@@ -1,11 +1,14 @@
+//-- Types
 import type { Translation } from "@/i18n";
 import type { Language} from "@/types/i18n";
 import type { DeviceDetail } from "@/types/api";
 import type { JSX } from "react/jsx-runtime";
 import type { ReactNode } from "react";
-import { CopyButton } from "@/components/react/CopyButton";
+//-- Components
+import { CopyButton } from "@/components/react/ui/button";
 import { VehicleTag } from "./VehicleTag";
 import { RolePill } from "@/components/react/RolePill";
+//-- Utils
 import { formatRelativeTime } from "@/lib";
 import { getVehicleLabel } from "@/lib/features";
 

@@ -15,7 +15,7 @@ import { deriveDeviceStatus } from '@/lib/device-utils';
 import { useDeviceService } from '@/lib/api/services/deviceService';
 import { useLocationService } from '@/lib/api/services/locationService';
 //-- Components
-import { Button, Breadcrumbs, EmptyState } from '@/components/react/ui';
+import { Breadcrumbs, EmptyState } from '@/components/react/ui';
 import { EditDeviceModal, DeleteDeviceModal } from '@/components/react/modal';
 import { GrantAccessModal } from '@/components/react/modal/GrantAccessModal';
 import { RevokeAccessModal } from '@/components/react/modal/RevokeAccessModal';
@@ -25,6 +25,7 @@ import { KpiStrip } from './Kpi';
 import { MapCard, TelemetryCard } from '@/components/react/devices/location';
 import { DeviceInfoCard } from './DeviceInfoCard';
 import { DeviceAccessTable } from '@/components/react/devices/access';
+import { Button } from '@/components/react/ui/button';
 //-- Icons
 import {
     AlertTriangle,
