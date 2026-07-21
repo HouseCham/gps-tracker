@@ -10,6 +10,7 @@ import {
     type DeviceStatusFilter,
     type DeviceVehicleFilter,
 } from '@/constants/device';
+import type { Language } from '@/types';
 //-- Constants
 import {
     DEVICE_SORT_OPTIONS,
@@ -36,10 +37,12 @@ import { interpolateTemplate } from '@/lib';
 /**
  * Props for the DevicesPage component.
  * @interface DevicesPageProps
+ * @prop {Language} locale - The locale for the page.
  * @prop {Translation['device']} translations - The translations for the page.
  * @prop {string} pageLabel - The label for the page.
  */
 interface DevicesPageProps {
+    locale: Language;
     translations: Translation['device'];
     pageLabel: string;
 }
@@ -49,6 +52,7 @@ interface DevicesPageProps {
  * @returns {JSX.Element} The rendered component.
  */
 export function DevicesPage({
+    locale,
     translations: t,
     pageLabel,
 }: DevicesPageProps): JSX.Element {
@@ -292,6 +296,7 @@ export function DevicesPage({
                 <DevicesTable
                     t={t}
                     devices={filtered}
+                    locale={locale}
                     onEdit={setEditTarget}
                     onDelete={setDeleteTarget}
                 />

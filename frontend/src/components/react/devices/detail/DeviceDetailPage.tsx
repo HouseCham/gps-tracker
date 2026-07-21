@@ -1,0 +1,297 @@
+import '@/styles/device-detail.css';
+import '@/styles/devices.css';
+
+import { useEffect, useMemo, useState, type JSX } from 'react';
+//-- Types
+import type {
+    DeviceAccessListItem,
+    DeviceDetail,
+    DeviceVehicleType,
+} from '@/types/api';
+import type { Language } from '@/types';
+import type { Translation } from '@/i18n';
+//-- Utils
+import { deriveDeviceStatus } from '@/lib/device-utils';
+import { useDeviceService } from '@/lib/api/services/deviceService';
+import { useLocationService } from '@/lib/api/services/locationService';
+//-- Components
+import { Button, Breadcrumbs, EmptyState } from '@/components/react/ui';
+import { EditDeviceModal, DeleteDeviceModal } from '@/components/react/modal';
+import { GrantAccessModal } from '@/components/react/modal/GrantAccessModal';
+import { RevokeAccessModal } from '@/components/react/modal/RevokeAccessModal';
+import { DeviceDetailError } from './DeviceDetailError';
+import { VehicleDetailHeader } from './VehicleDetailHeader';
+import { KpiStrip } from './Kpi';
+import { MapCard, TelemetryCard } from '../location';
+import { DeviceInfoCard } from './DeviceInfoCard';
+import { DeviceAccessTable } from '../access';
+//-- Icons
+import {
+    AlertTriangle,
+} from 'lucide-react';
+
+/**
+ * Props for the DeviceDetailPage component
+ * @interface DeviceDetailPageProps
+ * @prop {Language} locale - Locale.
+ * @prop {Translation['device']} translations - Translations.
+ * @prop {string} pageLabel - Page label.
+ */
+interface DeviceDetailPageProps {
+    locale: Language;
+    translations: Translation['device'];
+    pageLabel: string;
+}
+
+/**
+ * DeviceDetailPage component
+ * @param {DeviceDetailPageProps} props - Props for the DeviceDetailPage component.
+ * @returns {JSX.Element} The rendered DeviceDetailPage component
+ */
+export function DeviceDetailPage({
+    locale,
+    translations: t,
+    pageLabel,
+}: DeviceDetailPageProps): JSX.Element {
+    const {
+        device,
+        isLoading: deviceLoading,
+        error: deviceError,
+        getDeviceById,
+        grantAccess,
+        revokeAccess,
+        updateDevice,
+        deleteDevice,
+    } = useDeviceService();
+    const {
+        latest,
+        isLoading: locationLoading,
+        error: locationError,
+        getLatestLocation,
+    } = useLocationService();
+    const [deviceId, setDeviceId] = useState<string | undefined>();
+    const [inviteOpen, setInviteOpen] = useState(false);
+    const [editOpen, setEditOpen] = useState(false);
+    const [deleteOpen, setDeleteOpen] = useState(false);
+    const [revokeTarget, setRevokeTarget] =
+        useState<DeviceAccessListItem | null>(null);
+
+    useEffect(() => {
+        setDeviceId(
+            new URLSearchParams(window.location.search).get('id') ?? ''
+        );
+    }, []);
+
+    useEffect(() => {
+        if (!deviceId) return;
+        void Promise.all([
+            getDeviceById(deviceId),
+            getLatestLocation(deviceId),
+        ]);
+    }, [deviceId, getDeviceById, getLatestLocation]);
+
+    const status = useMemo(
+        () => (device ? deriveDeviceStatus(device.last_seen_at, t) : null),
+        [device, t]
+    );
+
+    const goBack = (): void => {
+        window.location.href = `/${locale}/devices/`;
+    };
+
+    const reload = (): void => {
+        if (!deviceId) return;
+        void Promise.all([
+            getDeviceById(deviceId),
+            getLatestLocation(deviceId),
+        ]);
+    };
+
+    const handleInvite = async (userId: string): Promise<void> => {
+        if (!device) return;
+        await grantAccess(device.id, userId);
+        setInviteOpen(false);
+    };
+
+    const handleRevoke = async (): Promise<void> => {
+        if (!device || !revokeTarget) return;
+        await revokeAccess(device.id, revokeTarget.user_id);
+        setRevokeTarget(null);
+    };
+
+    const handleEdit = async (
+        id: string,
+        data: {
+            name: string;
+            vehicle_type: DeviceVehicleType;
+            access_role: DeviceDetail['access_role'];
+        }
+    ): Promise<void> => {
+        await updateDevice(id, data);
+        setEditOpen(false);
+    };
+
+    const handleDelete = async (): Promise<void> => {
+        if (!device) return;
+        await deleteDevice(device.id);
+        goBack();
+    };
+
+    if (deviceId === undefined || deviceLoading) {
+        return (
+            <div className="dd-loading" role="status">
+                {t.detail.loading}
+            </div>
+        );
+    }
+
+    if (!deviceId) {
+        return (
+            <EmptyState
+                icon={<AlertTriangle size={28} />}
+                title={t.detail.missingDeviceTitle}
+                message={t.detail.missingDeviceMessage}
+                action={
+                    <Button type="button" variant="primary" onClick={goBack}>
+                        {t.detail.backToDevices}
+                    </Button>
+                }
+            />
+        );
+    }
+
+    if (!device || !status) {
+        return (
+            <>
+                <DeviceDetailError
+                    message={deviceError?.message ?? t.detail.failedToLoad}
+                    onRetry={reload}
+                    retryLabel={t.detail.retry}
+                />
+                <Button type="button" variant="secondary" onClick={goBack}>
+                    {t.detail.backToDevices}
+                </Button>
+            </>
+        );
+    }
+
+    return (
+        <div className="device-detail">
+            <Breadcrumbs
+                items={[
+                    { label: t.detail.workspace, href: `/${locale}/` },
+                    { label: pageLabel, href: `/${locale}/devices/` },
+                    { label: device.name },
+                ]}
+            />
+            <VehicleDetailHeader
+                device={device}
+                status={status}
+                locale={locale}
+                translations={t}
+                onBack={goBack}
+                onShare={() => setInviteOpen(true)}
+                onEdit={() => setEditOpen(true)}
+                onDelete={() => setDeleteOpen(true)}
+            />
+            {(deviceError || locationError) && (
+                <DeviceDetailError
+                    message={
+                        deviceError?.message ??
+                        locationError?.message ??
+                        t.detail.failedToLoad
+                    }
+                    onRetry={reload}
+                    retryLabel={t.detail.retry}
+                />
+            )}
+            <KpiStrip
+                device={device}
+                location={latest}
+                status={status}
+                locale={locale}
+                translations={t}
+            />
+            <section className="dd-section">
+                <div className="dd-section-head">
+                    <div>
+                        <h2>{t.detail.gpsTelemetry}</h2>
+                        <div>{t.detail.gpsTelemetryDescription}</div>
+                    </div>
+                </div>
+                <div className="dd-map-grid">
+                    <MapCard
+                        location={latest}
+                        locale={locale}
+                        translations={t}
+                        loading={locationLoading}
+                        onRefresh={() => {
+                            if (deviceId) void getLatestLocation(deviceId);
+                        }}
+                    />
+                    <TelemetryCard
+                        location={latest}
+                        locale={locale}
+                        translations={t}
+                    />
+                </div>
+            </section>
+            <section className="dd-section">
+                <div className="dd-section-head">
+                    <div>
+                        <h2>{t.detail.deviceSection}</h2>
+                        <div>{t.detail.deviceSectionDescription}</div>
+                    </div>
+                </div>
+                <DeviceInfoCard
+                    device={device}
+                    locale={locale}
+                    translations={t}
+                />
+            </section>
+            <section className="dd-section">
+                <div className="dd-section-head">
+                    <div>
+                        <h2>{t.detail.access}</h2>
+                        <div>{t.detail.accessDescription}</div>
+                    </div>
+                </div>
+                <DeviceAccessTable
+                    device={device}
+                    locale={locale}
+                    translations={t}
+                    onInvite={() => setInviteOpen(true)}
+                    onRevoke={setRevokeTarget}
+                />
+            </section>
+            <GrantAccessModal
+                open={inviteOpen}
+                onClose={() => setInviteOpen(false)}
+                onGrant={handleInvite}
+                loading={deviceLoading}
+                t={t.detail.accessTable}
+            />
+            <RevokeAccessModal
+                user={revokeTarget}
+                onClose={() => setRevokeTarget(null)}
+                onConfirm={handleRevoke}
+                loading={deviceLoading}
+                t={t.detail.accessTable}
+            />
+            <EditDeviceModal
+                open={editOpen}
+                device={device}
+                onClose={() => setEditOpen(false)}
+                onSave={handleEdit}
+                t={t}
+            />
+            <DeleteDeviceModal
+                open={deleteOpen}
+                device={device}
+                onClose={() => setDeleteOpen(false)}
+                onConfirm={handleDelete}
+                t={t}
+            />
+        </div>
+    );
+}

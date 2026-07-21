@@ -352,6 +352,15 @@
     text-overflow: ellipsis;
 }
 
+.dev-cell-clickable {
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.dev-cell-clickable:hover {
+    text-decoration: underline;
+}
+
 .dev-cell-id {
     font-size: 11px;
     color: var(--text-muted);

@@ -3,13 +3,15 @@ import { useEffect, useRef, useState } from 'react';
 import type { JSX, MouseEvent } from 'react';
 import type { DeviceWithAccess } from '@/types/api';
 import type { Translation } from '@/i18n';
+import type { Language } from '@/types';
 //-- Utils
-import { copyToClipboard } from '@/lib/copy-to-clipboard';
 import { deriveDeviceStatus, formatRelativeTime } from '@/lib';
+import { redirectTo } from '@/lib/router-utils';
 //-- Icons
-import { Check, Copy, Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2 } from 'lucide-react';
 //-- Components
 import { Button } from '@/components/react/ui/Button';
+import { CopyButton } from '@/components/react/CopyButton';
 import { VehicleIcon } from './VehicleIcon';
 
 const COPIED_FEEDBACK_DURATION_MS = 1500;
@@ -18,12 +20,14 @@ const COPIED_FEEDBACK_DURATION_MS = 1500;
  * @interface DevicesTableProps
  * @prop {Translation['device']} t - Translation strings.
  * @prop {DeviceWithAccess[]} devices - List of devices.
+ * @prop {Language} locale - Locale.
  * @prop {(d: DeviceWithAccess) => void} onEdit - Callback for editing a device.
  * @prop {(d: DeviceWithAccess) => void} onDelete - Callback for deleting a device.
  */
 interface DevicesTableProps {
     t: Translation['device'];
     devices: DeviceWithAccess[];
+    locale: Language;
     onEdit: (d: DeviceWithAccess) => void;
     onDelete: (d: DeviceWithAccess) => void;
 }
@@ -35,6 +39,7 @@ interface DevicesTableProps {
 export function DevicesTable({
     t,
     devices,
+    locale,
     onEdit,
     onDelete,
 }: DevicesTableProps): JSX.Element {
@@ -57,20 +62,6 @@ export function DevicesTable({
             if (copiedTimerRef.current) clearTimeout(copiedTimerRef.current);
         };
     }, [copiedDeviceId]);
-    /**
-     * Copy the UUID to the clipboard.
-     * @param {MouseEvent<HTMLButtonElement>} e - The copy button click event.
-     * @returns {Promise<void>} A promise that resolves when the UUID is copied.
-     */
-    const handleCopy = async (
-        e: MouseEvent<HTMLButtonElement>
-    ): Promise<void> => {
-        const deviceId = e.currentTarget.dataset.id;
-        const uuid = e.currentTarget.dataset.uuid;
-        if (!deviceId || !uuid) return;
-        const copied = await copyToClipboard(uuid);
-        setCopiedDeviceId(copied ? deviceId : null);
-    };
     /**
      * Handle an action on a device row.
      * @param {MouseEvent<HTMLButtonElement>} e - The click event.
@@ -106,7 +97,6 @@ export function DevicesTable({
                 <tbody>
                     {devices.map(d => {
                         const status = deriveDeviceStatus(d.last_seen_at, t);
-                        const isCopied = copiedDeviceId === d.id;
                         return (
                             <tr key={d.id}>
                                 {/* Device name and ID */}
@@ -120,7 +110,12 @@ export function DevicesTable({
                                             />
                                         </span>
                                         <div className="dev-cell-device-text">
-                                            <div className="dev-cell-name">
+                                            <div
+                                                className="dev-cell-name dev-cell-clickable"
+                                                role="button"
+                                                tabIndex={0}
+                                                onClick={() => redirectTo(`/devices/detail?id=${d.id}`)}
+                                            >
                                                 {d.name}
                                             </div>
                                             <div className="dev-cell-id">
@@ -135,36 +130,10 @@ export function DevicesTable({
                                         <code className="dev-firmware">
                                             {d.uuid_firmware}
                                         </code>
-                                        <Button
-                                            type="button"
-                                            className="copy-btn"
-                                            iconOnly
-                                            data-id={d.id}
-                                            data-uuid={d.uuid_firmware}
-                                            onClick={handleCopy}
-                                            aria-label={`${
-                                                isCopied
-                                                    ? t.table.copied
-                                                    : t.table.copy
-                                            } ${d.uuid_firmware}`}
-                                            title={
-                                                isCopied
-                                                    ? t.table.copied
-                                                    : t.table.copy
-                                            }
-                                            icon={
-                                                isCopied ? (
-                                                    <Check
-                                                        size={11}
-                                                        strokeWidth={1.6}
-                                                    />
-                                                ) : (
-                                                    <Copy
-                                                        size={11}
-                                                        strokeWidth={1.6}
-                                                    />
-                                                )
-                                            }
+                                        <CopyButton 
+                                            value={d.uuid_firmware}
+                                            label={t.table.copy}
+                                            copiedLabel={t.table.copied}
                                         />
                                     </div>
                                 </td>
@@ -187,7 +156,7 @@ export function DevicesTable({
                                 <td
                                     className={`dev-cell-time${d.last_seen_at ? '' : ' never'}`}
                                 >
-                                    {formatRelativeTime(d.last_seen_at)}
+                                    {formatRelativeTime(d.last_seen_at, locale)}
                                 </td>
                                 {/* Actions */}
                                 <td className="col-actions">

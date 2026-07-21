@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 //-- Types
 import type { ApiError, Envelope, LocationPoint } from '@/types/api';
 //-- Utils
@@ -52,58 +52,61 @@ export const useLocationService = (): ILocationService => {
      * @param {string} deviceId - UUID of the device to query.
      * @returns {Promise<void>} Resolves once the request settles.
      */
-    const getLatestLocation = async (deviceId: string): Promise<void> => {
-        setIsLoading(true);
-        setError(null);
-        try {
-            const { data: response } = await withApiErrorToast(() =>
-                apiClient<Envelope<LocationPoint> | null>(
-                    `/devices/${deviceId}/locations/latest`,
-                    { method: 'GET' }
-                )
-            );
-            if (!response) {
-                // Genuinely empty response (shouldn't happen on a
-                // 2xx envelope). Treat as an unknown failure so the
-                // UI can retry.
-                setError(toApiError(new Error('empty response')));
-                return;
+    const getLatestLocation = useCallback(
+        async (deviceId: string): Promise<void> => {
+            setIsLoading(true);
+            setError(null);
+            try {
+                const { data: response } = await withApiErrorToast(() =>
+                    apiClient<Envelope<LocationPoint> | null>(
+                        `/devices/${deviceId}/locations/latest`,
+                        { method: 'GET' }
+                    )
+                );
+                if (!response) {
+                    // Genuinely empty response (shouldn't happen on a
+                    // 2xx envelope). Treat as an unknown failure so the
+                    // UI can retry.
+                    setError(toApiError(new Error('empty response')));
+                    return;
+                }
+                if (response.status_code === 404) {
+                    // "Never reported" — render the disconnected badge
+                    // without firing an error toast.
+                    setLatest(null);
+                    return;
+                }
+                if (response.status_code !== 200) {
+                    setError({
+                        status: response.status_code,
+                        message: response.message,
+                    });
+                    toastBus.push({
+                        variant: 'error',
+                        title: 'Error',
+                        message: response.message,
+                    });
+                    return;
+                }
+                setLatest(response.data);
+            } catch (err) {
+                // withApiErrorToast has already pushed a toast; capture
+                // the typed error so the caller can render inline too.
+                setError(
+                    err && typeof err === 'object' && 'status' in err
+                        ? //'in' narrows to a Record of unknown;
+                          // our ApiError is exactly that shape, so the cast
+                          // is the tightest available without restructuring
+                          // the catch block.
+                          (err as ApiError)
+                        : toApiError(err)
+                );
+            } finally {
+                setIsLoading(false);
             }
-            if (response.status_code === 404) {
-                // "Never reported" — render the disconnected badge
-                // without firing an error toast.
-                setLatest(null);
-                return;
-            }
-            if (response.status_code !== 200) {
-                setError({
-                    status: response.status_code,
-                    message: response.message,
-                });
-                toastBus.push({
-                    variant: 'error',
-                    title: 'Error',
-                    message: response.message,
-                });
-                return;
-            }
-            setLatest(response.data);
-        } catch (err) {
-            // withApiErrorToast has already pushed a toast; capture
-            // the typed error so the caller can render inline too.
-            setError(
-                err && typeof err === 'object' && 'status' in err
-                    ? //'in' narrows to a Record of unknown;
-                      // our ApiError is exactly that shape, so the cast
-                      // is the tightest available without restructuring
-                      // the catch block.
-                      (err as ApiError)
-                    : toApiError(err)
-            );
-        } finally {
-            setIsLoading(false);
-        }
-    };
+        },
+        []
+    );
 
     return {
         isLoading,
