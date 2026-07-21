@@ -264,6 +264,11 @@
     background: var(--bg-page);
 }
 
+.dd-map .maplibregl-map {
+    width: 100%;
+    height: 100%;
+}
+
 .dd-map-canvas {
     position: absolute;
     inset: 0;
@@ -690,5 +695,50 @@
 
     .dd-info-label {
         min-width: 100%;
+    }
+}
+
+.dd-marker {
+    position: relative;
+    width: 24px;
+    height: 24px;
+    display: grid;
+    place-items: center;
+}
+
+.dd-marker-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #ea4335;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    z-index: 2;
+}
+
+.dd-marker-pulse {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #ea4335;
+    opacity: 0.5;
+    z-index: 1;
+    animation: dd-marker-pulse 2.4s ease-out infinite;
+}
+
+@keyframes dd-marker-pulse {
+    0% {
+        transform: scale(0.6);
+        opacity: 0.5;
+    }
+    80% {
+        transform: scale(2.8);
+        opacity: 0;
+    }
+    100% {
+        opacity: 0;
     }
 }

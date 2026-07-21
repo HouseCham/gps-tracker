@@ -1,14 +1,33 @@
 //-- Types
-import type { Translation } from "@/i18n";
-import type { LocationPoint } from "@/types/api";
-import type { Language } from "@/types/i18n";
-import type { JSX } from "react/jsx-runtime";
+import type { Translation } from '@/i18n';
+import type { LocationPoint } from '@/types/api';
+import type { Language } from '@/types/i18n';
+import type { JSX } from 'react/jsx-runtime';
 //-- Components
-import { Button } from "@/components/react/ui";
+import { Button } from '@/components/react/ui';
+import {
+    Map as MapLibreMap,
+    type MapRef,
+    Marker,
+    NavigationControl,
+    ScaleControl,
+} from 'react-map-gl/maplibre';
+import 'maplibre-gl/dist/maplibre-gl.css';
 //-- Icons
-import { MapPin, RefreshCw } from "lucide-react";
+import { MapPin, RefreshCw } from 'lucide-react';
 //-- Utils
-import { formatRelativeTime } from "@/lib";
+import { useEffect, useRef } from 'react';
+import { formatRelativeTime } from '@/lib';
+import { MAP_STYLE_URL } from '@/constants/components/map';
+
+const FALLBACK_CENTER = { latitude: 19.4326, longitude: -99.1332 };
+const FALLBACK_ZOOM = 4;
+const DEVICE_ZOOM = 15;
+const EASE_TO_DURATION_MS = 1200;
+const REFRESH_ICON_SIZE = 13;
+const COORDINATE_DECIMALS = 4;
+const EMPTY_STATE_ICON_SIZE = 26;
+
 /**
  * Props for the MapCard component
  * @interface MapCardProps
@@ -38,6 +57,23 @@ export function MapCard({
     onRefresh,
 }: MapCardProps): JSX.Element {
     const t = translations.detail;
+    const hasLocation = location !== null;
+    const center = hasLocation
+        ? { latitude: location.latitude, longitude: location.longitude }
+        : FALLBACK_CENTER;
+    const mapRef = useRef<MapRef | null>(null);
+
+    // ponytail: initialViewState only applies on first mount; the device
+    // location usually arrives *after* that. Animate to it once data loads.
+    useEffect(() => {
+        if (!hasLocation) return;
+        mapRef.current?.easeTo({
+            center: [location.longitude, location.latitude],
+            zoom: DEVICE_ZOOM,
+            duration: EASE_TO_DURATION_MS,
+        });
+    }, [hasLocation, location?.latitude, location?.longitude]);
+
     return (
         <div className="dd-card">
             <div className="dd-card-head">
@@ -54,53 +90,64 @@ export function MapCard({
                     variant="secondary"
                     size="sm"
                     loading={loading}
-                    icon={<RefreshCw size={13} />}
+                    icon={<RefreshCw size={REFRESH_ICON_SIZE} />}
                     onClick={onRefresh}
                 >
                     {t.refresh}
                 </Button>
             </div>
             <div className="dd-map" aria-label={t.mapLabel}>
-                <div className="dd-map-canvas" />
-                <svg
-                    className="dd-map-road"
-                    viewBox="0 0 100 100"
-                    preserveAspectRatio="none"
-                    aria-hidden="true"
+                <MapLibreMap
+                    ref={mapRef}
+                    mapStyle={MAP_STYLE_URL}
+                    initialViewState={{
+                        ...center,
+                        zoom: hasLocation ? DEVICE_ZOOM : FALLBACK_ZOOM,
+                        pitch: 0,
+                        bearing: 0,
+                    }}
+                    attributionControl={{ compact: true }}
+                    dragRotate={false}
+                    pitchWithRotate={false}
+                    touchPitch={false}
+                    boxZoom={false}
                 >
-                    <path
-                        d="M 0 40 Q 30 40 50 50 T 100 60"
-                        fill="none"
-                        stroke="var(--border-strong)"
-                        strokeWidth="0.4"
-                        strokeDasharray="2 2"
+                    <NavigationControl
+                        position="top-right"
+                        visualizePitch={false}
                     />
-                    <path
-                        d="M 30 0 Q 30 30 50 50 T 70 100"
-                        fill="none"
-                        stroke="var(--border)"
-                        strokeWidth="0.4"
-                        strokeDasharray="1 3"
-                    />
-                </svg>
-                {location ? (
+                    <ScaleControl position="bottom-left" unit="metric" />
+                    {hasLocation && (
+                        <Marker
+                            latitude={location.latitude}
+                            longitude={location.longitude}
+                            anchor="center"
+                        >
+                            <div
+                                className="dd-marker"
+                                aria-hidden="true"
+                            >
+                                <span className="dd-marker-pulse" />
+                                <span className="dd-marker-dot" />
+                            </div>
+                        </Marker>
+                    )}
+                </MapLibreMap>
+                {hasLocation && (
                     <>
-                        <div className="dd-map-pulse" aria-hidden="true" />
-                        <div className="dd-map-pin" aria-hidden="true">
-                            <MapPin size={32} strokeWidth={1.8} />
-                        </div>
                         <div className="dd-map-live">
                             <span className="dd-map-live-dot" />
                             {t.liveTracking}
                         </div>
                         <div className="dd-map-coords">
-                            {location.latitude.toFixed(4)}°,{' '}
-                            {location.longitude.toFixed(4)}°
+                            {location.latitude.toFixed(COORDINATE_DECIMALS)}°,{' '}
+                            {location.longitude.toFixed(COORDINATE_DECIMALS)}°
                         </div>
                     </>
-                ) : (
+                )}
+                {!hasLocation && (
                     <div className="dd-map-empty">
-                        <MapPin size={26} />
+                        <MapPin size={EMPTY_STATE_ICON_SIZE} />
                         <span>{t.noLocation}</span>
                     </div>
                 )}

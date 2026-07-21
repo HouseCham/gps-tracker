@@ -1,7 +1,7 @@
 import '@/styles/device-detail.css';
 import '@/styles/devices.css';
 
-import { useEffect, useMemo, useState, type JSX } from 'react';
+import { useEffect, useState, type JSX } from 'react';
 //-- Types
 import type {
     DeviceAccessListItem,
@@ -22,9 +22,9 @@ import { RevokeAccessModal } from '@/components/react/modal/RevokeAccessModal';
 import { DeviceDetailError } from './DeviceDetailError';
 import { VehicleDetailHeader } from './VehicleDetailHeader';
 import { KpiStrip } from './Kpi';
-import { MapCard, TelemetryCard } from '../location';
+import { MapCard, TelemetryCard } from '@/components/react/devices/location';
 import { DeviceInfoCard } from './DeviceInfoCard';
-import { DeviceAccessTable } from '../access';
+import { DeviceAccessTable } from '@/components/react/devices/access';
 //-- Icons
 import {
     AlertTriangle,
@@ -90,10 +90,7 @@ export function DeviceDetailPage({
         ]);
     }, [deviceId, getDeviceById, getLatestLocation]);
 
-    const status = useMemo(
-        () => (device ? deriveDeviceStatus(device.last_seen_at, t) : null),
-        [device, t]
-    );
+    const status = device ? deriveDeviceStatus(device.last_seen_at, t) : null;
 
     const goBack = (): void => {
         window.location.href = `/${locale}/devices/`;
