@@ -1,22 +1,9 @@
 import type { Translation } from '@/i18n';
-import type { AdminStatItem, DataTableColumn } from '@/types/components';
+import type { AdminStatItem, DeviceStatus } from '@/types/components';
 import {
     DEVICE_OFFLINE_THRESHOLD_MIN,
     DEVICE_ONLINE_THRESHOLD_MIN,
-    type DeviceStatusKey,
 } from '@/constants/device';
-
-/**
- * The shape returned by `deriveDeviceStatus`. `key` is the canonical
- * machine-readable state; `label` and `dot` are localized + class
- * hints for the table pill.
- * @interface DeviceStatus
- */
-export interface DeviceStatus {
-    key: DeviceStatusKey;
-    label: string;
-    dot: 'success' | 'warning' | 'danger' | 'never';
-}
 
 /**
  * Derives the connection status of a device from its last heartbeat.
@@ -46,21 +33,6 @@ export function deriveDeviceStatus(
         };
     }
     return { key: 'offline', label: strings.offline, dot: 'danger' };
-}
-
-/**
- * Get the columns for the device table.
- * @param {Translation} t - The translation object.
- * @returns {DataTableColumn[]} The columns for the device table.
- */
-export function getDeviceTableColumns(t: Translation): DataTableColumn[] {
-    return [
-        { key: 'name', label: t.device.table.name, sortable: true },
-        { key: 'vehicleType', label: t.device.table.vehicleType },
-        { key: 'status', label: t.device.table.status },
-        { key: 'lastSeen', label: t.device.table.lastSeen },
-        { key: 'actions', label: t.device.table.actions, align: 'right' },
-    ];
 }
 
 /**
@@ -105,18 +77,4 @@ export function getDemoKpiItems(t: Translation): Array<AdminStatItem> {
     ];
 }
 
-/**
- * Returns the columns for the device-access table.
- * @param {Translation['device']['detail']['accessTable']} t - Localized column labels.
- * @returns {DataTableColumn[]} Column definitions.
- */
-export function getDeviceAccessTableColumns(
-    t: Translation['device']['detail']['accessTable']
-): DataTableColumn[] {
-    return [
-        { key: 'name', label: t.name },
-        { key: 'email', label: t.email },
-        { key: 'access_granted_at', label: t.accessGranted },
-        { key: 'actions', label: t.actions, align: 'right' },
-    ];
-}
+

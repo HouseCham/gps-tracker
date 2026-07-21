@@ -26,7 +26,13 @@ export const VEHICLE_TYPE_OPTIONS = [
  * Device connection status keys derived from the time since the last
  * heartbeat. Used by `deriveDeviceStatus` and the table filter chips.
  */
-export type DeviceStatusKey = 'online' | 'stale' | 'offline' | 'never-seen';
+export const DEVICE_STATUS_KEYS = [
+    'online',
+    'stale',
+    'offline',
+    'never-seen',
+] as const;
+export type DeviceStatusKey = (typeof DEVICE_STATUS_KEYS)[number];
 
 /**
  * Maximum age in minutes before a device is no longer "online".
