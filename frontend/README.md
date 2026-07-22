@@ -205,23 +205,6 @@ All API calls return responses wrapped in a generic `Envelope<T>` type with stat
 
 ---
 
-## Gallery Pages
-
-The project includes dev-only gallery pages for component verification during development:
-
-| Route                    | Content                      |
-| ------------------------ | ---------------------------- |
-| `/dev-gallery`           | UI primitives showcase       |
-| `/admin-gallery`         | Admin components             |
-| `/device-gallery`        | Device components + form     |
-| `/map-gallery`           | Map + route player           |
-| `/section-gallery`       | Sections and dashboard shell |
-| `/react-islands-gallery` | Modal, Toast, Dropdown       |
-
-These pages use hardcoded demo data and are not intended for production.
-
----
-
 ## TypeScript Conventions
 
 - **Strict mode** — extends `astro/tsconfigs/strict`

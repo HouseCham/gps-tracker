@@ -1,18 +1,27 @@
 //-- API
-import { authClient } from './client';
+import { apiClient, authClient } from './client';
 //-- Types
 import type {
     AuthSession,
     AuthUser,
+    Envelope,
     MeResponse,
     OAuthAuthorizeResponse,
     OAuthProvider,
+    ProfileResponse,
     SignInCredentials,
     SignUpCredentials,
+    UserRole,
 } from '@/types/api';
 //-- Utils
 import { handleApiError, withApiErrorToast } from '@/lib/api/api-utils';
-import { clearUser, setAuthLoading, setUser } from '@/lib/stores/auth';
+import {
+    clearUser,
+    setAuthLoading,
+    setRoleLoaded,
+    setUser,
+    setUserRole,
+} from '@/lib/stores/auth';
 import { redirectTo } from '@/lib';
 //-- Constants
 import { REDIRECT_AFTER_AUTH, REDIRECT_AFTER_SIGNOUT } from '@/constants/auth';
@@ -84,6 +93,37 @@ async function fetchMe(): Promise<AuthUser | null> {
         return data?.user ?? null;
     } catch {
         return null;
+    }
+}
+
+/**
+ * Calls GET /api/v1/users/me and stores the user's role. Fires as a
+ * side-effect of `getSession()` so the role lands alongside the session
+ * without an extra round trip from the auth gate. Errors are swallowed
+ * and the role stays `null`; `OnlyAdminRoute` treats a failed fetch
+ * as "deny" (fails closed) so an unverified role can never unlock the
+ * admin page.
+ *
+ * ponytail: best-effort, no retry, no cache. Add a retry / memo when
+ * the admin gate becomes a hotspot (it won't).
+ *
+ * @returns {Promise<UserRole | null>} The resolved role, or `null` on failure.
+ */
+async function fetchRole(): Promise<UserRole | null> {
+    try {
+        const { data } = await apiClient<
+            Envelope<ProfileResponse['user']> | null
+        >('/users/me', { method: 'GET' });
+        const role = data?.data?.role;
+        if (role === 'user' || role === 'super_admin') {
+            setUserRole(role);
+            return role;
+        }
+        return null;
+    } catch {
+        return null;
+    } finally {
+        setRoleLoaded();
     }
 }
 
@@ -207,7 +247,9 @@ export const authService = {
     /**
      * Restore the session on app startup. Calls GET /me and hydrates
      * `$user` when the cookie is still valid, otherwise clears the
-     * store. Safe to call multiple times.
+     * store. On a successful user hydration, also kicks off the role
+     * fetch (non-blocking) so role-gated routes can resolve on their
+     * first render. Safe to call multiple times.
      * @returns {Promise<AuthUser | null>} The authenticated user, or null.
      */
     async getSession(): Promise<AuthUser | null> {
@@ -216,6 +258,7 @@ export const authService = {
             const user = await fetchMe();
             if (user) {
                 setUser(user);
+                void fetchRole();
             } else {
                 clearUser();
             }

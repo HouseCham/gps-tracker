@@ -1,3 +1,6 @@
+//-- Types
+import type { UserRole } from './auth.types';
+
 export interface User {
     id: string;
     email: string;
@@ -5,7 +8,7 @@ export interface User {
     image: string | null;
     name: string;
     lastname: string;
-    role: 'user' | 'super_admin';
+    role: UserRole;
     must_change_password: boolean;
     created_at: string;
 }

@@ -278,6 +278,12 @@ export const es: Translation = {
             subtitle: 'Emite y revoca claves de API para tus dispositivos.',
         },
     },
+    noAccess: {
+        title: 'Área restringida',
+        body: 'No tienes permiso para ver esta página. Si crees que se trata de un error, contacta con un administrador del espacio de trabajo.',
+        backCta: 'Volver al panel',
+        hint: 'Inicia sesión con una cuenta con permisos.',
+    },
     device: {
         title: 'Dispositivos',
         online: 'En línea',
@@ -600,6 +606,10 @@ export const es: Translation = {
         userDeleted: {
             title: 'Usuario eliminado',
             message: '{name} ya no tiene acceso.',
+        },
+        accessDenied: {
+            title: 'Acceso denegado',
+            message: 'Esta área está restringida a administradores.',
         },
     },
     apiKeys: {

@@ -7,16 +7,28 @@ import { getTranslation } from '@/i18n';
 //-- Types
 import type { Language } from '@/types';
 //-- Components
-import { Sidebar } from '@/components/react/layout/Sidebar';
-import { Topbar } from '@/components/react/layout/Topbar';
-import { AuthProvider, ProtectedRoute } from '@/components/react/auth';
-
+import AppShell from '@/components/astro/layout/AppShell.astro';
+import {
+    AuthProvider,
+    OnlyAdminRoute,
+    ProtectedRoute,
+} from '@/components/react/auth';
+/**
+ * @interface Props
+ * @property {Language} [locale='en'] - Current locale code.
+ * @property {string | undefined} [title] - Page title.
+ * @property {string} pageLabel - Page title.
+ * @property {string | undefined} [pageEyebrow] - Page eyebrow.
+ * @property {string | undefined} [class] - Extra classes.
+ * @property {boolean} [onlyAdmin] - Marks the page as admin-only.
+ */
 interface Props {
     locale?: Language;
     title?: string;
     pageLabel: string;
     pageEyebrow?: string;
     class?: string;
+    onlyAdmin?: boolean;
 }
 
 const {
@@ -25,9 +37,9 @@ const {
     pageLabel,
     pageEyebrow,
     class: className,
+    onlyAdmin = false,
 } = Astro.props;
 const t = getTranslation(locale);
-const classes = ['gp-app', className].filter(Boolean).join(' ');
 const currentPath = Astro.url.pathname;
 ---
 
@@ -50,27 +62,33 @@ const currentPath = Astro.url.pathname;
     <body>
         <AuthProvider client:load>
             <ProtectedRoute client:load>
-                <div class={classes}>
-                    <Sidebar
-                        client:load
-                        locale={locale}
-                        pathname={currentPath}
-                        nav={t.nav}
-                        layout={t.layout}
-                    />
-                    <main class="gp-main">
-                        <Topbar
-                            client:load
+                {onlyAdmin ? (
+                    <OnlyAdminRoute client:load locale={locale}>
+                        <AppShell
                             locale={locale}
                             pageLabel={pageLabel}
                             pageEyebrow={pageEyebrow}
+                            class={className}
+                            nav={t.nav}
                             layout={t.layout}
-                        />
-                        <div class="gp-content">
+                            currentPath={currentPath}
+                        >
                             <slot />
-                        </div>
-                    </main>
-                </div>
+                        </AppShell>
+                    </OnlyAdminRoute>
+                ) : (
+                    <AppShell
+                        locale={locale}
+                        pageLabel={pageLabel}
+                        pageEyebrow={pageEyebrow}
+                        class={className}
+                        nav={t.nav}
+                        layout={t.layout}
+                        currentPath={currentPath}
+                    >
+                        <slot />
+                    </AppShell>
+                )}
             </ProtectedRoute>
         </AuthProvider>
     </body>

@@ -3,6 +3,8 @@ import type { JSX } from 'react';
 import { useStore } from '@nanostores/react';
 import { $sidebarOpen, closeSidebar } from '@/lib/stores/layout';
 import { $user } from '@/lib/stores/auth';
+//-- Hooks
+import { useAuth } from '@/lib/hooks/useAuth';
 //-- Types
 import type { Translation } from '@/i18n';
 import type { Language } from '@/types';
@@ -10,6 +12,7 @@ import type { Language } from '@/types';
 import { SHELL_NAV_ITEMS, SIDEBAR_ICONS } from '@/constants/layout';
 //-- Utils
 import { getInitials } from '@/lib';
+import { isSuperAdmin } from '@/lib/auth/role-utils';
 import { redirectTo } from '@/lib/router-utils';
 //-- Components
 import { Button } from '@/components/react/ui/button';
@@ -41,6 +44,15 @@ export function Sidebar({
 }: SidebarProps): JSX.Element {
     const sidebarOpen = useStore($sidebarOpen);
     const user = useStore($user);
+    const { role } = useAuth();
+
+    /**
+     * Filter out items that require the user to be a super admin.
+     * @returns {ShellNavItem[]} The filtered items.
+     */
+    const visibleItems = SHELL_NAV_ITEMS.filter(
+        item => !item.requiresRole || isSuperAdmin(role)
+    );
 
     return (
         <aside
@@ -62,7 +74,7 @@ export function Sidebar({
             <nav className="gp-sidebar-scroll" aria-label={layout.primaryNav}>
                 <div className="gp-sidebar-section">{layout.workspace}</div>
                 <div className="gp-sidebar-nav">
-                    {SHELL_NAV_ITEMS.map(item => {
+                    {visibleItems.map(item => {
                         const Icon = SIDEBAR_ICONS[item.icon];
                         const href = `/${locale}${item.href}`;
                         const isActive =
