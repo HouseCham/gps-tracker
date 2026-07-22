@@ -43,7 +43,7 @@ export function SearchInput({
     };
     useEffect(() => {
         window.addEventListener('keydown', onKey);
-        return () => window.removeEventListener('keydown', onKey);
+        return (): void => window.removeEventListener('keydown', onKey);
     }, []);
 
     return (

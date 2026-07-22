@@ -61,7 +61,7 @@ export function Modal({
         document.addEventListener('keydown', onKey);
         const previousOverflow = document.body.style.overflow;
         document.body.style.overflow = 'hidden';
-        return () => {
+        return (): void => {
             document.removeEventListener('keydown', onKey);
             document.body.style.overflow = previousOverflow;
         };

@@ -1,6 +1,6 @@
 import type { User } from '@/types/api';
 import type { Translation } from '@/i18n';
-import type { AdminStatItem, DataTableColumn } from '@/types/components';
+import type { DataTableColumn } from '@/types/components/ui';
 /**
  * @constant USER_TABLE_COLUMNS
  * @description Columns for the user table
