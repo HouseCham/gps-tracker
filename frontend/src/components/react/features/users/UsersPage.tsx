@@ -6,7 +6,11 @@ import type { CreatedUser, CreateUserDto, User } from '@/types/api';
 import type { Translation } from '@/i18n';
 import type { Language } from '@/types';
 //-- Utils
-import { computeFilterCounts, filterAndSortUsers, interpolateTemplate } from '@/lib';
+import {
+    computeFilterCounts,
+    filterAndSortUsers,
+    interpolateTemplate,
+} from '@/lib';
 //-- Components
 import { Alert } from '@/components/react/ui/Alert';
 import { Button } from '@/components/react/ui/button';
@@ -24,26 +28,31 @@ import { useUserService } from '@/lib/api/services/userService';
 //-- Stores
 import { toastBus } from '@/lib/stores/toast.store';
 //-- Icons
-import { AlertTriangle, Download, UserPlus, Users as UsersIcon } from 'lucide-react';
+import {
+    AlertTriangle,
+    Download,
+    UserPlus,
+    Users as UsersIcon,
+} from 'lucide-react';
 //-- Lazy components
-const AddUserModal = lazy(
-    () => import('@/components/react/modal/AddUserModal').then(m => ({
-        default: m.AddUserModal
+const AddUserModal = lazy(() =>
+    import('@/components/react/modal/AddUserModal').then(m => ({
+        default: m.AddUserModal,
     }))
 );
-const DeleteUserModal = lazy(
-    () => import('@/components/react/modal/deleteModal/DeleteUserModal').then(m => ({
-        default: m.DeleteUserModal
-    })),
-);
-const TempPasswordModal = lazy(
-    () => import('@/components/react/modal/TempPasswordModal').then(m => ({
-        default: m.TempPasswordModal
+const DeleteUserModal = lazy(() =>
+    import('@/components/react/modal/deleteModal/DeleteUserModal').then(m => ({
+        default: m.DeleteUserModal,
     }))
 );
-const UserDetailModal = lazy(
-    () => import('@/components/react/modal/UserDetailModal').then(m => ({
-        default: m.UserDetailModal
+const TempPasswordModal = lazy(() =>
+    import('@/components/react/modal/TempPasswordModal').then(m => ({
+        default: m.TempPasswordModal,
+    }))
+);
+const UserDetailModal = lazy(() =>
+    import('@/components/react/modal/UserDetailModal').then(m => ({
+        default: m.UserDetailModal,
     }))
 );
 /**
@@ -128,8 +137,7 @@ export function UsersPage({
 
     const counts: UserFilterCounts = computeFilterCounts(users);
 
-    const hasFilters =
-        !!query || roleFilter !== 'all' || emailFilter !== 'all';
+    const hasFilters = !!query || roleFilter !== 'all' || emailFilter !== 'all';
 
     /**
      * Clear all search filters.
@@ -202,13 +210,9 @@ export function UsersPage({
         <>
             <header className="users-page-header">
                 <div className="users-page-titles">
-                    <div className="users-page-eyebrow">
-                        {t.admin.title}
-                    </div>
+                    <div className="users-page-eyebrow">{t.admin.title}</div>
                     <h1 className="users-page-title">{pageLabel}</h1>
-                    <p className="users-page-sub">
-                        {pageSubtitle}
-                    </p>
+                    <p className="users-page-sub">{pageSubtitle}</p>
                 </div>
                 <div className="users-page-actions">
                     <Button

@@ -1,15 +1,15 @@
 //-- Types
-import type { DeviceStatus } from "@/types/components";
-import type { JSX } from "react/jsx-runtime";
+import type { DeviceStatus } from '@/types/components';
+import type { JSX } from 'react/jsx-runtime';
 //-- Constants
-import { DEVICE_STATUS_KEYS } from "@/constants";
+import { DEVICE_STATUS_KEYS } from '@/constants';
 /**
  * Props for the StatusPill component
  * @interface StatusPillProps
  * @param {DeviceStatus} status - The device status
  */
 interface StatusPillProps {
-    status: DeviceStatus
+    status: DeviceStatus;
 }
 /**
  * StatusPill component

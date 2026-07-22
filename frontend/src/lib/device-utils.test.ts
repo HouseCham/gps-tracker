@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { en } from '@/i18n';
-import {
-    deriveDeviceStatus,
-    getDemoKpiItems,
-} from './device-utils';
+import { deriveDeviceStatus, getDemoKpiItems } from './device-utils';
 
 describe('getDemoKpiItems', () => {
     it('returns four KPI items', () => {

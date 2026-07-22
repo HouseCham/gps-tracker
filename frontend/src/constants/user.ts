@@ -1,4 +1,4 @@
-import type { Language } from "@/types";
+import type { Language } from '@/types';
 
 /**
  * The literal phrase a user must type to enable the destructive button.

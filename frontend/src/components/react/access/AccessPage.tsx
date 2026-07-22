@@ -1,7 +1,12 @@
 import '@/styles/access.css';
 import { lazy, Suspense, useEffect, useState, type JSX } from 'react';
 //-- Types
-import type { AccessTranslation, ApiKeyRevealPayload, ApiKeySortKey, Language } from '@/types';
+import type {
+    AccessTranslation,
+    ApiKeyRevealPayload,
+    ApiKeySortKey,
+    Language,
+} from '@/types';
 //-- Icons
 import { AlertTriangle, KeyRound, KeySquare } from 'lucide-react';
 //-- Components

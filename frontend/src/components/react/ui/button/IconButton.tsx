@@ -1,9 +1,9 @@
 import '@/styles/components/icon-button.css';
 //-- Types
-import type { JSX } from "react/jsx-runtime";
+import type { JSX } from 'react/jsx-runtime';
 import type { MouseEvent } from 'react';
 //-- Icons
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from 'lucide-react';
 
 /**
  * Props for the IconButton component
@@ -15,18 +15,24 @@ import { Pencil, Trash2 } from "lucide-react";
  * @prop {(e: MouseEvent<HTMLButtonElement>) => void} handleAction - The onClick handler.
  */
 interface IconButtonProps {
-    dataID: string
-    danger?: boolean
-    ariaLabel?: string
-    title?: string
-    handleAction: (e: MouseEvent<HTMLButtonElement>) => void
+    dataID: string;
+    danger?: boolean;
+    ariaLabel?: string;
+    title?: string;
+    handleAction: (e: MouseEvent<HTMLButtonElement>) => void;
 }
 /**
  * Renders an icon button for editing or deleting an item.
  * @param {IconButtonProps} props - The props for the component.
  * @returns {JSX.Element} The rendered component.
  */
-export function IconButton({ dataID, danger = false, ariaLabel, title, handleAction }: IconButtonProps): JSX.Element {
+export function IconButton({
+    dataID,
+    danger = false,
+    ariaLabel,
+    title,
+    handleAction,
+}: IconButtonProps): JSX.Element {
     const buttonClass = `icon-action-btn ${danger ? 'is-danger' : ''}`;
     return (
         <button
@@ -38,11 +44,11 @@ export function IconButton({ dataID, danger = false, ariaLabel, title, handleAct
             aria-label={ariaLabel}
             title={title}
         >
-            {
-                danger
-                ? <Trash2 size={14} strokeWidth={1.6} />
-                : <Pencil size={14} strokeWidth={1.6} />
-            }
+            {danger ? (
+                <Trash2 size={14} strokeWidth={1.6} />
+            ) : (
+                <Pencil size={14} strokeWidth={1.6} />
+            )}
         </button>
-    )
+    );
 }

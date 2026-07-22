@@ -54,12 +54,7 @@ export function UserDetailModal({
     if (!user) return null;
     const devices = user.devices ?? [];
     return (
-        <Modal
-            open={user !== null}
-            onClose={onClose}
-            title={t.title}
-            size="lg"
-        >
+        <Modal open={user !== null} onClose={onClose} title={t.title} size="lg">
             <div className="userdetail-banner">
                 <div className="userdetail-avatar">
                     {getInitials(`${user.name} ${user.lastname}`)}

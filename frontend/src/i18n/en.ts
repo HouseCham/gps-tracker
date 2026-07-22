@@ -551,7 +551,8 @@ export const en = {
             title: 'Add user',
             create: 'Create user',
             cancel: 'Cancel',
-            roleHint: 'Super admins have full access to user management and platform settings.',
+            roleHint:
+                'Super admins have full access to user management and platform settings.',
         },
         tempPassword: {
             title: 'User created',
@@ -592,8 +593,7 @@ export const en = {
             export: 'Export',
             addFirstKey: 'Issue your first API key',
             noResultsTitle: 'No API keys match your filters',
-            noResultsMessage:
-                'Try clearing the search or issuing a new key.',
+            noResultsMessage: 'Try clearing the search or issuing a new key.',
             clearFilters: 'Clear filters',
             addKey: 'Issue API key',
             refreshed: 'Refreshed.',
@@ -652,8 +652,7 @@ export const en = {
                 'Tip: type the device name exactly as shown — case-sensitive.',
             revoke: 'Revoke key',
             revoking: 'Revoking…',
-            revokeFailed:
-                'Could not revoke the API key. Try again.',
+            revokeFailed: 'Could not revoke the API key. Try again.',
             revokeMismatch: 'The name must match the device exactly.',
         },
     },

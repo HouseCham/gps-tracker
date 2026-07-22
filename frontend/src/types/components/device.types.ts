@@ -137,7 +137,8 @@ export interface DeviceUserAccessTableStrings {
 /**
  * The translations for the device access table.
  */
-export type DeviceAccessTableTranslations = Translation['device']['detail']['accessTable'];
+export type DeviceAccessTableTranslations =
+    Translation['device']['detail']['accessTable'];
 /**
  * The shape returned by `deriveDeviceStatus`. `key` is the canonical
  * machine-readable state; `label` and `dot` are localized + class

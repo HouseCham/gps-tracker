@@ -567,7 +567,8 @@ export const es: Translation = {
             title: 'Añadir usuario',
             create: 'Crear usuario',
             cancel: 'Cancelar',
-            roleHint: 'Los super admins tienen acceso completo a la gestión de usuarios y a los ajustes de la plataforma.',
+            roleHint:
+                'Los super admins tienen acceso completo a la gestión de usuarios y a los ajustes de la plataforma.',
         },
         tempPassword: {
             title: 'Usuario creado',

@@ -123,10 +123,7 @@ export function MapCard({
                             longitude={location.longitude}
                             anchor="center"
                         >
-                            <div
-                                className="dd-marker"
-                                aria-hidden="true"
-                            >
+                            <div className="dd-marker" aria-hidden="true">
                                 <span className="dd-marker-pulse" />
                                 <span className="dd-marker-dot" />
                             </div>

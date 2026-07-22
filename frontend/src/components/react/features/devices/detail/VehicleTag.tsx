@@ -1,9 +1,9 @@
 //-- Types
-import type { Translation } from "@/i18n";
-import type { DeviceVehicleType } from "@/types/api";
-import type { JSX } from "react/jsx-runtime";
+import type { Translation } from '@/i18n';
+import type { DeviceVehicleType } from '@/types/api';
+import type { JSX } from 'react/jsx-runtime';
 //-- Utils
-import { getVehicleLabel } from "@/lib/features";
+import { getVehicleLabel } from '@/lib/features';
 //-- Components
 import { VehicleIcon } from '@/components/react/features/devices';
 

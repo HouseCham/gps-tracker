@@ -76,5 +76,3 @@ export function getDemoKpiItems(t: Translation): Array<AdminStatItem> {
         },
     ];
 }
-
-

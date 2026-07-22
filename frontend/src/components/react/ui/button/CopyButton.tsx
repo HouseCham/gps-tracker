@@ -1,12 +1,12 @@
-import { useState } from "react";
+import { useState } from 'react';
 //-- Types
-import type { JSX } from "react/jsx-runtime";
+import type { JSX } from 'react/jsx-runtime';
 //-- Utils
-import { copyToClipboard } from "@/lib";
+import { copyToClipboard } from '@/lib';
 //-- Components
-import { Button } from "./Button";
+import { Button } from './Button';
 //-- Icons
-import { Check, Copy } from "lucide-react";
+import { Check, Copy } from 'lucide-react';
 
 /**
  * Props for the CopyButton component.
@@ -19,7 +19,7 @@ interface CopyButtonProps {
     value: string;
     label: string;
     copiedLabel: string;
-};
+}
 /**
  * A button that copies a value to the clipboard.
  * @param {CopyButtonProps} props - Props for the component.

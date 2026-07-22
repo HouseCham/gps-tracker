@@ -21,31 +21,32 @@ import { VehicleDetailHeader } from './VehicleDetailHeader';
 import { KpiStrip } from './Kpi';
 import { DeviceInfoCard } from './DeviceInfoCard';
 import { Button } from '@/components/react/ui/button';
-import { MapCard, TelemetryCard } from '@/components/react/features/devices/location';
+import {
+    MapCard,
+    TelemetryCard,
+} from '@/components/react/features/devices/location';
 import { DeviceAccessTable } from '@/components/react/features/devices/access';
 //-- Icons
-import {
-    AlertTriangle,
-} from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 //-- Lazy components
-const EditDeviceModal = lazy(
-    () => import('@/components/react/modal').then(m => ({
-        default: m.EditDeviceModal
+const EditDeviceModal = lazy(() =>
+    import('@/components/react/modal').then(m => ({
+        default: m.EditDeviceModal,
     }))
 );
-const DeleteDeviceModal = lazy(
-    () => import('@/components/react/modal').then(m => ({
-        default: m.DeleteDeviceModal
+const DeleteDeviceModal = lazy(() =>
+    import('@/components/react/modal').then(m => ({
+        default: m.DeleteDeviceModal,
     }))
 );
-const GrantAccessModal = lazy(
-    () => import('@/components/react/modal').then(m => ({
-        default: m.GrantAccessModal
+const GrantAccessModal = lazy(() =>
+    import('@/components/react/modal').then(m => ({
+        default: m.GrantAccessModal,
     }))
 );
-const RevokeAccessModal = lazy(
-    () => import('@/components/react/modal').then(m => ({
-        default: m.RevokeAccessModal
+const RevokeAccessModal = lazy(() =>
+    import('@/components/react/modal').then(m => ({
+        default: m.RevokeAccessModal,
     }))
 );
 
@@ -289,9 +290,9 @@ export function DeviceDetailPage({
                     onGrant={handleInvite}
                     loading={deviceLoading}
                     t={t.detail.accessTable}
-                />    
+                />
             </Suspense>
-            
+
             {/* Revoke Access Modal */}
             <Suspense fallback={null}>
                 <RevokeAccessModal
@@ -302,7 +303,7 @@ export function DeviceDetailPage({
                     t={t.detail.accessTable}
                 />
             </Suspense>
-            
+
             {/* Edit Device Modal */}
             <Suspense fallback={null}>
                 <EditDeviceModal
@@ -313,7 +314,7 @@ export function DeviceDetailPage({
                     t={t}
                 />
             </Suspense>
-            
+
             {/* Delete Device Modal */}
             <Suspense fallback={null}>
                 <DeleteDeviceModal

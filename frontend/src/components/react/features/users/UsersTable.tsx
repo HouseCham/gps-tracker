@@ -95,9 +95,7 @@ export function UsersTable({
                             <td>
                                 <div className="users-cell-user">
                                     <div className="users-cell-avatar">
-                                        {getInitials(
-                                            `${u.name} ${u.lastname}`
-                                        )}
+                                        {getInitials(`${u.name} ${u.lastname}`)}
                                     </div>
                                     <div className="users-cell-name-block">
                                         <button
@@ -115,10 +113,7 @@ export function UsersTable({
                                 </div>
                             </td>
                             <td>
-                                <RolePill
-                                    role={u.role}
-                                    labels={roleLabels}
-                                />
+                                <RolePill role={u.role} labels={roleLabels} />
                             </td>
                             <td>
                                 <EmailStatusPill

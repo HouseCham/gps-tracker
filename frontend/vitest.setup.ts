@@ -8,7 +8,10 @@ if (typeof globalThis.localStorage === 'undefined') {
         configurable: true,
     });
 }
-if (typeof window !== 'undefined' && typeof window.localStorage === 'undefined') {
+if (
+    typeof window !== 'undefined' &&
+    typeof window.localStorage === 'undefined'
+) {
     Object.defineProperty(window, 'localStorage', {
         value: new Window().localStorage,
         writable: true,

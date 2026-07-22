@@ -1,9 +1,16 @@
-import type { Translation } from "@/i18n";
-import { formatRelativeTime, renderNumberWithUnit } from "@/lib";
-import type { LocationPoint } from "@/types/api";
-import type { Language } from "@/types/i18n";
-import { Battery, Clock3, Crosshair, Gauge, Mountain, Signal } from "lucide-react";
-import type { JSX } from "react/jsx-runtime";
+import type { Translation } from '@/i18n';
+import { formatRelativeTime, renderNumberWithUnit } from '@/lib';
+import type { LocationPoint } from '@/types/api';
+import type { Language } from '@/types/i18n';
+import {
+    Battery,
+    Clock3,
+    Crosshair,
+    Gauge,
+    Mountain,
+    Signal,
+} from 'lucide-react';
+import type { JSX } from 'react/jsx-runtime';
 /**
  * Props for the TelemetryCard component
  * @interface TelemetryCardProps
@@ -34,7 +41,10 @@ export function TelemetryCard({
               {
                   icon: <Mountain size={14} />,
                   label: t.telemetry.altitude,
-                  value: renderNumberWithUnit(location.altitude, t.units.meters),
+                  value: renderNumberWithUnit(
+                      location.altitude,
+                      t.units.meters
+                  ),
               },
               {
                   icon: <Gauge size={14} />,

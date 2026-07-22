@@ -1,9 +1,9 @@
 //-- Types
-import type { JSX } from "react/jsx-runtime";
+import type { JSX } from 'react/jsx-runtime';
 //-- Components
-import { Button } from "@/components/react/ui/button";
+import { Button } from '@/components/react/ui/button';
 //-- Icons
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle } from 'lucide-react';
 /**
  * Props for the DeviceDetailError component
  * @interface DeviceDetailErrorProps

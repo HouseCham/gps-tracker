@@ -82,9 +82,7 @@ describe('redirectTo', () => {
         setPath('/es/devices/');
         setNavigatorLanguage('en-US');
         redirectTo('/devices/detail?id=abc');
-        expect(replaceSpy).toHaveBeenCalledWith(
-            '/es/devices/detail?id=abc'
-        );
+        expect(replaceSpy).toHaveBeenCalledWith('/es/devices/detail?id=abc');
     });
 
     it('prefixes the path with /en when the pathname starts with /en', () => {

@@ -1,17 +1,25 @@
 //-- Types
-import type { JSX } from "react/jsx-runtime";
-import type { DeviceDetail } from "@/types/api";
-import type { DeviceStatus } from "@/types/components";
-import type { Language } from "@/types";
-import type { Translation } from "@/i18n";
+import type { JSX } from 'react/jsx-runtime';
+import type { DeviceDetail } from '@/types/api';
+import type { DeviceStatus } from '@/types/components';
+import type { Language } from '@/types';
+import type { Translation } from '@/i18n';
 //-- Components
-import { StatusPill } from "./StatusPill";
-import { VehicleTag } from "./VehicleTag";
-import { Button } from "@/components/react/ui/button";
-import { RolePill } from "@/components/react/RolePill";
+import { StatusPill } from './StatusPill';
+import { VehicleTag } from './VehicleTag';
+import { Button } from '@/components/react/ui/button';
+import { RolePill } from '@/components/react/RolePill';
 //-- Icons
-import { Activity, ArrowLeft, Clock3, Pencil, Shield, Trash2, Users } from "lucide-react";
-import { formatRelativeTime } from "@/lib";
+import {
+    Activity,
+    ArrowLeft,
+    Clock3,
+    Pencil,
+    Shield,
+    Trash2,
+    Users,
+} from 'lucide-react';
+import { formatRelativeTime } from '@/lib';
 /**
  * Props for the VehicleDetailHeader component
  * @interface VehicleDetailHeaderProps
@@ -33,7 +41,7 @@ interface VehicleDetailHeaderProps {
     onShare: () => void;
     onEdit: () => void;
     onDelete: () => void;
-};
+}
 /**
  * VehicleDetailHeader component
  * @param {VehicleDetailHeaderProps} props - Props for the VehicleDetailHeader component.

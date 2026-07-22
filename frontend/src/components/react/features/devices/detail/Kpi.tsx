@@ -1,13 +1,13 @@
 //-- Types
-import type { Translation } from "@/i18n";
-import type { Language } from "@/types";
-import type { DeviceDetail, LocationPoint } from "@/types/api";
-import type { DeviceStatus } from "@/types/components";
-import type { JSX, ReactNode } from "react";
+import type { Translation } from '@/i18n';
+import type { Language } from '@/types';
+import type { DeviceDetail, LocationPoint } from '@/types/api';
+import type { DeviceStatus } from '@/types/components';
+import type { JSX, ReactNode } from 'react';
 //-- Icons
-import { Battery, Signal, Gauge, Clock3 } from "lucide-react";
-import { clampValue, formatDateTime, formatRelativeTime } from "@/lib";
-import { getVehicleBatteryMetricTone } from "@/lib/features";
+import { Battery, Signal, Gauge, Clock3 } from 'lucide-react';
+import { clampValue, formatDateTime, formatRelativeTime } from '@/lib';
+import { getVehicleBatteryMetricTone } from '@/lib/features';
 /**
  * Props for the KpiCard component
  * @interface KpiCardProps
@@ -25,7 +25,7 @@ interface KpiCardProps {
     hint: string;
     percent: number | null;
     tone: 'ok' | 'warn' | 'bad' | '';
-};
+}
 /**
  * KpiCard component
  * @param {KpiCardProps} props - Props for the KpiCard component.
@@ -99,10 +99,16 @@ export function KpiStrip({
     const signalPercent =
         location?.signal_strength == null
             ? null
-            : clampValue(Math.round((location.signal_strength / 31) * 100), 0, 100);
+            : clampValue(
+                  Math.round((location.signal_strength / 31) * 100),
+                  0,
+                  100
+              );
     const speed = location?.speed == null ? null : location.speed;
     const speedPercent =
-        speed == null ? null : clampValue(Math.round((speed / 25) * 100), 0, 100);
+        speed == null
+            ? null
+            : clampValue(Math.round((speed / 25) * 100), 0, 100);
     const lastPing = location?.recorded_at ?? device.last_seen_at;
     const statusPercent =
         status.key === 'online'

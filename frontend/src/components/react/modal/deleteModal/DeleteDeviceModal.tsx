@@ -50,9 +50,7 @@ export function DeleteDeviceModal({
             subtitle={t.modals.deleteSubtitle}
             warningTitle={t.modals.deleteWarningTitle}
             warningMessage={t.modals.deleteWarningMessage}
-            targetIcon={
-                <VehicleIcon type={device.vehicle_type} size={18} />
-            }
+            targetIcon={<VehicleIcon type={device.vehicle_type} size={18} />}
             targetName={device.name}
             targetMeta={
                 <>

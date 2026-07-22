@@ -119,8 +119,12 @@ export function DeleteModal({
                     <AlertTriangle size={16} strokeWidth={1.6} />
                 </span>
                 <div className="modal-delete-warn-body">
-                    <div className="modal-delete-warn-title">{warningTitle}</div>
-                    <div className="modal-delete-warn-msg">{warningMessage}</div>
+                    <div className="modal-delete-warn-title">
+                        {warningTitle}
+                    </div>
+                    <div className="modal-delete-warn-msg">
+                        {warningMessage}
+                    </div>
                 </div>
             </div>
             <div className="delete-target">

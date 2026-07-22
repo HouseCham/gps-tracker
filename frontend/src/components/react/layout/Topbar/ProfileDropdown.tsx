@@ -55,10 +55,7 @@ export function ProfileDropdown({
     useClickOutside(ref, handleClose);
 
     return (
-        <div
-            className="chrome-dropdown chrome-dropdown--profile"
-            ref={ref}
-        >
+        <div className="chrome-dropdown chrome-dropdown--profile" ref={ref}>
             <div className="chrome-profile-card">
                 <div className="chrome-profile-avatar">
                     {user ? getInitials(user.name) : '?'}

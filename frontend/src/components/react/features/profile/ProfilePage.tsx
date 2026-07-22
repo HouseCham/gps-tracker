@@ -30,9 +30,9 @@ import { toastBus } from '@/lib/stores/toast.store';
 import { formatDate } from '@/lib/date-utils';
 import { getInitials, interpolateTemplate } from '@/lib';
 //-- Lazy components
-const EditProfileModal = lazy(
-    () => import('@/components/react/modal').then(m => ({
-        default: m.EditProfileModal
+const EditProfileModal = lazy(() =>
+    import('@/components/react/modal').then(m => ({
+        default: m.EditProfileModal,
     }))
 );
 

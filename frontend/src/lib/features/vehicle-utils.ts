@@ -6,7 +6,9 @@ import type { DeviceVehicleType } from '@/types/api';
  * @param {number | null} percent - The battery percentage.
  * @returns {string} The tone for the battery metric.
  */
-export function getVehicleBatteryMetricTone(percent: number | null): 'ok' | 'warn' | 'bad' | '' {
+export function getVehicleBatteryMetricTone(
+    percent: number | null
+): 'ok' | 'warn' | 'bad' | '' {
     if (percent == null) return '';
     if (percent < 20) return 'bad';
     if (percent < 50) return 'warn';

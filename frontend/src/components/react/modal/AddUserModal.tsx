@@ -52,9 +52,9 @@ export function AddUserModal({
         name: '',
         lastname: '',
     });
-    const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>(
-        {}
-    );
+    const [errors, setErrors] = useState<
+        Partial<Record<keyof FormState, string>>
+    >({});
 
     useEffect(() => {
         if (open) {
@@ -93,11 +93,7 @@ export function AddUserModal({
             size="md"
             footer={
                 <>
-                    <Button
-                        type="button"
-                        variant="secondary"
-                        onClick={onClose}
-                    >
+                    <Button type="button" variant="secondary" onClick={onClose}>
                         {createT.cancel}
                     </Button>
                     <Button
@@ -112,11 +108,7 @@ export function AddUserModal({
                 </>
             }
         >
-            <Field
-                label={t.email}
-                required
-                error={errors.email}
-            >
+            <Field label={t.email} required error={errors.email}>
                 <Input
                     type="email"
                     placeholder={t.emailPlaceholder}

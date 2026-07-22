@@ -1,15 +1,15 @@
 //-- Types
-import type { Translation } from "@/i18n";
-import type { DeviceAccessListItem, DeviceDetail } from "@/types/api";
-import type { DeviceAccessTableTranslations } from "@/types/components";
-import type { Language } from "@/types/i18n";
-import type { JSX, MouseEvent } from "react";
+import type { Translation } from '@/i18n';
+import type { DeviceAccessListItem, DeviceDetail } from '@/types/api';
+import type { DeviceAccessTableTranslations } from '@/types/components';
+import type { Language } from '@/types/i18n';
+import type { JSX, MouseEvent } from 'react';
 //-- Components
-import { Button } from "@/components/react/ui/button";
-import { Plus, Trash2, UserRound, Users } from "lucide-react";
-import { RolePill } from "@/components/react/RolePill";
+import { Button } from '@/components/react/ui/button';
+import { Plus, Trash2, UserRound, Users } from 'lucide-react';
+import { RolePill } from '@/components/react/RolePill';
 //-- Utils
-import { formatRelativeTime, getInitials, interpolateTemplate } from "@/lib";
+import { formatRelativeTime, getInitials, interpolateTemplate } from '@/lib';
 /**
  * Props for the DeviceAccessTable component
  * @interface DeviceAccessTableProps

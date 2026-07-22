@@ -1,5 +1,5 @@
-import type { API_KEY_SORT_OPTIONS } from "@/constants";
-import type { Translation } from "@/i18n";
+import type { API_KEY_SORT_OPTIONS } from '@/constants';
+import type { Translation } from '@/i18n';
 
 /**
  * Translation bundle shape consumed by the access page island.

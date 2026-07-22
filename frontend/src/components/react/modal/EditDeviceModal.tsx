@@ -140,7 +140,12 @@ export function EditDeviceModal({
                                 labels={t.table.vehicleTypes}
                                 onChange={vehicleType =>
                                     setForm(f =>
-                                        f ? { ...f, vehicle_type: vehicleType } : f
+                                        f
+                                            ? {
+                                                  ...f,
+                                                  vehicle_type: vehicleType,
+                                              }
+                                            : f
                                     )
                                 }
                             />

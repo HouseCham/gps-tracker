@@ -117,16 +117,16 @@ export function UserFilterBar({
                     <Select
                         options={sortOptions}
                         value={sortBy}
-                    onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-                        const next = e.target.value;
-                        if (
-                            next !== 'created-desc' &&
-                            next !== 'created-asc' &&
-                            next !== 'name-asc'
-                        )
-                            return;
-                        onSortBy(next);
-                    }}
+                        onChange={(e: ChangeEvent<HTMLSelectElement>) => {
+                            const next = e.target.value;
+                            if (
+                                next !== 'created-desc' &&
+                                next !== 'created-asc' &&
+                                next !== 'name-asc'
+                            )
+                                return;
+                            onSortBy(next);
+                        }}
                         aria-label={t.sortLabel}
                     />
                 </div>
@@ -209,7 +209,9 @@ function Chip({
             aria-pressed={active}
         >
             {label}
-            {count !== null && <span className="users-chip-count">{count}</span>}
+            {count !== null && (
+                <span className="users-chip-count">{count}</span>
+            )}
         </button>
     );
 }

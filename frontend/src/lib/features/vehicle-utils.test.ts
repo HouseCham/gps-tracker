@@ -1,9 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { en } from '@/i18n';
-import {
-    getVehicleBatteryMetricTone,
-    getVehicleLabel,
-} from './vehicle-utils';
+import { getVehicleBatteryMetricTone, getVehicleLabel } from './vehicle-utils';
 
 describe('getVehicleBatteryMetricTone', () => {
     it('returns an empty string for null percentages', () => {
