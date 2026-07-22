@@ -2,11 +2,11 @@ import '@/styles/users.css';
 
 import { lazy, Suspense, useEffect, useState, type JSX } from 'react';
 //-- Types
-import type { CreateUserDto, User } from '@/types/api';
+import type { CreatedUser, CreateUserDto, User } from '@/types/api';
 import type { Translation } from '@/i18n';
 import type { Language } from '@/types';
 //-- Utils
-import { interpolateTemplate } from '@/lib';
+import { computeFilterCounts, filterAndSortUsers, interpolateTemplate } from '@/lib';
 //-- Components
 import { Alert } from '@/components/react/ui/Alert';
 import { Button } from '@/components/react/ui/button';
@@ -56,73 +56,6 @@ type UsersTranslation = Translation['user'] &
     Pick<Translation, 'toast'>;
 
 /**
- * Apply the role / email / search filters and sort the result.
- * Cheap O(n log n); called every render — no memoization needed.
- */
-function filterAndSortUsers(
-    users: User[],
-    query: string,
-    roleFilter: UserRoleFilter,
-    emailFilter: UserEmailFilter,
-    sortBy: UserSortKey
-): User[] {
-    const q = query.trim().toLowerCase();
-    let list = users.filter(u => {
-        if (
-            q &&
-            !`${u.name} ${u.lastname} ${u.email}`.toLowerCase().includes(q)
-        ) {
-            return false;
-        }
-        if (roleFilter !== 'all' && u.role !== roleFilter) return false;
-        if (emailFilter === 'verified' && !u.email_verified) return false;
-        if (emailFilter === 'unverified' && u.email_verified) return false;
-        return true;
-    });
-    list = [...list].sort((a, b) => {
-        switch (sortBy) {
-            case 'created-desc':
-                return (
-                    new Date(b.created_at).getTime() -
-                    new Date(a.created_at).getTime()
-                );
-            case 'created-asc':
-                return (
-                    new Date(a.created_at).getTime() -
-                    new Date(b.created_at).getTime()
-                );
-            case 'name-asc':
-                return `${a.name} ${a.lastname}`.localeCompare(
-                    `${b.name} ${b.lastname}`
-                );
-            default:
-                return 0;
-        }
-    });
-    return list;
-}
-
-/**
- * Counts driving the chip badges in the filter bar.
- * Single O(n) pass over `users`.
- */
-function computeFilterCounts(users: User[]): UserFilterCounts {
-    let verified = 0;
-    let admin = 0;
-    for (const u of users) {
-        if (u.email_verified) verified += 1;
-        if (u.role === 'super_admin') admin += 1;
-    }
-    return {
-        all: users.length,
-        admin,
-        user: users.length - admin,
-        verified,
-        unverified: users.length - verified,
-    };
-}
-
-/**
  * Props for the UsersPage component.
  * @interface UsersPageProps
  * @prop {Language} locale - Active locale.
@@ -169,7 +102,7 @@ export function UsersPage({
     const [addOpen, setAddOpen] = useState(false);
     const [createLoading, setCreateLoading] = useState(false);
     const [detailTarget, setDetailTarget] = useState<User | null>(null);
-    const [createdUser, setCreatedUser] = useState<User | null>(null);
+    const [createdUser, setCreatedUser] = useState<CreatedUser | null>(null);
     const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
     const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -216,15 +149,10 @@ export function UsersPage({
     const handleCreate = async (payload: CreateUserDto): Promise<void> => {
         setCreateLoading(true);
         try {
-            await createUser(payload);
-            const created = users.find(u => u.email === payload.email);
-            if (created) {
-                setCreatedUser(created);
-            }
+            const created = await createUser(payload);
+            setCreatedUser(created);
             setAddOpen(false);
-            const name = created
-                ? `${created.name} ${created.lastname}`.trim()
-                : payload.email;
+            const name = `${created.name} ${created.lastname}`.trim();
             toastBus.push({
                 variant: 'success',
                 title: t.toast.userCreated.title,

@@ -9,6 +9,7 @@ vi.mock('@/lib/auth/client', () => ({
 import * as clientMod from '@/lib/auth/client';
 import { $toasts } from '@/lib/stores/toast.store';
 import type {
+    CreatedUser,
     CreateUserDto,
     Envelope,
     User,
@@ -98,8 +99,11 @@ describe('useUserService', () => {
 
     it('createUser appends the returned user to the existing list', async () => {
         const seedEnv = listEnv([u1]);
-        const created = makeUser({ id: 'u3', name: 'Gamma' });
-        const createEnv: { data: Envelope<User> } = {
+        const created: CreatedUser = {
+            ...makeUser({ id: 'u3', name: 'Gamma' }),
+            temporary_password: '0123456789abcdef0123456789abcdef',
+        };
+        const createEnv: { data: Envelope<CreatedUser> } = {
             data: { status_code: 201, message: 'OK', data: created },
         };
         apiClient
@@ -113,10 +117,13 @@ describe('useUserService', () => {
         });
         expect(result.current.users.map(u => u.id)).toEqual(['u1']);
 
-        const dto: CreateUserDto = { email: created.email, role: 'user' };
+        const dto: CreateUserDto = { email: created.email, name: created.name };
+        let response: User | undefined;
         await act(async () => {
-            await result.current.createUser(dto);
+            response = await result.current.createUser(dto);
         });
+
+        expect(response).toEqual(created);
 
         expect(result.current.users.map(u => u.id)).toEqual(['u1', 'u3']);
         expect(apiClient).toHaveBeenLastCalledWith(

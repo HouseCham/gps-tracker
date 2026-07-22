@@ -8,3 +8,4 @@ export * from './UserDetailModal';
 export { DeleteModal } from './deleteModal';
 export * from './deleteModal/DeleteDeviceModal';
 export * from './deleteModal/DeleteUserModal';
+export * from './EditProfileModal';

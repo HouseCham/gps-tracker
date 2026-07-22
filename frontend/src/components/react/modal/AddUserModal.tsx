@@ -5,7 +5,7 @@ import type { Translation } from '@/i18n';
 //-- Components
 import { Modal } from '@/components/react/ui';
 import { Button } from '@/components/react/ui/button';
-import { Field, Input, Select } from '@/components/react/form/ui';
+import { Field, Input } from '@/components/react/form/ui';
 //-- Icons
 import { UserPlus } from 'lucide-react';
 
@@ -32,7 +32,6 @@ interface FormState {
     email: string;
     name: string;
     lastname: string;
-    role: 'user' | 'super_admin';
 }
 
 /**
@@ -52,7 +51,6 @@ export function AddUserModal({
         email: '',
         name: '',
         lastname: '',
-        role: 'user',
     });
     const [errors, setErrors] = useState<Partial<Record<keyof FormState, string>>>(
         {}
@@ -60,7 +58,7 @@ export function AddUserModal({
 
     useEffect(() => {
         if (open) {
-            setForm({ email: '', name: '', lastname: '', role: 'user' });
+            setForm({ email: '', name: '', lastname: '' });
             setErrors({});
         }
     }, [open]);
@@ -74,14 +72,14 @@ export function AddUserModal({
     const submit = (): void => {
         const e: Partial<Record<keyof FormState, string>> = {};
         if (!form.email.trim()) e.email = t.emailRequired;
+        if (!form.name.trim()) e.name = t.nameRequired;
         setErrors(e);
         if (Object.keys(e).length > 0) return;
 
         const payload: CreateUserDto = {
             email: form.email.trim(),
-            role: form.role,
+            name: form.name.trim(),
         };
-        if (form.name.trim()) payload.name = form.name.trim();
         if (form.lastname.trim()) payload.lastname = form.lastname.trim();
 
         void onCreate(payload);
@@ -118,7 +116,6 @@ export function AddUserModal({
                 label={t.email}
                 required
                 error={errors.email}
-                help={!errors.email ? undefined : undefined}
             >
                 <Input
                     type="email"
@@ -132,11 +129,17 @@ export function AddUserModal({
                 />
             </Field>
             <div className="gp-field-row">
-                <Field label={t.name} help={t.namePlaceholder}>
+                <Field
+                    label={t.name}
+                    required
+                    error={errors.name}
+                    help={!errors.name ? t.namePlaceholder : undefined}
+                >
                     <Input
                         type="text"
                         placeholder={t.namePlaceholder}
                         value={form.name}
+                        invalid={!!errors.name}
                         onChange={(e: ChangeEvent<HTMLInputElement>) =>
                             setForm(f => ({ ...f, name: e.target.value }))
                         }
@@ -156,20 +159,6 @@ export function AddUserModal({
                     />
                 </Field>
             </div>
-            <Field label={t.role} required help={createT.roleHint}>
-                <Select
-                    options={[
-                        { value: 'user', label: t.roleUser },
-                        { value: 'super_admin', label: t.roleSuperAdmin },
-                    ]}
-                    value={form.role}
-                    onChange={(e: ChangeEvent<HTMLSelectElement>) => {
-                        const role = e.target.value;
-                        if (role !== 'user' && role !== 'super_admin') return;
-                        setForm(f => ({ ...f, role }));
-                    }}
-                />
-            </Field>
         </Modal>
     );
 }

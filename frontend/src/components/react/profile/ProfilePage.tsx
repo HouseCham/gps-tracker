@@ -1,6 +1,16 @@
 import '@/styles/profile.css';
-
-import { useEffect, useState, type JSX } from 'react';
+import { lazy, Suspense, useEffect, useState, type JSX } from 'react';
+//-- Stores
+import { useStore } from '@nanostores/react';
+import { $user } from '@/lib/stores/auth';
+//-- Types
+import type { Translation } from '@/i18n';
+import type { Language } from '@/types';
+import type { UpdateUserDto } from '@/types/api';
+//-- Components
+import { EmptyState } from '@/components/react/ui';
+import { Button } from '@/components/react/ui/button';
+//-- Icons
 import {
     AlertTriangle,
     CalendarDays,
@@ -13,28 +23,34 @@ import {
     ShieldCheck,
     UserRound,
 } from 'lucide-react';
-//-- Stores
-import { useStore } from '@nanostores/react';
-import { $user } from '@/lib/stores/auth';
-//-- Types
-import type { Translation } from '@/i18n';
-import type { Language } from '@/types';
-import type { UpdateUserDto } from '@/types/api';
-//-- Components
-import { EmptyState } from '@/components/react/ui';
-import { Button } from '@/components/react/ui/button';
-//-- Hooks
+//-- Services
 import { useUserService } from '@/lib/api/services/userService';
+//-- Utils
 import { toastBus } from '@/lib/stores/toast.store';
 import { formatDate } from '@/lib/date-utils';
 import { getInitials, interpolateTemplate } from '@/lib';
-import { EditProfileModal } from './EditProfileModal';
+//-- Lazy components
+const EditProfileModal = lazy(
+    () => import('@/components/react/modal').then(m => ({
+        default: m.EditProfileModal
+    }))
+);
 
+/**
+ * Props for the ProfilePage component
+ * @interface ProfilePageProps
+ * @prop {Language} locale - The current locale
+ * @prop {Translation['profile']} translations - The translations
+ */
 interface ProfilePageProps {
     locale: Language;
     translations: Translation['profile'];
 }
-
+/**
+ * Profile page component
+ * @param {ProfilePageProps} props - The props for the component
+ * @returns {JSX.Element} The rendered component
+ */
 export function ProfilePage({
     locale,
     translations: t,
@@ -49,15 +65,23 @@ export function ProfilePage({
         void getUserByID(authUser.id).catch(error => {
             void error;
         });
-    }, [authUser?.id, getUserByID]);
+    }, [authUser?.id]);
 
+    /**
+     * Reload the user data manually
+     * @returns {void}
+     */
     const reload = (): void => {
         if (!authUser?.id) return;
         void getUserByID(authUser.id).catch(error => {
             void error;
         });
     };
-    
+    /**
+     * Save/Update the user profile
+     * @param {UpdateUserDto} payload - The user profile data
+     * @returns {Promise<void>}
+     */
     const saveProfile = async (payload: UpdateUserDto): Promise<void> => {
         if (!user) return;
         await updateUser(user.id, payload);
@@ -268,13 +292,16 @@ export function ProfilePage({
                 </section>
             </div>
 
-            <EditProfileModal
-                open={editOpen}
-                user={user}
-                translations={t.edit}
-                onClose={() => setEditOpen(false)}
-                onSave={saveProfile}
-            />
+            {/* Edit Profile Informatino Modal */}
+            <Suspense fallback={null}>
+                <EditProfileModal
+                    open={editOpen}
+                    user={user}
+                    translations={t.edit}
+                    onClose={() => setEditOpen(false)}
+                    onSave={saveProfile}
+                />
+            </Suspense>
         </div>
     );
 }

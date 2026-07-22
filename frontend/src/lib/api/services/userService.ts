@@ -1,8 +1,9 @@
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 //-- Types
 import type {
     ApiError,
     CreateUserDto,
+    CreatedUser,
     Envelope,
     UpdateUserDto,
     User,
@@ -43,7 +44,7 @@ interface IUserService {
         page?: number,
         pageSize?: number
     ) => Promise<void>;
-    createUser: (payload: CreateUserDto) => Promise<void>;
+    createUser: (payload: CreateUserDto) => Promise<CreatedUser>;
     updateUser: (id: string, payload: UpdateUserDto) => Promise<void>;
     deleteUser: (id: string) => Promise<void>;
 }
@@ -101,76 +102,67 @@ export const useUserService = (): IUserService => {
      * @returns {Promise<void>} Resolves when the user is fetched and state is updated.
      * @throws {ApiError} An error object containing the error status, message, and code.
      */
-    const getUserByID = useCallback(
-        async (
-            id: string,
-            page: number = 1,
-            pageSize: number = 10
-        ): Promise<void> => {
-            setError(null);
-            setIsLoading(true);
-            setUser(null);
-            try {
-                const { data: response } = await withApiErrorToast(() =>
-                    apiClient<Envelope<UserWithDevices> | null>(
-                        `/users/${id}`,
-                        {
-                            method: 'GET',
-                            query: { page, page_size: pageSize },
-                        }
-                    )
-                );
-                if (!response) {
-                    toastBus.push({
-                        variant: 'error',
-                        title: 'Error',
-                        message: 'get user returned a null response',
-                    });
-                    handleApiError(
-                        new Error('get user returned a null response')
-                    );
-                }
-                setUser(response.data);
-            } catch (caught: unknown) {
-                const apiError = isApiError(caught)
-                    ? caught
-                    : toApiError(caught);
-                setError(apiError);
-                throw apiError;
-            } finally {
-                setIsLoading(false);
+    async function getUserByID(
+        id: string,
+        page: number = 1,
+        pageSize: number = 10
+    ): Promise<void> {
+        setError(null);
+        setIsLoading(true);
+        setUser(null);
+        try {
+            const { data: response } = await withApiErrorToast(() =>
+                apiClient<Envelope<UserWithDevices> | null>(`/users/${id}`, {
+                    method: 'GET',
+                    query: { page, page_size: pageSize },
+                })
+            );
+            if (!response) {
+                toastBus.push({
+                    variant: 'error',
+                    title: 'Error',
+                    message: 'get user returned a null response',
+                });
+                handleApiError(new Error('get user returned a null response'));
             }
-        },
-        []
-    );
+            setUser(response.data);
+        } catch (caught: unknown) {
+            const apiError = isApiError(caught) ? caught : toApiError(caught);
+            setError(apiError);
+            throw apiError;
+        } finally {
+            setIsLoading(false);
+        }
+    }
 
     /**
      * Creates a new user.
      * @param {CreateUserDto} payload - The user data to create.
-     * @returns {Promise<void>} Resolves when the user is created.
+     * @returns {Promise<CreatedUser>} The created user and temporary password.
      * @throws {ApiError} An error object containing the error status, message, and code.
      */
-    async function createUser(payload: CreateUserDto): Promise<void> {
+    async function createUser(payload: CreateUserDto): Promise<CreatedUser> {
         resetState();
         setIsLoading(true);
         try {
             const { data: response } = await withApiErrorToast(() =>
-                apiClient<Envelope<User> | null>('/users', {
+                apiClient<Envelope<CreatedUser> | null>('/users', {
                     method: 'POST',
                     body: payload,
                 })
             );
-            if (!response || !response.data) {
+            if (!response || response.status_code !== 201 || !response.data) {
                 toastBus.push({
                     variant: 'error',
                     title: 'Error',
-                    message: 'create user returned a null response',
+                    message: 'create user returned an invalid response',
                 });
                 handleApiError(
-                    new Error('create user returned a null response')
+                    new Error('create user returned an invalid response')
                 );
             }
-            setUsers([...users, response.data]);
+            setUsers(prev => [...prev, response.data]);
+            return response.data;
         } finally {
             setIsLoading(false);
         }

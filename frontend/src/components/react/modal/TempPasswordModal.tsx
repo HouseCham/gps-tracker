@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { JSX } from 'react/jsx-runtime';
 //-- Types
-import type { User } from '@/types/api';
+import type { CreatedUser } from '@/types/api';
 import type { Translation } from '@/i18n';
 //-- Utils
 import { copyToClipboard } from '@/lib';
@@ -13,30 +13,22 @@ import { Button } from '@/components/react/ui/button';
 import { AlertTriangle, Check, Copy } from 'lucide-react';
 
 /**
- * Local extension of {@link User} that recognises the optional
- * `_temporary_password` field the mock data carried. Real backends do
- * not return it (the password is emailed) so it's optional everywhere.
- */
-type CreatedUser = User & { _temporary_password?: string };
-
-/**
  * Props for the TempPasswordModal component.
  * @interface TempPasswordModalProps
- * @prop {User | null} user - The just-created user, or null when the modal is closed.
+ * @prop {CreatedUser | null} user - The just-created user, or null when the modal is closed.
  * @prop {() => void} onClose - Callback for closing the modal.
  * @prop {Translation['user']['tempPassword']} t - Translation strings.
  */
 interface TempPasswordModalProps {
-    user: User | null;
+    user: CreatedUser | null;
     onClose: () => void;
     t: Translation['user']['tempPassword'];
 }
 
 /**
  * TempPasswordModal — confirmation dialog shown right after a user is
- * created. When the backend supplies a temporary password (mock data)
- * it surfaces it for the admin to copy; otherwise it tells the admin
- * that a password was emailed to the user.
+ * created. It surfaces the one-time temporary password for the admin
+ * to deliver to the new user through a secure channel.
  * @param {TempPasswordModalProps} props
  * @returns {JSX.Element | null}
  */
@@ -49,8 +41,7 @@ export function TempPasswordModal({
 
     if (!user) return null;
 
-    const created = user as CreatedUser;
-    const tempPassword = created._temporary_password;
+    const tempPassword = user.temporary_password;
 
     /**
      * Copy the temporary password to the clipboard.
@@ -84,27 +75,25 @@ export function TempPasswordModal({
                     })}
                 </div>
             </div>
-            {tempPassword ? (
-                <div className="temp-pwd-display">
-                    <code className="temp-pwd-value">{tempPassword}</code>
-                    <div className="temp-pwd-actions">
-                        <Button
-                            type="button"
-                            variant="secondary"
-                            icon={
-                                copied ? (
-                                    <Check size={14} strokeWidth={1.6} />
-                                ) : (
-                                    <Copy size={14} strokeWidth={1.6} />
-                                )
-                            }
-                            onClick={() => void copy()}
-                        >
-                            {copied ? t.copied : t.copy}
-                        </Button>
-                    </div>
+            <div className="temp-pwd-display">
+                <code className="temp-pwd-value">{tempPassword}</code>
+                <div className="temp-pwd-actions">
+                    <Button
+                        type="button"
+                        variant="secondary"
+                        icon={
+                            copied ? (
+                                <Check size={14} strokeWidth={1.6} />
+                            ) : (
+                                <Copy size={14} strokeWidth={1.6} />
+                            )
+                        }
+                        onClick={() => void copy()}
+                    >
+                        {copied ? t.copied : t.copy}
+                    </Button>
                 </div>
-            ) : null}
+            </div>
             <p className="temp-pwd-meta">{t.meta}</p>
         </Modal>
     );
