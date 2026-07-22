@@ -1,0 +1,40 @@
+---
+import type { GetStaticPaths } from 'astro';
+//-- Translations
+import { getTranslation } from '@/i18n';
+//-- Types
+import type { Language } from '@/types';
+//-- Components
+import MainLayout from '@/components/astro/layout/MainLayout.astro';
+import { UsersPage } from '@/components/react/features/users';
+
+/**
+ * Static paths — same locales as the rest of the authenticated pages.
+ */
+export const getStaticPaths: GetStaticPaths = () => {
+    return [{ params: { lan: 'en' } }, { params: { lan: 'es' } }];
+};
+
+const locale = Astro.params.lan as Language;
+const translation = getTranslation(locale);
+const title = `${translation.page.users.title} · ${translation.layout.appName}`;
+---
+
+<MainLayout
+    locale={locale}
+    title={title}
+    pageLabel={translation.page.users.title}
+    pageEyebrow={translation.layout.workspace}
+>
+    <UsersPage
+        client:load
+        locale={locale}
+        translations={{
+            ...translation.user,
+            admin: translation.admin,
+            toast: translation.toast,
+        }}
+        pageLabel={translation.page.users.title}
+        pageSubtitle={translation.page.users.subtitle}
+    />
+</MainLayout>

@@ -26,9 +26,12 @@ export interface UserWithDevices extends User {
 
 export interface CreateUserDto {
     email: string;
-    name?: string;
+    name: string;
     lastname?: string;
-    role: 'user' | 'super_admin';
+}
+
+export interface CreatedUser extends User {
+    temporary_password: string;
 }
 
 export interface UpdateUserDto {

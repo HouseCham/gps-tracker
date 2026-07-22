@@ -1,4 +1,4 @@
-# GPS Tracker — Frontend
+# Open GPS — Frontend
 
 A self-hosted, open-source web application for real-time GPS tracking of IoT devices. Built for hobbyists, small businesses, and developers who want full control over their tracking data.
 

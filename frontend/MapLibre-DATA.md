@@ -153,7 +153,7 @@ map.addControl(
 map.addControl(
     new maplibregl.GeolocateControl({
         positionOptions: { enableHighAccuracy: true },
-        trackUserLocation: true, // ★ for a GPS tracker, this is your "follow device" mode
+        trackUserLocation: true, // ★ for a Open GPS, this is your "follow device" mode
         showUserHeading: true,
     }),
     'top-right'

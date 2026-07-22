@@ -7,7 +7,7 @@ import type { Language } from '@/types';
 import type { LoginFormStrings } from '@/types/components';
 //-- Components
 import AuthLayout from '@/components/astro/layout/AuthLayout.astro';
-import { LoginForm } from '@/components/react/auth';
+import { LoginForm } from '@/components/react/form';
 /**
  * @type {GetStaticPaths}
  */
@@ -32,9 +32,23 @@ const loginStrings: LoginFormStrings = {
     loginSubtitle: translation.auth.loginSubtitle,
     signInWithGoogle: translation.auth.signInWithGoogle,
     orContinueWith: translation.auth.orContinueWith,
+    rememberDevice: translation.auth.rememberDevice,
+    forgotPassword: translation.auth.forgotPassword,
+    noAccount: translation.auth.noAccount,
+    createOne: translation.auth.createOne,
+    firstAdminBadge: translation.auth.firstAdminBadge,
+    loginFailed: translation.auth.loginFailed,
+    showPassword: translation.auth.showPassword,
+    hidePassword: translation.auth.hidePassword,
+    emailPasswordRequired: translation.auth.emailPasswordRequired,
+    apiInspectorTitle: translation.auth.apiInspectorTitle,
+    apiInspectorCookieNote: translation.auth.apiInspectorCookieNote,
 };
 ---
 
-<AuthLayout isLoginPage title={`${translation.auth.loginTitle} · GPS Tracker`}>
-    <LoginForm client:load strings={loginStrings} />
+<AuthLayout isLoginPage title={`${translation.auth.loginTitle} · Open GPS`}>
+    <LoginForm 
+        client:load 
+        strings={loginStrings} 
+    />
 </AuthLayout>

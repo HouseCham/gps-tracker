@@ -1,142 +1,107 @@
 import '@/styles/ui/modal.css';
-//-- React
-import { useEffect, useId, useRef } from 'react';
-//-- Types
-import type { ReactNode } from 'react';
-import type { ModalSize, ModalVariant } from '@/types/components';
-//-- Icons
+
 import { X } from 'lucide-react';
+import { useEffect, type JSX, type ReactNode } from 'react';
+
 /**
+ * Size presets for the modal dialog.
+ * - `sm` — confirmation prompts and short forms (420px)
+ * - `md` — default; Add/Edit forms (480px)
+ * - `lg` — multi-field forms and rich content (560px)
+ */
+export type ModalSize = 'sm' | 'md' | 'lg';
+
+const SIZE_TO_MAX_WIDTH: Record<ModalSize, number> = {
+    sm: 420,
+    md: 480,
+    lg: 560,
+};
+
+/**
+ * Props for the Modal component.
  * @interface ModalProps
- * @param {boolean} open - Whether the modal is open.
- * @param {function} onClose - The function to call when the modal is closed.
- * @param {string} title - The title of the modal.
- * @param {ReactNode} children - The children of the modal.
- * @param {ReactNode} footer - The footer of the modal.
- * @param {ModalVariant} [variant='default'] - The variant of the modal.
- * @param {ModalSize} [size='md'] - The size of the modal.
- * @param {boolean} [closeOnBackdrop=true] - Whether to close the modal when the backdrop is clicked.
- * @param {boolean} [closeOnEscape=true] - Whether to close the modal when the escape key is pressed.
- * @param {React.RefObject<HTMLElement>} [initialFocusRef] - The ref of the element to focus when the modal is opened.
+ * @prop {boolean} open - Whether the modal is visible. When `false`, returns null and frees focus.
+ * @prop {() => void} onClose - Called on backdrop click, close-button click, or Escape key.
+ * @prop {string} title - Heading text; also used for `aria-label`.
+ * @prop {string} [subtitle] - Optional supporting copy under the title.
+ * @prop {ReactNode} [footer] - Optional footer area (typically Cancel + primary action buttons).
+ * @prop {ModalSize} [size='md'] - Width preset.
+ * @prop {ReactNode} children - Modal body content.
  */
 export interface ModalProps {
     open: boolean;
     onClose: () => void;
     title: string;
-    children: ReactNode;
+    subtitle?: string;
     footer?: ReactNode;
-    variant?: ModalVariant;
     size?: ModalSize;
-    closeOnBackdrop?: boolean;
-    closeOnEscape?: boolean;
-    initialFocusRef?: React.RefObject<HTMLElement>;
+    children: ReactNode;
 }
+
 /**
- * Renders a modal component.
- * @param {ModalProps} props - The props for the component.
- * @returns {React.JSX.Element | null} The rendered component.
+ * Modal — accessible dialog with backdrop click + Escape dismiss.
+ * Locks body scroll while open, restores focus behavior on close.
+ * @param {ModalProps} props
+ * @returns {JSX.Element | null}
  */
-export default function Modal({
+export function Modal({
     open,
     onClose,
     title,
-    children,
+    subtitle,
     footer,
-    variant = 'default',
     size = 'md',
-    closeOnBackdrop = true,
-    closeOnEscape = true,
-    initialFocusRef,
-}: ModalProps): React.JSX.Element | null {
-    const titleId = useId();
-    const panelRef = useRef<HTMLDivElement>(null);
-    const startSentinelRef = useRef<HTMLButtonElement>(null);
-    const endSentinelRef = useRef<HTMLButtonElement>(null);
-
+    children,
+}: ModalProps): JSX.Element | null {
     useEffect(() => {
         if (!open) return;
-        const previousOverflow = document.body.style.overflow;
-        document.body.style.overflow = 'hidden';
-
         const onKey = (e: KeyboardEvent): void => {
-            if (e.key === 'Escape' && closeOnEscape) {
-                e.stopPropagation();
-                onClose();
-            }
+            if (e.key === 'Escape') onClose();
         };
         document.addEventListener('keydown', onKey);
-
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
         return (): void => {
             document.removeEventListener('keydown', onKey);
             document.body.style.overflow = previousOverflow;
         };
-    }, [open, onClose, closeOnEscape]);
-
-    // Separate effect: only refocus on open transitions or when the
-    // initialFocusRef identity changes. Keeping focus out of the effect
-    // above prevents an unstable `onClose` (e.g. an inline handler from
-    // the parent) from stealing focus from inputs on every keystroke.
-    useEffect(() => {
-        if (!open) return;
-        (initialFocusRef?.current ?? panelRef.current)?.focus();
-    }, [open, initialFocusRef]);
+    }, [open, onClose]);
 
     if (!open) return null;
 
-    const onBackdropPointer = (e: React.MouseEvent): void => {
-        if (closeOnBackdrop && e.target === e.currentTarget) onClose();
-    };
-
-    const onSentinelFocus = (dir: 'start' | 'end'): void => {
-        const all = panelRef.current?.querySelectorAll<HTMLElement>(
-            'a[href],button:not([disabled]),textarea,input,select,[tabindex]:not([tabindex="-1"])'
-        );
-        if (!all || all.length === 0) return;
-        (dir === 'start' ? all[all.length - 1] : all[0])?.focus();
-    };
-
     return (
-        <div className="modal-backdrop is-open" onMouseDown={onBackdropPointer}>
-            <button
-                ref={startSentinelRef}
-                type="button"
-                tabIndex={0}
-                className="modal-sentinel"
-                aria-hidden="true"
-                onFocus={(): void => onSentinelFocus('start')}
-            />
+        <div
+            className="gp-modal-backdrop"
+            onClick={onClose}
+            role="presentation"
+        >
             <div
-                ref={panelRef}
-                className={`modal modal--${variant} modal--${size}`}
+                className={`gp-modal ${size === 'sm' ? 'is-sm' : size === 'lg' ? 'is-lg' : ''}`}
+                style={{ maxWidth: SIZE_TO_MAX_WIDTH[size] }}
+                onClick={e => e.stopPropagation()}
                 role="dialog"
                 aria-modal="true"
-                aria-labelledby={titleId}
-                tabIndex={-1}
+                aria-label={title}
             >
-                <header className="modal-head">
-                    <h2 id={titleId} className="modal-title">
-                        {title}
-                    </h2>
+                <header className="gp-modal-head">
+                    <div className="gp-modal-head-text">
+                        <div className="gp-modal-title">{title}</div>
+                        {subtitle && (
+                            <div className="gp-modal-sub">{subtitle}</div>
+                        )}
+                    </div>
                     <button
                         type="button"
-                        className="modal-close"
+                        className="gp-modal-close"
                         onClick={onClose}
-                        aria-label="Close dialog"
+                        aria-label="Close"
                     >
-                        <X size={18} strokeWidth={1.75} />
+                        <X size={14} aria-hidden="true" />
                     </button>
                 </header>
-                <div className="modal-body">{children}</div>
-                {footer && <footer className="modal-foot">{footer}</footer>}
+                <div className="gp-modal-body">{children}</div>
+                {footer && <footer className="gp-modal-foot">{footer}</footer>}
             </div>
-            <button
-                ref={endSentinelRef}
-                type="button"
-                tabIndex={0}
-                className="modal-sentinel"
-                aria-hidden="true"
-                onFocus={(): void => onSentinelFocus('end')}
-            />
         </div>
     );
 }

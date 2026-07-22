@@ -7,7 +7,7 @@ import type { Language } from '@/types';
 import type { SignupFormStrings } from '@/types/components';
 //-- Components
 import AuthLayout from '@/components/astro/layout/AuthLayout.astro';
-import { BootstrapGate, SignupForm } from '@/components/react/auth';
+import { SignupForm } from '@/components/react/form';
 
 /**
  * @type {GetStaticPaths}
@@ -37,11 +37,39 @@ const signupStrings: SignupFormStrings = {
     nameRequired: translation.auth.nameRequired,
     signupTitle: translation.auth.signupTitle,
     signupSubtitle: translation.auth.signupSubtitle,
+    strengthLabel: translation.auth.strengthLabel,
+    strengthTooShort: translation.auth.strengthTooShort,
+    strengthWeak: translation.auth.strengthWeak,
+    strengthFair: translation.auth.strengthFair,
+    strengthGood: translation.auth.strengthGood,
+    strengthStrong: translation.auth.strengthStrong,
+    nameHelp: translation.auth.nameHelp,
+    passwordHelp: translation.auth.passwordHelp,
+    confirmPassword: translation.auth.confirmPassword,
+    passwordsDoNotMatch: translation.auth.passwordsDoNotMatch,
+    termsAgree: translation.auth.termsAgree,
+    termsLabel: translation.auth.termsLabel,
+    privacyLabel: translation.auth.privacyLabel,
+    creatingAccount: translation.auth.creatingAccount,
+    orDivider: translation.auth.orDivider,
+    continueWithGoogle: translation.auth.continueWithGoogle,
+    firstAdminWelcome: translation.auth.firstAdminWelcome,
+    createAccountBadge: translation.auth.createAccountBadge,
+    emailPasswordRequired: translation.auth.emailPasswordRequired,
+    acceptTerms: translation.auth.acceptTerms,
+    pickStrongerPassword: translation.auth.pickStrongerPassword,
+    signupFailed: translation.auth.signupFailed,
+    showPassword: translation.auth.showPassword,
+    hidePassword: translation.auth.hidePassword,
+    apiInspectorTitle: translation.auth.apiInspectorTitle,
+    apiInspectorCookieNote: translation.auth.apiInspectorCookieNote,
+    autoSignInNote: translation.auth.autoSignInNote,
 };
 ---
 
-<AuthLayout title={`${translation.auth.signupTitle} · GPS Tracker`}>
-    <BootstrapGate client:load locale={locale}>
-        <SignupForm client:load strings={signupStrings} />
-    </BootstrapGate>
+<AuthLayout title={`${translation.auth.signupTitle} · Open GPS`}>
+    <SignupForm 
+        client:load 
+        strings={signupStrings} 
+    />
 </AuthLayout>
