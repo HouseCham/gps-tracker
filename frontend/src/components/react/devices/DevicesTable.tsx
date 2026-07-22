@@ -6,10 +6,8 @@ import type { Language } from '@/types';
 //-- Utils
 import { deriveDeviceStatus, formatRelativeTime } from '@/lib';
 import { redirectTo } from '@/lib/router-utils';
-//-- Icons
-import { Pencil, Trash2 } from 'lucide-react';
 //-- Components
-import { CopyButton } from '@/components/react/ui/button';
+import { CopyButton, IconButton } from '@/components/react/ui/button';
 import { VehicleIcon } from './VehicleIcon';
 
 /**
@@ -154,28 +152,22 @@ export function DevicesTable({
                                 {/* Actions */}
                                 <td className="col-actions">
                                     <div className="dev-row-actions">
-                                        <button
-                                            type="button"
-                                            className="dev-action-btn"
-                                            data-id={d.id}
-                                            data-action="edit"
-                                            onClick={handleAction}
-                                            aria-label={`${t.table.edit} ${d.name}`}
+                                        {/* Edit Button */}
+                                        <IconButton
+                                            dataID={d.id}
+                                            danger={false}
+                                            ariaLabel={`${t.table.edit} ${d.name}`}
                                             title={t.table.edit}
-                                        >
-                                            <Pencil size={14} strokeWidth={1.6} />
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className="dev-action-btn is-danger"
-                                            data-id={d.id}
-                                            data-action="delete"
-                                            onClick={handleAction}
-                                            aria-label={`${t.table.delete} ${d.name}`}
+                                            handleAction={handleAction}
+                                        />
+                                        {/* Delete Button */}
+                                        <IconButton
+                                            danger
+                                            dataID={d.id}
+                                            ariaLabel={`${t.table.delete} ${d.name}`}
                                             title={t.table.delete}
-                                        >
-                                            <Trash2 size={14} strokeWidth={1.6} />
-                                        </button>
+                                            handleAction={handleAction}
+                                        />
                                     </div>
                                 </td>
                             </tr>
