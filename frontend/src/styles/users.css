@@ -456,6 +456,11 @@
     margin-bottom: var(--s-5);
 }
 
+.userdetail-info {
+    flex: 1;
+    min-width: 0;
+}
+
 .userdetail-avatar {
     width: 64px;
     height: 64px;
@@ -610,6 +615,11 @@
     font-size: 13px;
     font-weight: 500;
     color: var(--text-primary);
+}
+
+.userdetail-device-body {
+    flex: 1;
+    min-width: 0;
 }
 
 .userdetail-device-meta {

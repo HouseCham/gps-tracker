@@ -1,3 +1,4 @@
+import '@/styles/components/icon-button.css';
 //-- Types
 import type { JSX } from "react/jsx-runtime";
 import type { MouseEvent } from 'react';
@@ -26,7 +27,7 @@ interface IconButtonProps {
  * @returns {JSX.Element} The rendered component.
  */
 export function IconButton({ dataID, danger = false, ariaLabel, title, handleAction }: IconButtonProps): JSX.Element {
-    const buttonClass = `dev-action-btn ${danger ? 'is-danger' : ''}`;
+    const buttonClass = `icon-action-btn ${danger ? 'is-danger' : ''}`;
     return (
         <button
             type="button"
