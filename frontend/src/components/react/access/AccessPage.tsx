@@ -1,13 +1,13 @@
 import '@/styles/access.css';
 import { lazy, Suspense, useEffect, useState, type JSX } from 'react';
 //-- Types
-import type { AccessTranslation, ApiKeyRevealPayload, Language } from '@/types';
+import type { AccessTranslation, ApiKeyRevealPayload, ApiKeySortKey, Language } from '@/types';
 //-- Icons
 import { AlertTriangle, KeyRound, KeySquare } from 'lucide-react';
 //-- Components
 import { Button } from '@/components/react/ui/button';
 import { EmptyState } from '@/components/react/ui/EmptyState';
-import { AccessFilterBar, type ApiKeySortKey } from './AccessFilterBar';
+import { AccessFilterBar } from './AccessFilterBar';
 import { AccessKeysTable } from './AccessKeysTable';
 //-- Services
 import {

@@ -34,7 +34,7 @@ export function truncateId(id: string): string {
     return `${id.slice(0, 8)}…`;
 }
 /**
- * 
+ *
  */
 export function isApiKeySortKey(value: string): value is ApiKeySortKey {
     return API_KEY_SORT_OPTIONS.some(option => option === value);

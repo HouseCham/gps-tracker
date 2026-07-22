@@ -6,4 +6,4 @@ export const API_KEY_SORT_OPTIONS = [
     'created-desc',
     'created-asc',
     'device-asc',
-];
+] as const;

@@ -7,6 +7,8 @@ import type { ApiKeySortKey } from '@/types';
 import { API_KEY_SORT_OPTIONS } from '@/constants';
 //-- Icons
 import { RefreshCw, Search as SearchIcon } from 'lucide-react';
+//-- Utils
+import { isApiKeySortKey } from '@/lib/api-keys-utils';
 //-- Components
 import { Button } from '@/components/react/ui/button';
 import { Select } from '@/components/react/form/ui';
@@ -43,7 +45,7 @@ export function AccessFilterBar({
     onSortBy,
     onRefresh,
 }: AccessFilterBarProps): JSX.Element {
-    const sortOptions = API_KEY_SORT_OPTIONS.map((k: ApiKeySortKey) => ({
+    const sortOptions = API_KEY_SORT_OPTIONS.map(k => ({
         value: k,
         label: t.sort[k],
     }));
