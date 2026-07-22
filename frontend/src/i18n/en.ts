@@ -266,6 +266,10 @@ export const en = {
             subtitle:
                 'Manage user access, roles and onboarding for the Open GPS platform.',
         },
+        access: {
+            title: 'Access',
+            subtitle: 'Issue and revoke API keys for your devices.',
+        },
     },
     device: {
         title: 'Devices',
@@ -583,6 +587,28 @@ export const en = {
     },
     apiKeys: {
         title: 'API Keys',
+        page: {
+            summary: '{total} active keys across {devices} devices',
+            export: 'Export',
+            addFirstKey: 'Issue your first API key',
+            noResultsTitle: 'No API keys match your filters',
+            noResultsMessage:
+                'Try clearing the search or issuing a new key.',
+            clearFilters: 'Clear filters',
+            addKey: 'Issue API key',
+            refreshed: 'Refreshed.',
+            issuedToast: 'New API key issued for "{device}".',
+            revokedToast: 'API key revoked from "{device}".',
+        },
+        filters: {
+            searchPlaceholder: 'Search by device or key id…',
+            sortLabel: 'Sort',
+            sort: {
+                'created-desc': 'Newest first',
+                'created-asc': 'Oldest first',
+                'device-asc': 'Device (A–Z)',
+            },
+        },
         table: {
             device: 'Device',
             keyId: 'Key ID',
@@ -590,6 +616,45 @@ export const en = {
             lastUsed: 'Last used',
             expires: 'Expires',
             actions: 'Actions',
+            notAvailable: '—',
+            copy: 'Copy',
+            copied: 'Copied',
+            refresh: 'Refresh',
+        },
+        modals: {
+            addTitle: 'Issue API key',
+            addSubtitle:
+                'Choose the device that will use this key. The token is shown only once.',
+            deviceLabel: 'Device',
+            devicePlaceholder: 'Select a device',
+            deviceRequired: 'Choose a device.',
+            noDevicesAvailable:
+                'No devices available. Register a device first.',
+            cancel: 'Cancel',
+            issue: 'Issue key',
+            issuing: 'Issuing…',
+            revealTitle: 'Save this API key',
+            revealBanner:
+                'Copy this key now — it is shown only once. Flash it onto "{device}" firmware before closing this dialog.',
+            revealMeta:
+                'For security, this key is only shown once. If you lose it, revoke and issue a new one.',
+            copy: 'Copy',
+            copied: 'Copied',
+            saved: "I've saved the key",
+            revokeTitle: 'Revoke API key',
+            revokeSubtitle:
+                'Revoking this key will disconnect "{device}" from Open GPS until a new key is issued.',
+            revokeWarningTitle: 'This will permanently revoke the key',
+            revokeWarningMessage:
+                'The device will need a new API key to authenticate. This action cannot be undone.',
+            revokeTypeToConfirm: 'Type "{name}" to confirm',
+            revokeTip:
+                'Tip: type the device name exactly as shown — case-sensitive.',
+            revoke: 'Revoke key',
+            revoking: 'Revoking…',
+            revokeFailed:
+                'Could not revoke the API key. Try again.',
+            revokeMismatch: 'The name must match the device exactly.',
         },
     },
 };

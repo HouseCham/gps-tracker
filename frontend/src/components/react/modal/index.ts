@@ -1,3 +1,4 @@
+export * from './AddAccessKeyModal';
 export * from './AddDeviceModal';
 export * from './EditDeviceModal';
 export * from './GrantAccessModal';
@@ -5,6 +6,7 @@ export * from './RevokeAccessModal';
 export * from './AddUserModal';
 export * from './TempPasswordModal';
 export * from './UserDetailModal';
+export * from './DeleteAccessKeyModal';
 export { DeleteModal } from './deleteModal';
 export * from './deleteModal/DeleteDeviceModal';
 export * from './deleteModal/DeleteUserModal';

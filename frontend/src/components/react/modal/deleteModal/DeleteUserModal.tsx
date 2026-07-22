@@ -9,16 +9,7 @@ import { RolePill } from '@/components/react/features/users';
 import { DeleteModal } from './index';
 //-- Utils
 import { getInitials } from '@/lib/user-utils';
-
-/**
- * The literal phrase a user must type to enable the destructive button.
- * Kept in sync with the matching template in `user.delete.prompt`.
- * @constant {Record<Language, string>}
- */
-export const DELETE_CONFIRM_PHRASE: Record<Language, string> = {
-    en: 'confirm',
-    es: 'confirmar',
-};
+import { DELETE_USER_CONFIRM_PHRASE } from '@/constants';
 
 /**
  * Props for the DeleteUserModal component.
@@ -58,7 +49,7 @@ export function DeleteUserModal({
 }: DeleteUserModalProps): JSX.Element | null {
     if (!user) return null;
 
-    const phrase = DELETE_CONFIRM_PHRASE[locale];
+    const phrase = DELETE_USER_CONFIRM_PHRASE[locale];
 
     return (
         <DeleteModal

@@ -273,6 +273,10 @@ export const es: Translation = {
             subtitle:
                 'Gestiona el acceso de usuarios, roles y la incorporación a la plataforma Open GPS.',
         },
+        access: {
+            title: 'Acceso',
+            subtitle: 'Emite y revoca claves de API para tus dispositivos.',
+        },
     },
     device: {
         title: 'Dispositivos',
@@ -599,6 +603,28 @@ export const es: Translation = {
     },
     apiKeys: {
         title: 'Claves de API',
+        page: {
+            summary: '{total} claves activas en {devices} dispositivos',
+            export: 'Exportar',
+            addFirstKey: 'Emite tu primera clave de API',
+            noResultsTitle: 'Ninguna clave coincide con los filtros',
+            noResultsMessage:
+                'Prueba a borrar la búsqueda o emite una nueva clave.',
+            clearFilters: 'Borrar filtros',
+            addKey: 'Emitir clave de API',
+            refreshed: 'Actualizado.',
+            issuedToast: 'Nueva clave de API emitida para «{device}».',
+            revokedToast: 'Clave de API revocada de «{device}».',
+        },
+        filters: {
+            searchPlaceholder: 'Buscar por dispositivo o ID de clave…',
+            sortLabel: 'Ordenar',
+            sort: {
+                'created-desc': 'Más recientes primero',
+                'created-asc': 'Más antiguas primero',
+                'device-asc': 'Dispositivo (A–Z)',
+            },
+        },
         table: {
             device: 'Dispositivo',
             keyId: 'ID de clave',
@@ -606,6 +632,46 @@ export const es: Translation = {
             lastUsed: 'Último uso',
             expires: 'Expira',
             actions: 'Acciones',
+            notAvailable: '—',
+            copy: 'Copiar',
+            copied: 'Copiado',
+            refresh: 'Actualizar',
+        },
+        modals: {
+            addTitle: 'Emitir clave de API',
+            addSubtitle:
+                'Elige el dispositivo que usará esta clave. El token solo se muestra una vez.',
+            deviceLabel: 'Dispositivo',
+            devicePlaceholder: 'Selecciona un dispositivo',
+            deviceRequired: 'Elige un dispositivo.',
+            noDevicesAvailable:
+                'No hay dispositivos disponibles. Registra uno primero.',
+            cancel: 'Cancelar',
+            issue: 'Emitir clave',
+            issuing: 'Emitiendo…',
+            revealTitle: 'Guarda esta clave de API',
+            revealBanner:
+                'Copia esta clave ahora — solo se muestra una vez. Flásheala en el firmware de «{device}» antes de cerrar este diálogo.',
+            revealMeta:
+                'Por seguridad, esta clave solo se muestra una vez. Si la pierdes, revócala y emite una nueva.',
+            copy: 'Copiar',
+            copied: 'Copiado',
+            saved: 'He guardado la clave',
+            revokeTitle: 'Revocar clave de API',
+            revokeSubtitle:
+                'Revocar esta clave desconectará «{device}» de Open GPS hasta que se emita una nueva.',
+            revokeWarningTitle: 'Esto revocará permanentemente la clave',
+            revokeWarningMessage:
+                'El dispositivo necesitará una nueva clave de API para autenticarse. Esta acción no se puede deshacer.',
+            revokeTypeToConfirm: 'Escribe «{name}» para confirmar',
+            revokeTip:
+                'Consejo: escribe el nombre del dispositivo exactamente como se muestra — distingue mayúsculas.',
+            revoke: 'Revocar clave',
+            revoking: 'Revocando…',
+            revokeFailed:
+                'No se pudo revocar la clave de API. Inténtalo de nuevo.',
+            revokeMismatch:
+                'El nombre debe coincidir exactamente con el del dispositivo.',
         },
     },
 };
