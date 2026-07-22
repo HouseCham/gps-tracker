@@ -16,7 +16,7 @@ import {
     EmailStatusPill,
     PasswordPill,
     RolePill,
-} from '@/components/react/users/UserPills';
+} from '@/components/react/features/users';
 
 /**
  * Props for the UserDetailModal component.

@@ -1,7 +1,7 @@
 import '@/styles/device-detail.css';
 import '@/styles/devices.css';
 
-import { useEffect, useState, type JSX } from 'react';
+import { useEffect, useState, lazy, type JSX, Suspense } from 'react';
 //-- Types
 import type {
     DeviceAccessListItem,
@@ -16,20 +16,38 @@ import { useDeviceService } from '@/lib/api/services/deviceService';
 import { useLocationService } from '@/lib/api/services/locationService';
 //-- Components
 import { Breadcrumbs, EmptyState } from '@/components/react/ui';
-import { EditDeviceModal, DeleteDeviceModal } from '@/components/react/modal';
-import { GrantAccessModal } from '@/components/react/modal/GrantAccessModal';
-import { RevokeAccessModal } from '@/components/react/modal/RevokeAccessModal';
 import { DeviceDetailError } from './DeviceDetailError';
 import { VehicleDetailHeader } from './VehicleDetailHeader';
 import { KpiStrip } from './Kpi';
-import { MapCard, TelemetryCard } from '@/components/react/devices/location';
 import { DeviceInfoCard } from './DeviceInfoCard';
-import { DeviceAccessTable } from '@/components/react/devices/access';
 import { Button } from '@/components/react/ui/button';
+import { MapCard, TelemetryCard } from '@/components/react/features/devices/location';
+import { DeviceAccessTable } from '@/components/react/features/devices/access';
 //-- Icons
 import {
     AlertTriangle,
 } from 'lucide-react';
+//-- Lazy components
+const EditDeviceModal = lazy(
+    () => import('@/components/react/modal').then(m => ({
+        default: m.EditDeviceModal
+    }))
+);
+const DeleteDeviceModal = lazy(
+    () => import('@/components/react/modal').then(m => ({
+        default: m.DeleteDeviceModal
+    }))
+);
+const GrantAccessModal = lazy(
+    () => import('@/components/react/modal').then(m => ({
+        default: m.GrantAccessModal
+    }))
+);
+const RevokeAccessModal = lazy(
+    () => import('@/components/react/modal').then(m => ({
+        default: m.RevokeAccessModal
+    }))
+);
 
 /**
  * Props for the DeviceDetailPage component
@@ -262,34 +280,50 @@ export function DeviceDetailPage({
                     onRevoke={setRevokeTarget}
                 />
             </section>
-            <GrantAccessModal
-                open={inviteOpen}
-                onClose={() => setInviteOpen(false)}
-                onGrant={handleInvite}
-                loading={deviceLoading}
-                t={t.detail.accessTable}
-            />
-            <RevokeAccessModal
-                user={revokeTarget}
-                onClose={() => setRevokeTarget(null)}
-                onConfirm={handleRevoke}
-                loading={deviceLoading}
-                t={t.detail.accessTable}
-            />
-            <EditDeviceModal
-                open={editOpen}
-                device={device}
-                onClose={() => setEditOpen(false)}
-                onSave={handleEdit}
-                t={t}
-            />
-            <DeleteDeviceModal
-                open={deleteOpen}
-                device={device}
-                onClose={() => setDeleteOpen(false)}
-                onConfirm={handleDelete}
-                t={t}
-            />
+
+            {/* Grant Access Modal */}
+            <Suspense fallback={null}>
+                <GrantAccessModal
+                    open={inviteOpen}
+                    onClose={() => setInviteOpen(false)}
+                    onGrant={handleInvite}
+                    loading={deviceLoading}
+                    t={t.detail.accessTable}
+                />    
+            </Suspense>
+            
+            {/* Revoke Access Modal */}
+            <Suspense fallback={null}>
+                <RevokeAccessModal
+                    user={revokeTarget}
+                    onClose={() => setRevokeTarget(null)}
+                    onConfirm={handleRevoke}
+                    loading={deviceLoading}
+                    t={t.detail.accessTable}
+                />
+            </Suspense>
+            
+            {/* Edit Device Modal */}
+            <Suspense fallback={null}>
+                <EditDeviceModal
+                    open={editOpen}
+                    device={device}
+                    onClose={() => setEditOpen(false)}
+                    onSave={handleEdit}
+                    t={t}
+                />
+            </Suspense>
+            
+            {/* Delete Device Modal */}
+            <Suspense fallback={null}>
+                <DeleteDeviceModal
+                    open={deleteOpen}
+                    device={device}
+                    onClose={() => setDeleteOpen(false)}
+                    onConfirm={handleDelete}
+                    t={t}
+                />
+            </Suspense>
         </div>
     );
 }

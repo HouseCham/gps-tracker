@@ -3,7 +3,7 @@ import type { JSX } from 'react/jsx-runtime';
 import type { DeviceWithAccess } from '@/types/api';
 import type { Translation } from '@/i18n';
 //-- Components
-import { VehicleIcon } from '@/components/react/devices';
+import { VehicleIcon } from '@/components/react/features/devices';
 //-- Local
 import { DeleteModal } from './index';
 //-- Utils

@@ -11,7 +11,7 @@ import {
     EmailStatusPill,
     PasswordPill,
     RolePill,
-} from '@/components/react/users/UserPills';
+} from '@/components/react/features/users';
 import { IconButton } from '@/components/react/ui/button';
 
 /**

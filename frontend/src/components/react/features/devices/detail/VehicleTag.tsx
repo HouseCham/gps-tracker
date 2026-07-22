@@ -5,7 +5,7 @@ import type { JSX } from "react/jsx-runtime";
 //-- Utils
 import { getVehicleLabel } from "@/lib/features";
 //-- Components
-import { VehicleIcon } from '@/components/react/devices';
+import { VehicleIcon } from '@/components/react/features/devices';
 
 /**
  * Returns the label for the vehicle type.

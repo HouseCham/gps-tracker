@@ -10,7 +10,7 @@ import { Check } from 'lucide-react';
 import { Modal } from '@/components/react/ui';
 import { Button } from '@/components/react/ui/button';
 import { Field, Input } from '@/components/react/form/ui';
-import { VehicleTypeSelect } from '@/components/react/devices/VehicleTypeSelect';
+import { VehicleTypeSelect } from '@/components/react/features/devices';
 //-- Utils
 import { interpolateTemplate } from '@/lib';
 /**

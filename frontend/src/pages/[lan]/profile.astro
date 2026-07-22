@@ -3,7 +3,7 @@ import type { GetStaticPaths } from 'astro';
 import { getTranslation } from '@/i18n';
 import type { Language } from '@/types';
 import MainLayout from '@/components/astro/layout/MainLayout.astro';
-import { ProfilePage } from '@/components/react/profile/ProfilePage';
+import { ProfilePage } from '@/components/react/features/profile/ProfilePage';
 
 export const getStaticPaths: GetStaticPaths = () => {
     return [{ params: { lan: 'en' } }, { params: { lan: 'es' } }];

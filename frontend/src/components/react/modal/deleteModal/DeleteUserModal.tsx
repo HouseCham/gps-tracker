@@ -4,7 +4,7 @@ import type { User } from '@/types/api';
 import type { Translation } from '@/i18n';
 import type { Language } from '@/types';
 //-- Components
-import { RolePill } from '@/components/react/users/UserPills';
+import { RolePill } from '@/components/react/features/users';
 //-- Local
 import { DeleteModal } from './index';
 //-- Utils
