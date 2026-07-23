@@ -5,9 +5,9 @@ import type { Translation } from '@/i18n';
 //-- Icons
 import { KeyRound } from 'lucide-react';
 //-- Local
-import { DeleteModal } from './deleteModal';
 //-- Utils
 import { interpolateTemplate } from '@/lib';
+import { DeleteModal } from './index';
 
 /**
  * Props for the DeleteAccessKeyModal component.

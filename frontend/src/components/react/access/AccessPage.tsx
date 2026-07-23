@@ -31,7 +31,7 @@ const AddAccessKeyModal = lazy(() =>
     }))
 );
 const DeleteAccessKeyModal = lazy(() =>
-    import('@/components/react/modal/DeleteAccessKeyModal').then(m => ({
+    import('@/components/react/modal').then(m => ({
         default: m.DeleteAccessKeyModal,
     }))
 );

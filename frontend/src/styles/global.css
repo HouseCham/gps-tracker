@@ -32,6 +32,7 @@
     --accent-active: #3a577a;
     --accent-tint: #d3e3f0;
     --accent-text: #16232f;
+    --color-on-accent: #fff;
 
     /* Status */
     --success: #4c8577;
@@ -106,6 +107,7 @@
     --accent-active: #6291bb;
     --accent-tint: #1e2c3d;
     --accent-text: #0e1116;
+    --color-on-accent: var(--accent-text);
     --success: #6baa9c;
     --success-tint: #1b2d2a;
     --success-text: #a8d5c9;
