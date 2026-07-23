@@ -1,47 +1,15 @@
-import type { ChangeEvent, JSX } from 'react';
 //-- Types
+import type { ChangeEvent, JSX } from 'react';
 import type { Translation } from '@/i18n';
+import type { UserEmailFilter, UserFilterCounts, UserRoleFilter, UserSortKey } from '@/types/api';
+//-- Constants
+import { USER_SORT_OPTIONS } from '@/constants';
 //-- Icons
 import { RefreshCw, Search as SearchIcon } from 'lucide-react';
 //-- Components
 import { Button } from '@/components/react/ui/button';
 import { Select } from '@/components/react/form/ui';
-
-/**
- * The sort keys supported by the users table.
- * @type {'created-desc' | 'created-asc' | 'name-asc'}
- */
-export type UserSortKey = 'created-desc' | 'created-asc' | 'name-asc';
-
-export const USER_SORT_OPTIONS: readonly UserSortKey[] = [
-    'created-desc',
-    'created-asc',
-    'name-asc',
-] as const;
-
-/**
- * The role filter values.
- * @type {'all' | 'user' | 'super_admin'}
- */
-export type UserRoleFilter = 'all' | 'user' | 'super_admin';
-
-/**
- * The email-verification filter values.
- * @type {'all' | 'verified' | 'unverified'}
- */
-export type UserEmailFilter = 'all' | 'verified' | 'unverified';
-
-/**
- * Counts driving the chip badges in the filter bar.
- * @interface UserFilterCounts
- */
-export interface UserFilterCounts {
-    all: number;
-    admin: number;
-    user: number;
-    verified: number;
-    unverified: number;
-}
+import { Chip } from '@/components/react/ui/';
 
 /**
  * Props for the UserFilterBar component.
@@ -185,33 +153,4 @@ export function UserFilterBar({
             </div>
         </div>
     );
-}
-
-/**
- * Internal filter chip with optional count badge.
- */
-function Chip({
-    label,
-    count,
-    active,
-    onClick,
-}: {
-    label: string;
-    count: number | null;
-    active: boolean;
-    onClick: () => void;
-}): JSX.Element {
-    return (
-        <button
-            type="button"
-            className={`users-chip${active ? ' is-active' : ''}`}
-            onClick={onClick}
-            aria-pressed={active}
-        >
-            {label}
-            {count !== null && (
-                <span className="users-chip-count">{count}</span>
-            )}
-        </button>
-    );
-}
+};

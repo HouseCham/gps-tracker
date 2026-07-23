@@ -78,19 +78,21 @@ export const SHELL_NOTIFICATIONS: ShellNotification[] = [
 export const SHELL_NAV_ITEMS: ShellNavItem[] = [
     { id: 'dashboard', href: '/', labelKey: 'dashboard', icon: 'dashboard' },
     {
+        id: 'admin',
+        href: '/admin',
+        labelKey: 'admin',
+        icon: 'admin',
+        count: 14,
+        requiresRole: 'super_admin',
+    },
+    {
         id: 'devices',
         href: '/devices',
         labelKey: 'devices',
         icon: 'devices',
         count: 128,
     },
-    {
-        id: 'users',
-        href: '/users',
-        labelKey: 'usersRoles',
-        icon: 'users',
-        count: 14,
-    },
+    { id: 'access', href: '/access', labelKey: 'access', icon: 'access' },
     {
         id: 'settings',
         href: '/settings',
@@ -98,7 +100,6 @@ export const SHELL_NAV_ITEMS: ShellNavItem[] = [
         icon: 'settings',
     },
     { id: 'reports', href: '/reports', labelKey: 'reports', icon: 'reports' },
-    { id: 'access', href: '/access', labelKey: 'access', icon: 'access' },
 ];
 /**
  * @constant SIDEBAR_ICONS
@@ -108,7 +109,7 @@ export const SHELL_NAV_ITEMS: ShellNavItem[] = [
 export const SIDEBAR_ICONS: Record<ShellNavIcon, LucideIcon> = {
     dashboard: LayoutGrid,
     devices: Satellite,
-    users: Users,
+    admin: Users,
     settings: Settings,
     reports: List,
     access: Key,

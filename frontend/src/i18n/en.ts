@@ -271,6 +271,12 @@ export const en = {
             subtitle: 'Issue and revoke API keys for your devices.',
         },
     },
+    noAccess: {
+        title: 'Restricted area',
+        body: 'You do not have permission to view this page. If you believe this is a mistake, contact a workspace administrator.',
+        backCta: 'Back to dashboard',
+        hint: 'Sign in with an account that has the required permissions.',
+    },
     device: {
         title: 'Devices',
         online: 'Online',
@@ -584,6 +590,10 @@ export const en = {
         userDeleted: {
             title: 'User deleted',
             message: '{name} no longer has access.',
+        },
+        accessDenied: {
+            title: 'Access denied',
+            message: 'This area is restricted to administrators.',
         },
     },
     apiKeys: {

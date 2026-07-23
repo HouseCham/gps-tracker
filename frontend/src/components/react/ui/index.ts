@@ -13,3 +13,4 @@ export * from './StatusBadge';
 export * from './StatusIndicator';
 export * from './ThemeToggle';
 export * from './Modal';
+export * from './Chip';

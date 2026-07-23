@@ -14,6 +14,7 @@ import type { Translation } from '@/i18n';
 import { deriveDeviceStatus } from '@/lib/device-utils';
 import { useDeviceService } from '@/lib/api/services/deviceService';
 import { useLocationService } from '@/lib/api/services/locationService';
+import { redirectTo } from '@/lib';
 //-- Components
 import { Breadcrumbs, EmptyState } from '@/components/react/ui';
 import { DeviceDetailError } from './DeviceDetailError';
@@ -111,11 +112,15 @@ export function DeviceDetailPage({
     }, [deviceId, getDeviceById, getLatestLocation]);
 
     const status = device ? deriveDeviceStatus(device.last_seen_at, t) : null;
-
-    const goBack = (): void => {
-        window.location.href = `/${locale}/devices/`;
-    };
-
+    /**
+     * Go back to the devices page
+     * @returns {void}
+     */
+    const goBack = (): void => redirectTo(`/${locale}/devices/`);
+    /**
+     * Reload the device and location data
+     * @returns {void}
+     */
     const reload = (): void => {
         if (!deviceId) return;
         void Promise.all([
@@ -123,19 +128,31 @@ export function DeviceDetailPage({
             getLatestLocation(deviceId),
         ]);
     };
-
+    /**
+     * Handle the invitation of a user
+     * @param {string} userId - The ID of the user to invite.
+     * @returns {Promise<void>} A promise that resolves when the invitation is sent.
+     */
     const handleInvite = async (userId: string): Promise<void> => {
         if (!device) return;
         await grantAccess(device.id, userId);
         setInviteOpen(false);
     };
-
+    /**
+     * Handle the revocation of a user
+     * @returns {Promise<void>} A promise that resolves when the revocation is sent.
+     */
     const handleRevoke = async (): Promise<void> => {
         if (!device || !revokeTarget) return;
         await revokeAccess(device.id, revokeTarget.user_id);
         setRevokeTarget(null);
     };
-
+    /**
+     * Handle the editing of a device.
+     * @param {string} id - The ID of the device to edit.
+     * @param {object} data - The data for the edited device.
+     * @returns {Promise<void>} A promise that resolves when the device is edited. 
+     */
     const handleEdit = async (
         id: string,
         data: {
@@ -147,7 +164,10 @@ export function DeviceDetailPage({
         await updateDevice(id, data);
         setEditOpen(false);
     };
-
+    /**
+     * Handle the deletion of a device.
+     * @returns {Promise<void>} A promise that resolves when the device is deleted.
+     */
     const handleDelete = async (): Promise<void> => {
         if (!device) return;
         await deleteDevice(device.id);
@@ -296,6 +316,7 @@ export function DeviceDetailPage({
             {/* Revoke Access Modal */}
             <Suspense fallback={null}>
                 <RevokeAccessModal
+                    open={revokeTarget !== null}
                     user={revokeTarget}
                     onClose={() => setRevokeTarget(null)}
                     onConfirm={handleRevoke}

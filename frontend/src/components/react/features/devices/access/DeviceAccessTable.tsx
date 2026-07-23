@@ -5,8 +5,8 @@ import type { DeviceAccessTableTranslations } from '@/types/components';
 import type { Language } from '@/types/i18n';
 import type { JSX, MouseEvent } from 'react';
 //-- Components
-import { Button } from '@/components/react/ui/button';
-import { Plus, Trash2, UserRound, Users } from 'lucide-react';
+import { Button, IconButton } from '@/components/react/ui/button';
+import { Plus, UserRound, Users } from 'lucide-react';
 import { RolePill } from '@/components/react/RolePill';
 //-- Utils
 import { formatRelativeTime, getInitials, interpolateTemplate } from '@/lib';
@@ -48,7 +48,7 @@ export function DeviceAccessTable({
      * @returns {void}
      */
     const handleRevoke = (e: MouseEvent<HTMLButtonElement>): void => {
-        const userId = e.currentTarget.dataset.userId;
+        const userId = e.currentTarget.dataset.id;
         if (!userId) return;
         const user = users.find(u => u.user_id === userId);
         if (!user) return;
@@ -135,16 +135,12 @@ export function DeviceAccessTable({
                                                 {t.protected}
                                             </span>
                                         ) : (
-                                            <Button
-                                                type="button"
-                                                variant="secondary"
-                                                size="sm"
-                                                iconOnly
-                                                icon={<Trash2 size={13} />}
-                                                data-user-id={user.user_id}
-                                                onClick={handleRevoke}
-                                                aria-label={`${t.remove} ${user.name}`}
+                                            <IconButton
+                                                danger
+                                                dataID={user.user_id}
+                                                ariaLabel={`${t.remove} ${user.name}`}
                                                 title={t.remove}
+                                                handleAction={handleRevoke}
                                             />
                                         )}
                                     </td>

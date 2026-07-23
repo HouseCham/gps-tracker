@@ -1,5 +1,5 @@
 import '@/styles/devices.css';
-import { useEffect, useMemo, useState, type JSX } from 'react';
+import { useEffect, useState, type JSX, lazy, Suspense } from 'react';
 //-- Types
 import type { DeviceVehicleType, DeviceWithAccess } from '@/types/api';
 import type { Translation } from '@/i18n';
@@ -24,16 +24,28 @@ import { Button } from '@/components/react/ui/button';
 import { EmptyState } from '@/components/react/ui/EmptyState';
 import { DeviceFilterBar } from './DeviceFilterBar';
 import { DevicesTable } from './DevicesTable';
-import {
-    AddDeviceModal,
-    DeleteDeviceModal,
-    EditDeviceModal,
-} from '@/components/react/modal';
 //-- Services
 import { useDeviceService } from '@/lib/api/services/deviceService';
 //-- Utils
 import { deriveDeviceStatus } from '@/lib/device-utils';
 import { interpolateTemplate } from '@/lib';
+//-- Lazy components
+const AddDeviceModal = lazy(() =>
+    import('@/components/react/modal').then(m => ({
+        default: m.AddDeviceModal,
+    }))
+);
+const DeleteDeviceModal = lazy(() =>
+    import('@/components/react/modal').then(m => ({
+        default: m.DeleteDeviceModal,
+    }))
+);
+const EditDeviceModal = lazy(() =>
+    import('@/components/react/modal').then(m => ({
+        default: m.EditDeviceModal,
+    }))
+);
+
 /**
  * Props for the DevicesPage component.
  * @interface DevicesPageProps
@@ -82,7 +94,11 @@ export function DevicesPage({
     useEffect(() => {
         void getAllDevices();
     }, []);
-
+    
+    /**
+     * Options for the status dropdown.
+     * @type {Record<string, string>}
+     */
     const statusOptions: Record<string, string> = {
         all: t.table.filter.allStatuses,
         online: t.online,
@@ -90,7 +106,10 @@ export function DevicesPage({
         offline: t.offline,
         'never-seen': t.neverSeen,
     };
-
+    /**
+     * Options for the vehicle type dropdown.
+     * @type {{ value: DeviceVehicleFilter; label: string }[]}
+     */
     const vehicleOptions: { value: DeviceVehicleFilter; label: string }[] = [
         { value: DEVICE_VEHICLE_FILTER_ALL, label: t.table.filter.allVehicles },
         ...VEHICLE_TYPE_OPTIONS.map(v => ({
@@ -98,13 +117,19 @@ export function DevicesPage({
             label: t.table.vehicleTypes[v],
         })),
     ];
-
+    /**
+     * Options for the sort key dropdown.
+     * @type {{ value: DeviceSortKey; label: string }[]}
+     */
     const sortOptions = DEVICE_SORT_OPTIONS.map(k => ({
         value: k,
         label: t.table.sort[k],
     }));
-
-    const filtered = useMemo(() => {
+    /**
+     * Filter the devices based on the query, status filter, vehicle filter, and sort key.
+     * @returns {DeviceWithAccess[]} The filtered devices.
+     */
+    const filtered = (() => {
         const q = query.trim().toLowerCase();
         let list = devices.filter(d => {
             if (
@@ -148,8 +173,12 @@ export function DevicesPage({
             }
         });
         return list;
-    }, [devices, query, statusFilter, vehicleFilter, sortBy, t]);
+    })();
 
+    /**
+     * Count the number of devices in each status.
+     * @returns {Record<DeviceStatusKey | 'total', number>} The counts.
+     */
     const counts: Record<DeviceStatusKey | 'total', number> = {
         online: 0,
         stale: 0,
@@ -157,10 +186,15 @@ export function DevicesPage({
         'never-seen': 0,
         total: devices.length,
     };
+
     for (const d of devices) {
         counts[deriveDeviceStatus(d.last_seen_at, t).key]++;
     }
-
+    /**
+     * Handle the creation of a new device.
+     * @param {object} data - The data for the new device.
+     * @returns {Promise<void>} A promise that resolves when the device is created.
+     */
     const handleCreate = async (data: {
         name: string;
         uuid_firmware: string;
@@ -175,6 +209,12 @@ export function DevicesPage({
         setAddOpen(false);
     };
 
+    /**
+     * Handle the editing of a device.
+     * @param {string} id - The ID of the device to edit.
+     * @param {object} data - The data for the edited device.
+     * @returns {Promise<void>} A promise that resolves when the device is edited. 
+     */
     const handleSave = async (
         id: string,
         data: {
@@ -189,7 +229,10 @@ export function DevicesPage({
         });
         setEditTarget(null);
     };
-
+    /**
+     * Handle the deletion of a device.
+     * @returns {Promise<void>} A promise that resolves when the device is deleted.
+     */
     const handleDelete = async (): Promise<void> => {
         if (!deleteTarget) return;
         await deleteDevice(deleteTarget.id);
@@ -302,28 +345,34 @@ export function DevicesPage({
                 />
             )}
 
-            <AddDeviceModal
-                open={addOpen}
-                onClose={() => setAddOpen(false)}
-                onCreate={handleCreate}
-                t={t}
-            />
+            <Suspense fallback={null}>
+                <AddDeviceModal
+                    open={addOpen}
+                    onClose={() => setAddOpen(false)}
+                    onCreate={handleCreate}
+                    t={t}
+                />    
+            </Suspense>
 
-            <EditDeviceModal
-                open={editTarget !== null}
-                device={editTarget}
-                onClose={() => setEditTarget(null)}
-                onSave={handleSave}
-                t={t}
-            />
+            <Suspense fallback={null}>
+                <EditDeviceModal
+                    open={editTarget !== null}
+                    device={editTarget}
+                    onClose={() => setEditTarget(null)}
+                    onSave={handleSave}
+                    t={t}
+                />
+            </Suspense>
 
-            <DeleteDeviceModal
-                open={deleteTarget !== null}
-                device={deleteTarget}
-                onClose={() => setDeleteTarget(null)}
-                onConfirm={handleDelete}
-                t={t}
-            />
+            <Suspense fallback={null}>
+                <DeleteDeviceModal
+                    open={deleteTarget !== null}
+                    device={deleteTarget}
+                    onClose={() => setDeleteTarget(null)}
+                    onConfirm={handleDelete}
+                    t={t}
+                />
+            </Suspense>
         </>
     );
 }
