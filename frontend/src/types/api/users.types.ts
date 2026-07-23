@@ -55,3 +55,34 @@ export interface UpdateUserDto {
 export interface ProfileResponse {
     user: User;
 }
+/**
+ * Counts driving the chip badges in the filter bar.
+ * @interface UserFilterCounts
+ * @prop {number} all - Total number of users.
+ * @prop {number} admin - Number of admin users.
+ * @prop {number} user - Number of non-admin users.
+ * @prop {number} verified - Number of verified emails.
+ * @prop {number} unverified - Number of unverified emails.
+ */
+export interface UserFilterCounts {
+    all: number;
+    admin: number;
+    user: number;
+    verified: number;
+    unverified: number;
+}
+/**
+ * The role filter values.
+ * @type {'all' | 'user' | 'super_admin'}
+ */
+export type UserRoleFilter = 'all' | 'user' | 'super_admin';
+/**
+ * The email-verification filter values.
+ * @type {'all' | 'verified' | 'unverified'}
+ */
+export type UserEmailFilter = 'all' | 'verified' | 'unverified';
+/**
+ * The sort keys supported by the users table.
+ * @type {'created-desc' | 'created-asc' | 'name-asc'}
+ */
+export type UserSortKey = 'created-desc' | 'created-asc' | 'name-asc';
