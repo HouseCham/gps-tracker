@@ -124,11 +124,18 @@ export const useAuthService = (): useAuthService => {
     async function signOut(): Promise<void> {
         setAuthLoading(true);
         try {
-            // Sign-out must always clear local state and redirect, even
-            // when the backend call fails (network blip, expired session,
-            // etc.) — the cookie is gone either way, and re-trying just
-            // strands the user on a page they can't use.
-            await authClient('/sign-out', { method: 'POST' });
+            // signOut's contract is "never throw": the session cookie is
+            // gone either way, the toast above gives the user feedback,
+            // and rethrowing would just leave them stranded on a page they
+            // can't act on. Local cleanup runs unconditionally in `finally`.
+            await withApiErrorToast(() =>
+                authClient('/sign-out', { method: 'POST' })
+            );
+        } catch (_err) {
+            // The toast from withApiErrorToast is the user-visible surface
+            // for this failure path; swallowing here is intentional and
+            // documented by the test "still clears $user + redirects when
+            // the backend rejects (finally guarantee)".
         } finally {
             clearUser();
             redirectTo(REDIRECT_AFTER_SIGNOUT);
@@ -238,10 +245,38 @@ export const useAuthService = (): useAuthService => {
         }
     }
     /**
-     * Signs in the user by calling POST /sign-in on the Authula backend.
-     * @returns {Promise<void>}
+     * Kicks off the OAuth flow by asking Authula for the provider's
+     * authorize URL, then hands the browser off to it. The callback URL
+     * is the current page's origin; the backend redirects back there
+     * after the provider handshake.
+     * @param {OAuthProvider} provider - The provider identifier (e.g. "google").
+     * @returns {Promise<void>} Resolves once the navigation is dispatched.
+     * @throws {ApiError} When the authorize call fails (the toast has
+     *   already been pushed by `withApiErrorToast`).
      */
-    async function signInOAuth(): Promise<void> {};
+    async function signInOAuth(provider: OAuthProvider): Promise<void> {
+        setAuthLoading(true);
+        try {
+            const { data } = await withApiErrorToast(() =>
+                authClient<OAuthAuthorizeResponse | null>(
+                    `/oauth2/authorize/${provider}?redirect_to=${encodeURIComponent(window.location.origin)}`,
+                    { method: 'GET' }
+                )
+            );
+            if (!data?.authUrl) {
+                throw new Error('oauth authorize returned an empty response');
+            }
+            // Success path deliberately skips the `finally` reset: the page
+            // navigates away, so the loading flag is moot in production.
+            window.location.href = data.authUrl;
+        } catch (err) {
+            // withApiErrorToast already pushed a toast (or this is the
+            // empty-response throw above). Reset the loading flag here —
+            // the success path skips this reset because the page navigates.
+            setAuthLoading(false);
+            throw err;
+        }
+    }
 
     return {
         isLoading,

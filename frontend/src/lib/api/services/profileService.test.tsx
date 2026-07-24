@@ -1,7 +1,7 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-vi.mock('@/lib/auth/client', () => ({
+vi.mock('@/lib/api/client', () => ({
     authClient: vi.fn(),
     apiClient: vi.fn(),
 }));
