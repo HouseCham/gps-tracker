@@ -10,7 +10,7 @@ vi.mock('@/lib', async importOriginal => {
     return { ...actual, redirectTo: vi.fn() };
 });
 
-import * as clientMod from '@/lib/auth/client';
+import * as clientMod from '@/lib/api/client';
 import * as libMod from '@/lib';
 import { $isAuthLoading, $user } from '@/lib/stores/auth';
 import { $toasts } from '@/lib/stores/toast.store';
@@ -20,7 +20,7 @@ import type {
     MeResponse,
     OAuthAuthorizeResponse,
 } from '@/types/api';
-import { authService } from './service';
+import { authService } from './authService';
 
 const authClient = vi.mocked(clientMod.authClient);
 const redirectTo = vi.mocked(libMod.redirectTo);

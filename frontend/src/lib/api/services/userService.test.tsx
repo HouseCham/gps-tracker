@@ -6,7 +6,7 @@ vi.mock('@/lib/auth/client', () => ({
     apiClient: vi.fn(),
 }));
 
-import * as clientMod from '@/lib/auth/client';
+import * as clientMod from '@/lib/api/client';
 import { $toasts } from '@/lib/stores/toast.store';
 import type {
     CreatedUser,
